@@ -1,0 +1,16 @@
+- implement endpoint shutdown function
+- get rid of all panic
+ - when service is not running on the other end, and our function returns error, return some irpc error
+- allow imports from within go module (will need that /x/ type inference package?)
+- figure out error handling and what to do on server side panics
+- test function with zero return vals
+- slice - consider passing capacity
+    - consider capacity's max size (and a limit for all calls for that sake)
+    - slices (and other reference types) passed in as value can't be changed. i guess, this cannot be avoided
+        but has to be mentioned somewhere
+- see other peoples solution for time.Time (embedded pointers etc...)
+- implement bitpacking writer. first for slice of bool, eventually perhaps
+    for everything? (could use some benchmarking before that though)
+- change naming of generated files from _gen.go to _irpc.go? (stringer uses _string.go)
+- check capnproto - something similar?
+- perhaps rename generated names of RpcService and RpcClient to IrpcService etc? rpc is quite generic, Irpc points directly to specific part of code
