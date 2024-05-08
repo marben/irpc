@@ -5,9 +5,9 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"github.com/marben/irpc/pkg/irpc"
 	"io"
 	"math"
-	"github.com/marben/irpc"
 )
 
 type basicAPIRpcService struct {

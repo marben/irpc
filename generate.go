@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	irpcImport   = "tigershare/irpc"
+	irpcImport   = "github.com/marben/irpc/pkg/irpc"
 	binaryImport = "encoding/binary"
 	fmtImport    = "fmt"
 	ioImport     = "io"

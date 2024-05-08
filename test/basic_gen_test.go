@@ -4,7 +4,7 @@ import (
 	"math"
 	"testing"
 
-	"github.com/marben/irpc"
+	"github.com/marben/irpc/pkg/irpc"
 )
 
 func TestBasic(t *testing.T) {

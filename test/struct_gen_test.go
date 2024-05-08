@@ -3,7 +3,7 @@ package irpctestpkg
 import (
 	"testing"
 
-	"github.com/marben/irpc"
+	"github.com/marben/irpc/pkg/irpc"
 )
 
 func newTestEndpoints() (local *irpc.Endpoint, remote *irpc.Endpoint) {
