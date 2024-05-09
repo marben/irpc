@@ -1,7 +1,6 @@
 - implement endpoint shutdown function
 - get rid of all panic
  - when service is not running on the other end, and our function returns error, return some irpc error
-- allow imports from within go module (will need that /x/ type inference package?)
 - figure out error handling and what to do on server side panics
 - test function with zero return vals
 - slice - consider passing capacity
@@ -14,3 +13,4 @@
 - change naming of generated files from _gen.go to _irpc.go? (stringer uses _string.go)
 - check capnproto - something similar?
 - perhaps rename generated names of RpcService and RpcClient to IrpcService etc? rpc is quite generic, Irpc points directly to specific part of code
+- get rid of fmt import(mostly used for errors) to possibly reduce size of wasm binary?

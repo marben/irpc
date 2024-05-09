@@ -32,7 +32,7 @@ type Endpoint struct {
 	servicesMux sync.RWMutex
 
 	conn     io.ReadWriter
-	connWMux sync.Mutex // only one routine can write to connection at one time
+	connWMux sync.Mutex
 
 	reqNum    uint16 // serial number of our next request	// todo: sort out overflow (and test?)
 	reqNumMux sync.Mutex

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -8,43 +9,50 @@ import (
 )
 
 func main() {
-	// fmt.Printf("Running %s go on %s\n", os.Args[0], os.Getenv("GOFILE"))
-
-	// cwd, err := os.Getwd()
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// fmt.Printf("  cwd = %s\n", cwd)
-	// fmt.Printf("  os.Args = %#v\n", os.Args)
-
-	// for _, ev := range []string{"GOARCH", "GOOS", "GOFILE", "GOLINE", "GOPACKAGE", "DOLLAR"} {
-	// 	fmt.Println("  ", ev, "=", os.Getenv(ev))
-	// }
-
 	if err := run(); err != nil {
-		log.Fatalf("run failed: %+v", err)
+		log.Fatalf("error: %+v", err)
 	}
 }
 
 func run() error {
-	srcFileName := os.Getenv("GOFILE")
-	if srcFileName == "" {
-		return fmt.Errorf("$GOFILE doesn't contain the requested parse file")
+	flag.Parse()
+
+	var inputFiles []string
+	if flag.NArg() > 0 {
+		// input files were passed as arguments
+		inputFiles = flag.Args()
+	} else {
+		// we should be run by "//go generate", which sets some env variables for us ("GOARCH", "GOOS", "GOFILE", "GOLINE", "GOPACKAGE", "DOLLAR")
+		f := os.Getenv("GOFILE")
+		if f == "" {
+			return fmt.Errorf("either specify the input file as command parameter, or run the irpc command using `go generate`")
+		}
+		inputFiles = append(inputFiles, f)
 	}
 
-	fd, err := newRpcFileDesc(srcFileName)
-	if err != nil {
-		return fmt.Errorf("newRpcFileDesc for file '%s': %w", srcFileName, err)
+	for _, f := range inputFiles {
+		if err := processInputFile(f); err != nil {
+			return fmt.Errorf("processing file %q: %w", f, err)
+		}
 	}
-	fmt.Print(fd.print())
+
+	return nil
+}
+
+func processInputFile(inputFile string) error {
+	fd, err := loadRpcFileDesc(inputFile)
+	if err != nil {
+		return fmt.Errorf("loadRpcFileDesc for file '%s': %w", inputFile, err)
+	}
+	// fmt.Print(fd.print())
 
 	g, err := newGenerator(fd)
 	if err != nil {
-		return fmt.Errorf("newGenerator for file '%s': %w", srcFileName, err)
+		return fmt.Errorf("newGenerator for file '%s': %w", inputFile, err)
 	}
 
 	// OUTPUT FILE
-	genFileName, err := generatedFileName(srcFileName)
+	genFileName, err := generatedFileName(inputFile)
 	if err != nil {
 		return fmt.Errorf("figure out generated file name: %w", err)
 	}

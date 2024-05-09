@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 	"go/ast"
-	"go/importer"
-	"go/parser"
 	"go/token"
 	"go/types"
+
+	"golang.org/x/tools/go/packages"
 )
 
 // representation of irpc service/client defining interface (marked with //go:generate)
@@ -31,10 +31,6 @@ func newRpcInterface(typesInfo *types.Info, typeSpec *ast.TypeSpec, astIface *as
 	if ifaceTypeObject == nil {
 		return rpcInterface{}, fmt.Errorf("couldn't find interface '%s' type definition", typeSpec.Name.Name)
 	}
-	// typesInterface, ok := ifaceTypeObject.Type().(*types.Interface)
-	// if !ok {
-	// 	return rpcInterface{}, fmt.Errorf("iface's '%s' type definition is not *types.Interface. it is: %s", typeSpec.Name.Name, ifaceTypeObject.Type())
-	// }
 
 	return rpcInterface{typeSpec: typeSpec, astIface: astIface, methods: ms}, nil
 }
@@ -170,27 +166,38 @@ type rpcFileDesc struct {
 	ifaces      []rpcInterface
 }
 
-func newRpcFileDesc(filename string) (rpcFileDesc, error) {
-	fSet := token.NewFileSet()
-	fileAst, err := parser.ParseFile(fSet, filename, nil, parser.AllErrors)
+func loadRpcFileDesc(filename string) (rpcFileDesc, error) {
+	cfg := &packages.Config{
+		Mode: packages.NeedTypes | packages.NeedDeps | packages.NeedImports | packages.NeedSyntax | packages.NeedTypesInfo,
+	}
+	ps, err := packages.Load(cfg, filename)
 	if err != nil {
-		return rpcFileDesc{}, fmt.Errorf("parse file '%s': %w", filename, err)
+		return rpcFileDesc{}, fmt.Errorf("packages.Load(): %w", err)
 	}
 
-	// print AST
-	// ast.Print(fSet, fileAst)
-
-	conf := types.Config{Importer: importer.Default()}
-	info := &types.Info{
-		Defs:  make(map[*ast.Ident]types.Object),
-		Types: make(map[ast.Expr]types.TypeAndValue),
+	if len(ps) != 1 {
+		return rpcFileDesc{}, fmt.Errorf("unexpectedly %d packages returned for file %q", len(ps), filename)
 	}
-	pkg, err := conf.Check("", fSet, []*ast.File{fileAst}, info)
+
+	p := ps[0]
+
+	if len(p.Syntax) != 1 {
+		return rpcFileDesc{}, fmt.Errorf("unexpectedly %d ast syntax trees returned", len(p.Syntax))
+	}
+	fileAst := p.Syntax[0]
+
+	ifaces, err := loadRpcInterfaces(fileAst, p.TypesInfo)
 	if err != nil {
-		return rpcFileDesc{}, fmt.Errorf("conf.Check(): %w", err)
+		return rpcFileDesc{}, fmt.Errorf("loadRpcInterfaces: %w", err)
 	}
-	fmt.Printf("loaded package: %s\n", pkg.Name())
 
+	return rpcFileDesc{
+		filename:    filename,
+		ifaces:      ifaces,
+		packageName: fileAst.Name.Name}, nil
+}
+
+func loadRpcInterfaces(fileAst *ast.File, tInfo *types.Info) ([]rpcInterface, error) {
 	ifaces := []rpcInterface{}
 	for _, decl := range fileAst.Decls {
 		genDecl, ok := decl.(*ast.GenDecl)
@@ -209,18 +216,15 @@ func newRpcFileDesc(filename string) (rpcFileDesc, error) {
 			if !ok {
 				continue
 			}
-			iface, err := newRpcInterface(info, ts, it)
+			iface, err := newRpcInterface(tInfo, ts, it)
 			if err != nil {
-				return rpcFileDesc{}, fmt.Errorf("newRpcInterface %s: %w", ts.Name.String(), err)
+				return nil, fmt.Errorf("newRpcInterface %s: %w", ts.Name.String(), err)
 			}
 			ifaces = append(ifaces, iface)
 		}
 	}
 
-	return rpcFileDesc{
-		filename:    filename,
-		ifaces:      ifaces,
-		packageName: fileAst.Name.Name}, nil
+	return ifaces, nil
 }
 
 func (f rpcFileDesc) print() string {
