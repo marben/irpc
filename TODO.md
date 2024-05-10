@@ -14,3 +14,5 @@
 - check capnproto - something similar?
 - perhaps rename generated names of RpcService and RpcClient to IrpcService etc? rpc is quite generic, Irpc points directly to specific part of code
 - get rid of fmt import(mostly used for errors) to possibly reduce size of wasm binary?
+- consider moving the irpc package from `irpc/pkg/irpc` to `irpc/irpc`
+- implement and test sending big messages with different endpoint.MaxMsgLen. client should be splitting msgs etc?

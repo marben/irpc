@@ -13,6 +13,8 @@ import (
 
 var errServiceRegistered = errors.New("service already registered")
 
+const DefaultMaxMsgLength = 10 * 1024 * 1024 // 10 MiB for now
+
 type Service interface {
 	Id() string
 	CallFunc(funcName string, params []byte) ([]byte, error)
@@ -41,6 +43,8 @@ type Endpoint struct {
 
 	ourPendingRequests    map[uint16]chan responsePacket // pending request function awaiting response on given channel
 	ourPendingRequestsMux sync.Mutex
+
+	MaxMsgLen int
 }
 
 func NewEndpoint() *Endpoint {
@@ -48,6 +52,7 @@ func NewEndpoint() *Endpoint {
 		services:           make(map[string]Service),
 		ourPendingRequests: make(map[uint16]chan responsePacket),
 		awaitConnC:         make(chan struct{}),
+		MaxMsgLen:          DefaultMaxMsgLength,
 	}
 }
 
@@ -166,20 +171,6 @@ func (e *Endpoint) CallRemoteFuncRaw(serviceName, funcName string, params []byte
 	return resp.Data, nil
 }
 
-// todo: remove in favour of RegisterServices ??
-// func (e *Endpoint) RegisterService(service Service) error {
-// 	e.servicesMux.Lock()
-// 	defer e.servicesMux.Unlock()
-
-// 	if _, found := e.services[service.Id()]; found {
-// 		return fmt.Errorf("%s: %w", service.Id(), errServiceRegistered)
-// 	}
-
-// 	e.services[service.Id()] = service
-
-// 	return nil
-// }
-
 // todo: really variadic?
 func (e *Endpoint) RegisterServices(services ...Service) error {
 	e.servicesMux.Lock()
@@ -286,10 +277,11 @@ func (e *Endpoint) readMsgs() error {
 		if err := binary.Read(e.conn, binary.LittleEndian, &h); err != nil {
 			return fmt.Errorf("failed to read header: %w", err)
 		}
-		// log.Printf("%p: succesfully read header: %v", e, h)
 
 		// read the data
-		// todo: this allocation is dangerous. somehow limit the amount of data
+		if h.DataLen > uint64(e.MaxMsgLen) {
+			return fmt.Errorf("incoming message size %d is bigger than our allowed size of %d", h.DataLen, e.MaxMsgLen)
+		}
 		data := make([]byte, h.DataLen)
 		// log.Printf("%p: waiting for data of len: %d", e, len(data))
 		if n, err := io.ReadFull(e.conn, data); err != nil {
