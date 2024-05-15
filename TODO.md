@@ -16,3 +16,4 @@
 - get rid of fmt import(mostly used for errors) to possibly reduce size of wasm binary?
 - consider moving the irpc package from `irpc/pkg/irpc` to `irpc/irpc`
 - implement and test sending big messages with different endpoint.MaxMsgLen. client should be splitting msgs etc?
+- allow usage of '*' or '.' to specify more than one input file

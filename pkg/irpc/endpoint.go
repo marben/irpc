@@ -326,11 +326,13 @@ func (e *Endpoint) Serve(conn io.ReadWriter) error {
 	// unblock all waiting client requests
 	close(e.awaitConnC)
 
+	errC := make(chan error, 1)
 	go func() {
 		if err := e.readMsgs(); err != nil {
-			log.Fatalf("read msgs ended with err: %+v", err)
+			errC <- err
 		}
+		errC <- nil
 	}()
 
-	select {} // todo: select on some error channels
+	return <-errC
 }
