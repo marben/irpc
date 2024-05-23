@@ -196,9 +196,9 @@ type varField struct {
 	enc             encoder
 }
 
-func newVarField(p rpcParam) (varField, error) {
+func newVarField(apiName string, p rpcParam) (varField, error) {
 	structFieldName := fmt.Sprintf("Param%d_%s", p.pos, p.name)
-	enc, err := varEncoder(p.typeAndValue.Type)
+	enc, err := varEncoder(apiName, p.typeAndValue.Type)
 	if err != nil {
 		return varField{}, fmt.Errorf("param field for type '%s': %w", p.typeName, err)
 	}
@@ -222,7 +222,7 @@ func newMethodGenerator(ifaceName string, m rpcMethod) (methodGenerator, error) 
 	reqStructTypeName := "_Irpc_" + ifaceName + m.name + "Req"
 	reqFields := []varField{}
 	for _, param := range m.params {
-		rf, err := newVarField(param)
+		rf, err := newVarField(ifaceName, param)
 		if err != nil {
 			return methodGenerator{}, fmt.Errorf("newVarField for param '%s': %w", param.name, err)
 		}
@@ -237,7 +237,7 @@ func newMethodGenerator(ifaceName string, m rpcMethod) (methodGenerator, error) 
 	respStructTypeName := "_Irpc_" + ifaceName + m.name + "Resp"
 	respFields := []varField{}
 	for _, result := range m.results {
-		rf, err := newVarField(result)
+		rf, err := newVarField(ifaceName, result)
 		if err != nil {
 			return methodGenerator{}, fmt.Errorf("newVarField for param '%s': %w", result.name, err)
 		}

@@ -21,7 +21,6 @@ type Service interface {
 }
 
 // our generated code function calls' arguments implements Serializable/Deserializble
-// TODO: work on io.Writer and io.Reader
 type Serializable interface {
 	Serialize(w io.Writer) error
 }

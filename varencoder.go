@@ -5,7 +5,7 @@ import (
 	"go/types"
 )
 
-func varEncoder(t types.Type) (encoder, error) {
+func varEncoder(apiName string, t types.Type) (encoder, error) {
 	switch t := t.(type) {
 	case *types.Basic:
 		switch t.Kind() {
@@ -41,14 +41,14 @@ func varEncoder(t types.Type) (encoder, error) {
 			return nil, fmt.Errorf("unsupported basic type '%s'", t.Name())
 		}
 	case *types.Slice:
-		return newSliceEncoder(t)
+		return newSliceEncoder(apiName, t)
 	case *types.Named:
 		name := t.Obj().Name()
 		switch ut := t.Underlying().(type) {
 		case *types.Struct:
-			return newNamedStructEncoder(ut)
+			return newNamedStructEncoder(apiName, ut)
 		case *types.Interface:
-			return newInterfaceEncoder(name, ut)
+			return newInterfaceEncoder(name, apiName, ut)
 		default:
 			return nil, fmt.Errorf("unsupported named type: %s", ut)
 		}

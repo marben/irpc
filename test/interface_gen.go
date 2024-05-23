@@ -334,7 +334,7 @@ func (s *_Irpc_interfaceTestrtnErrorWithMessageResp) Deserialize(r io.Reader) er
 		if isNil {
 			s.Param0_ = nil
 		} else {
-			var impl _error_irpcInterfaceImpl
+			var impl _error_interfaceTest_irpcInterfaceImpl
 			{ // Error()
 				{
 					var l int
@@ -357,11 +357,11 @@ func (s *_Irpc_interfaceTestrtnErrorWithMessageResp) Deserialize(r io.Reader) er
 	return nil
 }
 
-type _error_irpcInterfaceImpl struct {
+type _error_interfaceTest_irpcInterfaceImpl struct {
 	_Error_0_ string
 }
 
-func (i _error_irpcInterfaceImpl) Error() string {
+func (i _error_interfaceTest_irpcInterfaceImpl) Error() string {
 	return i._Error_0_
 }
 
@@ -429,7 +429,7 @@ func (s *_Irpc_interfaceTestrtnNilErrorResp) Deserialize(r io.Reader) error {
 		if isNil {
 			s.Param0_ = nil
 		} else {
-			var impl _error_irpcInterfaceImpl
+			var impl _error_interfaceTest_irpcInterfaceImpl
 			{ // Error()
 				{
 					var l int
@@ -549,7 +549,7 @@ func (s *_Irpc_interfaceTestrtnTwoErrorsResp) Deserialize(r io.Reader) error {
 		if isNil {
 			s.Param0_ = nil
 		} else {
-			var impl _error_irpcInterfaceImpl
+			var impl _error_interfaceTest_irpcInterfaceImpl
 			{ // Error()
 				{
 					var l int
@@ -583,7 +583,7 @@ func (s *_Irpc_interfaceTestrtnTwoErrorsResp) Deserialize(r io.Reader) error {
 		if isNil {
 			s.Param1_ = nil
 		} else {
-			var impl _error_irpcInterfaceImpl
+			var impl _error_interfaceTest_irpcInterfaceImpl
 			{ // Error()
 				{
 					var l int
@@ -730,7 +730,7 @@ func (s *_Irpc_interfaceTestrtnStringAndErrorResp) Deserialize(r io.Reader) erro
 		if isNil {
 			s.Param1_err = nil
 		} else {
-			var impl _error_irpcInterfaceImpl
+			var impl _error_interfaceTest_irpcInterfaceImpl
 			{ // Error()
 				{
 					var l int
@@ -815,7 +815,7 @@ func (s *_Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedReq) Deseriali
 		if isNil {
 			s.Param0_ci = nil
 		} else {
-			var impl _customInterface_irpcInterfaceImpl
+			var impl _customInterface_interfaceTest_irpcInterfaceImpl
 			{ // IntFunc()
 				b := make([]byte, 8)
 				if _, err := io.ReadFull(r, b[:8]); err != nil {
@@ -845,15 +845,15 @@ func (s *_Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedReq) Deseriali
 	return nil
 }
 
-type _customInterface_irpcInterfaceImpl struct {
+type _customInterface_interfaceTest_irpcInterfaceImpl struct {
 	_IntFunc_0_    int
 	_StringFunc_0_ string
 }
 
-func (i _customInterface_irpcInterfaceImpl) IntFunc() int {
+func (i _customInterface_interfaceTest_irpcInterfaceImpl) IntFunc() int {
 	return i._IntFunc_0_
 }
-func (i _customInterface_irpcInterfaceImpl) StringFunc() string {
+func (i _customInterface_interfaceTest_irpcInterfaceImpl) StringFunc() string {
 	return i._StringFunc_0_
 }
 
@@ -952,7 +952,7 @@ func (s *_Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp) Deserial
 		if isNil {
 			s.Param0_ = nil
 		} else {
-			var impl _customInterface_irpcInterfaceImpl
+			var impl _customInterface_interfaceTest_irpcInterfaceImpl
 			{ // IntFunc()
 				b := make([]byte, 8)
 				if _, err := io.ReadFull(r, b[:8]); err != nil {
@@ -993,7 +993,7 @@ func (s *_Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp) Deserial
 		if isNil {
 			s.Param1_ = nil
 		} else {
-			var impl _error_irpcInterfaceImpl
+			var impl _error_interfaceTest_irpcInterfaceImpl
 			{ // Error()
 				{
 					var l int

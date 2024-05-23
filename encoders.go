@@ -199,8 +199,8 @@ type sliceEncoder struct {
 	elemType types.Type
 }
 
-func newSliceEncoder(t *types.Slice) (sliceEncoder, error) {
-	elemEnc, err := varEncoder(t.Elem())
+func newSliceEncoder(apiName string, t *types.Slice) (sliceEncoder, error) {
+	elemEnc, err := varEncoder(apiName, t.Elem())
 	if err != nil {
 		return sliceEncoder{}, fmt.Errorf("unsupported slice underlying type %s: %w", t.Elem(), err)
 	}
@@ -255,11 +255,11 @@ type namedStructEncoder struct {
 	fields []structField
 }
 
-func newNamedStructEncoder(s *types.Struct) (namedStructEncoder, error) {
+func newNamedStructEncoder(apiName string, s *types.Struct) (namedStructEncoder, error) {
 	structFields := []structField{}
 	for i := 0; i < s.NumFields(); i++ {
 		f := s.Field(i)
-		enc, err := varEncoder(f.Type())
+		enc, err := varEncoder(apiName, f.Type())
 		if err != nil {
 			return namedStructEncoder{}, fmt.Errorf("cannot encode structs field '%s' of type '%s': %w", f.Name(), f.Type(), err)
 		}
@@ -347,7 +347,7 @@ type interfaceEncoder struct {
 	implTypeName string
 }
 
-func newInterfaceEncoder(name string, it *types.Interface) (interfaceEncoder, error) {
+func newInterfaceEncoder(name string, apiName string, it *types.Interface) (interfaceEncoder, error) {
 	fncs := []ifaceFunc{}
 	for i := 0; i < it.NumMethods(); i++ {
 		m := it.Method(i)
@@ -360,7 +360,7 @@ func newInterfaceEncoder(name string, it *types.Interface) (interfaceEncoder, er
 		results := []ifaceRtnVar{}
 		for i := 0; i < sig.Results().Len(); i++ {
 			r := sig.Results().At(i)
-			enc, err := varEncoder(r.Type())
+			enc, err := varEncoder(apiName, r.Type())
 			if err != nil {
 				return interfaceEncoder{}, fmt.Errorf("newInterfaceEncoder: no encoder for %s of type %s: %w", r.Name(), r.Type(), err)
 			}
@@ -380,8 +380,10 @@ func newInterfaceEncoder(name string, it *types.Interface) (interfaceEncoder, er
 	}
 
 	return interfaceEncoder{
-		name:         name,
-		implTypeName: "_" + name + "_irpcInterfaceImpl",
+		name: name,
+		// we need to make the type unique within package, because we want each file to be self contained
+		// it would be possible to use filename instead of apiName, but that would confuse file renaming. this will do for now
+		implTypeName: "_" + name + "_" + apiName + "_irpcInterfaceImpl",
 		fncs:         fncs,
 	}, nil
 }
