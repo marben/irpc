@@ -1,6 +1,7 @@
 package irpctestpkg
 
 import (
+	"io"
 	"math"
 	"testing"
 
@@ -168,4 +169,63 @@ func TestBasic(t *testing.T) {
 	if s != "ABCŘŽA" {
 		t.Fatalf("unepected toUpperString result: '%s'", s)
 	}
+}
+
+type CountingReadWriteCloser struct {
+	rwc    io.ReadWriteCloser
+	rBytes int
+	wBytes int
+}
+
+func (crw *CountingReadWriteCloser) Read(p []byte) (n int, err error) {
+	n, err = crw.rwc.Read(p)
+	crw.rBytes += n
+	return n, err
+}
+
+func (crw *CountingReadWriteCloser) Write(p []byte) (n int, err error) {
+	n, err = crw.rwc.Write(p)
+	crw.wBytes += n
+	return n, err
+}
+
+func (crw *CountingReadWriteCloser) Close() error {
+	return crw.rwc.Close()
+}
+
+func BenchmarkAddInt64(b *testing.B) {
+	var rb, wb int // read/write bytes per one cycle
+	for range b.N {
+		p1, p2 := irpc.NewDoubleEndedPipe()
+
+		clientEp := irpc.NewEndpoint()
+		go clientEp.Serve(p1)
+		c := newBasicAPIRpcClient(clientEp)
+
+		crw := &CountingReadWriteCloser{rwc: p2}
+		serviceEp := irpc.NewEndpoint()
+		go serviceEp.Serve(crw)
+
+		skew := 2
+		service := newBasicAPIRpcService(basicApiImpl{skew: skew})
+		serviceEp.RegisterServices(service)
+
+		var x, y int64 = 1, 10
+		if res := c.addInt64(x, y); res != x+y+int64(skew) {
+			b.Fatalf("%d + %d != %d", x, y, res)
+		}
+		if err := clientEp.Close(); err != nil {
+			b.Fatalf("clientEp.Close(): %v", err)
+		}
+		if err := serviceEp.Close(); err != nil {
+			b.Fatalf("serviceEp.Close(): %v", err)
+		}
+
+		// rb, wb = crw.rBytes, crw.wBytes
+		rb += crw.rBytes
+		wb += crw.wBytes
+	}
+	b.ReportMetric(float64(rb)/float64(b.N), "rBytes/rpc")
+	b.ReportMetric(float64(wb)/float64(b.N), "wBytes/rpc")
+	// b.Logf("r: %d Bytes, w: %d Bytes. runs: %d", rb, wb, b.N)
 }

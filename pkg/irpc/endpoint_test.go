@@ -170,6 +170,24 @@ func TestCallBeforeServe(t *testing.T) {
 	}
 }
 
+func TestServeAfterClose(t *testing.T) {
+	c1, c2 := NewDoubleEndedPipe()
+	ep1, ep2 := NewEndpoint(), NewEndpoint()
+	go func() { ep1.Serve(c1) }()
+	go func() { ep2.Serve(c2) }()
+
+	if err := ep1.Close(); err != nil {
+		t.Fatalf("unexpected close err: %v", err)
+	}
+	if err2 := ep1.Serve(c1); !errors.Is(err2, ErrEndpointClosed) {
+		t.Fatalf("unexpected error on second close: %v", err2)
+	}
+	// close after close
+	if err3 := ep1.Close(); !errors.Is(err3, ErrEndpointClosed) {
+		t.Fatalf("second close returned: %v", err3)
+	}
+}
+
 // performs remote func call both A->B and B->A
 func TestBothSidesRemoteCall(t *testing.T) {
 	pA, pB := NewDoubleEndedPipe()
@@ -206,8 +224,8 @@ func TestRegisterServiceTwice(t *testing.T) {
 	}
 
 	err := ep.RegisterServices(newMathIRpcService(nil))
-	if !errors.Is(err, errServiceRegistered) {
-		t.Fatalf("expected error %v, but got: %v", errServiceRegistered, err)
+	if !errors.Is(err, errServiceAlreadyRegistered) {
+		t.Fatalf("expected error %v, but got: %v", errServiceAlreadyRegistered, err)
 	}
 }
 

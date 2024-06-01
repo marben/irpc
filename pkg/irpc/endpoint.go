@@ -9,9 +9,11 @@ import (
 	"log"
 	"sort"
 	"sync"
+	"sync/atomic"
 )
 
-var errServiceRegistered = errors.New("service already registered")
+var errServiceAlreadyRegistered = errors.New("service already registered")
+var ErrEndpointClosed = errors.New("endpoint is closed")
 
 const DefaultMaxMsgLength = 10 * 1024 * 1024 // 10 MiB for now
 
@@ -28,11 +30,15 @@ type Deserializable interface {
 	Deserialize(r io.Reader) error
 }
 
+// Endpoint represents one side of a connection
+// there needs to be a serving endpoint on both sides of connection for communication to work
 type Endpoint struct {
 	services    map[string]Service
 	servicesMux sync.RWMutex
 
-	conn     io.ReadWriter
+	closed atomic.Bool
+
+	conn     io.ReadWriteCloser
 	connWMux sync.Mutex
 
 	reqNum    uint16 // serial number of our next request	// todo: sort out overflow (and test?)
@@ -53,6 +59,25 @@ func NewEndpoint() *Endpoint {
 		awaitConnC:         make(chan struct{}),
 		MaxMsgLen:          DefaultMaxMsgLength,
 	}
+}
+
+// immediately stops serving any requests
+// Close closes the underlying connection, if it is io.Closer in which case it return's it's return error
+func (e *Endpoint) Close() error {
+	if e.closed.Load() {
+		return ErrEndpointClosed
+	}
+
+	e.connWMux.Lock()
+	defer e.connWMux.Unlock()
+
+	e.closed.Store(true)
+
+	if closer, ok := e.conn.(io.Closer); ok {
+		return closer.Close()
+	}
+
+	return nil
 }
 
 func (e *Endpoint) getService(serviceId string) (s Service, found bool) {
@@ -110,6 +135,10 @@ func (e *Endpoint) popPendingRequestRtnChannel(reqNum uint16) (chan responsePack
 }
 
 func (e *Endpoint) CallRemoteFunc(serviceName, funcName string, req Serializable, resp Deserializable) error {
+	if e.closed.Load() {
+		return ErrEndpointClosed
+	}
+
 	b := bytes.NewBuffer(nil)
 	err := req.Serialize(b)
 	if err != nil {
@@ -132,6 +161,9 @@ func (e *Endpoint) CallRemoteFunc(serviceName, funcName string, req Serializable
 // same as call remote func, but doesn't do the serialization/deserialization for you
 // TODO: eventually make non-public (i guess)
 func (e *Endpoint) CallRemoteFuncRaw(serviceName, funcName string, params []byte) ([]byte, error) {
+	if e.closed.Load() { // todo: should not be necessary, once it's not public
+		return nil, ErrEndpointClosed
+	}
 	// log.Printf("irpc: sending reqest num %d for func %s", e.reqNum, funcName)
 
 	reqNum := e.genNewRequestNumber()
@@ -177,7 +209,7 @@ func (e *Endpoint) RegisterServices(services ...Service) error {
 
 	for _, service := range services {
 		if _, found := e.services[service.Id()]; found {
-			return fmt.Errorf("%s: %w", service.Id(), errServiceRegistered)
+			return fmt.Errorf("%s: %w", service.Id(), errServiceAlreadyRegistered)
 		}
 
 		e.services[service.Id()] = service
@@ -319,7 +351,11 @@ func (e *Endpoint) readMsgs() error {
 	}
 }
 
-func (e *Endpoint) Serve(conn io.ReadWriter) error {
+func (e *Endpoint) Serve(conn io.ReadWriteCloser) error {
+	if e.closed.Load() {
+		return ErrEndpointClosed
+	}
+
 	e.conn = conn
 
 	// unblock all waiting client requests
