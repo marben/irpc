@@ -180,8 +180,8 @@ func (e *Endpoint) CallRemoteFuncRaw(serviceName, funcName string, params []byte
 	}
 
 	header := packetHeader{
-		Type:    rpcRequest,
-		DataLen: uint64(len(requestBytes)),
+		typ:     rpcRequest,
+		dataLen: uint64(len(requestBytes)),
 	}
 
 	ch := e.registerNewPendingRequestRtnChannel(reqNum)
@@ -267,8 +267,8 @@ func (e *Endpoint) sendResponse(reqNum uint16, respData []byte, err error) error
 	}
 
 	header := packetHeader{
-		Type:    rpcResponse,
-		DataLen: uint64(len(respSerialized)),
+		typ:     rpcResponse,
+		dataLen: uint64(len(respSerialized)),
 	}
 
 	if err := e.writeToConn(header, respSerialized); err != nil {
@@ -303,16 +303,16 @@ func (e *Endpoint) readMsgs() error {
 		}
 
 		// read the data
-		if h.DataLen > uint64(e.MaxMsgLen) {
-			return fmt.Errorf("incoming message size %d is bigger than our allowed size of %d", h.DataLen, e.MaxMsgLen)
+		if h.dataLen > uint64(e.MaxMsgLen) {
+			return fmt.Errorf("incoming message size %d is bigger than our allowed size of %d", h.dataLen, e.MaxMsgLen)
 		}
-		data := make([]byte, h.DataLen)
+		data := make([]byte, h.dataLen)
 		// log.Printf("%p: waiting for data of len: %d", e, len(data))
 		if n, err := io.ReadFull(e.conn, data); err != nil {
-			return fmt.Errorf("failed to read %d bytes of message data. only got: %d", h.DataLen, n)
+			return fmt.Errorf("failed to read %d bytes of message data. only got: %d", h.dataLen, n)
 		}
 		// log.Printf("%p: wait is over. succesfully read data: %v", e, data)
-		switch h.Type {
+		switch h.typ {
 		case rpcRequest:
 			var req requestPacket
 			if err := req.deserialize(data); err != nil {
@@ -339,7 +339,7 @@ func (e *Endpoint) readMsgs() error {
 			ch <- resp
 
 		default:
-			return fmt.Errorf("unexpected msg type: %d", h.Type)
+			return fmt.Errorf("unexpected msg type: %d", h.typ)
 		}
 	}
 }

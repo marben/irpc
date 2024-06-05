@@ -9,6 +9,8 @@ import (
 
 // TODO: replace json with something better (gob for a starter?)
 
+var endian = binary.LittleEndian
+
 type packetType uint8
 
 const (
@@ -17,18 +19,31 @@ const (
 )
 
 type packetHeader struct {
-	Type    packetType
-	DataLen uint64
+	typ     packetType
+	dataLen uint64
 }
 
+const packetHeaderSize = 1 + 8 // packetType + DataLen
+
 func (ph packetHeader) write(w io.Writer) error {
-	// TODO: binary.Write uses reflection for structs.
-	// TODO: serialize headers manually, to avoid (presumably slow) reflection
-	return binary.Write(w, binary.LittleEndian, ph)
+	b := make([]byte, packetHeaderSize)
+	b[0] = byte(ph.typ)
+	endian.PutUint64(b[1:], ph.dataLen)
+	_, err := w.Write(b)
+	return err
 }
 
 func (ph *packetHeader) read(r io.Reader) error {
-	return binary.Read(r, binary.LittleEndian, ph)
+	b := make([]byte, packetHeaderSize)
+	_, err := io.ReadFull(r, b)
+	if err != nil {
+		return err
+	}
+
+	ph.typ = packetType(b[0])
+	ph.dataLen = endian.Uint64(b[1:])
+
+	return nil
 }
 
 type requestPacket struct {
