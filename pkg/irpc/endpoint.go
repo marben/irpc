@@ -2,7 +2,6 @@ package irpc
 
 import (
 	"bytes"
-	"encoding/binary"
 	"errors"
 	"fmt"
 	"io"
@@ -233,19 +232,13 @@ func (e *Endpoint) RegisteredServices() []string {
 }
 
 func (e *Endpoint) writeToConn(header packetHeader, data []byte) error {
-	headerSerialized, err := header.serialize()
-	if err != nil {
-		return fmt.Errorf("failed to serialize header: %w", err)
-	}
-
 	// make sure we have a connection
 	<-e.awaitConnC
 
 	e.connWMux.Lock()
 	defer e.connWMux.Unlock()
 
-	// log.Printf("%p: writing header: %v", e, header)
-	if _, err := e.conn.Write(headerSerialized); err != nil {
+	if err := header.write(e.conn); err != nil {
 		return fmt.Errorf("failed to write serialized header to connection: %w", err)
 	}
 
@@ -305,7 +298,7 @@ func (e *Endpoint) readMsgs() error {
 	for {
 		// read the header
 		var h packetHeader
-		if err := binary.Read(e.conn, binary.LittleEndian, &h); err != nil {
+		if err := h.read(e.conn); err != nil {
 			return fmt.Errorf("failed to read header: %w", err)
 		}
 

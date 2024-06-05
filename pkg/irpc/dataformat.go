@@ -1,10 +1,10 @@
 package irpc
 
 import (
-	"bytes"
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"io"
 )
 
 // TODO: replace json with something better (gob for a starter?)
@@ -21,20 +21,14 @@ type packetHeader struct {
 	DataLen uint64
 }
 
-func (ph packetHeader) serialize() ([]byte, error) {
+func (ph packetHeader) write(w io.Writer) error {
 	// TODO: binary.Write uses reflection for structs.
 	// TODO: serialize headers manually, to avoid (presumably slow) reflection
-	buf := new(bytes.Buffer)
-	if err := binary.Write(buf, binary.LittleEndian, ph); err != nil {
-		return nil, fmt.Errorf("failed to serialize packet header into binary form: %w", err)
-	}
-
-	return buf.Bytes(), nil
+	return binary.Write(w, binary.LittleEndian, ph)
 }
 
-func (ph *packetHeader) deserialize(data []byte) error {
-	buf := bytes.NewBuffer(data)
-	return binary.Read(buf, binary.LittleEndian, &ph)
+func (ph *packetHeader) read(r io.Reader) error {
+	return binary.Read(r, binary.LittleEndian, ph)
 }
 
 type requestPacket struct {
