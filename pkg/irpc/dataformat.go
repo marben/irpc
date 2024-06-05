@@ -23,27 +23,26 @@ type packetHeader struct {
 	dataLen uint64
 }
 
-const packetHeaderSize = 1 + 8 // packetType + DataLen
-
 func (ph packetHeader) write(w io.Writer) error {
-	b := make([]byte, packetHeaderSize)
-	b[0] = byte(ph.typ)
-	endian.PutUint64(b[1:], ph.dataLen)
-	_, err := w.Write(b)
-	return err
+	if err := writeUint8(w, uint8(ph.typ)); err != nil {
+		return err
+	}
+	if err := writeUint64(w, ph.dataLen); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ph *packetHeader) read(r io.Reader) error {
-	b := make([]byte, packetHeaderSize)
-	_, err := io.ReadFull(r, b)
+	typUi8, err := readUint8(r)
 	if err != nil {
 		return err
 	}
+	ph.typ = packetType(typUi8)
 
-	ph.typ = packetType(b[0])
-	ph.dataLen = endian.Uint64(b[1:])
+	ph.dataLen, err = readUint64(r)
 
-	return nil
+	return err
 }
 
 type requestPacket struct {
@@ -76,4 +75,34 @@ func (rp responsePacket) serialize() ([]byte, error) {
 
 func (rp *responsePacket) deserialize(data []byte) error {
 	return json.Unmarshal(data, rp)
+}
+
+func writeUint64(w io.Writer, data uint64) error {
+	var buf [8]byte
+	endian.PutUint64(buf[:], data)
+	_, err := w.Write(buf[:])
+	return err
+}
+
+func writeUint8(w io.Writer, data uint8) error {
+	var buf [1]byte
+	buf[0] = data
+	_, err := w.Write(buf[:])
+	return err
+}
+
+func readUint8(r io.Reader) (uint8, error) {
+	buf := make([]byte, 1)
+	if _, err := io.ReadFull(r, buf); err != nil {
+		return 0, err
+	}
+	return uint8(buf[0]), nil
+}
+
+func readUint64(r io.Reader) (uint64, error) {
+	buf := make([]byte, 8)
+	if _, err := io.ReadFull(r, buf); err != nil {
+		return 0, err
+	}
+	return endian.Uint64(buf), nil
 }
