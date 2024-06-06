@@ -174,19 +174,13 @@ func (e *Endpoint) CallRemoteFuncRaw(serviceName, funcName string, params []byte
 		Data:       params,
 	}
 
-	requestBytes, err := request.serialize()
-	if err != nil {
-		return nil, fmt.Errorf("failed to serialize request: %w", err)
-	}
-
 	header := packetHeader{
-		typ:     rpcRequest,
-		dataLen: uint64(len(requestBytes)),
+		typ: rpcRequest,
 	}
 
 	ch := e.registerNewPendingRequestRtnChannel(reqNum)
 
-	if err := e.writeToConn(header, requestBytes); err != nil {
+	if err := e.serializeToConn(header, request); err != nil {
 		e.popPendingRequestRtnChannel(reqNum)
 		return nil, fmt.Errorf("failed to write request to the connection")
 	}
@@ -231,20 +225,19 @@ func (e *Endpoint) RegisteredServices() []string {
 	return ss
 }
 
-func (e *Endpoint) writeToConn(header packetHeader, data []byte) error {
+func (e *Endpoint) serializeToConn(header packetHeader, data Serializable) error {
 	// make sure we have a connection
 	<-e.awaitConnC
 
 	e.connWMux.Lock()
 	defer e.connWMux.Unlock()
 
-	if err := header.write(e.conn); err != nil {
-		return fmt.Errorf("failed to write serialized header to connection: %w", err)
+	if err := header.Serialize(e.conn); err != nil {
+		return fmt.Errorf("header.Serialize: %w", err)
 	}
 
-	// log.Printf("%p: writing data of len %d, %v", e, len(data), data)
-	if _, err := e.conn.Write(data); err != nil {
-		return fmt.Errorf("failed to write data to connection: %w", err)
+	if err := data.Serialize(e.conn); err != nil {
+		return fmt.Errorf("data.Serialize(conn): %w", err)
 	}
 
 	return nil
@@ -261,18 +254,13 @@ func (e *Endpoint) sendResponse(reqNum uint16, respData []byte, err error) error
 		Data:   respData,
 		Err:    errStr,
 	}
-	respSerialized, err := resp.serialize()
-	if err != nil {
-		return fmt.Errorf("failed to serialize response packet")
-	}
 
 	header := packetHeader{
-		typ:     rpcResponse,
-		dataLen: uint64(len(respSerialized)),
+		typ: rpcResponse,
 	}
 
-	if err := e.writeToConn(header, respSerialized); err != nil {
-		return fmt.Errorf("failed to write response to connection: %w", err)
+	if err := e.serializeToConn(header, resp); err != nil {
+		return fmt.Errorf("failed to serialize response to connection: %w", err)
 	}
 
 	return nil
@@ -298,25 +286,15 @@ func (e *Endpoint) readMsgs() error {
 	for {
 		// read the header
 		var h packetHeader
-		if err := h.read(e.conn); err != nil {
+		if err := h.Deserialize(e.conn); err != nil {
 			return fmt.Errorf("failed to read header: %w", err)
 		}
 
-		// read the data
-		if h.dataLen > uint64(e.MaxMsgLen) {
-			return fmt.Errorf("incoming message size %d is bigger than our allowed size of %d", h.dataLen, e.MaxMsgLen)
-		}
-		data := make([]byte, h.dataLen)
-		// log.Printf("%p: waiting for data of len: %d", e, len(data))
-		if n, err := io.ReadFull(e.conn, data); err != nil {
-			return fmt.Errorf("failed to read %d bytes of message data. only got: %d", h.dataLen, n)
-		}
-		// log.Printf("%p: wait is over. succesfully read data: %v", e, data)
 		switch h.typ {
 		case rpcRequest:
 			var req requestPacket
-			if err := req.deserialize(data); err != nil {
-				return fmt.Errorf("failed to deserialize received request '%v':%w", data, err)
+			if err := req.Deserialize(e.conn); err != nil {
+				return fmt.Errorf("failed to read received request :%w", err)
 			}
 			go func() {
 				if err := e.processIncomingRequest(req); err != nil {
@@ -326,10 +304,9 @@ func (e *Endpoint) readMsgs() error {
 
 		case rpcResponse:
 			var resp responsePacket
-			if err := resp.deserialize(data); err != nil {
-				return fmt.Errorf("failed to deserialize response data '%v' :%w", data, err)
+			if err := resp.Deserialize(e.conn); err != nil {
+				return fmt.Errorf("failed to read response data:%w", err)
 			}
-			// log.Printf("obtained reponse: %+v", data)
 			ch, err := e.popPendingRequestRtnChannel(resp.ReqNum)
 			if err != nil {
 				log.Printf("skipping response num %d because we failed to find corresponding request: %v", resp.ReqNum, err)

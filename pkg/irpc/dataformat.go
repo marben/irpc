@@ -3,11 +3,8 @@ package irpc
 import (
 	"encoding/binary"
 	"encoding/json"
-	"fmt"
 	"io"
 )
-
-// TODO: replace json with something better (gob for a starter?)
 
 var endian = binary.LittleEndian
 
@@ -19,28 +16,23 @@ const (
 )
 
 type packetHeader struct {
-	typ     packetType
-	dataLen uint64
+	typ packetType
 }
 
-func (ph packetHeader) write(w io.Writer) error {
+func (ph packetHeader) Serialize(w io.Writer) error {
 	if err := writeUint8(w, uint8(ph.typ)); err != nil {
 		return err
 	}
-	if err := writeUint64(w, ph.dataLen); err != nil {
-		return err
-	}
+
 	return nil
 }
 
-func (ph *packetHeader) read(r io.Reader) error {
+func (ph *packetHeader) Deserialize(r io.Reader) error {
 	typUi8, err := readUint8(r)
 	if err != nil {
 		return err
 	}
 	ph.typ = packetType(typUi8)
-
-	ph.dataLen, err = readUint64(r)
 
 	return err
 }
@@ -52,15 +44,21 @@ type requestPacket struct {
 	Data       []byte
 }
 
-func (rp *requestPacket) deserialize(data []byte) error {
-	if err := json.Unmarshal(data, rp); err != nil {
-		return fmt.Errorf("failed to deserialize packet. err: %w", err)
+func (rp *requestPacket) Deserialize(r io.Reader) error {
+	dec := json.NewDecoder(r)
+	if err := dec.Decode(rp); err != nil {
+		return err
 	}
+
 	return nil
 }
 
-func (rp requestPacket) serialize() ([]byte, error) {
-	return json.Marshal(rp)
+func (rp requestPacket) Serialize(w io.Writer) error {
+	enc := json.NewEncoder(w)
+	if err := enc.Encode(rp); err != nil {
+		return err
+	}
+	return nil
 }
 
 type responsePacket struct {
@@ -69,12 +67,21 @@ type responsePacket struct {
 	Err    string // not sure about this yet
 }
 
-func (rp responsePacket) serialize() ([]byte, error) {
-	return json.Marshal(rp)
+func (rp responsePacket) Serialize(w io.Writer) error {
+	enc := json.NewEncoder(w)
+	if err := enc.Encode(rp); err != nil {
+		return err
+	}
+	return nil
 }
 
-func (rp *responsePacket) deserialize(data []byte) error {
-	return json.Unmarshal(data, rp)
+func (rp *responsePacket) Deserialize(r io.Reader) error {
+	dec := json.NewDecoder(r)
+	if err := dec.Decode(rp); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func writeUint64(w io.Writer, data uint64) error {
