@@ -3,24 +3,29 @@ package irpctestpkg
 import (
 	"io"
 	"math"
+	"sync"
 	"testing"
 
 	"github.com/marben/irpc/pkg/irpc"
+	"github.com/marben/irpc/test/testtools"
 )
 
 func TestBasic(t *testing.T) {
-	p1, p2 := irpc.NewDoubleEndedPipe()
+	p1, p2 := testtools.NewDoubleEndedPipe()
 
 	clientEp := irpc.NewEndpoint()
 	go clientEp.Serve(p1)
-	c := newBasicAPIRpcClient(clientEp)
-
 	serviceEp := irpc.NewEndpoint()
 	go serviceEp.Serve(p2)
 
 	skew := 2
 	service := newBasicAPIRpcService(basicApiImpl{skew: skew})
 	serviceEp.RegisterServices(service)
+
+	c, err := newBasicAPIRpcClient(clientEp)
+	if err != nil {
+		t.Fatalf("failed to create client: %v", err)
+	}
 
 	// BOOL
 	negTrue := c.negBool(true)
@@ -174,33 +179,57 @@ func TestBasic(t *testing.T) {
 type CountingReadWriteCloser struct {
 	rwc    io.ReadWriteCloser
 	rBytes int
+	rmux   sync.Mutex
 	wBytes int
+	wmux   sync.Mutex
+}
+
+func (crw *CountingReadWriteCloser) Reset() {
+	crw.rBytes, crw.wBytes = 0, 0
 }
 
 func (crw *CountingReadWriteCloser) Read(p []byte) (n int, err error) {
 	n, err = crw.rwc.Read(p)
+
+	crw.rmux.Lock()
+	defer crw.rmux.Unlock()
+
 	crw.rBytes += n
 	return n, err
 }
 
 func (crw *CountingReadWriteCloser) Write(p []byte) (n int, err error) {
 	n, err = crw.rwc.Write(p)
+
+	crw.wmux.Lock()
+	defer crw.wmux.Unlock()
 	crw.wBytes += n
 	return n, err
+}
+
+func (crw *CountingReadWriteCloser) RBytes() int {
+	crw.rmux.Lock()
+	defer crw.rmux.Unlock()
+	return crw.rBytes
+}
+
+func (crw *CountingReadWriteCloser) WBytes() int {
+	crw.wmux.Lock()
+	defer crw.wmux.Unlock()
+	return crw.wBytes
 }
 
 func (crw *CountingReadWriteCloser) Close() error {
 	return crw.rwc.Close()
 }
 
-func BenchmarkAddInt64(b *testing.B) {
-	var rb, wb int // read/write bytes per one cycle
+func BenchmarkClientRegister(b *testing.B) {
+	var rb, wb int // read/write bytes
 	for range b.N {
-		p1, p2 := irpc.NewDoubleEndedPipe()
+		p1, p2 := testtools.NewDoubleEndedPipe()
 
 		clientEp := irpc.NewEndpoint()
 		go clientEp.Serve(p1)
-		c := newBasicAPIRpcClient(clientEp)
 
 		crw := &CountingReadWriteCloser{rwc: p2}
 		serviceEp := irpc.NewEndpoint()
@@ -210,10 +239,12 @@ func BenchmarkAddInt64(b *testing.B) {
 		service := newBasicAPIRpcService(basicApiImpl{skew: skew})
 		serviceEp.RegisterServices(service)
 
-		var x, y int64 = 1, 10
-		if res := c.addInt64(x, y); res != x+y+int64(skew) {
-			b.Fatalf("%d + %d != %d", x, y, res)
+		// register client (network communication)
+		_, err := newBasicAPIRpcClient(clientEp)
+		if err != nil {
+			b.Fatalf("failed to create client: %v", err)
 		}
+
 		if err := clientEp.Close(); err != nil {
 			b.Fatalf("clientEp.Close(): %v", err)
 		}
@@ -227,5 +258,43 @@ func BenchmarkAddInt64(b *testing.B) {
 	}
 	b.ReportMetric(float64(rb)/float64(b.N), "rBytes/rpc")
 	b.ReportMetric(float64(wb)/float64(b.N), "wBytes/rpc")
-	// b.Logf("r: %d Bytes, w: %d Bytes. runs: %d", rb, wb, b.N)
+}
+
+func BenchmarkAddInt64(b *testing.B) {
+	p1, p2 := testtools.NewDoubleEndedPipe()
+
+	serviceEp := irpc.NewEndpoint()
+	go serviceEp.Serve(p2)
+
+	crw := &CountingReadWriteCloser{rwc: p1}
+	clientEp := irpc.NewEndpoint()
+	go clientEp.Serve(crw)
+
+	skew := 2
+	service := newBasicAPIRpcService(basicApiImpl{skew: skew})
+	serviceEp.RegisterServices(service)
+
+	c, err := newBasicAPIRpcClient(clientEp)
+	if err != nil {
+		b.Fatalf("failed to create client: %v", err)
+	}
+
+	b.ResetTimer()
+	crw.Reset()
+	for range b.N {
+		var x, y int64 = 1, 10
+		if res := c.addInt64(x, y); res != x+y+int64(skew) {
+			b.Fatalf("%d + %d != %d", x, y, res)
+		}
+	}
+	// b.Logf("N: %d, rBytes: %d, wBytes: %d", b.N, crw.RBytes(), crw.WBytes())
+	b.ReportMetric(float64(crw.RBytes())/float64(b.N), "rBytes/rpc")
+	b.ReportMetric(float64(crw.WBytes())/float64(b.N), "wBytes/rpc")
+
+	if err := clientEp.Close(); err != nil {
+		b.Fatalf("clientEp.Close(): %v", err)
+	}
+	if err := serviceEp.Close(); err != nil {
+		b.Fatalf("serviceEp.Close(): %v", err)
+	}
 }

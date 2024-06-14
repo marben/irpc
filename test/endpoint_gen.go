@@ -17,15 +17,15 @@ type endpointApiRpcService struct {
 func newEndpointApiRpcService(impl endpointApi) *endpointApiRpcService {
 	return &endpointApiRpcService{impl: impl}
 }
-func (endpointApiRpcService) Id() string {
-	return "endpointApiRpcService"
+func (endpointApiRpcService) Hash() []byte {
+	return []byte("endpointApiRpcService")
 }
-func (s *endpointApiRpcService) CallFunc(funcName string, args []byte) ([]byte, error) {
-	switch funcName {
-	case "Div":
+func (s *endpointApiRpcService) CallFunc(funcId irpc.FuncId, args []byte) ([]byte, error) {
+	switch funcId {
+	case 0:
 		return s.callDiv(args)
 	default:
-		return nil, fmt.Errorf("function '%s' doesn't exist on service '%s'", funcName, s.Id())
+		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, string(s.Hash()))
 	}
 }
 func (s *endpointApiRpcService) callDiv(params []byte) ([]byte, error) {
@@ -46,10 +46,15 @@ func (s *endpointApiRpcService) callDiv(params []byte) ([]byte, error) {
 
 type endpointApiRpcClient struct {
 	endpoint *irpc.Endpoint
+	id       irpc.RegisteredServiceId
 }
 
-func newEndpointApiRpcClient(endpoint *irpc.Endpoint) *endpointApiRpcClient {
-	return &endpointApiRpcClient{endpoint: endpoint}
+func newEndpointApiRpcClient(endpoint *irpc.Endpoint) (*endpointApiRpcClient, error) {
+	id, err := endpoint.RegisterClient([]byte("endpointApiRpcService"))
+	if err != nil {
+		return nil, fmt.Errorf("register failed: %w", err)
+	}
+	return &endpointApiRpcClient{endpoint: endpoint, id: id}, nil
 }
 func (_c *endpointApiRpcClient) Div(a float64, b float64) (float64, error) {
 	var req = _Irpc_endpointApiDivReq{
@@ -57,7 +62,7 @@ func (_c *endpointApiRpcClient) Div(a float64, b float64) (float64, error) {
 		Param0_b: b,
 	}
 	var resp _Irpc_endpointApiDivResp
-	if err := _c.endpoint.CallRemoteFunc("endpointApiRpcService", "Div", req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(_c.id, 0, req, &resp); err != nil {
 		panic(err)
 	}
 	return resp.Param0_, resp.Param1_

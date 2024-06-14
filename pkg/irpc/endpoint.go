@@ -11,14 +11,24 @@ import (
 	"sync/atomic"
 )
 
-var errServiceAlreadyRegistered = errors.New("service already registered")
+var ErrServiceAlreadyRegistered = errors.New("service already registered")
 var ErrEndpointClosed = errors.New("endpoint is closed")
 
-const DefaultMaxMsgLength = 10 * 1024 * 1024 // 10 MiB for now
+// const DefaultMaxMsgLength = 10 * 1024 * 1024 // 10 MiB for now
+
+// client registers to a service (by hash). upon registration, service is given 'RegisteredServiceId'
+type RegisteredServiceId uint16
+type FuncId uint16
+
+const (
+	// clientRegistrationService is used to register other services (and give them their ids)
+	// 0 is not used, so that uninitialized clients (with service id = 0), erros out
+	clientRegistrationService RegisteredServiceId = iota + 1
+)
 
 type Service interface {
-	Id() string
-	CallFunc(funcName string, params []byte) ([]byte, error)
+	Hash() []byte // unique hash of the service
+	CallFunc(funcId FuncId, params []byte) ([]byte, error)
 }
 
 // our generated code function calls' arguments implements Serializable/Deserializble
@@ -32,8 +42,12 @@ type Deserializable interface {
 // Endpoint represents one side of a connection
 // there needs to be a serving endpoint on both sides of connection for communication to work
 type Endpoint struct {
-	services    map[string]Service
-	servicesMux sync.RWMutex
+	// maps registered service's hash to it's given id
+	// todo: rename to serviceHashes
+	services        map[string]RegisteredServiceId
+	clientsServices map[RegisteredServiceId]Service
+	nextServiceId   RegisteredServiceId
+	servicesMux     sync.RWMutex
 
 	closed atomic.Bool
 
@@ -48,16 +62,24 @@ type Endpoint struct {
 	ourPendingRequests    map[uint16]chan responsePacket // pending request function awaiting response on given channel
 	ourPendingRequestsMux sync.Mutex
 
-	MaxMsgLen int
+	// MaxMsgLen int
 }
 
 func NewEndpoint() *Endpoint {
-	return &Endpoint{
-		services:           make(map[string]Service),
+	ep := &Endpoint{
+		services:           make(map[string]RegisteredServiceId),
+		clientsServices:    make(map[RegisteredServiceId]Service),
 		ourPendingRequests: make(map[uint16]chan responsePacket),
 		awaitConnC:         make(chan struct{}),
-		MaxMsgLen:          DefaultMaxMsgLength,
+		nextServiceId:      clientRegistrationService + 1,
+		// MaxMsgLen:          DefaultMaxMsgLength,
 	}
+
+	// default service for registering clients
+	regService := &clientRegisterService{ep: ep}
+	ep.clientsServices[clientRegistrationService] = regService
+
+	return ep
 }
 
 // immediately stops serving any requests
@@ -79,23 +101,36 @@ func (e *Endpoint) Close() error {
 	return nil
 }
 
-func (e *Endpoint) getService(serviceId string) (s Service, found bool) {
+// registers client on remote endpoint
+// if there is no corresponding service registered on remote node, returns error
+// todo: rename to RegisterRemoteClient
+func (e *Endpoint) RegisterClient(serviceHash []byte) (RegisteredServiceId, error) {
+	req := clientRegisterReq{ServiceHash: serviceHash}
+	resp := clientRegisterResp{}
+	if err := e.CallRemoteFunc(clientRegistrationService, 0 /* currently there is just one function */, req, &resp); err != nil {
+		return 0, fmt.Errorf("failed to register client %q: %w", serviceHash, err)
+	}
+
+	return resp.ServiceId, nil
+}
+
+func (e *Endpoint) getService(id RegisteredServiceId) (s Service, found bool) {
 	e.servicesMux.RLock()
 	defer e.servicesMux.RUnlock()
 
-	s, found = e.services[serviceId]
+	s, found = e.clientsServices[id]
 	return
 }
 
-func (e *Endpoint) callLocalFunc(serviceId, funcName string, params []byte) ([]byte, error) {
-	service, found := e.getService(serviceId)
+func (e *Endpoint) callLocalFunc(sId RegisteredServiceId, fId FuncId, params []byte) ([]byte, error) {
+	service, found := e.getService(sId)
 	if !found {
-		return nil, fmt.Errorf("could not find service '%s'", serviceId)
+		return nil, fmt.Errorf("could not find service '%v'", sId)
 	}
 
-	rtn, err := service.CallFunc(funcName, params)
+	rtn, err := service.CallFunc(fId, params)
 	if err != nil {
-		return nil, fmt.Errorf("failed to call function '%s/%s': %w", serviceId, funcName, err)
+		return nil, fmt.Errorf("failed to call function '%v/%v': %w", sId, fId, err)
 	}
 
 	return rtn, nil
@@ -133,7 +168,7 @@ func (e *Endpoint) popPendingRequestRtnChannel(reqNum uint16) (chan responsePack
 	return c, nil
 }
 
-func (e *Endpoint) CallRemoteFunc(serviceName, funcName string, req Serializable, resp Deserializable) error {
+func (e *Endpoint) CallRemoteFunc(serviceId RegisteredServiceId, funcId FuncId, req Serializable, resp Deserializable) error {
 	if e.closed.Load() {
 		return ErrEndpointClosed
 	}
@@ -144,7 +179,7 @@ func (e *Endpoint) CallRemoteFunc(serviceName, funcName string, req Serializable
 		return fmt.Errorf("failed to serialize request: %w", err)
 	}
 
-	respBytes, err := e.CallRemoteFuncRaw(serviceName, funcName, b.Bytes())
+	respBytes, err := e.CallRemoteFuncRaw(serviceId, funcId, b.Bytes())
 	if err != nil {
 		return fmt.Errorf("remote call failed: %w", err)
 	}
@@ -159,19 +194,18 @@ func (e *Endpoint) CallRemoteFunc(serviceName, funcName string, req Serializable
 
 // same as call remote func, but doesn't do the serialization/deserialization for you
 // TODO: eventually make non-public (i guess)
-func (e *Endpoint) CallRemoteFuncRaw(serviceName, funcName string, params []byte) ([]byte, error) {
+func (e *Endpoint) CallRemoteFuncRaw(serviceId RegisteredServiceId, funcId FuncId, params []byte) ([]byte, error) {
 	if e.closed.Load() { // todo: should not be necessary, once it's not public
 		return nil, ErrEndpointClosed
 	}
-	// log.Printf("irpc: sending reqest num %d for func %s", e.reqNum, funcName)
 
 	reqNum := e.genNewRequestNumber()
 
 	request := requestPacket{
-		ReqNum:     reqNum,
-		ServiceId:  serviceName,
-		FuncNameId: funcName,
-		Data:       params,
+		ReqNum:    reqNum,
+		ServiceId: serviceId,
+		FuncId:    funcId,
+		Data:      params,
 	}
 
 	header := packetHeader{
@@ -195,29 +229,34 @@ func (e *Endpoint) CallRemoteFuncRaw(serviceName, funcName string, params []byte
 	return resp.Data, nil
 }
 
-// todo: really variadic?
+// todo: variadic is not such a great idea - what if only one error fails to register? what to return?
 func (e *Endpoint) RegisterServices(services ...Service) error {
 	e.servicesMux.Lock()
 	defer e.servicesMux.Unlock()
 
 	for _, service := range services {
-		if _, found := e.services[service.Id()]; found {
-			return fmt.Errorf("%s: %w", service.Id(), errServiceAlreadyRegistered)
+		if _, found := e.services[string(service.Hash())]; found {
+			return fmt.Errorf("%s: %w", service.Hash(), ErrServiceAlreadyRegistered)
 		}
 
-		e.services[service.Id()] = service
+		id := e.nextServiceId
+		e.nextServiceId++
+
+		e.services[string(service.Hash())] = id
+		e.clientsServices[id] = service
 	}
 
 	return nil
 }
 
+// prints hashes of all registered services
 func (e *Endpoint) RegisteredServices() []string {
 	e.servicesMux.RLock()
 	defer e.servicesMux.RUnlock()
 
 	ss := []string{}
-	for _, s := range e.services {
-		ss = append(ss, s.Id())
+	for s := range e.services {
+		ss = append(ss, s)
 	}
 
 	sort.Strings(ss)
@@ -268,7 +307,7 @@ func (e *Endpoint) sendResponse(reqNum uint16, respData []byte, err error) error
 
 // todo: pass in context to exit on
 func (e *Endpoint) processIncomingRequest(req requestPacket) error {
-	resp, err := e.callLocalFunc(req.ServiceId, req.FuncNameId, req.Data)
+	resp, err := e.callLocalFunc(req.ServiceId, req.FuncId, req.Data)
 	if err != nil {
 		if errResp := e.sendResponse(req.ReqNum, nil, err); errResp != nil {
 			return fmt.Errorf("failed to respond with error '%s': %v", err, errResp)
@@ -340,4 +379,55 @@ func (e *Endpoint) Serve(conn io.ReadWriteCloser) error {
 	}()
 
 	return <-errC
+}
+
+var _ Service = &clientRegisterService{}
+
+// service accomodating the client's registration
+// only for endpoint's purposes
+type clientRegisterService struct {
+	ep *Endpoint
+}
+
+// CallFunc implements Service.
+func (c *clientRegisterService) CallFunc(funcId FuncId, params []byte) ([]byte, error) {
+	switch funcId {
+	case 0:
+		return c.findServiceId(params)
+	default:
+		return nil, fmt.Errorf("registerService has no function %d", funcId)
+	}
+}
+
+// used to respond to clients the service id
+// todo: rename to findServiceId or something
+func (c *clientRegisterService) findServiceId(params []byte) ([]byte, error) {
+	r := bytes.NewBuffer(params)
+	var req clientRegisterReq
+	if err := req.Deserialize(r); err != nil {
+		return nil, fmt.Errorf("failed to deserilize request: %w", err)
+	}
+
+	var resp clientRegisterResp
+	c.ep.servicesMux.RLock()
+	serviceId, found := c.ep.services[string(req.ServiceHash)]
+	if !found {
+		resp.Err = fmt.Errorf("couldn't find service hash %q", string(req.ServiceHash)).Error()
+	} else {
+		resp.ServiceId = serviceId
+	}
+	c.ep.servicesMux.RUnlock()
+
+	w := bytes.NewBuffer(nil)
+	if err := resp.Serialize(w); err != nil {
+		return nil, fmt.Errorf("serialization failed: %w", err)
+	}
+
+	return w.Bytes(), nil
+}
+
+// Hash implements Service.
+func (c *clientRegisterService) Hash() []byte {
+	// currently, client register service is not versioned and it's hash is not used at all
+	return nil
 }

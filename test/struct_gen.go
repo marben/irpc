@@ -16,19 +16,19 @@ type structAPIRpcService struct {
 func newStructAPIRpcService(impl structAPI) *structAPIRpcService {
 	return &structAPIRpcService{impl: impl}
 }
-func (structAPIRpcService) Id() string {
-	return "structAPIRpcService"
+func (structAPIRpcService) Hash() []byte {
+	return []byte("structAPIRpcService")
 }
-func (s *structAPIRpcService) CallFunc(funcName string, args []byte) ([]byte, error) {
-	switch funcName {
-	case "VectSum":
+func (s *structAPIRpcService) CallFunc(funcId irpc.FuncId, args []byte) ([]byte, error) {
+	switch funcId {
+	case 0:
 		return s.callVectSum(args)
-	case "Vect3x3Sum":
+	case 1:
 		return s.callVect3x3Sum(args)
-	case "SumSliceStruct":
+	case 2:
 		return s.callSumSliceStruct(args)
 	default:
-		return nil, fmt.Errorf("function '%s' doesn't exist on service '%s'", funcName, s.Id())
+		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, string(s.Hash()))
 	}
 }
 func (s *structAPIRpcService) callVectSum(params []byte) ([]byte, error) {
@@ -79,17 +79,22 @@ func (s *structAPIRpcService) callSumSliceStruct(params []byte) ([]byte, error) 
 
 type structAPIRpcClient struct {
 	endpoint *irpc.Endpoint
+	id       irpc.RegisteredServiceId
 }
 
-func newStructAPIRpcClient(endpoint *irpc.Endpoint) *structAPIRpcClient {
-	return &structAPIRpcClient{endpoint: endpoint}
+func newStructAPIRpcClient(endpoint *irpc.Endpoint) (*structAPIRpcClient, error) {
+	id, err := endpoint.RegisterClient([]byte("structAPIRpcService"))
+	if err != nil {
+		return nil, fmt.Errorf("register failed: %w", err)
+	}
+	return &structAPIRpcClient{endpoint: endpoint, id: id}, nil
 }
 func (_c *structAPIRpcClient) VectSum(v vect3) int {
 	var req = _Irpc_structAPIVectSumReq{
 		Param0_v: v,
 	}
 	var resp _Irpc_structAPIVectSumResp
-	if err := _c.endpoint.CallRemoteFunc("structAPIRpcService", "VectSum", req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(_c.id, 0, req, &resp); err != nil {
 		panic(err)
 	}
 	return resp.Param0_
@@ -99,7 +104,7 @@ func (_c *structAPIRpcClient) Vect3x3Sum(v vect3x3) vect3 {
 		Param0_v: v,
 	}
 	var resp _Irpc_structAPIVect3x3SumResp
-	if err := _c.endpoint.CallRemoteFunc("structAPIRpcService", "Vect3x3Sum", req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(_c.id, 1, req, &resp); err != nil {
 		panic(err)
 	}
 	return resp.Param0_
@@ -109,7 +114,7 @@ func (_c *structAPIRpcClient) SumSliceStruct(s sliceStruct) int {
 		Param0_s: s,
 	}
 	var resp _Irpc_structAPISumSliceStructResp
-	if err := _c.endpoint.CallRemoteFunc("structAPIRpcService", "SumSliceStruct", req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(_c.id, 2, req, &resp); err != nil {
 		panic(err)
 	}
 	return resp.Param0_

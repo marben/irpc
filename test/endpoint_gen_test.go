@@ -4,10 +4,11 @@ import (
 	"testing"
 
 	"github.com/marben/irpc/pkg/irpc"
+	"github.com/marben/irpc/test/testtools"
 )
 
 func TestEndpointClose(t *testing.T) {
-	p1, p2 := irpc.NewDoubleEndedPipe()
+	p1, p2 := testtools.NewDoubleEndedPipe()
 
 	ep1 := irpc.NewEndpoint()
 	errC1 := make(chan error)

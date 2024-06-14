@@ -13,6 +13,8 @@ type packetType uint8
 const (
 	rpcRequest packetType = iota
 	rpcResponse
+	// rpcClientRegisterReq // notifies about given client registration
+	// rpcClientRegisterResp
 )
 
 type packetHeader struct {
@@ -37,11 +39,54 @@ func (ph *packetHeader) Deserialize(r io.Reader) error {
 	return err
 }
 
+type clientRegisterReq struct {
+	ServiceHash []byte
+}
+
+func (rp *clientRegisterReq) Deserialize(r io.Reader) error {
+	dec := json.NewDecoder(r)
+	if err := dec.Decode(rp); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (rp clientRegisterReq) Serialize(w io.Writer) error {
+	enc := json.NewEncoder(w)
+	if err := enc.Encode(rp); err != nil {
+		return err
+	}
+	return nil
+}
+
+type clientRegisterResp struct {
+	ServiceId RegisteredServiceId
+	Err       string // todo: turn into proper error, once we don't do json serialization
+}
+
+func (rp *clientRegisterResp) Deserialize(r io.Reader) error {
+	dec := json.NewDecoder(r)
+	if err := dec.Decode(rp); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (rp clientRegisterResp) Serialize(w io.Writer) error {
+	enc := json.NewEncoder(w)
+	if err := enc.Encode(rp); err != nil {
+		return err
+	}
+	return nil
+}
+
 type requestPacket struct {
-	ReqNum     uint16
-	ServiceId  string
-	FuncNameId string
-	Data       []byte
+	ReqNum    uint16
+	ServiceId RegisteredServiceId
+	FuncId    FuncId
+	Data      []byte
 }
 
 func (rp *requestPacket) Deserialize(r io.Reader) error {

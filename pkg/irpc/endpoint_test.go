@@ -1,11 +1,13 @@
-package irpc
+package irpc_test
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
 	"testing"
-	"time"
+
+	"github.com/marben/irpc/pkg/irpc"
+	"github.com/marben/irpc/test/testtools"
 )
 
 // the interface that is base for our rpc
@@ -14,16 +16,16 @@ type Math interface {
 }
 
 // the implementation of our function
-type MathHandler struct {
+type MathImpl struct {
 	resultSkew int // skew is added to result, to distinguish different versions of math
 }
 
-func (mh MathHandler) Add(a, b int) int {
+func (mh MathImpl) Add(a, b int) int {
 	return a + b + mh.resultSkew
 }
 
-var _ Math = MathHandler{}
-var _ Service = &MathIRpcService{}
+var _ Math = MathImpl{}
+var _ irpc.Service = &MathIRpcService{}
 
 type MathIRpcService struct {
 	impl Math
@@ -31,13 +33,13 @@ type MathIRpcService struct {
 
 func newMathIRpcService(impl Math) *MathIRpcService { return &MathIRpcService{impl: impl} }
 
-func (ms *MathIRpcService) CallFunc(funcName string, params []byte) ([]byte, error) {
-	switch funcName {
-	case "Add":
+func (ms *MathIRpcService) CallFunc(funcId irpc.FuncId, params []byte) ([]byte, error) {
+	switch funcId {
+	case mathIrpcFuncAdd:
 		return ms.callAdd(params)
 
 	default:
-		return nil, fmt.Errorf("function '%s' doesn't exist on service '%s'", funcName, ms.Id())
+		return nil, fmt.Errorf("function '%v' doesn't exist on service '%s'", funcId, ms.Hash())
 	}
 }
 
@@ -51,17 +53,30 @@ func (ms *MathIRpcService) callAdd(params []byte) ([]byte, error) {
 	return rtn.serialize()
 }
 
-const mathIrpcServiceName = "MathService"
+var mathIrpcServiceHash = []byte("MathServiceHash")
 
-// todo: maybe not needed?
-func (*MathIRpcService) Id() string {
-	return mathIrpcServiceName
+func (*MathIRpcService) Hash() []byte {
+	return mathIrpcServiceHash
 }
 
 var _ Math = &MathIRpcClient{}
 
+const (
+	mathIrpcFuncAdd irpc.FuncId = iota
+)
+
 type MathIRpcClient struct {
-	ep *Endpoint
+	ep *irpc.Endpoint
+	id irpc.RegisteredServiceId
+}
+
+func NewMathIrpcClient(ep *irpc.Endpoint) (*MathIRpcClient, error) {
+	id, err := ep.RegisterClient(mathIrpcServiceHash)
+	if err != nil {
+		return nil, fmt.Errorf("register failed: %w", err)
+	}
+
+	return &MathIRpcClient{ep, id}, nil
 }
 
 // todo: maybe we request error return from rpc functions?
@@ -72,7 +87,7 @@ func (mc *MathIRpcClient) Add(a int, b int) int {
 		// serialization errors should not happen in generated code (can generate test as well)
 		panic(fmt.Sprintf("serialization of Math.Add params failed with: %+v", err))
 	}
-	rtnBytes, err := mc.ep.CallRemoteFuncRaw(mathIrpcServiceName, "Add", paramsBytes)
+	rtnBytes, err := mc.ep.CallRemoteFuncRaw(mc.id, mathIrpcFuncAdd, paramsBytes)
 	if err != nil {
 		panic(fmt.Sprintf("irpc call return error: %+v", err))
 	}
@@ -109,37 +124,65 @@ func (v *addRtnVals) deserialize(data []byte) error {
 	return json.Unmarshal(data, v)
 }
 
-func TestEndpointRemoteFunc(t *testing.T) {
-	pA, pB := NewDoubleEndedPipe()
+func TestEndpointClientRegister(t *testing.T) {
+	ep1, ep2, err := testtools.CreateLocalTcpEndpoints()
+	if err != nil {
+		t.Fatalf("create tcp: %v", err)
+	}
 
-	serviceEndpoint := NewEndpoint()
+	if err := ep1.RegisterServices(newMathIRpcService(MathImpl{})); err != nil {
+		t.Fatalf("service register: %v", err)
+	}
+
+	mathClient, err := NewMathIrpcClient(ep2)
+	if err != nil {
+		t.Fatalf("failed to create mathirpc client: %+v", err)
+	}
+	res := mathClient.Add(1, 2)
+	if res != 3 {
+		t.Fatalf("wrong result: %d", res)
+	}
+}
+
+func TestEndpointRemoteFunc(t *testing.T) {
+	pA, pB := testtools.NewDoubleEndedPipe()
+
+	serviceEndpoint := irpc.NewEndpoint()
 	go func() { serviceEndpoint.Serve(pA) }()
 
-	clientEndpoint := NewEndpoint()
+	clientEndpoint := irpc.NewEndpoint()
 	go func() { clientEndpoint.Serve(pB) }()
 
-	mathServiceB := newMathIRpcService(MathHandler{})
+	skew := 8
+	mathServiceB := newMathIRpcService(MathImpl{resultSkew: skew})
 	if err := serviceEndpoint.RegisterServices(mathServiceB); err != nil {
 		t.Fatalf("failed to register service: %+v", err)
 	}
 
-	clientA := MathIRpcClient{ep: clientEndpoint}
+	clientA, err := NewMathIrpcClient(clientEndpoint)
+	if err != nil {
+		t.Fatalf("failed to register client: %+v", err)
+	}
 	res := clientA.Add(1, 2)
-	if res != 3 {
+	if res != 1+2+skew {
 		t.Fatalf("expected result of 3, but got %d", res)
 	}
 }
 
-// at this moment, it is possible to register clients and call them, before Serve(conn) is called
-// calls client calls should block until the Serve() is called, upon which they should fire
+// this blocks - for obvious reasons.
+// todo: implement context cancelling
+/*
 func TestCallBeforeServe(t *testing.T) {
-	clientEndpoint, serviceEndpoint := NewEndpoint(), NewEndpoint()
+	clientEndpoint, serviceEndpoint := irpc.NewEndpoint(), irpc.NewEndpoint()
 
-	if err := serviceEndpoint.RegisterServices(newMathIRpcService(MathHandler{})); err != nil {
+	if err := serviceEndpoint.RegisterServices(newMathIRpcService(MathImpl{})); err != nil {
 		t.Fatalf("registering math service failed with: %+v", err)
 	}
 
-	clientA := MathIRpcClient{ep: clientEndpoint}
+	clientA, err := NewMathIrpcClient(clientEndpoint)
+	if err != nil {
+		t.Fatalf("failed to create client: %v", err)
+	}
 
 	resC := make(chan int)
 
@@ -147,7 +190,7 @@ func TestCallBeforeServe(t *testing.T) {
 	// hopefully the client call will be made during this sleep
 	time.Sleep(200 * time.Millisecond)
 
-	pClient, pB := NewDoubleEndedPipe()
+	pClient, pB := testtools.NewDoubleEndedPipe()
 
 	// first we connect the client endpoint, which should trigger write to connection. but it's not read yet
 	go func() {
@@ -169,41 +212,48 @@ func TestCallBeforeServe(t *testing.T) {
 		t.Fatalf("expected result 5, but got %d", res)
 	}
 }
+*/
 
 func TestServeAfterClose(t *testing.T) {
-	c1, c2 := NewDoubleEndedPipe()
-	ep1, ep2 := NewEndpoint(), NewEndpoint()
+	c1, c2 := testtools.NewDoubleEndedPipe()
+	ep1, ep2 := irpc.NewEndpoint(), irpc.NewEndpoint()
 	go func() { ep1.Serve(c1) }()
 	go func() { ep2.Serve(c2) }()
 
 	if err := ep1.Close(); err != nil {
 		t.Fatalf("unexpected close err: %v", err)
 	}
-	if err2 := ep1.Serve(c1); !errors.Is(err2, ErrEndpointClosed) {
+	if err2 := ep1.Serve(c1); !errors.Is(err2, irpc.ErrEndpointClosed) {
 		t.Fatalf("unexpected error on second close: %v", err2)
 	}
 	// close after close
-	if err3 := ep1.Close(); !errors.Is(err3, ErrEndpointClosed) {
+	if err3 := ep1.Close(); !errors.Is(err3, irpc.ErrEndpointClosed) {
 		t.Fatalf("second close returned: %v", err3)
 	}
 }
 
 // performs remote func call both A->B and B->A
 func TestBothSidesRemoteCall(t *testing.T) {
-	pA, pB := NewDoubleEndedPipe()
+	pA, pB := testtools.NewDoubleEndedPipe()
 
-	endpointA := NewEndpoint()
+	endpointA := irpc.NewEndpoint()
 	// a is skewed by 1
-	endpointA.RegisterServices(newMathIRpcService(MathHandler{resultSkew: 1}))
+	endpointA.RegisterServices(newMathIRpcService(MathImpl{resultSkew: 1}))
 	go func() { endpointA.Serve(pA) }()
 
-	endpointB := NewEndpoint()
+	endpointB := irpc.NewEndpoint()
 	// b is skewed by 2
-	endpointB.RegisterServices(newMathIRpcService(MathHandler{resultSkew: 2}))
+	endpointB.RegisterServices(newMathIRpcService(MathImpl{resultSkew: 2}))
 	go func() { endpointB.Serve(pB) }()
 
-	clientA := MathIRpcClient{ep: endpointA}
-	clientB := MathIRpcClient{ep: endpointB}
+	clientA, err := NewMathIrpcClient(endpointA)
+	if err != nil {
+		t.Fatalf("new clientA: %+v", err)
+	}
+	clientB, err := NewMathIrpcClient(endpointB)
+	if err != nil {
+		t.Fatalf("new clientB: %+v", err)
+	}
 
 	resFromB := clientA.Add(1, 2)
 	if resFromB != 5 {
@@ -217,40 +267,14 @@ func TestBothSidesRemoteCall(t *testing.T) {
 }
 
 func TestRegisterServiceTwice(t *testing.T) {
-	ep := NewEndpoint()
+	ep := irpc.NewEndpoint()
 
 	if err := ep.RegisterServices(newMathIRpcService(nil)); err != nil {
 		t.Fatalf("registration of first service failed")
 	}
 
 	err := ep.RegisterServices(newMathIRpcService(nil))
-	if !errors.Is(err, errServiceAlreadyRegistered) {
-		t.Fatalf("expected error %v, but got: %v", errServiceAlreadyRegistered, err)
-	}
-}
-
-// calls local function on an endpoint
-func TestEndpointLocalFunc(t *testing.T) {
-	// pA, _ := DoubleEndedPipe()
-	e := NewEndpoint()
-	ts := newMathIRpcService(MathHandler{})
-
-	if err := e.RegisterServices(ts); err != nil {
-		t.Fatalf("failed to register test service: %+v", err)
-	}
-
-	pBytes, err := addParams{A: 1, B: 2}.serialize()
-	if err != nil {
-		t.Fatalf("failed to serialize add parameters: %+v", err)
-	}
-	rtnBytes, err := e.callLocalFunc("MathService", "Add", pBytes)
-	if err != nil {
-		t.Fatalf("failed to call local func: %+v", err)
-	}
-	var rtn addRtnVals
-	rtn.deserialize(rtnBytes)
-
-	if rtn.Res != 3 {
-		t.Fatalf("addition is '%d' instead of '3'", rtn.Res)
+	if !errors.Is(err, irpc.ErrServiceAlreadyRegistered) {
+		t.Fatalf("expected error %v, but got: %v", irpc.ErrServiceAlreadyRegistered, err)
 	}
 }

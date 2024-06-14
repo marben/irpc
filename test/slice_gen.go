@@ -17,19 +17,19 @@ type sliceTestRpcService struct {
 func newSliceTestRpcService(impl sliceTest) *sliceTestRpcService {
 	return &sliceTestRpcService{impl: impl}
 }
-func (sliceTestRpcService) Id() string {
-	return "sliceTestRpcService"
+func (sliceTestRpcService) Hash() []byte {
+	return []byte("sliceTestRpcService")
 }
-func (s *sliceTestRpcService) CallFunc(funcName string, args []byte) ([]byte, error) {
-	switch funcName {
-	case "SliceSum":
+func (s *sliceTestRpcService) CallFunc(funcId irpc.FuncId, args []byte) ([]byte, error) {
+	switch funcId {
+	case 0:
 		return s.callSliceSum(args)
-	case "VectMult":
+	case 1:
 		return s.callVectMult(args)
-	case "SliceOfFloat64Sum":
+	case 2:
 		return s.callSliceOfFloat64Sum(args)
 	default:
-		return nil, fmt.Errorf("function '%s' doesn't exist on service '%s'", funcName, s.Id())
+		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, string(s.Hash()))
 	}
 }
 func (s *sliceTestRpcService) callSliceSum(params []byte) ([]byte, error) {
@@ -80,17 +80,22 @@ func (s *sliceTestRpcService) callSliceOfFloat64Sum(params []byte) ([]byte, erro
 
 type sliceTestRpcClient struct {
 	endpoint *irpc.Endpoint
+	id       irpc.RegisteredServiceId
 }
 
-func newSliceTestRpcClient(endpoint *irpc.Endpoint) *sliceTestRpcClient {
-	return &sliceTestRpcClient{endpoint: endpoint}
+func newSliceTestRpcClient(endpoint *irpc.Endpoint) (*sliceTestRpcClient, error) {
+	id, err := endpoint.RegisterClient([]byte("sliceTestRpcService"))
+	if err != nil {
+		return nil, fmt.Errorf("register failed: %w", err)
+	}
+	return &sliceTestRpcClient{endpoint: endpoint, id: id}, nil
 }
 func (_c *sliceTestRpcClient) SliceSum(slice []int) int {
 	var req = _Irpc_sliceTestSliceSumReq{
 		Param0_slice: slice,
 	}
 	var resp _Irpc_sliceTestSliceSumResp
-	if err := _c.endpoint.CallRemoteFunc("sliceTestRpcService", "SliceSum", req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(_c.id, 0, req, &resp); err != nil {
 		panic(err)
 	}
 	return resp.Param0_
@@ -101,7 +106,7 @@ func (_c *sliceTestRpcClient) VectMult(vect []int, s int) []int {
 		Param1_s:    s,
 	}
 	var resp _Irpc_sliceTestVectMultResp
-	if err := _c.endpoint.CallRemoteFunc("sliceTestRpcService", "VectMult", req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(_c.id, 1, req, &resp); err != nil {
 		panic(err)
 	}
 	return resp.Param0_
@@ -111,7 +116,7 @@ func (_c *sliceTestRpcClient) SliceOfFloat64Sum(slice []float64) float64 {
 		Param0_slice: slice,
 	}
 	var resp _Irpc_sliceTestSliceOfFloat64SumResp
-	if err := _c.endpoint.CallRemoteFunc("sliceTestRpcService", "SliceOfFloat64Sum", req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(_c.id, 2, req, &resp); err != nil {
 		panic(err)
 	}
 	return resp.Param0_

@@ -17,47 +17,47 @@ type basicAPIRpcService struct {
 func newBasicAPIRpcService(impl basicAPI) *basicAPIRpcService {
 	return &basicAPIRpcService{impl: impl}
 }
-func (basicAPIRpcService) Id() string {
-	return "basicAPIRpcService"
+func (basicAPIRpcService) Hash() []byte {
+	return []byte("basicAPIRpcService")
 }
-func (s *basicAPIRpcService) CallFunc(funcName string, args []byte) ([]byte, error) {
-	switch funcName {
-	case "addByte":
+func (s *basicAPIRpcService) CallFunc(funcId irpc.FuncId, args []byte) ([]byte, error) {
+	switch funcId {
+	case 0:
 		return s.calladdByte(args)
-	case "addInt":
+	case 1:
 		return s.calladdInt(args)
-	case "swapInt":
+	case 2:
 		return s.callswapInt(args)
-	case "subUint":
+	case 3:
 		return s.callsubUint(args)
-	case "addInt8":
+	case 4:
 		return s.calladdInt8(args)
-	case "addUint8":
+	case 5:
 		return s.calladdUint8(args)
-	case "addInt16":
+	case 6:
 		return s.calladdInt16(args)
-	case "addUint16":
+	case 7:
 		return s.calladdUint16(args)
-	case "addInt32":
+	case 8:
 		return s.calladdInt32(args)
-	case "addUint32":
+	case 9:
 		return s.calladdUint32(args)
-	case "addInt64":
+	case 10:
 		return s.calladdInt64(args)
-	case "addUint64":
+	case 11:
 		return s.calladdUint64(args)
-	case "addFloat64":
+	case 12:
 		return s.calladdFloat64(args)
-	case "addFloat32":
+	case 13:
 		return s.calladdFloat32(args)
-	case "toUpper":
+	case 14:
 		return s.calltoUpper(args)
-	case "toUpperString":
+	case 15:
 		return s.calltoUpperString(args)
-	case "negBool":
+	case 16:
 		return s.callnegBool(args)
 	default:
-		return nil, fmt.Errorf("function '%s' doesn't exist on service '%s'", funcName, s.Id())
+		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, string(s.Hash()))
 	}
 }
 func (s *basicAPIRpcService) calladdByte(params []byte) ([]byte, error) {
@@ -323,22 +323,27 @@ type emptyAPIRpcService struct {
 func newEmptyAPIRpcService(impl emptyAPI) *emptyAPIRpcService {
 	return &emptyAPIRpcService{impl: impl}
 }
-func (emptyAPIRpcService) Id() string {
-	return "emptyAPIRpcService"
+func (emptyAPIRpcService) Hash() []byte {
+	return []byte("emptyAPIRpcService")
 }
-func (s *emptyAPIRpcService) CallFunc(funcName string, args []byte) ([]byte, error) {
-	switch funcName {
+func (s *emptyAPIRpcService) CallFunc(funcId irpc.FuncId, args []byte) ([]byte, error) {
+	switch funcId {
 	default:
-		return nil, fmt.Errorf("function '%s' doesn't exist on service '%s'", funcName, s.Id())
+		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, string(s.Hash()))
 	}
 }
 
 type basicAPIRpcClient struct {
 	endpoint *irpc.Endpoint
+	id       irpc.RegisteredServiceId
 }
 
-func newBasicAPIRpcClient(endpoint *irpc.Endpoint) *basicAPIRpcClient {
-	return &basicAPIRpcClient{endpoint: endpoint}
+func newBasicAPIRpcClient(endpoint *irpc.Endpoint) (*basicAPIRpcClient, error) {
+	id, err := endpoint.RegisterClient([]byte("basicAPIRpcService"))
+	if err != nil {
+		return nil, fmt.Errorf("register failed: %w", err)
+	}
+	return &basicAPIRpcClient{endpoint: endpoint, id: id}, nil
 }
 func (_c *basicAPIRpcClient) addByte(a byte, b byte) byte {
 	var req = _Irpc_basicAPIaddByteReq{
@@ -346,7 +351,7 @@ func (_c *basicAPIRpcClient) addByte(a byte, b byte) byte {
 		Param1_b: b,
 	}
 	var resp _Irpc_basicAPIaddByteResp
-	if err := _c.endpoint.CallRemoteFunc("basicAPIRpcService", "addByte", req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(_c.id, 0, req, &resp); err != nil {
 		panic(err)
 	}
 	return resp.Param0_
@@ -357,7 +362,7 @@ func (_c *basicAPIRpcClient) addInt(a int, b int) int {
 		Param1_b: b,
 	}
 	var resp _Irpc_basicAPIaddIntResp
-	if err := _c.endpoint.CallRemoteFunc("basicAPIRpcService", "addInt", req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(_c.id, 1, req, &resp); err != nil {
 		panic(err)
 	}
 	return resp.Param0_
@@ -368,7 +373,7 @@ func (_c *basicAPIRpcClient) swapInt(a int, b int) (int, int) {
 		Param1_b: b,
 	}
 	var resp _Irpc_basicAPIswapIntResp
-	if err := _c.endpoint.CallRemoteFunc("basicAPIRpcService", "swapInt", req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(_c.id, 2, req, &resp); err != nil {
 		panic(err)
 	}
 	return resp.Param0_, resp.Param1_
@@ -379,7 +384,7 @@ func (_c *basicAPIRpcClient) subUint(a uint, b uint) uint {
 		Param0_b: b,
 	}
 	var resp _Irpc_basicAPIsubUintResp
-	if err := _c.endpoint.CallRemoteFunc("basicAPIRpcService", "subUint", req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(_c.id, 3, req, &resp); err != nil {
 		panic(err)
 	}
 	return resp.Param0_
@@ -390,7 +395,7 @@ func (_c *basicAPIRpcClient) addInt8(a int8, b int8) int8 {
 		Param0_b: b,
 	}
 	var resp _Irpc_basicAPIaddInt8Resp
-	if err := _c.endpoint.CallRemoteFunc("basicAPIRpcService", "addInt8", req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(_c.id, 4, req, &resp); err != nil {
 		panic(err)
 	}
 	return resp.Param0_
@@ -401,7 +406,7 @@ func (_c *basicAPIRpcClient) addUint8(a uint8, b uint8) uint8 {
 		Param0_b: b,
 	}
 	var resp _Irpc_basicAPIaddUint8Resp
-	if err := _c.endpoint.CallRemoteFunc("basicAPIRpcService", "addUint8", req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(_c.id, 5, req, &resp); err != nil {
 		panic(err)
 	}
 	return resp.Param0_
@@ -412,7 +417,7 @@ func (_c *basicAPIRpcClient) addInt16(a int16, b int16) int16 {
 		Param0_b: b,
 	}
 	var resp _Irpc_basicAPIaddInt16Resp
-	if err := _c.endpoint.CallRemoteFunc("basicAPIRpcService", "addInt16", req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(_c.id, 6, req, &resp); err != nil {
 		panic(err)
 	}
 	return resp.Param0_
@@ -423,7 +428,7 @@ func (_c *basicAPIRpcClient) addUint16(a uint16, b uint16) uint16 {
 		Param0_b: b,
 	}
 	var resp _Irpc_basicAPIaddUint16Resp
-	if err := _c.endpoint.CallRemoteFunc("basicAPIRpcService", "addUint16", req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(_c.id, 7, req, &resp); err != nil {
 		panic(err)
 	}
 	return resp.Param0_
@@ -434,7 +439,7 @@ func (_c *basicAPIRpcClient) addInt32(a int32, b int32) int32 {
 		Param0_b: b,
 	}
 	var resp _Irpc_basicAPIaddInt32Resp
-	if err := _c.endpoint.CallRemoteFunc("basicAPIRpcService", "addInt32", req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(_c.id, 8, req, &resp); err != nil {
 		panic(err)
 	}
 	return resp.Param0_
@@ -445,7 +450,7 @@ func (_c *basicAPIRpcClient) addUint32(a uint32, b uint32) uint32 {
 		Param0_b: b,
 	}
 	var resp _Irpc_basicAPIaddUint32Resp
-	if err := _c.endpoint.CallRemoteFunc("basicAPIRpcService", "addUint32", req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(_c.id, 9, req, &resp); err != nil {
 		panic(err)
 	}
 	return resp.Param0_
@@ -456,7 +461,7 @@ func (_c *basicAPIRpcClient) addInt64(a int64, b int64) int64 {
 		Param0_b: b,
 	}
 	var resp _Irpc_basicAPIaddInt64Resp
-	if err := _c.endpoint.CallRemoteFunc("basicAPIRpcService", "addInt64", req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(_c.id, 10, req, &resp); err != nil {
 		panic(err)
 	}
 	return resp.Param0_
@@ -467,7 +472,7 @@ func (_c *basicAPIRpcClient) addUint64(a uint64, b uint64) uint64 {
 		Param0_b: b,
 	}
 	var resp _Irpc_basicAPIaddUint64Resp
-	if err := _c.endpoint.CallRemoteFunc("basicAPIRpcService", "addUint64", req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(_c.id, 11, req, &resp); err != nil {
 		panic(err)
 	}
 	return resp.Param0_
@@ -478,7 +483,7 @@ func (_c *basicAPIRpcClient) addFloat64(a float64, b float64) float64 {
 		Param0_b: b,
 	}
 	var resp _Irpc_basicAPIaddFloat64Resp
-	if err := _c.endpoint.CallRemoteFunc("basicAPIRpcService", "addFloat64", req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(_c.id, 12, req, &resp); err != nil {
 		panic(err)
 	}
 	return resp.Param0_
@@ -489,7 +494,7 @@ func (_c *basicAPIRpcClient) addFloat32(a float32, b float32) float32 {
 		Param0_b: b,
 	}
 	var resp _Irpc_basicAPIaddFloat32Resp
-	if err := _c.endpoint.CallRemoteFunc("basicAPIRpcService", "addFloat32", req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(_c.id, 13, req, &resp); err != nil {
 		panic(err)
 	}
 	return resp.Param0_
@@ -499,7 +504,7 @@ func (_c *basicAPIRpcClient) toUpper(c rune) rune {
 		Param0_c: c,
 	}
 	var resp _Irpc_basicAPItoUpperResp
-	if err := _c.endpoint.CallRemoteFunc("basicAPIRpcService", "toUpper", req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(_c.id, 14, req, &resp); err != nil {
 		panic(err)
 	}
 	return resp.Param0_
@@ -509,7 +514,7 @@ func (_c *basicAPIRpcClient) toUpperString(s string) string {
 		Param0_s: s,
 	}
 	var resp _Irpc_basicAPItoUpperStringResp
-	if err := _c.endpoint.CallRemoteFunc("basicAPIRpcService", "toUpperString", req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(_c.id, 15, req, &resp); err != nil {
 		panic(err)
 	}
 	return resp.Param0_
@@ -519,7 +524,7 @@ func (_c *basicAPIRpcClient) negBool(ok bool) bool {
 		Param0_ok: ok,
 	}
 	var resp _Irpc_basicAPInegBoolResp
-	if err := _c.endpoint.CallRemoteFunc("basicAPIRpcService", "negBool", req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(_c.id, 16, req, &resp); err != nil {
 		panic(err)
 	}
 	return resp.Param0_
@@ -527,10 +532,15 @@ func (_c *basicAPIRpcClient) negBool(ok bool) bool {
 
 type emptyAPIRpcClient struct {
 	endpoint *irpc.Endpoint
+	id       irpc.RegisteredServiceId
 }
 
-func newEmptyAPIRpcClient(endpoint *irpc.Endpoint) *emptyAPIRpcClient {
-	return &emptyAPIRpcClient{endpoint: endpoint}
+func newEmptyAPIRpcClient(endpoint *irpc.Endpoint) (*emptyAPIRpcClient, error) {
+	id, err := endpoint.RegisterClient([]byte("emptyAPIRpcService"))
+	if err != nil {
+		return nil, fmt.Errorf("register failed: %w", err)
+	}
+	return &emptyAPIRpcClient{endpoint: endpoint, id: id}, nil
 }
 
 type _Irpc_basicAPIaddByteReq struct {

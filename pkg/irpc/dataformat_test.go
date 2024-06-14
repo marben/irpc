@@ -2,7 +2,6 @@ package irpc
 
 import (
 	"bytes"
-	"reflect"
 	"testing"
 )
 
@@ -61,25 +60,5 @@ func BenchmarkPacketHeaderDeSerialization(b *testing.B) {
 		if phOut != phInit {
 			b.Fatalf("%v != %v", phOut, phInit)
 		}
-	}
-}
-
-func TestRequestPacket(t *testing.T) {
-	rpIn := requestPacket{
-		ReqNum:     10,
-		ServiceId:  "service 007",
-		FuncNameId: "some func",
-		Data:       []byte("this is the data"),
-	}
-	buf := bytes.NewBuffer(nil)
-	if err := rpIn.Serialize(buf); err != nil {
-		t.Fatal("failed to serialize test packet")
-	}
-	var rpOut requestPacket
-	if err := rpOut.Deserialize(buf); err != nil {
-		t.Fatalf("read failed: %v", err)
-	}
-	if !reflect.DeepEqual(rpIn, rpOut) {
-		t.Fatalf("rpIn != rpOut: %v != %v", rpIn, rpOut)
 	}
 }

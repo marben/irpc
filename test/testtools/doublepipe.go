@@ -1,4 +1,4 @@
-package irpc
+package testtools
 
 import (
 	"errors"

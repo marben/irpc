@@ -3,14 +3,26 @@ package irpctestpkg
 import (
 	"slices"
 	"testing"
+
+	"github.com/marben/irpc/test/testtools"
 )
 
 func TestSlice(t *testing.T) {
-	l, r := newTestEndpoints()
-	c := newSliceTestRpcClient(l)
+	localEp, remoteEp, err := testtools.CreateLocalTcpEndpoints()
+	if err != nil {
+		t.Fatalf("create enpoints: %v", err)
+	}
+
+	// service
 	skew := 5
-	if err := r.RegisterServices(newSliceTestRpcService(sliceTestImpl{skew: skew})); err != nil {
+	if err := remoteEp.RegisterServices(newSliceTestRpcService(sliceTestImpl{skew: skew})); err != nil {
 		t.Fatalf("failed to register slice service to remote endpoint: %+v", err)
+	}
+
+	// client
+	c, err := newSliceTestRpcClient(localEp)
+	if err != nil {
+		t.Fatalf("failed to create client: %v", err)
 	}
 
 	// SLICE SUM (PASS SLICE)

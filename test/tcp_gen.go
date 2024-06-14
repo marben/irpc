@@ -17,15 +17,15 @@ type tcpTestApiRpcService struct {
 func newTcpTestApiRpcService(impl tcpTestApi) *tcpTestApiRpcService {
 	return &tcpTestApiRpcService{impl: impl}
 }
-func (tcpTestApiRpcService) Id() string {
-	return "tcpTestApiRpcService"
+func (tcpTestApiRpcService) Hash() []byte {
+	return []byte("tcpTestApiRpcService")
 }
-func (s *tcpTestApiRpcService) CallFunc(funcName string, args []byte) ([]byte, error) {
-	switch funcName {
-	case "Div":
+func (s *tcpTestApiRpcService) CallFunc(funcId irpc.FuncId, args []byte) ([]byte, error) {
+	switch funcId {
+	case 0:
 		return s.callDiv(args)
 	default:
-		return nil, fmt.Errorf("function '%s' doesn't exist on service '%s'", funcName, s.Id())
+		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, string(s.Hash()))
 	}
 }
 func (s *tcpTestApiRpcService) callDiv(params []byte) ([]byte, error) {
@@ -46,10 +46,15 @@ func (s *tcpTestApiRpcService) callDiv(params []byte) ([]byte, error) {
 
 type tcpTestApiRpcClient struct {
 	endpoint *irpc.Endpoint
+	id       irpc.RegisteredServiceId
 }
 
-func newTcpTestApiRpcClient(endpoint *irpc.Endpoint) *tcpTestApiRpcClient {
-	return &tcpTestApiRpcClient{endpoint: endpoint}
+func newTcpTestApiRpcClient(endpoint *irpc.Endpoint) (*tcpTestApiRpcClient, error) {
+	id, err := endpoint.RegisterClient([]byte("tcpTestApiRpcService"))
+	if err != nil {
+		return nil, fmt.Errorf("register failed: %w", err)
+	}
+	return &tcpTestApiRpcClient{endpoint: endpoint, id: id}, nil
 }
 func (_c *tcpTestApiRpcClient) Div(a float64, b float64) (float64, error) {
 	var req = _Irpc_tcpTestApiDivReq{
@@ -57,7 +62,7 @@ func (_c *tcpTestApiRpcClient) Div(a float64, b float64) (float64, error) {
 		Param0_b: b,
 	}
 	var resp _Irpc_tcpTestApiDivResp
-	if err := _c.endpoint.CallRemoteFunc("tcpTestApiRpcService", "Div", req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(_c.id, 0, req, &resp); err != nil {
 		panic(err)
 	}
 	return resp.Param0_, resp.Param1_

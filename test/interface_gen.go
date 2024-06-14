@@ -16,23 +16,23 @@ type interfaceTestRpcService struct {
 func newInterfaceTestRpcService(impl interfaceTest) *interfaceTestRpcService {
 	return &interfaceTestRpcService{impl: impl}
 }
-func (interfaceTestRpcService) Id() string {
-	return "interfaceTestRpcService"
+func (interfaceTestRpcService) Hash() []byte {
+	return []byte("interfaceTestRpcService")
 }
-func (s *interfaceTestRpcService) CallFunc(funcName string, args []byte) ([]byte, error) {
-	switch funcName {
-	case "rtnErrorWithMessage":
+func (s *interfaceTestRpcService) CallFunc(funcId irpc.FuncId, args []byte) ([]byte, error) {
+	switch funcId {
+	case 0:
 		return s.callrtnErrorWithMessage(args)
-	case "rtnNilError":
+	case 1:
 		return s.callrtnNilError(args)
-	case "rtnTwoErrors":
+	case 2:
 		return s.callrtnTwoErrors(args)
-	case "rtnStringAndError":
+	case 3:
 		return s.callrtnStringAndError(args)
-	case "passCustomInterfaceAndReturnItModified":
+	case 4:
 		return s.callpassCustomInterfaceAndReturnItModified(args)
 	default:
-		return nil, fmt.Errorf("function '%s' doesn't exist on service '%s'", funcName, s.Id())
+		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, string(s.Hash()))
 	}
 }
 func (s *interfaceTestRpcService) callrtnErrorWithMessage(params []byte) ([]byte, error) {
@@ -118,17 +118,17 @@ type customInterfaceRpcService struct {
 func newCustomInterfaceRpcService(impl customInterface) *customInterfaceRpcService {
 	return &customInterfaceRpcService{impl: impl}
 }
-func (customInterfaceRpcService) Id() string {
-	return "customInterfaceRpcService"
+func (customInterfaceRpcService) Hash() []byte {
+	return []byte("customInterfaceRpcService")
 }
-func (s *customInterfaceRpcService) CallFunc(funcName string, args []byte) ([]byte, error) {
-	switch funcName {
-	case "IntFunc":
+func (s *customInterfaceRpcService) CallFunc(funcId irpc.FuncId, args []byte) ([]byte, error) {
+	switch funcId {
+	case 0:
 		return s.callIntFunc(args)
-	case "StringFunc":
+	case 1:
 		return s.callStringFunc(args)
 	default:
-		return nil, fmt.Errorf("function '%s' doesn't exist on service '%s'", funcName, s.Id())
+		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, string(s.Hash()))
 	}
 }
 func (s *customInterfaceRpcService) callIntFunc(params []byte) ([]byte, error) {
@@ -164,17 +164,22 @@ func (s *customInterfaceRpcService) callStringFunc(params []byte) ([]byte, error
 
 type interfaceTestRpcClient struct {
 	endpoint *irpc.Endpoint
+	id       irpc.RegisteredServiceId
 }
 
-func newInterfaceTestRpcClient(endpoint *irpc.Endpoint) *interfaceTestRpcClient {
-	return &interfaceTestRpcClient{endpoint: endpoint}
+func newInterfaceTestRpcClient(endpoint *irpc.Endpoint) (*interfaceTestRpcClient, error) {
+	id, err := endpoint.RegisterClient([]byte("interfaceTestRpcService"))
+	if err != nil {
+		return nil, fmt.Errorf("register failed: %w", err)
+	}
+	return &interfaceTestRpcClient{endpoint: endpoint, id: id}, nil
 }
 func (_c *interfaceTestRpcClient) rtnErrorWithMessage(msg string) error {
 	var req = _Irpc_interfaceTestrtnErrorWithMessageReq{
 		Param0_msg: msg,
 	}
 	var resp _Irpc_interfaceTestrtnErrorWithMessageResp
-	if err := _c.endpoint.CallRemoteFunc("interfaceTestRpcService", "rtnErrorWithMessage", req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(_c.id, 0, req, &resp); err != nil {
 		panic(err)
 	}
 	return resp.Param0_
@@ -182,7 +187,7 @@ func (_c *interfaceTestRpcClient) rtnErrorWithMessage(msg string) error {
 func (_c *interfaceTestRpcClient) rtnNilError() error {
 	var req = _Irpc_interfaceTestrtnNilErrorReq{}
 	var resp _Irpc_interfaceTestrtnNilErrorResp
-	if err := _c.endpoint.CallRemoteFunc("interfaceTestRpcService", "rtnNilError", req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(_c.id, 1, req, &resp); err != nil {
 		panic(err)
 	}
 	return resp.Param0_
@@ -190,7 +195,7 @@ func (_c *interfaceTestRpcClient) rtnNilError() error {
 func (_c *interfaceTestRpcClient) rtnTwoErrors() (error, error) {
 	var req = _Irpc_interfaceTestrtnTwoErrorsReq{}
 	var resp _Irpc_interfaceTestrtnTwoErrorsResp
-	if err := _c.endpoint.CallRemoteFunc("interfaceTestRpcService", "rtnTwoErrors", req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(_c.id, 2, req, &resp); err != nil {
 		panic(err)
 	}
 	return resp.Param0_, resp.Param1_
@@ -200,7 +205,7 @@ func (_c *interfaceTestRpcClient) rtnStringAndError(msg string) (s string, err e
 		Param0_msg: msg,
 	}
 	var resp _Irpc_interfaceTestrtnStringAndErrorResp
-	if err := _c.endpoint.CallRemoteFunc("interfaceTestRpcService", "rtnStringAndError", req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(_c.id, 3, req, &resp); err != nil {
 		panic(err)
 	}
 	return resp.Param0_s, resp.Param1_err
@@ -210,7 +215,7 @@ func (_c *interfaceTestRpcClient) passCustomInterfaceAndReturnItModified(ci cust
 		Param0_ci: ci,
 	}
 	var resp _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp
-	if err := _c.endpoint.CallRemoteFunc("interfaceTestRpcService", "passCustomInterfaceAndReturnItModified", req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(_c.id, 4, req, &resp); err != nil {
 		panic(err)
 	}
 	return resp.Param0_, resp.Param1_
@@ -218,15 +223,20 @@ func (_c *interfaceTestRpcClient) passCustomInterfaceAndReturnItModified(ci cust
 
 type customInterfaceRpcClient struct {
 	endpoint *irpc.Endpoint
+	id       irpc.RegisteredServiceId
 }
 
-func newCustomInterfaceRpcClient(endpoint *irpc.Endpoint) *customInterfaceRpcClient {
-	return &customInterfaceRpcClient{endpoint: endpoint}
+func newCustomInterfaceRpcClient(endpoint *irpc.Endpoint) (*customInterfaceRpcClient, error) {
+	id, err := endpoint.RegisterClient([]byte("customInterfaceRpcService"))
+	if err != nil {
+		return nil, fmt.Errorf("register failed: %w", err)
+	}
+	return &customInterfaceRpcClient{endpoint: endpoint, id: id}, nil
 }
 func (_c *customInterfaceRpcClient) IntFunc() int {
 	var req = _Irpc_customInterfaceIntFuncReq{}
 	var resp _Irpc_customInterfaceIntFuncResp
-	if err := _c.endpoint.CallRemoteFunc("customInterfaceRpcService", "IntFunc", req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(_c.id, 0, req, &resp); err != nil {
 		panic(err)
 	}
 	return resp.Param0_
@@ -234,7 +244,7 @@ func (_c *customInterfaceRpcClient) IntFunc() int {
 func (_c *customInterfaceRpcClient) StringFunc() string {
 	var req = _Irpc_customInterfaceStringFuncReq{}
 	var resp _Irpc_customInterfaceStringFuncResp
-	if err := _c.endpoint.CallRemoteFunc("customInterfaceRpcService", "StringFunc", req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(_c.id, 1, req, &resp); err != nil {
 		panic(err)
 	}
 	return resp.Param0_

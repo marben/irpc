@@ -1,61 +1,14 @@
 package irpctestpkg
 
 import (
-	"fmt"
-	"net"
 	"testing"
 
 	"github.com/marben/irpc/pkg/irpc"
+	"github.com/marben/irpc/test/testtools"
 )
 
-func createLocalTcpConnPipe() (net.Conn, net.Conn, error) {
-	l, err := net.Listen("tcp", ":")
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to create listener: %w", err)
-	}
-	defer l.Close()
-
-	c1Ch := make(chan net.Conn)
-	err1Ch := make(chan error)
-	go func() {
-		conn, err := l.Accept()
-		if err != nil {
-			err1Ch <- fmt.Errorf("failed to accept connection 1: %w", err)
-		}
-		c1Ch <- conn
-	}()
-
-	conn2, err := net.Dial("tcp", l.Addr().String())
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to connect to our listener: %w", err)
-	}
-
-	select {
-	case err1 := <-err1Ch:
-		return nil, nil, err1
-	case conn1 := <-c1Ch:
-		return conn1, conn2, nil
-	}
-}
-
-func createLocalTcpEndpoints() (*irpc.Endpoint, *irpc.Endpoint, error) {
-	c1, c2, err := createLocalTcpConnPipe()
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to create local tcp pipe")
-	}
-	ep1 := irpc.NewEndpoint()
-	ep2 := irpc.NewEndpoint()
-
-	go func() { ep1.Serve(c1) }()
-	go func() { ep2.Serve(c2) }()
-	// go func() { log.Printf("serve ep1: %v", ep1.Serve(c1)) }()
-	// go func() { log.Printf("serve ep2: %v", ep2.Serve(c2)) }()
-
-	return ep1, ep2, nil
-}
-
 func TestTcpClientServer(t *testing.T) {
-	ep1, ep2, err := createLocalTcpEndpoints()
+	ep1, ep2, err := testtools.CreateLocalTcpEndpoints()
 	if err != nil {
 		t.Fatalf("failed to create local tcp endpoints: %v", err)
 	}
@@ -63,7 +16,10 @@ func TestTcpClientServer(t *testing.T) {
 	service := newTcpTestApiRpcService(tcpTestApiImpl{})
 	ep1.RegisterServices(service)
 
-	client := newTcpTestApiRpcClient(ep2)
+	client, err := newTcpTestApiRpcClient(ep2)
+	if err != nil {
+		t.Fatalf("failed to create client: %v", err)
+	}
 	res, err := client.Div(4, 2)
 	if err != nil {
 		t.Fatalf("div failed: %v", err)
@@ -84,7 +40,7 @@ func TestTcpClientServer(t *testing.T) {
 }
 
 func TestClosingConnection1(t *testing.T) {
-	c1, c2, err := createLocalTcpConnPipe()
+	c1, c2, err := testtools.CreateLocalTcpConnPipe()
 	if err != nil {
 		t.Fatalf("failed to create local tcp pipe")
 	}
@@ -108,7 +64,7 @@ func TestClosingConnection1(t *testing.T) {
 }
 
 func TestClosingConnection2(t *testing.T) {
-	c1, c2, err := createLocalTcpConnPipe()
+	c1, c2, err := testtools.CreateLocalTcpConnPipe()
 	if err != nil {
 		t.Fatalf("failed to create local tcp pipe")
 	}

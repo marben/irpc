@@ -17,3 +17,4 @@
 - consider moving the irpc package from `irpc/pkg/irpc` to `irpc/irpc`
 - implement and test sending big messages with different endpoint.MaxMsgLen. client should be splitting msgs etc?
 - allow usage of '*' or '.' to specify more than one input file
+- make endpoint.RegisterClient() unexported

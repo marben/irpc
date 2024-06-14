@@ -21,8 +21,8 @@ func newGenerator(fd rpcFileDesc) (generator, error) {
 	paramStructs := []paramStructGenerator{}
 	for _, iface := range fd.ifaces {
 		methods := []methodGenerator{}
-		for _, m := range iface.methods {
-			mg, err := newMethodGenerator(iface.name(), m)
+		for i, m := range iface.methods {
+			mg, err := newMethodGenerator(iface.name(), i, m)
 			if err != nil {
 				return generator{}, fmt.Errorf("method '%s' generator: %w", m.name, err)
 			}
@@ -213,11 +213,12 @@ func newVarField(apiName string, p rpcParam) (varField, error) {
 
 type methodGenerator struct {
 	name      string
+	index     int
 	req, resp paramStructGenerator
 	imports   []string
 }
 
-func newMethodGenerator(ifaceName string, m rpcMethod) (methodGenerator, error) {
+func newMethodGenerator(ifaceName string, index int, m rpcMethod) (methodGenerator, error) {
 	imports := newOrderedSet[string]()
 	reqStructTypeName := "_Irpc_" + ifaceName + m.name + "Req"
 	reqFields := []varField{}
@@ -251,6 +252,7 @@ func newMethodGenerator(ifaceName string, m rpcMethod) (methodGenerator, error) 
 
 	return methodGenerator{
 		name:    m.name,
+		index:   index,
 		req:     req,
 		resp:    resp,
 		imports: imports.ordered,
@@ -300,22 +302,22 @@ func (sg serviceGenerator) code() string {
 	`, generateStructConstructorName(sg.serviceTypeName), sg.ifaceName, sg.serviceTypeName)
 
 	// Id() func
-	fmt.Fprintf(sb, `func (%s) Id() string {
-		return "%s"
+	fmt.Fprintf(sb, `func (%s) Hash() []byte {
+		return []byte("%s")
 	}
 	`, sg.serviceTypeName, sg.serviceId)
 
 	// Call func call swith
-	fmt.Fprintf(sb, `func (%s *%s) CallFunc(funcName string, args []byte) ([]byte, error){
-		switch funcName {
+	fmt.Fprintf(sb, `func (%s *%s) CallFunc(funcId irpc.FuncId, args []byte) ([]byte, error){
+		switch funcId {
 			`, funcReceiverName, sg.serviceTypeName)
 	for _, m := range sg.methods {
-		fmt.Fprintf(sb, `case "%[1]s":
+		fmt.Fprintf(sb, `case %[3]d:
 			return %[2]s.call%[1]s(args)
-			`, m.name, funcReceiverName)
+			`, m.name, funcReceiverName, m.index)
 	}
 	fmt.Fprintf(sb, `default:
-			return nil, fmt.Errorf("function '%%s' doesn't exist on service '%%s'", funcName, %s.Id())
+			return nil, fmt.Errorf("function '%%d' doesn't exist on service '%%s'", funcId, string(%s.Hash()))
 		}
 	}
 	`, funcReceiverName)
@@ -368,12 +370,17 @@ func (cg clientGenerator) code() string {
 	fmt.Fprintf(b, `
 	type %[1]s struct {
 		endpoint *irpc.Endpoint
+		id irpc.RegisteredServiceId
 	}
 
-	func %[2]s(endpoint *irpc.Endpoint) *%[1]s {
-		return &%[1]s{endpoint: endpoint}
+	func %[2]s(endpoint *irpc.Endpoint) (*%[1]s, error) {
+		id, err := endpoint.RegisterClient([]byte("%[3]s"))
+		if err != nil {
+			return nil, fmt.Errorf("register failed: %%w", err)
+		}
+		return &%[1]s{endpoint: endpoint, id: id}, nil
 	}
-	`, cg.typeName, generateStructConstructorName(cg.typeName))
+	`, cg.typeName, generateStructConstructorName(cg.typeName), cg.serviceId)
 
 	// func calls
 	for _, m := range cg.methods {
@@ -389,11 +396,11 @@ func (cg clientGenerator) code() string {
 
 		// func call
 		fmt.Fprintf(b, "var resp %s\n", m.resp.typeName)
-		s := `if err := %s.endpoint.CallRemoteFunc("%s", "%s", req, &resp); err != nil {
+		s := `if err := %s.endpoint.CallRemoteFunc(%[1]s.id, %d, req, &resp); err != nil {
 			panic(err)
 		}
 		`
-		fmt.Fprintf(b, s, cg.fncReceiverName, cg.serviceId, m.name)
+		fmt.Fprintf(b, s, cg.fncReceiverName, m.index)
 
 		// return values
 		fmt.Fprintf(b, "return ")

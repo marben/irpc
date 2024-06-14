@@ -1,12 +1,24 @@
 package irpctestpkg
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/marben/irpc/test/testtools"
+)
 
 func TestError(t *testing.T) {
-	l, r := newTestEndpoints()
-	c := newInterfaceTestRpcClient(l)
-	if err := r.RegisterServices(newInterfaceTestRpcService(interfaceTestImpl{})); err != nil {
+	localEp, remoteEp, err := testtools.CreateLocalTcpEndpoints()
+	if err != nil {
+		t.Fatalf("create endpoints: %v", err)
+	}
+
+	if err := remoteEp.RegisterServices(newInterfaceTestRpcService(interfaceTestImpl{})); err != nil {
 		t.Fatalf("service create: %+v", err)
+	}
+
+	c, err := newInterfaceTestRpcClient(localEp)
+	if err != nil {
+		t.Fatalf("failed to create client: %v", err)
 	}
 
 	res1 := c.rtnErrorWithMessage("le message")

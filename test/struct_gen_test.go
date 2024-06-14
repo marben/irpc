@@ -3,34 +3,23 @@ package irpctestpkg
 import (
 	"testing"
 
-	"github.com/marben/irpc/pkg/irpc"
+	"github.com/marben/irpc/test/testtools"
 )
 
-func newTestEndpoints() (local *irpc.Endpoint, remote *irpc.Endpoint) {
-	p1, p2 := irpc.NewDoubleEndedPipe()
-
-	localEp := irpc.NewEndpoint()
-	go localEp.Serve(p1)
-
-	remoteEp := irpc.NewEndpoint()
-	go remoteEp.Serve(p2)
-	return localEp, remoteEp
-}
-
 func TestStructParam(t *testing.T) {
-	p1, p2 := irpc.NewDoubleEndedPipe()
-
-	localEp := irpc.NewEndpoint()
-	go localEp.Serve(p1)
-
-	c := newStructAPIRpcClient(localEp)
-
-	remoteEp := irpc.NewEndpoint()
-	go remoteEp.Serve(p2)
+	localEp, remoteEp, err := testtools.CreateLocalTcpEndpoints()
+	if err != nil {
+		t.Fatalf("create endpoints: %v", err)
+	}
 
 	skew := 8
 	service := newStructAPIRpcService(structImpl{skew: skew})
 	remoteEp.RegisterServices(service)
+
+	c, err := newStructAPIRpcClient(localEp)
+	if err != nil {
+		t.Fatalf("failed to create client: %v", err)
+	}
 
 	res := c.VectSum(vect3{1, 2, 3})
 	if res != 1+2+3+skew {
