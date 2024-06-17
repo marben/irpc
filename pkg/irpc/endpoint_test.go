@@ -1,9 +1,11 @@
 package irpc_test
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"testing"
 
 	"github.com/marben/irpc/pkg/irpc"
@@ -35,7 +37,7 @@ func newMathIRpcService(impl Math) *MathIRpcService { return &MathIRpcService{im
 
 func (ms *MathIRpcService) CallFunc(funcId irpc.FuncId, params []byte) ([]byte, error) {
 	switch funcId {
-	case mathIrpcFuncAdd:
+	case mathIrpcFuncAddId:
 		return ms.callAdd(params)
 
 	default:
@@ -44,13 +46,19 @@ func (ms *MathIRpcService) CallFunc(funcId irpc.FuncId, params []byte) ([]byte, 
 }
 
 func (ms *MathIRpcService) callAdd(params []byte) ([]byte, error) {
+	r := bytes.NewBuffer(params) // todo: pass reader as argument
 	var p addParams
-	if err := p.deserialize(params); err != nil {
+	if err := p.Deserialize(r); err != nil {
 		return nil, fmt.Errorf("failed to deserialize addParams: %w", err)
 	}
-	rtnVal := ms.impl.Add(p.A, p.B)
-	rtn := addRtnVals{Res: rtnVal}
-	return rtn.serialize()
+	var resp addRtnVals
+	resp.Res = ms.impl.Add(p.A, p.B)
+	b := bytes.NewBuffer(nil)
+	err := resp.Serialize(b)
+	if err != nil {
+		return nil, fmt.Errorf("response serialization failed: %w", err)
+	}
+	return b.Bytes(), nil
 }
 
 var mathIrpcServiceHash = []byte("MathServiceHash")
@@ -62,7 +70,7 @@ func (*MathIRpcService) Hash() []byte {
 var _ Math = &MathIRpcClient{}
 
 const (
-	mathIrpcFuncAdd irpc.FuncId = iota
+	mathIrpcFuncAddId irpc.FuncId = iota
 )
 
 type MathIRpcClient struct {
@@ -82,21 +90,13 @@ func NewMathIrpcClient(ep *irpc.Endpoint) (*MathIRpcClient, error) {
 // todo: maybe we request error return from rpc functions?
 func (mc *MathIRpcClient) Add(a int, b int) int {
 	var params = addParams{A: a, B: b}
-	paramsBytes, err := params.serialize()
-	if err != nil {
-		// serialization errors should not happen in generated code (can generate test as well)
-		panic(fmt.Sprintf("serialization of Math.Add params failed with: %+v", err))
-	}
-	rtnBytes, err := mc.ep.CallRemoteFuncRaw(mc.id, mathIrpcFuncAdd, paramsBytes)
-	if err != nil {
-		panic(fmt.Sprintf("irpc call return error: %+v", err))
-	}
-	var rtn addRtnVals
-	if err := rtn.deserialize(rtnBytes); err != nil {
-		panic(fmt.Sprintf("failed to deserialize addRtnVals from data: %+v", rtnBytes))
+	var resp addRtnVals
+
+	if err := mc.ep.CallRemoteFunc(mc.id, mathIrpcFuncAddId, params, &resp); err != nil {
+		panic(fmt.Sprintf("callRemoteFunc failed: %v", err))
 	}
 
-	return rtn.Res
+	return resp.Res
 }
 
 type addParams struct {
@@ -104,24 +104,24 @@ type addParams struct {
 	B int
 }
 
-func (p addParams) serialize() ([]byte, error) {
-	return json.Marshal(p)
+func (p addParams) Serialize(w io.Writer) error {
+	return json.NewEncoder(w).Encode(p)
 }
 
-func (p *addParams) deserialize(data []byte) error {
-	return json.Unmarshal(data, p)
+func (p *addParams) Deserialize(r io.Reader) error {
+	return json.NewDecoder(r).Decode(p)
 }
 
 type addRtnVals struct {
 	Res int
 }
 
-func (v addRtnVals) serialize() ([]byte, error) {
-	return json.Marshal(v)
+func (v addRtnVals) Serialize(w io.Writer) error {
+	return json.NewEncoder(w).Encode(v)
 }
 
-func (v *addRtnVals) deserialize(data []byte) error {
-	return json.Unmarshal(data, v)
+func (v *addRtnVals) Deserialize(r io.Reader) error {
+	return json.NewDecoder(r).Decode(v)
 }
 
 func TestEndpointClientRegister(t *testing.T) {
