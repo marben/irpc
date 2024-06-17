@@ -387,25 +387,28 @@ func (cg clientGenerator) code() string {
 		// func header
 		fmt.Fprintf(b, "func(%s *%s)%s(%s)(%s){\n", cg.fncReceiverName, cg.typeName, m.name, m.req.funcCallParams(), m.resp.funcCallParams())
 
+		allVars := append(m.req.params, m.resp.params...)
+		reqVarName := generateUniqueVarname("req", allVars)
+		respVarName := generateUniqueVarname("resp", allVars)
 		// request construction
-		fmt.Fprintf(b, "var req = %s {\n", m.req.typeName)
+		fmt.Fprintf(b, "var %s = %s {\n", reqVarName, m.req.typeName)
 		for _, p := range m.req.params {
 			fmt.Fprintf(b, "%s: %s,\n", p.structFieldName, p.name)
 		}
 		fmt.Fprintf(b, "}\n") // end struct assignment
 
 		// func call
-		fmt.Fprintf(b, "var resp %s\n", m.resp.typeName)
-		s := `if err := %s.endpoint.CallRemoteFunc(%[1]s.id, %d, req, &resp); err != nil {
+		fmt.Fprintf(b, "var %s %s\n", respVarName, m.resp.typeName)
+		s := `if err := %s.endpoint.CallRemoteFunc(%[1]s.id, %d, %s, &%s); err != nil {
 			panic(err)
 		}
 		`
-		fmt.Fprintf(b, s, cg.fncReceiverName, m.index)
+		fmt.Fprintf(b, s, cg.fncReceiverName, m.index, reqVarName, respVarName)
 
 		// return values
 		fmt.Fprintf(b, "return ")
 		for i, f := range m.resp.params {
-			fmt.Fprintf(b, "resp.%s", f.structFieldName)
+			fmt.Fprintf(b, "%s.%s", respVarName, f.structFieldName)
 			if i != len(m.resp.params)-1 {
 				fmt.Fprintf(b, ",")
 			}

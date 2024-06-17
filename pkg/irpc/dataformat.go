@@ -13,8 +13,6 @@ type packetType uint8
 const (
 	rpcRequest packetType = iota
 	rpcResponse
-	// rpcClientRegisterReq // notifies about given client registration
-	// rpcClientRegisterResp
 )
 
 type packetHeader struct {

@@ -31,3 +31,14 @@ func generateStructConstructorName(structName string) string {
 	rtn = append(rtn, runesIn[1:]...)
 	return string(rtn)
 }
+
+// makes sure varname is unique among existing vars. extends it with enough "_" if necessary and returns the new unique var name
+func generateUniqueVarname(varName string, existingVars []varField) string {
+	for i := 0; i < len(existingVars); i++ {
+		if existingVars[i].name == varName {
+			varName += "_"
+			i = 0
+		}
+	}
+	return varName
+}
