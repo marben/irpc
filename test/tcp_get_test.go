@@ -8,7 +8,7 @@ import (
 )
 
 func TestTcpClientServer(t *testing.T) {
-	ep1, ep2, err := testtools.CreateLocalTcpEndpoints()
+	ep1, ep2, err := testtools.CreateLocalTcpEndpoints(t)
 	if err != nil {
 		t.Fatalf("failed to create local tcp endpoints: %v", err)
 	}

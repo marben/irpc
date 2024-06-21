@@ -2,7 +2,6 @@
 package irpctestpkg
 
 import (
-	"bytes"
 	"encoding/binary"
 	"fmt"
 	"github.com/marben/irpc/pkg/irpc"
@@ -20,62 +19,56 @@ func newSliceTestRpcService(impl sliceTest) *sliceTestRpcService {
 func (sliceTestRpcService) Hash() []byte {
 	return []byte("sliceTestRpcService")
 }
-func (s *sliceTestRpcService) CallFunc(funcId irpc.FuncId, args []byte) ([]byte, error) {
+func (s *sliceTestRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
 	case 0:
-		return s.callSliceSum(args)
+
+		return func(r io.Reader) (irpc.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_sliceTestSliceSumReq
+			if err := args.Deserialize(r); err != nil {
+				return nil, err
+			}
+			return func() (irpc.Serializable, error) {
+				// EXECUTE
+				var resp _Irpc_sliceTestSliceSumResp
+				resp.Param0_ = s.impl.SliceSum(args.Param0_slice)
+				return resp, nil
+			}, nil
+		}, nil
 	case 1:
-		return s.callVectMult(args)
+
+		return func(r io.Reader) (irpc.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_sliceTestVectMultReq
+			if err := args.Deserialize(r); err != nil {
+				return nil, err
+			}
+			return func() (irpc.Serializable, error) {
+				// EXECUTE
+				var resp _Irpc_sliceTestVectMultResp
+				resp.Param0_ = s.impl.VectMult(args.Param0_vect, args.Param1_s)
+				return resp, nil
+			}, nil
+		}, nil
 	case 2:
-		return s.callSliceOfFloat64Sum(args)
+
+		return func(r io.Reader) (irpc.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_sliceTestSliceOfFloat64SumReq
+			if err := args.Deserialize(r); err != nil {
+				return nil, err
+			}
+			return func() (irpc.Serializable, error) {
+				// EXECUTE
+				var resp _Irpc_sliceTestSliceOfFloat64SumResp
+				resp.Param0_ = s.impl.SliceOfFloat64Sum(args.Param0_slice)
+				return resp, nil
+			}, nil
+		}, nil
 	default:
 		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, string(s.Hash()))
 	}
-}
-func (s *sliceTestRpcService) callSliceSum(params []byte) ([]byte, error) {
-	r := bytes.NewBuffer(params)
-	var req _Irpc_sliceTestSliceSumReq
-	if err := req.Deserialize(r); err != nil {
-		return nil, fmt.Errorf("failed to deserialize SliceSum: %w", err)
-	}
-	var resp _Irpc_sliceTestSliceSumResp
-	resp.Param0_ = s.impl.SliceSum(req.Param0_slice)
-	b := bytes.NewBuffer(nil)
-	err := resp.Serialize(b)
-	if err != nil {
-		return nil, fmt.Errorf("response serialization failed: %w", err)
-	}
-	return b.Bytes(), nil
-}
-func (s *sliceTestRpcService) callVectMult(params []byte) ([]byte, error) {
-	r := bytes.NewBuffer(params)
-	var req _Irpc_sliceTestVectMultReq
-	if err := req.Deserialize(r); err != nil {
-		return nil, fmt.Errorf("failed to deserialize VectMult: %w", err)
-	}
-	var resp _Irpc_sliceTestVectMultResp
-	resp.Param0_ = s.impl.VectMult(req.Param0_vect, req.Param1_s)
-	b := bytes.NewBuffer(nil)
-	err := resp.Serialize(b)
-	if err != nil {
-		return nil, fmt.Errorf("response serialization failed: %w", err)
-	}
-	return b.Bytes(), nil
-}
-func (s *sliceTestRpcService) callSliceOfFloat64Sum(params []byte) ([]byte, error) {
-	r := bytes.NewBuffer(params)
-	var req _Irpc_sliceTestSliceOfFloat64SumReq
-	if err := req.Deserialize(r); err != nil {
-		return nil, fmt.Errorf("failed to deserialize SliceOfFloat64Sum: %w", err)
-	}
-	var resp _Irpc_sliceTestSliceOfFloat64SumResp
-	resp.Param0_ = s.impl.SliceOfFloat64Sum(req.Param0_slice)
-	b := bytes.NewBuffer(nil)
-	err := resp.Serialize(b)
-	if err != nil {
-		return nil, fmt.Errorf("response serialization failed: %w", err)
-	}
-	return b.Bytes(), nil
 }
 
 type sliceTestRpcClient struct {

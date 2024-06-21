@@ -1,7 +1,6 @@
 package irpc_test
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -35,30 +34,25 @@ type MathIRpcService struct {
 
 func newMathIRpcService(impl Math) *MathIRpcService { return &MathIRpcService{impl: impl} }
 
-func (ms *MathIRpcService) CallFunc(funcId irpc.FuncId, params []byte) ([]byte, error) {
+func (ms *MathIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
 	case mathIrpcFuncAddId:
-		return ms.callAdd(params)
-
+		return func(r io.Reader) (irpc.FuncExecutor, error) {
+			// DESERIALIZE
+			var args addParams
+			if err := args.Deserialize(r); err != nil {
+				return nil, err
+			}
+			return func() (irpc.Serializable, error) {
+				// EXECUTE
+				var resp addRtnVals
+				resp.Res = ms.impl.Add(args.A, args.B)
+				return resp, nil
+			}, nil
+		}, nil
 	default:
 		return nil, fmt.Errorf("function '%v' doesn't exist on service '%s'", funcId, ms.Hash())
 	}
-}
-
-func (ms *MathIRpcService) callAdd(params []byte) ([]byte, error) {
-	r := bytes.NewBuffer(params) // todo: pass reader as argument
-	var p addParams
-	if err := p.Deserialize(r); err != nil {
-		return nil, fmt.Errorf("failed to deserialize addParams: %w", err)
-	}
-	var resp addRtnVals
-	resp.Res = ms.impl.Add(p.A, p.B)
-	b := bytes.NewBuffer(nil)
-	err := resp.Serialize(b)
-	if err != nil {
-		return nil, fmt.Errorf("response serialization failed: %w", err)
-	}
-	return b.Bytes(), nil
 }
 
 var mathIrpcServiceHash = []byte("MathServiceHash")
@@ -125,15 +119,17 @@ func (v *addRtnVals) Deserialize(r io.Reader) error {
 }
 
 func TestEndpointClientRegister(t *testing.T) {
-	ep1, ep2, err := testtools.CreateLocalTcpEndpoints()
+	ep1, ep2, err := testtools.CreateLocalTcpEndpoints(t)
 	if err != nil {
 		t.Fatalf("create tcp: %v", err)
 	}
 
+	t.Logf("registering math service")
 	if err := ep1.RegisterServices(newMathIRpcService(MathImpl{})); err != nil {
 		t.Fatalf("service register: %v", err)
 	}
 
+	t.Logf("creating client")
 	mathClient, err := NewMathIrpcClient(ep2)
 	if err != nil {
 		t.Fatalf("failed to create mathirpc client: %+v", err)

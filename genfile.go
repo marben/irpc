@@ -6,6 +6,19 @@ import (
 	"strings"
 )
 
+type formattingErr struct {
+	formattingError error
+	unformattedCode string
+}
+
+func (e *formattingErr) Error() string {
+	return e.formattingError.Error()
+}
+
+func (e *formattingErr) Unwrap() error {
+	return e.formattingError
+}
+
 type genFile struct {
 	pkg          string
 	imports      orderedSet[string]
@@ -34,7 +47,7 @@ func (gen *genFile) formatted() (string, error) {
 	raw := gen.raw()
 	formatted, err := format.Source([]byte(raw))
 	if err != nil {
-		return raw, fmt.Errorf("failed to format output code. returning raw form. %w", err)
+		return "", &formattingErr{formattingError: err, unformattedCode: raw}
 	}
 
 	return string(formatted), nil

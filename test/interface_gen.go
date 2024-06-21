@@ -2,7 +2,6 @@
 package irpctestpkg
 
 import (
-	"bytes"
 	"encoding/binary"
 	"fmt"
 	"github.com/marben/irpc/pkg/irpc"
@@ -19,96 +18,86 @@ func newInterfaceTestRpcService(impl interfaceTest) *interfaceTestRpcService {
 func (interfaceTestRpcService) Hash() []byte {
 	return []byte("interfaceTestRpcService")
 }
-func (s *interfaceTestRpcService) CallFunc(funcId irpc.FuncId, args []byte) ([]byte, error) {
+func (s *interfaceTestRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
 	case 0:
-		return s.callrtnErrorWithMessage(args)
+
+		return func(r io.Reader) (irpc.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_interfaceTestrtnErrorWithMessageReq
+			if err := args.Deserialize(r); err != nil {
+				return nil, err
+			}
+			return func() (irpc.Serializable, error) {
+				// EXECUTE
+				var resp _Irpc_interfaceTestrtnErrorWithMessageResp
+				resp.Param0_ = s.impl.rtnErrorWithMessage(args.Param0_msg)
+				return resp, nil
+			}, nil
+		}, nil
 	case 1:
-		return s.callrtnNilError(args)
+
+		return func(r io.Reader) (irpc.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_interfaceTestrtnNilErrorReq
+			if err := args.Deserialize(r); err != nil {
+				return nil, err
+			}
+			return func() (irpc.Serializable, error) {
+				// EXECUTE
+				var resp _Irpc_interfaceTestrtnNilErrorResp
+				resp.Param0_ = s.impl.rtnNilError()
+				return resp, nil
+			}, nil
+		}, nil
 	case 2:
-		return s.callrtnTwoErrors(args)
+
+		return func(r io.Reader) (irpc.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_interfaceTestrtnTwoErrorsReq
+			if err := args.Deserialize(r); err != nil {
+				return nil, err
+			}
+			return func() (irpc.Serializable, error) {
+				// EXECUTE
+				var resp _Irpc_interfaceTestrtnTwoErrorsResp
+				resp.Param0_, resp.Param1_ = s.impl.rtnTwoErrors()
+				return resp, nil
+			}, nil
+		}, nil
 	case 3:
-		return s.callrtnStringAndError(args)
+
+		return func(r io.Reader) (irpc.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_interfaceTestrtnStringAndErrorReq
+			if err := args.Deserialize(r); err != nil {
+				return nil, err
+			}
+			return func() (irpc.Serializable, error) {
+				// EXECUTE
+				var resp _Irpc_interfaceTestrtnStringAndErrorResp
+				resp.Param0_s, resp.Param1_err = s.impl.rtnStringAndError(args.Param0_msg)
+				return resp, nil
+			}, nil
+		}, nil
 	case 4:
-		return s.callpassCustomInterfaceAndReturnItModified(args)
+
+		return func(r io.Reader) (irpc.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedReq
+			if err := args.Deserialize(r); err != nil {
+				return nil, err
+			}
+			return func() (irpc.Serializable, error) {
+				// EXECUTE
+				var resp _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp
+				resp.Param0_, resp.Param1_ = s.impl.passCustomInterfaceAndReturnItModified(args.Param0_ci)
+				return resp, nil
+			}, nil
+		}, nil
 	default:
 		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, string(s.Hash()))
 	}
-}
-func (s *interfaceTestRpcService) callrtnErrorWithMessage(params []byte) ([]byte, error) {
-	r := bytes.NewBuffer(params)
-	var req _Irpc_interfaceTestrtnErrorWithMessageReq
-	if err := req.Deserialize(r); err != nil {
-		return nil, fmt.Errorf("failed to deserialize rtnErrorWithMessage: %w", err)
-	}
-	var resp _Irpc_interfaceTestrtnErrorWithMessageResp
-	resp.Param0_ = s.impl.rtnErrorWithMessage(req.Param0_msg)
-	b := bytes.NewBuffer(nil)
-	err := resp.Serialize(b)
-	if err != nil {
-		return nil, fmt.Errorf("response serialization failed: %w", err)
-	}
-	return b.Bytes(), nil
-}
-func (s *interfaceTestRpcService) callrtnNilError(params []byte) ([]byte, error) {
-	r := bytes.NewBuffer(params)
-	var req _Irpc_interfaceTestrtnNilErrorReq
-	if err := req.Deserialize(r); err != nil {
-		return nil, fmt.Errorf("failed to deserialize rtnNilError: %w", err)
-	}
-	var resp _Irpc_interfaceTestrtnNilErrorResp
-	resp.Param0_ = s.impl.rtnNilError()
-	b := bytes.NewBuffer(nil)
-	err := resp.Serialize(b)
-	if err != nil {
-		return nil, fmt.Errorf("response serialization failed: %w", err)
-	}
-	return b.Bytes(), nil
-}
-func (s *interfaceTestRpcService) callrtnTwoErrors(params []byte) ([]byte, error) {
-	r := bytes.NewBuffer(params)
-	var req _Irpc_interfaceTestrtnTwoErrorsReq
-	if err := req.Deserialize(r); err != nil {
-		return nil, fmt.Errorf("failed to deserialize rtnTwoErrors: %w", err)
-	}
-	var resp _Irpc_interfaceTestrtnTwoErrorsResp
-	resp.Param0_, resp.Param1_ = s.impl.rtnTwoErrors()
-	b := bytes.NewBuffer(nil)
-	err := resp.Serialize(b)
-	if err != nil {
-		return nil, fmt.Errorf("response serialization failed: %w", err)
-	}
-	return b.Bytes(), nil
-}
-func (s *interfaceTestRpcService) callrtnStringAndError(params []byte) ([]byte, error) {
-	r := bytes.NewBuffer(params)
-	var req _Irpc_interfaceTestrtnStringAndErrorReq
-	if err := req.Deserialize(r); err != nil {
-		return nil, fmt.Errorf("failed to deserialize rtnStringAndError: %w", err)
-	}
-	var resp _Irpc_interfaceTestrtnStringAndErrorResp
-	resp.Param0_s, resp.Param1_err = s.impl.rtnStringAndError(req.Param0_msg)
-	b := bytes.NewBuffer(nil)
-	err := resp.Serialize(b)
-	if err != nil {
-		return nil, fmt.Errorf("response serialization failed: %w", err)
-	}
-	return b.Bytes(), nil
-}
-func (s *interfaceTestRpcService) callpassCustomInterfaceAndReturnItModified(params []byte) ([]byte, error) {
-	r := bytes.NewBuffer(params)
-	var req _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedReq
-	if err := req.Deserialize(r); err != nil {
-		return nil, fmt.Errorf("failed to deserialize passCustomInterfaceAndReturnItModified: %w", err)
-	}
-	var resp _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp
-	resp.Param0_, resp.Param1_ = s.impl.passCustomInterfaceAndReturnItModified(req.Param0_ci)
-	b := bytes.NewBuffer(nil)
-	err := resp.Serialize(b)
-	if err != nil {
-		return nil, fmt.Errorf("response serialization failed: %w", err)
-	}
-	return b.Bytes(), nil
 }
 
 type customInterfaceRpcService struct {
@@ -121,45 +110,41 @@ func newCustomInterfaceRpcService(impl customInterface) *customInterfaceRpcServi
 func (customInterfaceRpcService) Hash() []byte {
 	return []byte("customInterfaceRpcService")
 }
-func (s *customInterfaceRpcService) CallFunc(funcId irpc.FuncId, args []byte) ([]byte, error) {
+func (s *customInterfaceRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
 	case 0:
-		return s.callIntFunc(args)
+
+		return func(r io.Reader) (irpc.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_customInterfaceIntFuncReq
+			if err := args.Deserialize(r); err != nil {
+				return nil, err
+			}
+			return func() (irpc.Serializable, error) {
+				// EXECUTE
+				var resp _Irpc_customInterfaceIntFuncResp
+				resp.Param0_ = s.impl.IntFunc()
+				return resp, nil
+			}, nil
+		}, nil
 	case 1:
-		return s.callStringFunc(args)
+
+		return func(r io.Reader) (irpc.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_customInterfaceStringFuncReq
+			if err := args.Deserialize(r); err != nil {
+				return nil, err
+			}
+			return func() (irpc.Serializable, error) {
+				// EXECUTE
+				var resp _Irpc_customInterfaceStringFuncResp
+				resp.Param0_ = s.impl.StringFunc()
+				return resp, nil
+			}, nil
+		}, nil
 	default:
 		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, string(s.Hash()))
 	}
-}
-func (s *customInterfaceRpcService) callIntFunc(params []byte) ([]byte, error) {
-	r := bytes.NewBuffer(params)
-	var req _Irpc_customInterfaceIntFuncReq
-	if err := req.Deserialize(r); err != nil {
-		return nil, fmt.Errorf("failed to deserialize IntFunc: %w", err)
-	}
-	var resp _Irpc_customInterfaceIntFuncResp
-	resp.Param0_ = s.impl.IntFunc()
-	b := bytes.NewBuffer(nil)
-	err := resp.Serialize(b)
-	if err != nil {
-		return nil, fmt.Errorf("response serialization failed: %w", err)
-	}
-	return b.Bytes(), nil
-}
-func (s *customInterfaceRpcService) callStringFunc(params []byte) ([]byte, error) {
-	r := bytes.NewBuffer(params)
-	var req _Irpc_customInterfaceStringFuncReq
-	if err := req.Deserialize(r); err != nil {
-		return nil, fmt.Errorf("failed to deserialize StringFunc: %w", err)
-	}
-	var resp _Irpc_customInterfaceStringFuncResp
-	resp.Param0_ = s.impl.StringFunc()
-	b := bytes.NewBuffer(nil)
-	err := resp.Serialize(b)
-	if err != nil {
-		return nil, fmt.Errorf("response serialization failed: %w", err)
-	}
-	return b.Bytes(), nil
 }
 
 type interfaceTestRpcClient struct {

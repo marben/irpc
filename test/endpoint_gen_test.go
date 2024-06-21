@@ -2,6 +2,7 @@ package irpctestpkg
 
 import (
 	"testing"
+	"time"
 
 	"github.com/marben/irpc/pkg/irpc"
 	"github.com/marben/irpc/test/testtools"
@@ -23,6 +24,7 @@ func TestEndpointClose(t *testing.T) {
 		errC2 <- ep2.Serve(p2)
 	}()
 
+	time.Sleep(10 * time.Millisecond)
 	if err := ep1.Close(); err != nil {
 		t.Fatalf("ep1.Close(): %v", err)
 	}
@@ -30,6 +32,6 @@ func TestEndpointClose(t *testing.T) {
 		t.Fatalf("ep2.Close(): %v", err)
 	}
 
-	<-errC1
-	<-errC2
+	t.Logf("ep1.Serve(): %v", <-errC1)
+	t.Logf("ep2.Serve(): %v", <-errC2)
 }

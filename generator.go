@@ -1,8 +1,10 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io"
+	"log"
 	"strings"
 )
 
@@ -81,7 +83,14 @@ func (g generator) write(w io.Writer) error {
 
 	file, err := genF.formatted()
 	if err != nil {
-		return fmt.Errorf("formatted output: %w", err)
+		var formatErr *formattingErr
+		if errors.As(err, &formatErr) {
+			log.Println("formatting failed. writing raw code to output file anyway")
+			if _, err := w.Write([]byte(formatErr.unformattedCode)); err != nil {
+				return fmt.Errorf("failed to write unformatted code to file: %w", err)
+			}
+		}
+		return err
 	}
 
 	if _, err := w.Write([]byte(file)); err != nil {
@@ -268,12 +277,7 @@ type serviceGenerator struct {
 }
 
 func newServiceGenerator(serviceTypeName, ifaceTypeName, serviceId string, methods []methodGenerator) (serviceGenerator, error) {
-	imports := []string{bytesImport, fmtImport}
-
-	if len(methods) > 0 {
-		// every method's call function creates a bytes.Buffer
-		imports = append(imports, bytesImport)
-	}
+	imports := []string{fmtImport}
 
 	return serviceGenerator{
 		ifaceName:       ifaceTypeName,
@@ -285,8 +289,6 @@ func newServiceGenerator(serviceTypeName, ifaceTypeName, serviceId string, metho
 }
 
 func (sg serviceGenerator) code() string {
-	funcReceiverName := "s"
-
 	sb := &strings.Builder{}
 
 	// type definition
@@ -308,39 +310,33 @@ func (sg serviceGenerator) code() string {
 	`, sg.serviceTypeName, sg.serviceId)
 
 	// Call func call swith
-	fmt.Fprintf(sb, `func (%s *%s) CallFunc(funcId irpc.FuncId, args []byte) ([]byte, error){
+	fmt.Fprintf(sb, `func (s *%s) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error){
 		switch funcId {
-			`, funcReceiverName, sg.serviceTypeName)
+			`, sg.serviceTypeName)
+
 	for _, m := range sg.methods {
-		fmt.Fprintf(sb, `case %[3]d:
-			return %[2]s.call%[1]s(args)
-			`, m.name, funcReceiverName, m.index)
+		fmt.Fprintf(sb, "case %d:\n", m.index)
+		fmt.Fprintf(sb, `
+		return func(r io.Reader) (irpc.FuncExecutor, error) {
+			// DESERIALIZE
+		 	var args %[1]s
+		 	if err := args.Deserialize(r); err != nil {
+		 		return nil, err
+		 	}
+			return func() (irpc.Serializable, error) {
+				// EXECUTE
+				var resp %[2]s
+				%[3]s = s.impl.%[4]s(%[5]s)
+				return resp, nil
+			}, nil
+		}, nil
+		 `, m.req.typeName, m.resp.typeName, m.resp.paramListPrefixed("resp."), m.name, m.req.paramListPrefixed("args."))
 	}
 	fmt.Fprintf(sb, `default:
-			return nil, fmt.Errorf("function '%%d' doesn't exist on service '%%s'", funcId, string(%s.Hash()))
+			return nil, fmt.Errorf("function '%%d' doesn't exist on service '%%s'", funcId, string(s.Hash()))
 		}
 	}
-	`, funcReceiverName)
-
-	// methods
-	for _, m := range sg.methods {
-		fmt.Fprintf(sb, `func (%[7]s *%[1]s) call%[2]s(params []byte)([]byte, error) {
-			r := bytes.NewBuffer(params)
-			var req %s
-			if err := req.Deserialize(r); err != nil {
-				return nil, fmt.Errorf("failed to deserialize %[2]s: %%w", err)
-			}
-			var resp %[4]s
-			%[5]s = %[7]s.impl.%[2]s(%[6]s)
-			b := bytes.NewBuffer(nil)
-			err := resp.Serialize(b)
-			if err != nil {
-				return nil, fmt.Errorf("response serialization failed: %%w", err)
-			}
-			return b.Bytes(), nil
-		}
-		`, sg.serviceTypeName, m.name, m.req.typeName, m.resp.typeName, m.resp.paramListPrefixed("resp."), m.req.paramListPrefixed("req."), funcReceiverName)
-	}
+	`)
 
 	return sb.String()
 }

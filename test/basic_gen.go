@@ -2,7 +2,6 @@
 package irpctestpkg
 
 import (
-	"bytes"
 	"encoding/binary"
 	"fmt"
 	"github.com/marben/irpc/pkg/irpc"
@@ -20,300 +19,266 @@ func newBasicAPIRpcService(impl basicAPI) *basicAPIRpcService {
 func (basicAPIRpcService) Hash() []byte {
 	return []byte("basicAPIRpcService")
 }
-func (s *basicAPIRpcService) CallFunc(funcId irpc.FuncId, args []byte) ([]byte, error) {
+func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
 	case 0:
-		return s.calladdByte(args)
+
+		return func(r io.Reader) (irpc.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_basicAPIaddByteReq
+			if err := args.Deserialize(r); err != nil {
+				return nil, err
+			}
+			return func() (irpc.Serializable, error) {
+				// EXECUTE
+				var resp _Irpc_basicAPIaddByteResp
+				resp.Param0_ = s.impl.addByte(args.Param0_a, args.Param1_b)
+				return resp, nil
+			}, nil
+		}, nil
 	case 1:
-		return s.calladdInt(args)
+
+		return func(r io.Reader) (irpc.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_basicAPIaddIntReq
+			if err := args.Deserialize(r); err != nil {
+				return nil, err
+			}
+			return func() (irpc.Serializable, error) {
+				// EXECUTE
+				var resp _Irpc_basicAPIaddIntResp
+				resp.Param0_ = s.impl.addInt(args.Param0_a, args.Param1_b)
+				return resp, nil
+			}, nil
+		}, nil
 	case 2:
-		return s.callswapInt(args)
+
+		return func(r io.Reader) (irpc.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_basicAPIswapIntReq
+			if err := args.Deserialize(r); err != nil {
+				return nil, err
+			}
+			return func() (irpc.Serializable, error) {
+				// EXECUTE
+				var resp _Irpc_basicAPIswapIntResp
+				resp.Param0_, resp.Param1_ = s.impl.swapInt(args.Param0_a, args.Param1_b)
+				return resp, nil
+			}, nil
+		}, nil
 	case 3:
-		return s.callsubUint(args)
+
+		return func(r io.Reader) (irpc.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_basicAPIsubUintReq
+			if err := args.Deserialize(r); err != nil {
+				return nil, err
+			}
+			return func() (irpc.Serializable, error) {
+				// EXECUTE
+				var resp _Irpc_basicAPIsubUintResp
+				resp.Param0_ = s.impl.subUint(args.Param0_a, args.Param0_b)
+				return resp, nil
+			}, nil
+		}, nil
 	case 4:
-		return s.calladdInt8(args)
+
+		return func(r io.Reader) (irpc.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_basicAPIaddInt8Req
+			if err := args.Deserialize(r); err != nil {
+				return nil, err
+			}
+			return func() (irpc.Serializable, error) {
+				// EXECUTE
+				var resp _Irpc_basicAPIaddInt8Resp
+				resp.Param0_ = s.impl.addInt8(args.Param0_a, args.Param0_b)
+				return resp, nil
+			}, nil
+		}, nil
 	case 5:
-		return s.calladdUint8(args)
+
+		return func(r io.Reader) (irpc.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_basicAPIaddUint8Req
+			if err := args.Deserialize(r); err != nil {
+				return nil, err
+			}
+			return func() (irpc.Serializable, error) {
+				// EXECUTE
+				var resp _Irpc_basicAPIaddUint8Resp
+				resp.Param0_ = s.impl.addUint8(args.Param0_a, args.Param0_b)
+				return resp, nil
+			}, nil
+		}, nil
 	case 6:
-		return s.calladdInt16(args)
+
+		return func(r io.Reader) (irpc.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_basicAPIaddInt16Req
+			if err := args.Deserialize(r); err != nil {
+				return nil, err
+			}
+			return func() (irpc.Serializable, error) {
+				// EXECUTE
+				var resp _Irpc_basicAPIaddInt16Resp
+				resp.Param0_ = s.impl.addInt16(args.Param0_a, args.Param0_b)
+				return resp, nil
+			}, nil
+		}, nil
 	case 7:
-		return s.calladdUint16(args)
+
+		return func(r io.Reader) (irpc.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_basicAPIaddUint16Req
+			if err := args.Deserialize(r); err != nil {
+				return nil, err
+			}
+			return func() (irpc.Serializable, error) {
+				// EXECUTE
+				var resp _Irpc_basicAPIaddUint16Resp
+				resp.Param0_ = s.impl.addUint16(args.Param0_a, args.Param0_b)
+				return resp, nil
+			}, nil
+		}, nil
 	case 8:
-		return s.calladdInt32(args)
+
+		return func(r io.Reader) (irpc.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_basicAPIaddInt32Req
+			if err := args.Deserialize(r); err != nil {
+				return nil, err
+			}
+			return func() (irpc.Serializable, error) {
+				// EXECUTE
+				var resp _Irpc_basicAPIaddInt32Resp
+				resp.Param0_ = s.impl.addInt32(args.Param0_a, args.Param0_b)
+				return resp, nil
+			}, nil
+		}, nil
 	case 9:
-		return s.calladdUint32(args)
+
+		return func(r io.Reader) (irpc.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_basicAPIaddUint32Req
+			if err := args.Deserialize(r); err != nil {
+				return nil, err
+			}
+			return func() (irpc.Serializable, error) {
+				// EXECUTE
+				var resp _Irpc_basicAPIaddUint32Resp
+				resp.Param0_ = s.impl.addUint32(args.Param0_a, args.Param0_b)
+				return resp, nil
+			}, nil
+		}, nil
 	case 10:
-		return s.calladdInt64(args)
+
+		return func(r io.Reader) (irpc.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_basicAPIaddInt64Req
+			if err := args.Deserialize(r); err != nil {
+				return nil, err
+			}
+			return func() (irpc.Serializable, error) {
+				// EXECUTE
+				var resp _Irpc_basicAPIaddInt64Resp
+				resp.Param0_ = s.impl.addInt64(args.Param0_a, args.Param0_b)
+				return resp, nil
+			}, nil
+		}, nil
 	case 11:
-		return s.calladdUint64(args)
+
+		return func(r io.Reader) (irpc.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_basicAPIaddUint64Req
+			if err := args.Deserialize(r); err != nil {
+				return nil, err
+			}
+			return func() (irpc.Serializable, error) {
+				// EXECUTE
+				var resp _Irpc_basicAPIaddUint64Resp
+				resp.Param0_ = s.impl.addUint64(args.Param0_a, args.Param0_b)
+				return resp, nil
+			}, nil
+		}, nil
 	case 12:
-		return s.calladdFloat64(args)
+
+		return func(r io.Reader) (irpc.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_basicAPIaddFloat64Req
+			if err := args.Deserialize(r); err != nil {
+				return nil, err
+			}
+			return func() (irpc.Serializable, error) {
+				// EXECUTE
+				var resp _Irpc_basicAPIaddFloat64Resp
+				resp.Param0_ = s.impl.addFloat64(args.Param0_a, args.Param0_b)
+				return resp, nil
+			}, nil
+		}, nil
 	case 13:
-		return s.calladdFloat32(args)
+
+		return func(r io.Reader) (irpc.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_basicAPIaddFloat32Req
+			if err := args.Deserialize(r); err != nil {
+				return nil, err
+			}
+			return func() (irpc.Serializable, error) {
+				// EXECUTE
+				var resp _Irpc_basicAPIaddFloat32Resp
+				resp.Param0_ = s.impl.addFloat32(args.Param0_a, args.Param0_b)
+				return resp, nil
+			}, nil
+		}, nil
 	case 14:
-		return s.calltoUpper(args)
+
+		return func(r io.Reader) (irpc.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_basicAPItoUpperReq
+			if err := args.Deserialize(r); err != nil {
+				return nil, err
+			}
+			return func() (irpc.Serializable, error) {
+				// EXECUTE
+				var resp _Irpc_basicAPItoUpperResp
+				resp.Param0_ = s.impl.toUpper(args.Param0_c)
+				return resp, nil
+			}, nil
+		}, nil
 	case 15:
-		return s.calltoUpperString(args)
+
+		return func(r io.Reader) (irpc.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_basicAPItoUpperStringReq
+			if err := args.Deserialize(r); err != nil {
+				return nil, err
+			}
+			return func() (irpc.Serializable, error) {
+				// EXECUTE
+				var resp _Irpc_basicAPItoUpperStringResp
+				resp.Param0_ = s.impl.toUpperString(args.Param0_s)
+				return resp, nil
+			}, nil
+		}, nil
 	case 16:
-		return s.callnegBool(args)
+
+		return func(r io.Reader) (irpc.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_basicAPInegBoolReq
+			if err := args.Deserialize(r); err != nil {
+				return nil, err
+			}
+			return func() (irpc.Serializable, error) {
+				// EXECUTE
+				var resp _Irpc_basicAPInegBoolResp
+				resp.Param0_ = s.impl.negBool(args.Param0_ok)
+				return resp, nil
+			}, nil
+		}, nil
 	default:
 		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, string(s.Hash()))
 	}
-}
-func (s *basicAPIRpcService) calladdByte(params []byte) ([]byte, error) {
-	r := bytes.NewBuffer(params)
-	var req _Irpc_basicAPIaddByteReq
-	if err := req.Deserialize(r); err != nil {
-		return nil, fmt.Errorf("failed to deserialize addByte: %w", err)
-	}
-	var resp _Irpc_basicAPIaddByteResp
-	resp.Param0_ = s.impl.addByte(req.Param0_a, req.Param1_b)
-	b := bytes.NewBuffer(nil)
-	err := resp.Serialize(b)
-	if err != nil {
-		return nil, fmt.Errorf("response serialization failed: %w", err)
-	}
-	return b.Bytes(), nil
-}
-func (s *basicAPIRpcService) calladdInt(params []byte) ([]byte, error) {
-	r := bytes.NewBuffer(params)
-	var req _Irpc_basicAPIaddIntReq
-	if err := req.Deserialize(r); err != nil {
-		return nil, fmt.Errorf("failed to deserialize addInt: %w", err)
-	}
-	var resp _Irpc_basicAPIaddIntResp
-	resp.Param0_ = s.impl.addInt(req.Param0_a, req.Param1_b)
-	b := bytes.NewBuffer(nil)
-	err := resp.Serialize(b)
-	if err != nil {
-		return nil, fmt.Errorf("response serialization failed: %w", err)
-	}
-	return b.Bytes(), nil
-}
-func (s *basicAPIRpcService) callswapInt(params []byte) ([]byte, error) {
-	r := bytes.NewBuffer(params)
-	var req _Irpc_basicAPIswapIntReq
-	if err := req.Deserialize(r); err != nil {
-		return nil, fmt.Errorf("failed to deserialize swapInt: %w", err)
-	}
-	var resp _Irpc_basicAPIswapIntResp
-	resp.Param0_, resp.Param1_ = s.impl.swapInt(req.Param0_a, req.Param1_b)
-	b := bytes.NewBuffer(nil)
-	err := resp.Serialize(b)
-	if err != nil {
-		return nil, fmt.Errorf("response serialization failed: %w", err)
-	}
-	return b.Bytes(), nil
-}
-func (s *basicAPIRpcService) callsubUint(params []byte) ([]byte, error) {
-	r := bytes.NewBuffer(params)
-	var req _Irpc_basicAPIsubUintReq
-	if err := req.Deserialize(r); err != nil {
-		return nil, fmt.Errorf("failed to deserialize subUint: %w", err)
-	}
-	var resp _Irpc_basicAPIsubUintResp
-	resp.Param0_ = s.impl.subUint(req.Param0_a, req.Param0_b)
-	b := bytes.NewBuffer(nil)
-	err := resp.Serialize(b)
-	if err != nil {
-		return nil, fmt.Errorf("response serialization failed: %w", err)
-	}
-	return b.Bytes(), nil
-}
-func (s *basicAPIRpcService) calladdInt8(params []byte) ([]byte, error) {
-	r := bytes.NewBuffer(params)
-	var req _Irpc_basicAPIaddInt8Req
-	if err := req.Deserialize(r); err != nil {
-		return nil, fmt.Errorf("failed to deserialize addInt8: %w", err)
-	}
-	var resp _Irpc_basicAPIaddInt8Resp
-	resp.Param0_ = s.impl.addInt8(req.Param0_a, req.Param0_b)
-	b := bytes.NewBuffer(nil)
-	err := resp.Serialize(b)
-	if err != nil {
-		return nil, fmt.Errorf("response serialization failed: %w", err)
-	}
-	return b.Bytes(), nil
-}
-func (s *basicAPIRpcService) calladdUint8(params []byte) ([]byte, error) {
-	r := bytes.NewBuffer(params)
-	var req _Irpc_basicAPIaddUint8Req
-	if err := req.Deserialize(r); err != nil {
-		return nil, fmt.Errorf("failed to deserialize addUint8: %w", err)
-	}
-	var resp _Irpc_basicAPIaddUint8Resp
-	resp.Param0_ = s.impl.addUint8(req.Param0_a, req.Param0_b)
-	b := bytes.NewBuffer(nil)
-	err := resp.Serialize(b)
-	if err != nil {
-		return nil, fmt.Errorf("response serialization failed: %w", err)
-	}
-	return b.Bytes(), nil
-}
-func (s *basicAPIRpcService) calladdInt16(params []byte) ([]byte, error) {
-	r := bytes.NewBuffer(params)
-	var req _Irpc_basicAPIaddInt16Req
-	if err := req.Deserialize(r); err != nil {
-		return nil, fmt.Errorf("failed to deserialize addInt16: %w", err)
-	}
-	var resp _Irpc_basicAPIaddInt16Resp
-	resp.Param0_ = s.impl.addInt16(req.Param0_a, req.Param0_b)
-	b := bytes.NewBuffer(nil)
-	err := resp.Serialize(b)
-	if err != nil {
-		return nil, fmt.Errorf("response serialization failed: %w", err)
-	}
-	return b.Bytes(), nil
-}
-func (s *basicAPIRpcService) calladdUint16(params []byte) ([]byte, error) {
-	r := bytes.NewBuffer(params)
-	var req _Irpc_basicAPIaddUint16Req
-	if err := req.Deserialize(r); err != nil {
-		return nil, fmt.Errorf("failed to deserialize addUint16: %w", err)
-	}
-	var resp _Irpc_basicAPIaddUint16Resp
-	resp.Param0_ = s.impl.addUint16(req.Param0_a, req.Param0_b)
-	b := bytes.NewBuffer(nil)
-	err := resp.Serialize(b)
-	if err != nil {
-		return nil, fmt.Errorf("response serialization failed: %w", err)
-	}
-	return b.Bytes(), nil
-}
-func (s *basicAPIRpcService) calladdInt32(params []byte) ([]byte, error) {
-	r := bytes.NewBuffer(params)
-	var req _Irpc_basicAPIaddInt32Req
-	if err := req.Deserialize(r); err != nil {
-		return nil, fmt.Errorf("failed to deserialize addInt32: %w", err)
-	}
-	var resp _Irpc_basicAPIaddInt32Resp
-	resp.Param0_ = s.impl.addInt32(req.Param0_a, req.Param0_b)
-	b := bytes.NewBuffer(nil)
-	err := resp.Serialize(b)
-	if err != nil {
-		return nil, fmt.Errorf("response serialization failed: %w", err)
-	}
-	return b.Bytes(), nil
-}
-func (s *basicAPIRpcService) calladdUint32(params []byte) ([]byte, error) {
-	r := bytes.NewBuffer(params)
-	var req _Irpc_basicAPIaddUint32Req
-	if err := req.Deserialize(r); err != nil {
-		return nil, fmt.Errorf("failed to deserialize addUint32: %w", err)
-	}
-	var resp _Irpc_basicAPIaddUint32Resp
-	resp.Param0_ = s.impl.addUint32(req.Param0_a, req.Param0_b)
-	b := bytes.NewBuffer(nil)
-	err := resp.Serialize(b)
-	if err != nil {
-		return nil, fmt.Errorf("response serialization failed: %w", err)
-	}
-	return b.Bytes(), nil
-}
-func (s *basicAPIRpcService) calladdInt64(params []byte) ([]byte, error) {
-	r := bytes.NewBuffer(params)
-	var req _Irpc_basicAPIaddInt64Req
-	if err := req.Deserialize(r); err != nil {
-		return nil, fmt.Errorf("failed to deserialize addInt64: %w", err)
-	}
-	var resp _Irpc_basicAPIaddInt64Resp
-	resp.Param0_ = s.impl.addInt64(req.Param0_a, req.Param0_b)
-	b := bytes.NewBuffer(nil)
-	err := resp.Serialize(b)
-	if err != nil {
-		return nil, fmt.Errorf("response serialization failed: %w", err)
-	}
-	return b.Bytes(), nil
-}
-func (s *basicAPIRpcService) calladdUint64(params []byte) ([]byte, error) {
-	r := bytes.NewBuffer(params)
-	var req _Irpc_basicAPIaddUint64Req
-	if err := req.Deserialize(r); err != nil {
-		return nil, fmt.Errorf("failed to deserialize addUint64: %w", err)
-	}
-	var resp _Irpc_basicAPIaddUint64Resp
-	resp.Param0_ = s.impl.addUint64(req.Param0_a, req.Param0_b)
-	b := bytes.NewBuffer(nil)
-	err := resp.Serialize(b)
-	if err != nil {
-		return nil, fmt.Errorf("response serialization failed: %w", err)
-	}
-	return b.Bytes(), nil
-}
-func (s *basicAPIRpcService) calladdFloat64(params []byte) ([]byte, error) {
-	r := bytes.NewBuffer(params)
-	var req _Irpc_basicAPIaddFloat64Req
-	if err := req.Deserialize(r); err != nil {
-		return nil, fmt.Errorf("failed to deserialize addFloat64: %w", err)
-	}
-	var resp _Irpc_basicAPIaddFloat64Resp
-	resp.Param0_ = s.impl.addFloat64(req.Param0_a, req.Param0_b)
-	b := bytes.NewBuffer(nil)
-	err := resp.Serialize(b)
-	if err != nil {
-		return nil, fmt.Errorf("response serialization failed: %w", err)
-	}
-	return b.Bytes(), nil
-}
-func (s *basicAPIRpcService) calladdFloat32(params []byte) ([]byte, error) {
-	r := bytes.NewBuffer(params)
-	var req _Irpc_basicAPIaddFloat32Req
-	if err := req.Deserialize(r); err != nil {
-		return nil, fmt.Errorf("failed to deserialize addFloat32: %w", err)
-	}
-	var resp _Irpc_basicAPIaddFloat32Resp
-	resp.Param0_ = s.impl.addFloat32(req.Param0_a, req.Param0_b)
-	b := bytes.NewBuffer(nil)
-	err := resp.Serialize(b)
-	if err != nil {
-		return nil, fmt.Errorf("response serialization failed: %w", err)
-	}
-	return b.Bytes(), nil
-}
-func (s *basicAPIRpcService) calltoUpper(params []byte) ([]byte, error) {
-	r := bytes.NewBuffer(params)
-	var req _Irpc_basicAPItoUpperReq
-	if err := req.Deserialize(r); err != nil {
-		return nil, fmt.Errorf("failed to deserialize toUpper: %w", err)
-	}
-	var resp _Irpc_basicAPItoUpperResp
-	resp.Param0_ = s.impl.toUpper(req.Param0_c)
-	b := bytes.NewBuffer(nil)
-	err := resp.Serialize(b)
-	if err != nil {
-		return nil, fmt.Errorf("response serialization failed: %w", err)
-	}
-	return b.Bytes(), nil
-}
-func (s *basicAPIRpcService) calltoUpperString(params []byte) ([]byte, error) {
-	r := bytes.NewBuffer(params)
-	var req _Irpc_basicAPItoUpperStringReq
-	if err := req.Deserialize(r); err != nil {
-		return nil, fmt.Errorf("failed to deserialize toUpperString: %w", err)
-	}
-	var resp _Irpc_basicAPItoUpperStringResp
-	resp.Param0_ = s.impl.toUpperString(req.Param0_s)
-	b := bytes.NewBuffer(nil)
-	err := resp.Serialize(b)
-	if err != nil {
-		return nil, fmt.Errorf("response serialization failed: %w", err)
-	}
-	return b.Bytes(), nil
-}
-func (s *basicAPIRpcService) callnegBool(params []byte) ([]byte, error) {
-	r := bytes.NewBuffer(params)
-	var req _Irpc_basicAPInegBoolReq
-	if err := req.Deserialize(r); err != nil {
-		return nil, fmt.Errorf("failed to deserialize negBool: %w", err)
-	}
-	var resp _Irpc_basicAPInegBoolResp
-	resp.Param0_ = s.impl.negBool(req.Param0_ok)
-	b := bytes.NewBuffer(nil)
-	err := resp.Serialize(b)
-	if err != nil {
-		return nil, fmt.Errorf("response serialization failed: %w", err)
-	}
-	return b.Bytes(), nil
 }
 
 type emptyAPIRpcService struct {
@@ -326,7 +291,7 @@ func newEmptyAPIRpcService(impl emptyAPI) *emptyAPIRpcService {
 func (emptyAPIRpcService) Hash() []byte {
 	return []byte("emptyAPIRpcService")
 }
-func (s *emptyAPIRpcService) CallFunc(funcId irpc.FuncId, args []byte) ([]byte, error) {
+func (s *emptyAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
 	default:
 		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, string(s.Hash()))

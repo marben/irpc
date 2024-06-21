@@ -3,14 +3,14 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 )
 
 func main() {
 	if err := run(); err != nil {
-		log.Fatalf("error: %+v", err)
+		fmt.Printf("error: %+v\n", err)
+		os.Exit(1)
 	}
 }
 
@@ -56,7 +56,7 @@ func processInputFile(inputFile string) error {
 	if err != nil {
 		return fmt.Errorf("figure out generated file name: %w", err)
 	}
-	log.Println("generating file:", genFileName)
+	fmt.Println("generating file:", genFileName)
 	outFile, err := os.Create(genFileName)
 	if err != nil {
 		return fmt.Errorf("create generated file '%s': %w", genFileName, err)

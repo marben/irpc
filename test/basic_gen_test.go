@@ -226,7 +226,10 @@ func (crw *CountingReadWriteCloser) Close() error {
 func BenchmarkClientRegister(b *testing.B) {
 	var rb, wb int // read/write bytes
 	for range b.N {
-		p1, p2 := testtools.NewDoubleEndedPipe()
+		p1, p2, err := testtools.CreateLocalTcpConnPipe()
+		if err != nil {
+			b.Fatalf("create tcp pipe: %v", err)
+		}
 
 		clientEp := irpc.NewEndpoint()
 		go clientEp.Serve(p1)
@@ -240,7 +243,7 @@ func BenchmarkClientRegister(b *testing.B) {
 		serviceEp.RegisterServices(service)
 
 		// register client (network communication)
-		_, err := newBasicAPIRpcClient(clientEp)
+		_, err = newBasicAPIRpcClient(clientEp)
 		if err != nil {
 			b.Fatalf("failed to create client: %v", err)
 		}
@@ -261,7 +264,10 @@ func BenchmarkClientRegister(b *testing.B) {
 }
 
 func BenchmarkAddInt64(b *testing.B) {
-	p1, p2 := testtools.NewDoubleEndedPipe()
+	p1, p2, err := testtools.CreateLocalTcpConnPipe()
+	if err != nil {
+		b.Fatalf("failed to create local tcp connection: %v", err)
+	}
 
 	serviceEp := irpc.NewEndpoint()
 	go serviceEp.Serve(p2)

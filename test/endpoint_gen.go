@@ -2,7 +2,6 @@
 package irpctestpkg
 
 import (
-	"bytes"
 	"encoding/binary"
 	"fmt"
 	"github.com/marben/irpc/pkg/irpc"
@@ -20,28 +19,26 @@ func newEndpointApiRpcService(impl endpointApi) *endpointApiRpcService {
 func (endpointApiRpcService) Hash() []byte {
 	return []byte("endpointApiRpcService")
 }
-func (s *endpointApiRpcService) CallFunc(funcId irpc.FuncId, args []byte) ([]byte, error) {
+func (s *endpointApiRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
 	case 0:
-		return s.callDiv(args)
+
+		return func(r io.Reader) (irpc.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_endpointApiDivReq
+			if err := args.Deserialize(r); err != nil {
+				return nil, err
+			}
+			return func() (irpc.Serializable, error) {
+				// EXECUTE
+				var resp _Irpc_endpointApiDivResp
+				resp.Param0_, resp.Param1_ = s.impl.Div(args.Param0_a, args.Param0_b)
+				return resp, nil
+			}, nil
+		}, nil
 	default:
 		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, string(s.Hash()))
 	}
-}
-func (s *endpointApiRpcService) callDiv(params []byte) ([]byte, error) {
-	r := bytes.NewBuffer(params)
-	var req _Irpc_endpointApiDivReq
-	if err := req.Deserialize(r); err != nil {
-		return nil, fmt.Errorf("failed to deserialize Div: %w", err)
-	}
-	var resp _Irpc_endpointApiDivResp
-	resp.Param0_, resp.Param1_ = s.impl.Div(req.Param0_a, req.Param0_b)
-	b := bytes.NewBuffer(nil)
-	err := resp.Serialize(b)
-	if err != nil {
-		return nil, fmt.Errorf("response serialization failed: %w", err)
-	}
-	return b.Bytes(), nil
 }
 
 type endpointApiRpcClient struct {

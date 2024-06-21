@@ -7,7 +7,7 @@ import (
 )
 
 func TestStructParam(t *testing.T) {
-	localEp, remoteEp, err := testtools.CreateLocalTcpEndpoints()
+	localEp, remoteEp, err := testtools.CreateLocalTcpEndpoints(t)
 	if err != nil {
 		t.Fatalf("create endpoints: %v", err)
 	}

@@ -37,7 +37,11 @@ func CreateLocalTcpConnPipe() (net.Conn, net.Conn, error) {
 	}
 }
 
-func CreateLocalTcpEndpoints() (*irpc.Endpoint, *irpc.Endpoint, error) {
+type testLogger interface {
+	Logf(format string, args ...any)
+}
+
+func CreateLocalTcpEndpoints(l testLogger) (*irpc.Endpoint, *irpc.Endpoint, error) {
 	c1, c2, err := CreateLocalTcpConnPipe()
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to create local tcp pipe")
@@ -45,10 +49,16 @@ func CreateLocalTcpEndpoints() (*irpc.Endpoint, *irpc.Endpoint, error) {
 	ep1 := irpc.NewEndpoint()
 	ep2 := irpc.NewEndpoint()
 
-	go func() { ep1.Serve(c1) }()
-	go func() { ep2.Serve(c2) }()
-	// go func() { log.Printf("serve ep1: %v", ep1.Serve(c1)) }()
-	// go func() { log.Printf("serve ep2: %v", ep2.Serve(c2)) }()
+	go func() {
+		if err := ep1.Serve(c1); err != nil {
+			l.Logf("ep1.Serve(): %v\n", err)
+		}
+	}()
+	go func() {
+		if err := ep2.Serve(c2); err != nil {
+			l.Logf("ep2.Serve(): %v\n", err)
+		}
+	}()
 
 	return ep1, ep2, nil
 }
