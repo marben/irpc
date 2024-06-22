@@ -160,56 +160,41 @@ func (e *Endpoint) popPendingRequestRtnChannel(reqNum uint16) (chan responsePack
 	return c, nil
 }
 
-// todo: get rid of this func an only do CallRemoteFuncRaw()
-func (e *Endpoint) CallRemoteFunc(serviceId RegisteredServiceId, funcId FuncId, req Serializable, resp Deserializable) error {
+func (e *Endpoint) CallRemoteFunc(serviceId RegisteredServiceId, funcId FuncId, reqData Serializable, resp Deserializable) error {
 	if e.closed.Load() {
 		return ErrEndpointClosed
 	}
 
-	respBytes, err := e.CallRemoteFuncRaw(serviceId, funcId, req)
-	if err != nil {
-		return fmt.Errorf("remote call failed: %w", err)
-	}
-
-	r := bytes.NewBuffer(respBytes)
-	if err := resp.Deserialize(r); err != nil {
-		return fmt.Errorf("response deserialize() failed: %w", err)
-	}
-
-	return nil
-}
-
-// TODO: eventually make non-public (i guess)
-func (e *Endpoint) CallRemoteFuncRaw(serviceId RegisteredServiceId, funcId FuncId, params Serializable) ([]byte, error) {
-	if e.closed.Load() { // todo: should not be necessary, once it's not public
-		return nil, ErrEndpointClosed
-	}
-
 	reqNum := e.genNewRequestNumber()
 
-	request := requestPacket{
+	reqType := packetHeader{
+		typ: rpcRequest,
+	}
+
+	requestHeader := requestPacket{
 		ReqNum:    reqNum,
 		ServiceId: serviceId,
 		FuncId:    funcId,
 	}
 
-	header := packetHeader{
-		typ: rpcRequest,
-	}
-
 	ch := e.registerNewPendingRequestRtnChannel(reqNum)
 
-	if err := e.serializeToConn(header, request, params); err != nil {
+	if err := e.serializeToConn(reqType, requestHeader, reqData); err != nil {
 		e.popPendingRequestRtnChannel(reqNum)
-		return nil, fmt.Errorf("failed to write request to the connection")
+		return fmt.Errorf("failed to write request to the connection")
 	}
 
-	resp := <-ch
-	if resp.Err != "" {
-		return resp.Data, fmt.Errorf("response error: %s", resp.Err)
+	respPacket := <-ch
+	if respPacket.Err != "" {
+		return fmt.Errorf("response error: %s", respPacket.Err)
 	}
 
-	return resp.Data, nil
+	r := bytes.NewBuffer(respPacket.Data)
+	if err := resp.Deserialize(r); err != nil {
+		return fmt.Errorf("response deserialize() failed: %w", err)
+	}
+
+	return nil
 }
 
 // todo: variadic is not such a great idea - what if only one error fails to register? what to return?
