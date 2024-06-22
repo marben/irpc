@@ -43,11 +43,11 @@ func (ms *MathIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer
 			if err := args.Deserialize(r); err != nil {
 				return nil, err
 			}
-			return func() (irpc.Serializable, error) {
+			return func() irpc.Serializable {
 				// EXECUTE
 				var resp addRtnVals
 				resp.Res = ms.impl.Add(args.A, args.B)
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 	default:

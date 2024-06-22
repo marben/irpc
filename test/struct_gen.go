@@ -28,11 +28,11 @@ func (s *structAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 			if err := args.Deserialize(r); err != nil {
 				return nil, err
 			}
-			return func() (irpc.Serializable, error) {
+			return func() irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_structAPIVectSumResp
 				resp.Param0_ = s.impl.VectSum(args.Param0_v)
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 	case 1:
@@ -43,11 +43,11 @@ func (s *structAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 			if err := args.Deserialize(r); err != nil {
 				return nil, err
 			}
-			return func() (irpc.Serializable, error) {
+			return func() irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_structAPIVect3x3SumResp
 				resp.Param0_ = s.impl.Vect3x3Sum(args.Param0_v)
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 	case 2:
@@ -58,11 +58,11 @@ func (s *structAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 			if err := args.Deserialize(r); err != nil {
 				return nil, err
 			}
-			return func() (irpc.Serializable, error) {
+			return func() irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_structAPISumSliceStructResp
 				resp.Param0_ = s.impl.SumSliceStruct(args.Param0_s)
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 	default:

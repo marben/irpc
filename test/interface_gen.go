@@ -28,11 +28,11 @@ func (s *interfaceTestRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeser
 			if err := args.Deserialize(r); err != nil {
 				return nil, err
 			}
-			return func() (irpc.Serializable, error) {
+			return func() irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_interfaceTestrtnErrorWithMessageResp
 				resp.Param0_ = s.impl.rtnErrorWithMessage(args.Param0_msg)
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 	case 1:
@@ -43,11 +43,11 @@ func (s *interfaceTestRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeser
 			if err := args.Deserialize(r); err != nil {
 				return nil, err
 			}
-			return func() (irpc.Serializable, error) {
+			return func() irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_interfaceTestrtnNilErrorResp
 				resp.Param0_ = s.impl.rtnNilError()
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 	case 2:
@@ -58,11 +58,11 @@ func (s *interfaceTestRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeser
 			if err := args.Deserialize(r); err != nil {
 				return nil, err
 			}
-			return func() (irpc.Serializable, error) {
+			return func() irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_interfaceTestrtnTwoErrorsResp
 				resp.Param0_, resp.Param1_ = s.impl.rtnTwoErrors()
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 	case 3:
@@ -73,11 +73,11 @@ func (s *interfaceTestRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeser
 			if err := args.Deserialize(r); err != nil {
 				return nil, err
 			}
-			return func() (irpc.Serializable, error) {
+			return func() irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_interfaceTestrtnStringAndErrorResp
 				resp.Param0_s, resp.Param1_err = s.impl.rtnStringAndError(args.Param0_msg)
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 	case 4:
@@ -88,11 +88,11 @@ func (s *interfaceTestRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeser
 			if err := args.Deserialize(r); err != nil {
 				return nil, err
 			}
-			return func() (irpc.Serializable, error) {
+			return func() irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp
 				resp.Param0_, resp.Param1_ = s.impl.passCustomInterfaceAndReturnItModified(args.Param0_ci)
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 	default:
@@ -120,11 +120,11 @@ func (s *customInterfaceRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDes
 			if err := args.Deserialize(r); err != nil {
 				return nil, err
 			}
-			return func() (irpc.Serializable, error) {
+			return func() irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_customInterfaceIntFuncResp
 				resp.Param0_ = s.impl.IntFunc()
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 	case 1:
@@ -135,11 +135,11 @@ func (s *customInterfaceRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDes
 			if err := args.Deserialize(r); err != nil {
 				return nil, err
 			}
-			return func() (irpc.Serializable, error) {
+			return func() irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_customInterfaceStringFuncResp
 				resp.Param0_ = s.impl.StringFunc()
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 	default:

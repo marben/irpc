@@ -33,7 +33,7 @@ type Service interface {
 }
 
 type ArgDeserializer func(r io.Reader) (FuncExecutor, error)
-type FuncExecutor func() (Serializable, error)
+type FuncExecutor func() Serializable
 
 // our generated code function calls' arguments implements Serializable/Deserializble
 type Serializable interface {
@@ -185,9 +185,6 @@ func (e *Endpoint) CallRemoteFunc(serviceId RegisteredServiceId, funcId FuncId, 
 	}
 
 	respPacket := <-ch
-	if respPacket.Err != "" {
-		return fmt.Errorf("response error: %s", respPacket.Err)
-	}
 
 	r := bytes.NewBuffer(respPacket.Data)
 	if err := resp.Deserialize(r); err != nil {
@@ -250,12 +247,7 @@ func (e *Endpoint) serializeToConn(data ...Serializable) error {
 }
 
 // respData is the actual serialized return data from the function
-func (e *Endpoint) sendResponse(reqNum uint16, respData Serializable, err error) error {
-	var errStr string
-	if err != nil {
-		errStr = err.Error()
-	}
-
+func (e *Endpoint) sendResponse(reqNum uint16, respData Serializable) error {
 	// todo: serialize directly to the connection
 	buf := bytes.NewBuffer(nil)
 	if err := respData.Serialize(buf); err != nil {
@@ -264,7 +256,6 @@ func (e *Endpoint) sendResponse(reqNum uint16, respData Serializable, err error)
 	resp := responsePacket{
 		ReqNum: reqNum,
 		Data:   buf.Bytes(),
-		Err:    errStr,
 	}
 
 	header := packetHeader{
@@ -312,13 +303,9 @@ func (e *Endpoint) readMsgs() error {
 				return fmt.Errorf("argDeserialize: %w", err)
 			}
 			go func() {
-				resp, err := exe()
-				if err != nil {
-					errC <- fmt.Errorf("func exec for req %v: %w", req, err)
-					return
-				}
+				resp := exe()
 
-				if err := e.sendResponse(req.ReqNum, resp, err); err != nil {
+				if err := e.sendResponse(req.ReqNum, resp); err != nil {
 					errC <- fmt.Errorf("failed to send response for request %d: %w", req.ReqNum, err)
 					return
 				}
@@ -380,7 +367,7 @@ func (c *clientRegisterService) GetFuncCall(funcId FuncId) (ArgDeserializer, err
 			if err := args.Deserialize(r); err != nil {
 				return nil, err
 			}
-			return func() (Serializable, error) {
+			return func() Serializable {
 				c.ep.servicesMux.RLock()
 				defer c.ep.servicesMux.RUnlock()
 
@@ -392,7 +379,7 @@ func (c *clientRegisterService) GetFuncCall(funcId FuncId) (ArgDeserializer, err
 					resp.ServiceId = serviceId
 				}
 
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 	default:

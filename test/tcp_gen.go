@@ -29,11 +29,11 @@ func (s *tcpTestApiRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserial
 			if err := args.Deserialize(r); err != nil {
 				return nil, err
 			}
-			return func() (irpc.Serializable, error) {
+			return func() irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_tcpTestApiDivResp
 				resp.Param0_, resp.Param1_ = s.impl.Div(args.Param0_a, args.Param0_b)
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 	default:

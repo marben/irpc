@@ -29,11 +29,11 @@ func (s *sliceTestRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 			if err := args.Deserialize(r); err != nil {
 				return nil, err
 			}
-			return func() (irpc.Serializable, error) {
+			return func() irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_sliceTestSliceSumResp
 				resp.Param0_ = s.impl.SliceSum(args.Param0_slice)
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 	case 1:
@@ -44,11 +44,11 @@ func (s *sliceTestRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 			if err := args.Deserialize(r); err != nil {
 				return nil, err
 			}
-			return func() (irpc.Serializable, error) {
+			return func() irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_sliceTestVectMultResp
 				resp.Param0_ = s.impl.VectMult(args.Param0_vect, args.Param1_s)
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 	case 2:
@@ -59,11 +59,11 @@ func (s *sliceTestRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 			if err := args.Deserialize(r); err != nil {
 				return nil, err
 			}
-			return func() (irpc.Serializable, error) {
+			return func() irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_sliceTestSliceOfFloat64SumResp
 				resp.Param0_ = s.impl.SliceOfFloat64Sum(args.Param0_slice)
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 	default:

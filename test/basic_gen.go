@@ -29,11 +29,11 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 			if err := args.Deserialize(r); err != nil {
 				return nil, err
 			}
-			return func() (irpc.Serializable, error) {
+			return func() irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddByteResp
 				resp.Param0_ = s.impl.addByte(args.Param0_a, args.Param1_b)
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 	case 1:
@@ -44,11 +44,11 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 			if err := args.Deserialize(r); err != nil {
 				return nil, err
 			}
-			return func() (irpc.Serializable, error) {
+			return func() irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddIntResp
 				resp.Param0_ = s.impl.addInt(args.Param0_a, args.Param1_b)
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 	case 2:
@@ -59,11 +59,11 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 			if err := args.Deserialize(r); err != nil {
 				return nil, err
 			}
-			return func() (irpc.Serializable, error) {
+			return func() irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIswapIntResp
 				resp.Param0_, resp.Param1_ = s.impl.swapInt(args.Param0_a, args.Param1_b)
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 	case 3:
@@ -74,11 +74,11 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 			if err := args.Deserialize(r); err != nil {
 				return nil, err
 			}
-			return func() (irpc.Serializable, error) {
+			return func() irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIsubUintResp
 				resp.Param0_ = s.impl.subUint(args.Param0_a, args.Param0_b)
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 	case 4:
@@ -89,11 +89,11 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 			if err := args.Deserialize(r); err != nil {
 				return nil, err
 			}
-			return func() (irpc.Serializable, error) {
+			return func() irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddInt8Resp
 				resp.Param0_ = s.impl.addInt8(args.Param0_a, args.Param0_b)
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 	case 5:
@@ -104,11 +104,11 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 			if err := args.Deserialize(r); err != nil {
 				return nil, err
 			}
-			return func() (irpc.Serializable, error) {
+			return func() irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddUint8Resp
 				resp.Param0_ = s.impl.addUint8(args.Param0_a, args.Param0_b)
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 	case 6:
@@ -119,11 +119,11 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 			if err := args.Deserialize(r); err != nil {
 				return nil, err
 			}
-			return func() (irpc.Serializable, error) {
+			return func() irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddInt16Resp
 				resp.Param0_ = s.impl.addInt16(args.Param0_a, args.Param0_b)
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 	case 7:
@@ -134,11 +134,11 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 			if err := args.Deserialize(r); err != nil {
 				return nil, err
 			}
-			return func() (irpc.Serializable, error) {
+			return func() irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddUint16Resp
 				resp.Param0_ = s.impl.addUint16(args.Param0_a, args.Param0_b)
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 	case 8:
@@ -149,11 +149,11 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 			if err := args.Deserialize(r); err != nil {
 				return nil, err
 			}
-			return func() (irpc.Serializable, error) {
+			return func() irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddInt32Resp
 				resp.Param0_ = s.impl.addInt32(args.Param0_a, args.Param0_b)
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 	case 9:
@@ -164,11 +164,11 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 			if err := args.Deserialize(r); err != nil {
 				return nil, err
 			}
-			return func() (irpc.Serializable, error) {
+			return func() irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddUint32Resp
 				resp.Param0_ = s.impl.addUint32(args.Param0_a, args.Param0_b)
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 	case 10:
@@ -179,11 +179,11 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 			if err := args.Deserialize(r); err != nil {
 				return nil, err
 			}
-			return func() (irpc.Serializable, error) {
+			return func() irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddInt64Resp
 				resp.Param0_ = s.impl.addInt64(args.Param0_a, args.Param0_b)
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 	case 11:
@@ -194,11 +194,11 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 			if err := args.Deserialize(r); err != nil {
 				return nil, err
 			}
-			return func() (irpc.Serializable, error) {
+			return func() irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddUint64Resp
 				resp.Param0_ = s.impl.addUint64(args.Param0_a, args.Param0_b)
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 	case 12:
@@ -209,11 +209,11 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 			if err := args.Deserialize(r); err != nil {
 				return nil, err
 			}
-			return func() (irpc.Serializable, error) {
+			return func() irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddFloat64Resp
 				resp.Param0_ = s.impl.addFloat64(args.Param0_a, args.Param0_b)
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 	case 13:
@@ -224,11 +224,11 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 			if err := args.Deserialize(r); err != nil {
 				return nil, err
 			}
-			return func() (irpc.Serializable, error) {
+			return func() irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddFloat32Resp
 				resp.Param0_ = s.impl.addFloat32(args.Param0_a, args.Param0_b)
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 	case 14:
@@ -239,11 +239,11 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 			if err := args.Deserialize(r); err != nil {
 				return nil, err
 			}
-			return func() (irpc.Serializable, error) {
+			return func() irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPItoUpperResp
 				resp.Param0_ = s.impl.toUpper(args.Param0_c)
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 	case 15:
@@ -254,11 +254,11 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 			if err := args.Deserialize(r); err != nil {
 				return nil, err
 			}
-			return func() (irpc.Serializable, error) {
+			return func() irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPItoUpperStringResp
 				resp.Param0_ = s.impl.toUpperString(args.Param0_s)
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 	case 16:
@@ -269,11 +269,11 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 			if err := args.Deserialize(r); err != nil {
 				return nil, err
 			}
-			return func() (irpc.Serializable, error) {
+			return func() irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPInegBoolResp
 				resp.Param0_ = s.impl.negBool(args.Param0_ok)
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 	default:

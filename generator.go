@@ -323,11 +323,11 @@ func (sg serviceGenerator) code() string {
 		 	if err := args.Deserialize(r); err != nil {
 		 		return nil, err
 		 	}
-			return func() (irpc.Serializable, error) {
+			return func() irpc.Serializable {
 				// EXECUTE
 				var resp %[2]s
 				%[3]s = s.impl.%[4]s(%[5]s)
-				return resp, nil
+				return resp
 			}, nil
 		}, nil
 		 `, m.req.typeName, m.resp.typeName, m.resp.paramListPrefixed("resp."), m.name, m.req.paramListPrefixed("args."))
