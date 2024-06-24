@@ -1,7 +1,6 @@
 package irpc
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -63,17 +62,17 @@ type Endpoint struct {
 
 	awaitConnC chan struct{} // read from this channel will unblock once Endpoint.Serve() was called, meaning we are sending/receiving (and conn != nil)
 
-	ourPendingRequests    map[uint16]chan responsePacket // pending request function awaiting response on given channel
-	ourPendingRequestsMux sync.Mutex
+	responseReaders    map[uint16]func(r io.Reader)
+	responseReadersMux sync.Mutex
 }
 
 func NewEndpoint() *Endpoint {
 	ep := &Endpoint{
-		services:           make(map[string]RegisteredServiceId),
-		clientsServices:    make(map[RegisteredServiceId]Service),
-		ourPendingRequests: make(map[uint16]chan responsePacket),
-		awaitConnC:         make(chan struct{}),
-		nextServiceId:      clientRegistrationService + 1,
+		services:        make(map[string]RegisteredServiceId),
+		clientsServices: make(map[RegisteredServiceId]Service),
+		responseReaders: make(map[uint16]func(r io.Reader)),
+		awaitConnC:      make(chan struct{}),
+		nextServiceId:   clientRegistrationService + 1,
 	}
 
 	// default service for registering clients
@@ -137,30 +136,7 @@ func (e *Endpoint) genNewRequestNumber() uint16 {
 	return reqNum
 }
 
-func (e *Endpoint) registerNewPendingRequestRtnChannel(reqNum uint16) chan responsePacket {
-	c := make(chan responsePacket, 1)
-
-	e.ourPendingRequestsMux.Lock()
-	defer e.ourPendingRequestsMux.Unlock()
-
-	e.ourPendingRequests[reqNum] = c
-	return c
-}
-
-func (e *Endpoint) popPendingRequestRtnChannel(reqNum uint16) (chan responsePacket, error) {
-	e.ourPendingRequestsMux.Lock()
-	defer e.ourPendingRequestsMux.Unlock()
-
-	c, found := e.ourPendingRequests[reqNum]
-	if !found {
-		return nil, fmt.Errorf("couldnt find pending request with reqNum '%d'", reqNum)
-	}
-	delete(e.ourPendingRequests, reqNum)
-
-	return c, nil
-}
-
-func (e *Endpoint) CallRemoteFunc(serviceId RegisteredServiceId, funcId FuncId, reqData Serializable, resp Deserializable) error {
+func (e *Endpoint) CallRemoteFunc(serviceId RegisteredServiceId, funcId FuncId, reqData Serializable, respData Deserializable) error {
 	if e.closed.Load() {
 		return ErrEndpointClosed
 	}
@@ -177,18 +153,24 @@ func (e *Endpoint) CallRemoteFunc(serviceId RegisteredServiceId, funcId FuncId, 
 		FuncId:    funcId,
 	}
 
-	ch := e.registerNewPendingRequestRtnChannel(reqNum)
+	c := make(chan error, 1)
+	e.responseReadersMux.Lock()
+	e.responseReaders[reqNum] = func(r io.Reader) {
+		c <- respData.Deserialize(r)
+	}
+	e.responseReadersMux.Unlock()
 
+	// todo: fail the whole endpoint?
 	if err := e.serializeToConn(reqType, requestHeader, reqData); err != nil {
-		e.popPendingRequestRtnChannel(reqNum)
+		e.responseReadersMux.Lock()
+		delete(e.responseReaders, reqNum)
+		e.responseReadersMux.Unlock()
 		return fmt.Errorf("failed to write request to the connection")
 	}
 
-	respPacket := <-ch
-
-	r := bytes.NewBuffer(respPacket.Data)
-	if err := resp.Deserialize(r); err != nil {
-		return fmt.Errorf("response deserialize() failed: %w", err)
+	// todo: should we close the endpoint on error?
+	if err := <-c; err != nil {
+		return fmt.Errorf("deserialization failed")
 	}
 
 	return nil
@@ -248,21 +230,15 @@ func (e *Endpoint) serializeToConn(data ...Serializable) error {
 
 // respData is the actual serialized return data from the function
 func (e *Endpoint) sendResponse(reqNum uint16, respData Serializable) error {
-	// todo: serialize directly to the connection
-	buf := bytes.NewBuffer(nil)
-	if err := respData.Serialize(buf); err != nil {
-		return fmt.Errorf("respData.Serialize(): %w", err)
-	}
 	resp := responsePacket{
 		ReqNum: reqNum,
-		Data:   buf.Bytes(),
 	}
 
 	header := packetHeader{
 		typ: rpcResponse,
 	}
 
-	if err := e.serializeToConn(header, resp); err != nil {
+	if err := e.serializeToConn(header, resp, respData); err != nil {
 		return fmt.Errorf("failed to serialize response to connection: %w", err)
 	}
 
@@ -316,18 +292,30 @@ func (e *Endpoint) readMsgs() error {
 			if err := resp.Deserialize(e.conn); err != nil {
 				return fmt.Errorf("failed to read response data:%w", err)
 			}
-			ch, err := e.popPendingRequestRtnChannel(resp.ReqNum)
+			readFunc, err := e.popResponseReaderFunc(resp)
 			if err != nil {
-				log.Printf("skipping response num %d because we failed to find corresponding request: %v", resp.ReqNum, err)
-				continue
+				// todo: probably just fail
+				log.Printf("skipping response num %d because we failed to find corresponding request func: %v", resp.ReqNum, err)
+				break
 			}
-			// a blocking write, but channels should be buffered
-			ch <- resp
+			readFunc(e.conn)
 
 		default:
 			return fmt.Errorf("unexpected msg type: %d", h.typ)
 		}
 	}
+}
+
+func (e *Endpoint) popResponseReaderFunc(resp responsePacket) (func(r io.Reader), error) {
+	e.responseReadersMux.Lock()
+	defer e.responseReadersMux.Unlock()
+
+	f, found := e.responseReaders[resp.ReqNum]
+	if !found {
+		return nil, fmt.Errorf("response reader num %d not found", resp.ReqNum)
+	}
+	delete(e.responseReaders, resp.ReqNum)
+	return f, nil
 }
 
 func (e *Endpoint) Serve(conn io.ReadWriteCloser) error {

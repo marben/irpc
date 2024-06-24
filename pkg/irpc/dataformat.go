@@ -129,15 +129,11 @@ func (rp *requestPacket) Deserialize(r io.Reader) error {
 }
 
 type responsePacket struct {
-	ReqNum uint16 // number of the initiating request
-	Data   []byte
+	ReqNum uint16 // request number that initiated this response
 }
 
 func (rp responsePacket) Serialize(w io.Writer) error {
 	if err := writeUint16(w, rp.ReqNum); err != nil {
-		return err
-	}
-	if err := writeByteSlice(w, rp.Data); err != nil {
 		return err
 	}
 	return nil
@@ -146,10 +142,6 @@ func (rp responsePacket) Serialize(w io.Writer) error {
 func (rp *responsePacket) Deserialize(r io.Reader) error {
 	var err error
 	rp.ReqNum, err = readUint16(r)
-	if err != nil {
-		return err
-	}
-	rp.Data, err = readByteSlice(r)
 	if err != nil {
 		return err
 	}
