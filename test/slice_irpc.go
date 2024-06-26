@@ -21,8 +21,7 @@ func (sliceTestRpcService) Hash() []byte {
 }
 func (s *sliceTestRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
-	case 0:
-
+	case 0: // SliceSum
 		return func(r io.Reader) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_sliceTestSliceSumReq
@@ -36,8 +35,7 @@ func (s *sliceTestRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 				return resp
 			}, nil
 		}, nil
-	case 1:
-
+	case 1: // VectMult
 		return func(r io.Reader) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_sliceTestVectMultReq
@@ -51,8 +49,7 @@ func (s *sliceTestRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 				return resp
 			}, nil
 		}, nil
-	case 2:
-
+	case 2: // SliceOfFloat64Sum
 		return func(r io.Reader) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_sliceTestSliceOfFloat64SumReq
@@ -120,16 +117,15 @@ type _Irpc_sliceTestSliceSumReq struct {
 }
 
 func (s _Irpc_sliceTestSliceSumReq) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // []int
 		var l int = len(s.Param0_slice)
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, uint64(l))
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("l int write: %w", err)
 		}
 
 		for i := 0; i < l; i++ {
-			b := make([]byte, 8)
 			binary.LittleEndian.PutUint64(b, uint64(s.Param0_slice[i]))
 			if _, err := w.Write(b[:8]); err != nil {
 				return fmt.Errorf("s.Param0_slice[i] int write: %w", err)
@@ -164,8 +160,8 @@ type _Irpc_sliceTestSliceSumResp struct {
 }
 
 func (s _Irpc_sliceTestSliceSumResp) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // int
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, uint64(s.Param0_))
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("s.Param0_ int write: %w", err)
@@ -190,16 +186,15 @@ type _Irpc_sliceTestVectMultReq struct {
 }
 
 func (s _Irpc_sliceTestVectMultReq) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // []int
 		var l int = len(s.Param0_vect)
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, uint64(l))
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("l int write: %w", err)
 		}
 
 		for i := 0; i < l; i++ {
-			b := make([]byte, 8)
 			binary.LittleEndian.PutUint64(b, uint64(s.Param0_vect[i]))
 			if _, err := w.Write(b[:8]); err != nil {
 				return fmt.Errorf("s.Param0_vect[i] int write: %w", err)
@@ -208,7 +203,6 @@ func (s _Irpc_sliceTestVectMultReq) Serialize(w io.Writer) error {
 		}
 	}
 	{ // int
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, uint64(s.Param1_s))
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("s.Param1_s int write: %w", err)
@@ -248,16 +242,15 @@ type _Irpc_sliceTestVectMultResp struct {
 }
 
 func (s _Irpc_sliceTestVectMultResp) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // []int
 		var l int = len(s.Param0_)
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, uint64(l))
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("l int write: %w", err)
 		}
 
 		for i := 0; i < l; i++ {
-			b := make([]byte, 8)
 			binary.LittleEndian.PutUint64(b, uint64(s.Param0_[i]))
 			if _, err := w.Write(b[:8]); err != nil {
 				return fmt.Errorf("s.Param0_[i] int write: %w", err)
@@ -292,16 +285,15 @@ type _Irpc_sliceTestSliceOfFloat64SumReq struct {
 }
 
 func (s _Irpc_sliceTestSliceOfFloat64SumReq) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // []float64
 		var l int = len(s.Param0_slice)
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, uint64(l))
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("l int write: %w", err)
 		}
 
 		for i := 0; i < l; i++ {
-			b := make([]byte, 8)
 			binary.LittleEndian.PutUint64(b, math.Float64bits(s.Param0_slice[i]))
 			if _, err := w.Write(b[:8]); err != nil {
 				return fmt.Errorf("s.Param0_slice[i] float64 write: %w", err)
@@ -336,8 +328,8 @@ type _Irpc_sliceTestSliceOfFloat64SumResp struct {
 }
 
 func (s _Irpc_sliceTestSliceOfFloat64SumResp) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // float64
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, math.Float64bits(s.Param0_))
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("s.Param0_ float64 write: %w", err)

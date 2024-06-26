@@ -1,6 +1,7 @@
 package irpc
 
 import (
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"io"
@@ -15,6 +16,29 @@ var ErrEndpointClosed = errors.New("endpoint is closed")
 var ErrServiceNotFound = errors.New("service not found")
 
 // const DefaultMaxMsgLength = 10 * 1024 * 1024 // 10 MiB for now
+
+var endian = binary.LittleEndian
+
+type packetType uint8
+
+const (
+	rpcRequest packetType = iota + 1
+	rpcResponse
+)
+
+type packetHeader struct {
+	typ packetType
+}
+
+type requestPacket struct {
+	ReqNum    uint16
+	ServiceId RegisteredServiceId
+	FuncId    FuncId
+}
+
+type responsePacket struct {
+	ReqNum uint16 // request number that initiated this response
+}
 
 // client registers to a service (by hash). upon registration, service is given 'RegisteredServiceId'
 type RegisteredServiceId uint16
@@ -46,8 +70,7 @@ type Deserializable interface {
 // there needs to be a serving endpoint on both sides of connection for communication to work
 type Endpoint struct {
 	// maps registered service's hash to it's given id
-	// todo: rename to serviceHashes
-	services        map[string]RegisteredServiceId
+	serviceHashes   map[string]RegisteredServiceId
 	clientsServices map[RegisteredServiceId]Service
 	nextServiceId   RegisteredServiceId
 	servicesMux     sync.RWMutex
@@ -68,7 +91,7 @@ type Endpoint struct {
 
 func NewEndpoint() *Endpoint {
 	ep := &Endpoint{
-		services:        make(map[string]RegisteredServiceId),
+		serviceHashes:   make(map[string]RegisteredServiceId),
 		clientsServices: make(map[RegisteredServiceId]Service),
 		responseReaders: make(map[uint16]func(r io.Reader)),
 		awaitConnC:      make(chan struct{}),
@@ -182,14 +205,14 @@ func (e *Endpoint) RegisterServices(services ...Service) error {
 	defer e.servicesMux.Unlock()
 
 	for _, service := range services {
-		if _, found := e.services[string(service.Hash())]; found {
+		if _, found := e.serviceHashes[string(service.Hash())]; found {
 			return fmt.Errorf("%s: %w", service.Hash(), ErrServiceAlreadyRegistered)
 		}
 
 		id := e.nextServiceId
 		e.nextServiceId++
 
-		e.services[string(service.Hash())] = id
+		e.serviceHashes[string(service.Hash())] = id
 		e.clientsServices[id] = service
 	}
 
@@ -202,7 +225,7 @@ func (e *Endpoint) RegisteredServices() []string {
 	defer e.servicesMux.RUnlock()
 
 	ss := []string{}
-	for s := range e.services {
+	for s := range e.serviceHashes {
 		ss = append(ss, s)
 	}
 
@@ -336,47 +359,4 @@ func (e *Endpoint) Serve(conn io.ReadWriteCloser) error {
 	}()
 
 	return <-errC
-}
-
-var _ Service = &clientRegisterService{}
-
-// service accomodating the client's registration
-// only for endpoint's purposes
-type clientRegisterService struct {
-	ep *Endpoint
-}
-
-// GetFuncCall implements Service.
-func (c *clientRegisterService) GetFuncCall(funcId FuncId) (ArgDeserializer, error) {
-	switch funcId {
-	case 0:
-		return func(r io.Reader) (FuncExecutor, error) {
-			var args clientRegisterReq
-			if err := args.Deserialize(r); err != nil {
-				return nil, err
-			}
-			return func() Serializable {
-				c.ep.servicesMux.RLock()
-				defer c.ep.servicesMux.RUnlock()
-
-				var resp clientRegisterResp
-				serviceId, found := c.ep.services[string(args.ServiceHash)]
-				if !found {
-					resp.Err = fmt.Errorf("couldn't find service hash %q", string(args.ServiceHash)).Error()
-				} else {
-					resp.ServiceId = serviceId
-				}
-
-				return resp
-			}, nil
-		}, nil
-	default:
-		return nil, fmt.Errorf("registerService has no function %d", funcId)
-	}
-}
-
-// Hash implements Service.
-func (c *clientRegisterService) Hash() []byte {
-	// currently, client register service is not versioned and it's hash is not used at all
-	return nil
 }

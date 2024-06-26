@@ -36,7 +36,7 @@ func varEncoder(apiName string, t types.Type) (encoder, error) {
 		case types.Float64:
 			return float64Encoder, nil
 		case types.String:
-			return stringEncoder{}, nil
+			return newStringEncoder(), nil
 		default:
 			return nil, fmt.Errorf("unsupported basic type '%s'", t.Name())
 		}

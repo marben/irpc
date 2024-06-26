@@ -20,8 +20,7 @@ func (interfaceTestRpcService) Hash() []byte {
 }
 func (s *interfaceTestRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
-	case 0:
-
+	case 0: // rtnErrorWithMessage
 		return func(r io.Reader) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_interfaceTestrtnErrorWithMessageReq
@@ -35,8 +34,7 @@ func (s *interfaceTestRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeser
 				return resp
 			}, nil
 		}, nil
-	case 1:
-
+	case 1: // rtnNilError
 		return func(r io.Reader) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_interfaceTestrtnNilErrorReq
@@ -50,8 +48,7 @@ func (s *interfaceTestRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeser
 				return resp
 			}, nil
 		}, nil
-	case 2:
-
+	case 2: // rtnTwoErrors
 		return func(r io.Reader) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_interfaceTestrtnTwoErrorsReq
@@ -65,8 +62,7 @@ func (s *interfaceTestRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeser
 				return resp
 			}, nil
 		}, nil
-	case 3:
-
+	case 3: // rtnStringAndError
 		return func(r io.Reader) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_interfaceTestrtnStringAndErrorReq
@@ -80,8 +76,7 @@ func (s *interfaceTestRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeser
 				return resp
 			}, nil
 		}, nil
-	case 4:
-
+	case 4: // passCustomInterfaceAndReturnItModified
 		return func(r io.Reader) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedReq
@@ -112,8 +107,7 @@ func (customInterfaceRpcService) Hash() []byte {
 }
 func (s *customInterfaceRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
-	case 0:
-
+	case 0: // IntFunc
 		return func(r io.Reader) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_customInterfaceIntFuncReq
@@ -127,8 +121,7 @@ func (s *customInterfaceRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDes
 				return resp
 			}, nil
 		}, nil
-	case 1:
-
+	case 1: // StringFunc
 		return func(r io.Reader) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_customInterfaceStringFuncReq
@@ -240,9 +233,9 @@ type _Irpc_interfaceTestrtnErrorWithMessageReq struct {
 }
 
 func (s _Irpc_interfaceTestrtnErrorWithMessageReq) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // string
 		var l int = len(s.Param0_msg)
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, uint64(l))
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("l int write: %w", err)
@@ -280,12 +273,12 @@ type _Irpc_interfaceTestrtnErrorWithMessageResp struct {
 }
 
 func (s _Irpc_interfaceTestrtnErrorWithMessageResp) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // error
 		var isNil bool
 		if s.Param0_ == nil {
 			isNil = true
 		}
-		b := make([]byte, 1)
 		if isNil {
 			b[0] = 1
 		} else {
@@ -299,7 +292,6 @@ func (s _Irpc_interfaceTestrtnErrorWithMessageResp) Serialize(w io.Writer) error
 			{ // Error()
 				_Error_0_ := s.Param0_.Error()
 				var l int = len(_Error_0_)
-				b := make([]byte, 8)
 				binary.LittleEndian.PutUint64(b, uint64(l))
 				if _, err := w.Write(b[:8]); err != nil {
 					return fmt.Errorf("l int write: %w", err)
@@ -375,12 +367,12 @@ type _Irpc_interfaceTestrtnNilErrorResp struct {
 }
 
 func (s _Irpc_interfaceTestrtnNilErrorResp) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // error
 		var isNil bool
 		if s.Param0_ == nil {
 			isNil = true
 		}
-		b := make([]byte, 1)
 		if isNil {
 			b[0] = 1
 		} else {
@@ -394,7 +386,6 @@ func (s _Irpc_interfaceTestrtnNilErrorResp) Serialize(w io.Writer) error {
 			{ // Error()
 				_Error_0_ := s.Param0_.Error()
 				var l int = len(_Error_0_)
-				b := make([]byte, 8)
 				binary.LittleEndian.PutUint64(b, uint64(l))
 				if _, err := w.Write(b[:8]); err != nil {
 					return fmt.Errorf("l int write: %w", err)
@@ -463,12 +454,12 @@ type _Irpc_interfaceTestrtnTwoErrorsResp struct {
 }
 
 func (s _Irpc_interfaceTestrtnTwoErrorsResp) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // error
 		var isNil bool
 		if s.Param0_ == nil {
 			isNil = true
 		}
-		b := make([]byte, 1)
 		if isNil {
 			b[0] = 1
 		} else {
@@ -482,7 +473,6 @@ func (s _Irpc_interfaceTestrtnTwoErrorsResp) Serialize(w io.Writer) error {
 			{ // Error()
 				_Error_0_ := s.Param0_.Error()
 				var l int = len(_Error_0_)
-				b := make([]byte, 8)
 				binary.LittleEndian.PutUint64(b, uint64(l))
 				if _, err := w.Write(b[:8]); err != nil {
 					return fmt.Errorf("l int write: %w", err)
@@ -500,7 +490,6 @@ func (s _Irpc_interfaceTestrtnTwoErrorsResp) Serialize(w io.Writer) error {
 		if s.Param1_ == nil {
 			isNil = true
 		}
-		b := make([]byte, 1)
 		if isNil {
 			b[0] = 1
 		} else {
@@ -514,7 +503,6 @@ func (s _Irpc_interfaceTestrtnTwoErrorsResp) Serialize(w io.Writer) error {
 			{ // Error()
 				_Error_0_ := s.Param1_.Error()
 				var l int = len(_Error_0_)
-				b := make([]byte, 8)
 				binary.LittleEndian.PutUint64(b, uint64(l))
 				if _, err := w.Write(b[:8]); err != nil {
 					return fmt.Errorf("l int write: %w", err)
@@ -606,9 +594,9 @@ type _Irpc_interfaceTestrtnStringAndErrorReq struct {
 }
 
 func (s _Irpc_interfaceTestrtnStringAndErrorReq) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // string
 		var l int = len(s.Param0_msg)
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, uint64(l))
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("l int write: %w", err)
@@ -647,9 +635,9 @@ type _Irpc_interfaceTestrtnStringAndErrorResp struct {
 }
 
 func (s _Irpc_interfaceTestrtnStringAndErrorResp) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // string
 		var l int = len(s.Param0_s)
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, uint64(l))
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("l int write: %w", err)
@@ -665,7 +653,6 @@ func (s _Irpc_interfaceTestrtnStringAndErrorResp) Serialize(w io.Writer) error {
 		if s.Param1_err == nil {
 			isNil = true
 		}
-		b := make([]byte, 1)
 		if isNil {
 			b[0] = 1
 		} else {
@@ -679,7 +666,6 @@ func (s _Irpc_interfaceTestrtnStringAndErrorResp) Serialize(w io.Writer) error {
 			{ // Error()
 				_Error_0_ := s.Param1_err.Error()
 				var l int = len(_Error_0_)
-				b := make([]byte, 8)
 				binary.LittleEndian.PutUint64(b, uint64(l))
 				if _, err := w.Write(b[:8]); err != nil {
 					return fmt.Errorf("l int write: %w", err)
@@ -753,12 +739,12 @@ type _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedReq struct {
 }
 
 func (s _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedReq) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // customInterface
 		var isNil bool
 		if s.Param0_ci == nil {
 			isNil = true
 		}
-		b := make([]byte, 1)
 		if isNil {
 			b[0] = 1
 		} else {
@@ -771,7 +757,6 @@ func (s _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedReq) Serialize(
 		if !isNil {
 			{ // IntFunc()
 				_IntFunc_0_ := s.Param0_ci.IntFunc()
-				b := make([]byte, 8)
 				binary.LittleEndian.PutUint64(b, uint64(_IntFunc_0_))
 				if _, err := w.Write(b[:8]); err != nil {
 					return fmt.Errorf("_IntFunc_0_ int write: %w", err)
@@ -780,7 +765,6 @@ func (s _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedReq) Serialize(
 			{ // StringFunc()
 				_StringFunc_0_ := s.Param0_ci.StringFunc()
 				var l int = len(_StringFunc_0_)
-				b := make([]byte, 8)
 				binary.LittleEndian.PutUint64(b, uint64(l))
 				if _, err := w.Write(b[:8]); err != nil {
 					return fmt.Errorf("l int write: %w", err)
@@ -858,12 +842,12 @@ type _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp struct {
 }
 
 func (s _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // customInterface
 		var isNil bool
 		if s.Param0_ == nil {
 			isNil = true
 		}
-		b := make([]byte, 1)
 		if isNil {
 			b[0] = 1
 		} else {
@@ -876,7 +860,6 @@ func (s _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp) Serialize
 		if !isNil {
 			{ // IntFunc()
 				_IntFunc_0_ := s.Param0_.IntFunc()
-				b := make([]byte, 8)
 				binary.LittleEndian.PutUint64(b, uint64(_IntFunc_0_))
 				if _, err := w.Write(b[:8]); err != nil {
 					return fmt.Errorf("_IntFunc_0_ int write: %w", err)
@@ -885,7 +868,6 @@ func (s _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp) Serialize
 			{ // StringFunc()
 				_StringFunc_0_ := s.Param0_.StringFunc()
 				var l int = len(_StringFunc_0_)
-				b := make([]byte, 8)
 				binary.LittleEndian.PutUint64(b, uint64(l))
 				if _, err := w.Write(b[:8]); err != nil {
 					return fmt.Errorf("l int write: %w", err)
@@ -903,7 +885,6 @@ func (s _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp) Serialize
 		if s.Param1_ == nil {
 			isNil = true
 		}
-		b := make([]byte, 1)
 		if isNil {
 			b[0] = 1
 		} else {
@@ -917,7 +898,6 @@ func (s _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp) Serialize
 			{ // Error()
 				_Error_0_ := s.Param1_.Error()
 				var l int = len(_Error_0_)
-				b := make([]byte, 8)
 				binary.LittleEndian.PutUint64(b, uint64(l))
 				if _, err := w.Write(b[:8]); err != nil {
 					return fmt.Errorf("l int write: %w", err)
@@ -1026,8 +1006,8 @@ type _Irpc_customInterfaceIntFuncResp struct {
 }
 
 func (s _Irpc_customInterfaceIntFuncResp) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // int
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, uint64(s.Param0_))
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("s.Param0_ int write: %w", err)
@@ -1061,9 +1041,9 @@ type _Irpc_customInterfaceStringFuncResp struct {
 }
 
 func (s _Irpc_customInterfaceStringFuncResp) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // string
 		var l int = len(s.Param0_)
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, uint64(l))
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("l int write: %w", err)

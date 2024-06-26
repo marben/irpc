@@ -20,8 +20,7 @@ func (structAPIRpcService) Hash() []byte {
 }
 func (s *structAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
-	case 0:
-
+	case 0: // VectSum
 		return func(r io.Reader) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_structAPIVectSumReq
@@ -35,8 +34,7 @@ func (s *structAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 				return resp
 			}, nil
 		}, nil
-	case 1:
-
+	case 1: // Vect3x3Sum
 		return func(r io.Reader) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_structAPIVect3x3SumReq
@@ -50,8 +48,7 @@ func (s *structAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 				return resp
 			}, nil
 		}, nil
-	case 2:
-
+	case 2: // SumSliceStruct
 		return func(r io.Reader) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_structAPISumSliceStructReq
@@ -118,23 +115,21 @@ type _Irpc_structAPIVectSumReq struct {
 }
 
 func (s _Irpc_structAPIVectSumReq) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // vect3
 		{
-			b := make([]byte, 8)
 			binary.LittleEndian.PutUint64(b, uint64(s.Param0_v.a))
 			if _, err := w.Write(b[:8]); err != nil {
 				return fmt.Errorf("s.Param0_v.a int write: %w", err)
 			}
 		}
 		{
-			b := make([]byte, 8)
 			binary.LittleEndian.PutUint64(b, uint64(s.Param0_v.b))
 			if _, err := w.Write(b[:8]); err != nil {
 				return fmt.Errorf("s.Param0_v.b int write: %w", err)
 			}
 		}
 		{
-			b := make([]byte, 8)
 			binary.LittleEndian.PutUint64(b, uint64(s.Param0_v.c))
 			if _, err := w.Write(b[:8]); err != nil {
 				return fmt.Errorf("s.Param0_v.c int write: %w", err)
@@ -175,8 +170,8 @@ type _Irpc_structAPIVectSumResp struct {
 }
 
 func (s _Irpc_structAPIVectSumResp) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // int
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, uint64(s.Param0_))
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("s.Param0_ int write: %w", err)
@@ -200,24 +195,22 @@ type _Irpc_structAPIVect3x3SumReq struct {
 }
 
 func (s _Irpc_structAPIVect3x3SumReq) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // vect3x3
 		{
 			{
-				b := make([]byte, 8)
 				binary.LittleEndian.PutUint64(b, uint64(s.Param0_v.v1.a))
 				if _, err := w.Write(b[:8]); err != nil {
 					return fmt.Errorf("s.Param0_v.v1.a int write: %w", err)
 				}
 			}
 			{
-				b := make([]byte, 8)
 				binary.LittleEndian.PutUint64(b, uint64(s.Param0_v.v1.b))
 				if _, err := w.Write(b[:8]); err != nil {
 					return fmt.Errorf("s.Param0_v.v1.b int write: %w", err)
 				}
 			}
 			{
-				b := make([]byte, 8)
 				binary.LittleEndian.PutUint64(b, uint64(s.Param0_v.v1.c))
 				if _, err := w.Write(b[:8]); err != nil {
 					return fmt.Errorf("s.Param0_v.v1.c int write: %w", err)
@@ -226,21 +219,18 @@ func (s _Irpc_structAPIVect3x3SumReq) Serialize(w io.Writer) error {
 		}
 		{
 			{
-				b := make([]byte, 8)
 				binary.LittleEndian.PutUint64(b, uint64(s.Param0_v.v2.a))
 				if _, err := w.Write(b[:8]); err != nil {
 					return fmt.Errorf("s.Param0_v.v2.a int write: %w", err)
 				}
 			}
 			{
-				b := make([]byte, 8)
 				binary.LittleEndian.PutUint64(b, uint64(s.Param0_v.v2.b))
 				if _, err := w.Write(b[:8]); err != nil {
 					return fmt.Errorf("s.Param0_v.v2.b int write: %w", err)
 				}
 			}
 			{
-				b := make([]byte, 8)
 				binary.LittleEndian.PutUint64(b, uint64(s.Param0_v.v2.c))
 				if _, err := w.Write(b[:8]); err != nil {
 					return fmt.Errorf("s.Param0_v.v2.c int write: %w", err)
@@ -249,21 +239,18 @@ func (s _Irpc_structAPIVect3x3SumReq) Serialize(w io.Writer) error {
 		}
 		{
 			{
-				b := make([]byte, 8)
 				binary.LittleEndian.PutUint64(b, uint64(s.Param0_v.v3.a))
 				if _, err := w.Write(b[:8]); err != nil {
 					return fmt.Errorf("s.Param0_v.v3.a int write: %w", err)
 				}
 			}
 			{
-				b := make([]byte, 8)
 				binary.LittleEndian.PutUint64(b, uint64(s.Param0_v.v3.b))
 				if _, err := w.Write(b[:8]); err != nil {
 					return fmt.Errorf("s.Param0_v.v3.b int write: %w", err)
 				}
 			}
 			{
-				b := make([]byte, 8)
 				binary.LittleEndian.PutUint64(b, uint64(s.Param0_v.v3.c))
 				if _, err := w.Write(b[:8]); err != nil {
 					return fmt.Errorf("s.Param0_v.v3.c int write: %w", err)
@@ -353,23 +340,21 @@ type _Irpc_structAPIVect3x3SumResp struct {
 }
 
 func (s _Irpc_structAPIVect3x3SumResp) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // vect3
 		{
-			b := make([]byte, 8)
 			binary.LittleEndian.PutUint64(b, uint64(s.Param0_.a))
 			if _, err := w.Write(b[:8]); err != nil {
 				return fmt.Errorf("s.Param0_.a int write: %w", err)
 			}
 		}
 		{
-			b := make([]byte, 8)
 			binary.LittleEndian.PutUint64(b, uint64(s.Param0_.b))
 			if _, err := w.Write(b[:8]); err != nil {
 				return fmt.Errorf("s.Param0_.b int write: %w", err)
 			}
 		}
 		{
-			b := make([]byte, 8)
 			binary.LittleEndian.PutUint64(b, uint64(s.Param0_.c))
 			if _, err := w.Write(b[:8]); err != nil {
 				return fmt.Errorf("s.Param0_.c int write: %w", err)
@@ -410,17 +395,16 @@ type _Irpc_structAPISumSliceStructReq struct {
 }
 
 func (s _Irpc_structAPISumSliceStructReq) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // sliceStruct
 		{
 			var l int = len(s.Param0_s.s1)
-			b := make([]byte, 8)
 			binary.LittleEndian.PutUint64(b, uint64(l))
 			if _, err := w.Write(b[:8]); err != nil {
 				return fmt.Errorf("l int write: %w", err)
 			}
 
 			for i := 0; i < l; i++ {
-				b := make([]byte, 8)
 				binary.LittleEndian.PutUint64(b, uint64(s.Param0_s.s1[i]))
 				if _, err := w.Write(b[:8]); err != nil {
 					return fmt.Errorf("s.Param0_s.s1[i] int write: %w", err)
@@ -430,14 +414,12 @@ func (s _Irpc_structAPISumSliceStructReq) Serialize(w io.Writer) error {
 		}
 		{
 			var l int = len(s.Param0_s.s2)
-			b := make([]byte, 8)
 			binary.LittleEndian.PutUint64(b, uint64(l))
 			if _, err := w.Write(b[:8]); err != nil {
 				return fmt.Errorf("l int write: %w", err)
 			}
 
 			for i := 0; i < l; i++ {
-				b := make([]byte, 8)
 				binary.LittleEndian.PutUint64(b, uint64(s.Param0_s.s2[i]))
 				if _, err := w.Write(b[:8]); err != nil {
 					return fmt.Errorf("s.Param0_s.s2[i] int write: %w", err)
@@ -491,8 +473,8 @@ type _Irpc_structAPISumSliceStructResp struct {
 }
 
 func (s _Irpc_structAPISumSliceStructResp) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // int
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, uint64(s.Param0_))
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("s.Param0_ int write: %w", err)

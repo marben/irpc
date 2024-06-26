@@ -1,22 +1,8 @@
 package irpc
 
 import (
-	"encoding/binary"
 	"io"
 )
-
-var endian = binary.LittleEndian
-
-type packetType uint8
-
-const (
-	rpcRequest packetType = iota + 1
-	rpcResponse
-)
-
-type packetHeader struct {
-	typ packetType
-}
 
 func (ph packetHeader) Serialize(w io.Writer) error {
 	if err := writeUint8(w, uint8(ph.typ)); err != nil {
@@ -34,65 +20,6 @@ func (ph *packetHeader) Deserialize(r io.Reader) error {
 	ph.typ = packetType(typUi8)
 
 	return err
-}
-
-type clientRegisterReq struct {
-	ServiceHash []byte
-}
-
-func (rp clientRegisterReq) Serialize(w io.Writer) error {
-	if err := writeByteSlice(w, rp.ServiceHash); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (rp *clientRegisterReq) Deserialize(r io.Reader) error {
-	var err error
-	rp.ServiceHash, err = readByteSlice(r)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-type clientRegisterResp struct {
-	ServiceId RegisteredServiceId
-	Err       string // todo: turn into proper error, once we don't do json serialization
-}
-
-func (rp clientRegisterResp) Serialize(w io.Writer) error {
-	if err := writeUint16(w, uint16(rp.ServiceId)); err != nil {
-		return err
-	}
-	if err := writeString(w, rp.Err); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (rp *clientRegisterResp) Deserialize(r io.Reader) error {
-	var err error
-	sid, err := readUint16(r)
-	if err != nil {
-		return err
-	}
-	rp.ServiceId = RegisteredServiceId(sid)
-
-	rp.Err, err = readString(r)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-type requestPacket struct {
-	ReqNum    uint16
-	ServiceId RegisteredServiceId
-	FuncId    FuncId
 }
 
 func (rp requestPacket) Serialize(w io.Writer) error {
@@ -126,10 +53,6 @@ func (rp *requestPacket) Deserialize(r io.Reader) error {
 	}
 	rp.FuncId = FuncId(fId)
 	return nil
-}
-
-type responsePacket struct {
-	ReqNum uint16 // request number that initiated this response
 }
 
 func (rp responsePacket) Serialize(w io.Writer) error {

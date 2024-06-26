@@ -133,12 +133,26 @@ func (sg paramStructGenerator) code() string {
 }
 
 func (sg paramStructGenerator) serializeFunc() string {
+	// find the requested size for out buffer
+	bufSize := 0
+	for _, vf := range sg.params {
+		bufSize = max(bufSize, vf.enc.requestBufSize())
+	}
+
 	sb := &strings.Builder{}
 	fmt.Fprintf(sb, "func (s %s)Serialize(w io.Writer) error {\n", sg.typeName)
+	var bi bufInfo
+	if bufSize > 0 {
+		fmt.Fprintf(sb, "b := make([]byte, %d)\n", bufSize)
+		bi = bufInfo{
+			varName: "b",
+			length:  bufSize,
+		}
+	}
 	if len(sg.params) > 0 {
 		for _, p := range sg.params {
 			fmt.Fprintf(sb, "{ // %s\n", p.typeName)
-			sb.WriteString(p.enc.encode("s." + p.structFieldName))
+			sb.WriteString(p.enc.encode(bi, "s."+p.structFieldName))
 			sb.WriteString("}\n")
 		}
 	}
@@ -315,9 +329,8 @@ func (sg serviceGenerator) code() string {
 			`, sg.serviceTypeName)
 
 	for _, m := range sg.methods {
-		fmt.Fprintf(sb, "case %d:\n", m.index)
-		fmt.Fprintf(sb, `
-		return func(r io.Reader) (irpc.FuncExecutor, error) {
+		fmt.Fprintf(sb, "case %d: // %s\n", m.index, m.name)
+		fmt.Fprintf(sb, `return func(r io.Reader) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 		 	var args %[1]s
 		 	if err := args.Deserialize(r); err != nil {

@@ -21,8 +21,7 @@ func (basicAPIRpcService) Hash() []byte {
 }
 func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
-	case 0:
-
+	case 0: // addByte
 		return func(r io.Reader) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_basicAPIaddByteReq
@@ -36,8 +35,7 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 				return resp
 			}, nil
 		}, nil
-	case 1:
-
+	case 1: // addInt
 		return func(r io.Reader) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_basicAPIaddIntReq
@@ -51,8 +49,7 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 				return resp
 			}, nil
 		}, nil
-	case 2:
-
+	case 2: // swapInt
 		return func(r io.Reader) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_basicAPIswapIntReq
@@ -66,8 +63,7 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 				return resp
 			}, nil
 		}, nil
-	case 3:
-
+	case 3: // subUint
 		return func(r io.Reader) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_basicAPIsubUintReq
@@ -81,8 +77,7 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 				return resp
 			}, nil
 		}, nil
-	case 4:
-
+	case 4: // addInt8
 		return func(r io.Reader) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_basicAPIaddInt8Req
@@ -96,8 +91,7 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 				return resp
 			}, nil
 		}, nil
-	case 5:
-
+	case 5: // addUint8
 		return func(r io.Reader) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_basicAPIaddUint8Req
@@ -111,8 +105,7 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 				return resp
 			}, nil
 		}, nil
-	case 6:
-
+	case 6: // addInt16
 		return func(r io.Reader) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_basicAPIaddInt16Req
@@ -126,8 +119,7 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 				return resp
 			}, nil
 		}, nil
-	case 7:
-
+	case 7: // addUint16
 		return func(r io.Reader) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_basicAPIaddUint16Req
@@ -141,8 +133,7 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 				return resp
 			}, nil
 		}, nil
-	case 8:
-
+	case 8: // addInt32
 		return func(r io.Reader) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_basicAPIaddInt32Req
@@ -156,8 +147,7 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 				return resp
 			}, nil
 		}, nil
-	case 9:
-
+	case 9: // addUint32
 		return func(r io.Reader) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_basicAPIaddUint32Req
@@ -171,8 +161,7 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 				return resp
 			}, nil
 		}, nil
-	case 10:
-
+	case 10: // addInt64
 		return func(r io.Reader) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_basicAPIaddInt64Req
@@ -186,8 +175,7 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 				return resp
 			}, nil
 		}, nil
-	case 11:
-
+	case 11: // addUint64
 		return func(r io.Reader) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_basicAPIaddUint64Req
@@ -201,8 +189,7 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 				return resp
 			}, nil
 		}, nil
-	case 12:
-
+	case 12: // addFloat64
 		return func(r io.Reader) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_basicAPIaddFloat64Req
@@ -216,8 +203,7 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 				return resp
 			}, nil
 		}, nil
-	case 13:
-
+	case 13: // addFloat32
 		return func(r io.Reader) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_basicAPIaddFloat32Req
@@ -231,8 +217,7 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 				return resp
 			}, nil
 		}, nil
-	case 14:
-
+	case 14: // toUpper
 		return func(r io.Reader) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_basicAPItoUpperReq
@@ -246,8 +231,7 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 				return resp
 			}, nil
 		}, nil
-	case 15:
-
+	case 15: // toUpperString
 		return func(r io.Reader) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_basicAPItoUpperStringReq
@@ -261,8 +245,7 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 				return resp
 			}, nil
 		}, nil
-	case 16:
-
+	case 16: // negBool
 		return func(r io.Reader) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_basicAPInegBoolReq
@@ -514,15 +497,14 @@ type _Irpc_basicAPIaddByteReq struct {
 }
 
 func (s _Irpc_basicAPIaddByteReq) Serialize(w io.Writer) error {
+	b := make([]byte, 1)
 	{ // byte
-		b := make([]byte, 1)
 		b[0] = byte(s.Param0_a)
 		if _, err := w.Write(b[:1]); err != nil {
 			return fmt.Errorf("s.Param0_a uint8 write: %w", err)
 		}
 	}
 	{ // byte
-		b := make([]byte, 1)
 		b[0] = byte(s.Param1_b)
 		if _, err := w.Write(b[:1]); err != nil {
 			return fmt.Errorf("s.Param1_b uint8 write: %w", err)
@@ -553,8 +535,8 @@ type _Irpc_basicAPIaddByteResp struct {
 }
 
 func (s _Irpc_basicAPIaddByteResp) Serialize(w io.Writer) error {
+	b := make([]byte, 1)
 	{ // byte
-		b := make([]byte, 1)
 		b[0] = byte(s.Param0_)
 		if _, err := w.Write(b[:1]); err != nil {
 			return fmt.Errorf("s.Param0_ uint8 write: %w", err)
@@ -579,15 +561,14 @@ type _Irpc_basicAPIaddIntReq struct {
 }
 
 func (s _Irpc_basicAPIaddIntReq) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // int
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, uint64(s.Param0_a))
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("s.Param0_a int write: %w", err)
 		}
 	}
 	{ // int
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, uint64(s.Param1_b))
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("s.Param1_b int write: %w", err)
@@ -618,8 +599,8 @@ type _Irpc_basicAPIaddIntResp struct {
 }
 
 func (s _Irpc_basicAPIaddIntResp) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // int
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, uint64(s.Param0_))
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("s.Param0_ int write: %w", err)
@@ -644,15 +625,14 @@ type _Irpc_basicAPIswapIntReq struct {
 }
 
 func (s _Irpc_basicAPIswapIntReq) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // int
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, uint64(s.Param0_a))
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("s.Param0_a int write: %w", err)
 		}
 	}
 	{ // int
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, uint64(s.Param1_b))
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("s.Param1_b int write: %w", err)
@@ -684,15 +664,14 @@ type _Irpc_basicAPIswapIntResp struct {
 }
 
 func (s _Irpc_basicAPIswapIntResp) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // int
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, uint64(s.Param0_))
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("s.Param0_ int write: %w", err)
 		}
 	}
 	{ // int
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, uint64(s.Param1_))
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("s.Param1_ int write: %w", err)
@@ -724,15 +703,14 @@ type _Irpc_basicAPIsubUintReq struct {
 }
 
 func (s _Irpc_basicAPIsubUintReq) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // uint
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, uint64(s.Param0_a))
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("s.Param0_a uint write: %w", err)
 		}
 	}
 	{ // uint
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, uint64(s.Param0_b))
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("s.Param0_b uint write: %w", err)
@@ -763,8 +741,8 @@ type _Irpc_basicAPIsubUintResp struct {
 }
 
 func (s _Irpc_basicAPIsubUintResp) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // uint
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, uint64(s.Param0_))
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("s.Param0_ uint write: %w", err)
@@ -789,15 +767,14 @@ type _Irpc_basicAPIaddInt8Req struct {
 }
 
 func (s _Irpc_basicAPIaddInt8Req) Serialize(w io.Writer) error {
+	b := make([]byte, 1)
 	{ // int8
-		b := make([]byte, 1)
 		b[0] = byte(s.Param0_a)
 		if _, err := w.Write(b[:1]); err != nil {
 			return fmt.Errorf("s.Param0_a int8 write: %w", err)
 		}
 	}
 	{ // int8
-		b := make([]byte, 1)
 		b[0] = byte(s.Param0_b)
 		if _, err := w.Write(b[:1]); err != nil {
 			return fmt.Errorf("s.Param0_b int8 write: %w", err)
@@ -828,8 +805,8 @@ type _Irpc_basicAPIaddInt8Resp struct {
 }
 
 func (s _Irpc_basicAPIaddInt8Resp) Serialize(w io.Writer) error {
+	b := make([]byte, 1)
 	{ // int8
-		b := make([]byte, 1)
 		b[0] = byte(s.Param0_)
 		if _, err := w.Write(b[:1]); err != nil {
 			return fmt.Errorf("s.Param0_ int8 write: %w", err)
@@ -854,15 +831,14 @@ type _Irpc_basicAPIaddUint8Req struct {
 }
 
 func (s _Irpc_basicAPIaddUint8Req) Serialize(w io.Writer) error {
+	b := make([]byte, 1)
 	{ // uint8
-		b := make([]byte, 1)
 		b[0] = byte(s.Param0_a)
 		if _, err := w.Write(b[:1]); err != nil {
 			return fmt.Errorf("s.Param0_a uint8 write: %w", err)
 		}
 	}
 	{ // uint8
-		b := make([]byte, 1)
 		b[0] = byte(s.Param0_b)
 		if _, err := w.Write(b[:1]); err != nil {
 			return fmt.Errorf("s.Param0_b uint8 write: %w", err)
@@ -893,8 +869,8 @@ type _Irpc_basicAPIaddUint8Resp struct {
 }
 
 func (s _Irpc_basicAPIaddUint8Resp) Serialize(w io.Writer) error {
+	b := make([]byte, 1)
 	{ // uint8
-		b := make([]byte, 1)
 		b[0] = byte(s.Param0_)
 		if _, err := w.Write(b[:1]); err != nil {
 			return fmt.Errorf("s.Param0_ uint8 write: %w", err)
@@ -919,15 +895,14 @@ type _Irpc_basicAPIaddInt16Req struct {
 }
 
 func (s _Irpc_basicAPIaddInt16Req) Serialize(w io.Writer) error {
+	b := make([]byte, 2)
 	{ // int16
-		b := make([]byte, 2)
 		binary.LittleEndian.PutUint16(b, uint16(s.Param0_a))
 		if _, err := w.Write(b[:2]); err != nil {
 			return fmt.Errorf("s.Param0_a int16 write: %w", err)
 		}
 	}
 	{ // int16
-		b := make([]byte, 2)
 		binary.LittleEndian.PutUint16(b, uint16(s.Param0_b))
 		if _, err := w.Write(b[:2]); err != nil {
 			return fmt.Errorf("s.Param0_b int16 write: %w", err)
@@ -958,8 +933,8 @@ type _Irpc_basicAPIaddInt16Resp struct {
 }
 
 func (s _Irpc_basicAPIaddInt16Resp) Serialize(w io.Writer) error {
+	b := make([]byte, 2)
 	{ // int16
-		b := make([]byte, 2)
 		binary.LittleEndian.PutUint16(b, uint16(s.Param0_))
 		if _, err := w.Write(b[:2]); err != nil {
 			return fmt.Errorf("s.Param0_ int16 write: %w", err)
@@ -984,15 +959,14 @@ type _Irpc_basicAPIaddUint16Req struct {
 }
 
 func (s _Irpc_basicAPIaddUint16Req) Serialize(w io.Writer) error {
+	b := make([]byte, 2)
 	{ // uint16
-		b := make([]byte, 2)
 		binary.LittleEndian.PutUint16(b, s.Param0_a)
 		if _, err := w.Write(b[:2]); err != nil {
 			return fmt.Errorf("s.Param0_a uint16 write: %w", err)
 		}
 	}
 	{ // uint16
-		b := make([]byte, 2)
 		binary.LittleEndian.PutUint16(b, s.Param0_b)
 		if _, err := w.Write(b[:2]); err != nil {
 			return fmt.Errorf("s.Param0_b uint16 write: %w", err)
@@ -1023,8 +997,8 @@ type _Irpc_basicAPIaddUint16Resp struct {
 }
 
 func (s _Irpc_basicAPIaddUint16Resp) Serialize(w io.Writer) error {
+	b := make([]byte, 2)
 	{ // uint16
-		b := make([]byte, 2)
 		binary.LittleEndian.PutUint16(b, s.Param0_)
 		if _, err := w.Write(b[:2]); err != nil {
 			return fmt.Errorf("s.Param0_ uint16 write: %w", err)
@@ -1049,15 +1023,14 @@ type _Irpc_basicAPIaddInt32Req struct {
 }
 
 func (s _Irpc_basicAPIaddInt32Req) Serialize(w io.Writer) error {
+	b := make([]byte, 4)
 	{ // int32
-		b := make([]byte, 4)
 		binary.LittleEndian.PutUint32(b, uint32(s.Param0_a))
 		if _, err := w.Write(b[:4]); err != nil {
 			return fmt.Errorf("s.Param0_a int32 write: %w", err)
 		}
 	}
 	{ // int32
-		b := make([]byte, 4)
 		binary.LittleEndian.PutUint32(b, uint32(s.Param0_b))
 		if _, err := w.Write(b[:4]); err != nil {
 			return fmt.Errorf("s.Param0_b int32 write: %w", err)
@@ -1088,8 +1061,8 @@ type _Irpc_basicAPIaddInt32Resp struct {
 }
 
 func (s _Irpc_basicAPIaddInt32Resp) Serialize(w io.Writer) error {
+	b := make([]byte, 4)
 	{ // int32
-		b := make([]byte, 4)
 		binary.LittleEndian.PutUint32(b, uint32(s.Param0_))
 		if _, err := w.Write(b[:4]); err != nil {
 			return fmt.Errorf("s.Param0_ int32 write: %w", err)
@@ -1114,15 +1087,14 @@ type _Irpc_basicAPIaddUint32Req struct {
 }
 
 func (s _Irpc_basicAPIaddUint32Req) Serialize(w io.Writer) error {
+	b := make([]byte, 4)
 	{ // uint32
-		b := make([]byte, 4)
 		binary.LittleEndian.PutUint32(b, s.Param0_a)
 		if _, err := w.Write(b[:4]); err != nil {
 			return fmt.Errorf("s.Param0_a uint32 write: %w", err)
 		}
 	}
 	{ // uint32
-		b := make([]byte, 4)
 		binary.LittleEndian.PutUint32(b, s.Param0_b)
 		if _, err := w.Write(b[:4]); err != nil {
 			return fmt.Errorf("s.Param0_b uint32 write: %w", err)
@@ -1153,8 +1125,8 @@ type _Irpc_basicAPIaddUint32Resp struct {
 }
 
 func (s _Irpc_basicAPIaddUint32Resp) Serialize(w io.Writer) error {
+	b := make([]byte, 4)
 	{ // uint32
-		b := make([]byte, 4)
 		binary.LittleEndian.PutUint32(b, s.Param0_)
 		if _, err := w.Write(b[:4]); err != nil {
 			return fmt.Errorf("s.Param0_ uint32 write: %w", err)
@@ -1179,15 +1151,14 @@ type _Irpc_basicAPIaddInt64Req struct {
 }
 
 func (s _Irpc_basicAPIaddInt64Req) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // int64
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, uint64(s.Param0_a))
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("s.Param0_a int64 write: %w", err)
 		}
 	}
 	{ // int64
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, uint64(s.Param0_b))
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("s.Param0_b int64 write: %w", err)
@@ -1218,8 +1189,8 @@ type _Irpc_basicAPIaddInt64Resp struct {
 }
 
 func (s _Irpc_basicAPIaddInt64Resp) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // int64
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, uint64(s.Param0_))
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("s.Param0_ int64 write: %w", err)
@@ -1244,15 +1215,14 @@ type _Irpc_basicAPIaddUint64Req struct {
 }
 
 func (s _Irpc_basicAPIaddUint64Req) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // uint64
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, s.Param0_a)
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("s.Param0_a uint64 write: %w", err)
 		}
 	}
 	{ // uint64
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, s.Param0_b)
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("s.Param0_b uint64 write: %w", err)
@@ -1283,8 +1253,8 @@ type _Irpc_basicAPIaddUint64Resp struct {
 }
 
 func (s _Irpc_basicAPIaddUint64Resp) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // uint64
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, s.Param0_)
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("s.Param0_ uint64 write: %w", err)
@@ -1309,15 +1279,14 @@ type _Irpc_basicAPIaddFloat64Req struct {
 }
 
 func (s _Irpc_basicAPIaddFloat64Req) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // float64
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, math.Float64bits(s.Param0_a))
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("s.Param0_a float64 write: %w", err)
 		}
 	}
 	{ // float64
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, math.Float64bits(s.Param0_b))
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("s.Param0_b float64 write: %w", err)
@@ -1348,8 +1317,8 @@ type _Irpc_basicAPIaddFloat64Resp struct {
 }
 
 func (s _Irpc_basicAPIaddFloat64Resp) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // float64
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, math.Float64bits(s.Param0_))
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("s.Param0_ float64 write: %w", err)
@@ -1374,15 +1343,14 @@ type _Irpc_basicAPIaddFloat32Req struct {
 }
 
 func (s _Irpc_basicAPIaddFloat32Req) Serialize(w io.Writer) error {
+	b := make([]byte, 4)
 	{ // float32
-		b := make([]byte, 4)
 		binary.LittleEndian.PutUint32(b, math.Float32bits(s.Param0_a))
 		if _, err := w.Write(b[:4]); err != nil {
 			return fmt.Errorf("s.Param0_a float32 write: %w", err)
 		}
 	}
 	{ // float32
-		b := make([]byte, 4)
 		binary.LittleEndian.PutUint32(b, math.Float32bits(s.Param0_b))
 		if _, err := w.Write(b[:4]); err != nil {
 			return fmt.Errorf("s.Param0_b float32 write: %w", err)
@@ -1413,8 +1381,8 @@ type _Irpc_basicAPIaddFloat32Resp struct {
 }
 
 func (s _Irpc_basicAPIaddFloat32Resp) Serialize(w io.Writer) error {
+	b := make([]byte, 4)
 	{ // float32
-		b := make([]byte, 4)
 		binary.LittleEndian.PutUint32(b, math.Float32bits(s.Param0_))
 		if _, err := w.Write(b[:4]); err != nil {
 			return fmt.Errorf("s.Param0_ float32 write: %w", err)
@@ -1438,8 +1406,8 @@ type _Irpc_basicAPItoUpperReq struct {
 }
 
 func (s _Irpc_basicAPItoUpperReq) Serialize(w io.Writer) error {
+	b := make([]byte, 4)
 	{ // rune
-		b := make([]byte, 4)
 		binary.LittleEndian.PutUint32(b, uint32(s.Param0_c))
 		if _, err := w.Write(b[:4]); err != nil {
 			return fmt.Errorf("s.Param0_c int32 write: %w", err)
@@ -1463,8 +1431,8 @@ type _Irpc_basicAPItoUpperResp struct {
 }
 
 func (s _Irpc_basicAPItoUpperResp) Serialize(w io.Writer) error {
+	b := make([]byte, 4)
 	{ // rune
-		b := make([]byte, 4)
 		binary.LittleEndian.PutUint32(b, uint32(s.Param0_))
 		if _, err := w.Write(b[:4]); err != nil {
 			return fmt.Errorf("s.Param0_ int32 write: %w", err)
@@ -1488,9 +1456,9 @@ type _Irpc_basicAPItoUpperStringReq struct {
 }
 
 func (s _Irpc_basicAPItoUpperStringReq) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // string
 		var l int = len(s.Param0_s)
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, uint64(l))
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("l int write: %w", err)
@@ -1528,9 +1496,9 @@ type _Irpc_basicAPItoUpperStringResp struct {
 }
 
 func (s _Irpc_basicAPItoUpperStringResp) Serialize(w io.Writer) error {
+	b := make([]byte, 8)
 	{ // string
 		var l int = len(s.Param0_)
-		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, uint64(l))
 		if _, err := w.Write(b[:8]); err != nil {
 			return fmt.Errorf("l int write: %w", err)
@@ -1568,8 +1536,8 @@ type _Irpc_basicAPInegBoolReq struct {
 }
 
 func (s _Irpc_basicAPInegBoolReq) Serialize(w io.Writer) error {
+	b := make([]byte, 1)
 	{ // bool
-		b := make([]byte, 1)
 		if s.Param0_ok {
 			b[0] = 1
 		} else {
@@ -1601,8 +1569,8 @@ type _Irpc_basicAPInegBoolResp struct {
 }
 
 func (s _Irpc_basicAPInegBoolResp) Serialize(w io.Writer) error {
+	b := make([]byte, 1)
 	{ // bool
-		b := make([]byte, 1)
 		if s.Param0_ {
 			b[0] = 1
 		} else {
