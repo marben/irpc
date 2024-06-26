@@ -77,5 +77,5 @@ func generatedFileName(inputGoFile string) (string, error) {
 		return "", fmt.Errorf("not a go file. '%s' doesn't end with '%s' suffix", inputGoFile, goSuffix)
 	}
 
-	return n + "_gen" + goSuffix, nil
+	return n + "_irpc" + goSuffix, nil
 }

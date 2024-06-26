@@ -8,7 +8,7 @@ func TestGeneratedFileName(t *testing.T) {
 		t.Fatalf("unexpected error: %+v", err)
 	}
 
-	if out != "test_gen.go" {
+	if out != "test_irpc.go" {
 		t.Fatalf("unexpected generated filename: '%s'", out)
 	}
 }

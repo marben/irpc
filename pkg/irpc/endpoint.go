@@ -245,7 +245,7 @@ func (e *Endpoint) sendResponse(reqNum uint16, respData Serializable) error {
 	return nil
 }
 
-func (e *Endpoint) readMsgs() error {
+func (e *Endpoint) readMsgs(r io.Reader) error {
 	errC := make(chan error)
 	for {
 		select {
@@ -255,14 +255,14 @@ func (e *Endpoint) readMsgs() error {
 		}
 
 		var h packetHeader
-		if err := h.Deserialize(e.conn); err != nil {
+		if err := h.Deserialize(r); err != nil {
 			return fmt.Errorf("failed to read header: %w", err)
 		}
 
 		switch h.typ {
 		case rpcRequest:
 			var req requestPacket
-			if err := req.Deserialize(e.conn); err != nil {
+			if err := req.Deserialize(r); err != nil {
 				return fmt.Errorf("failed to read received request :%w", err)
 			}
 
@@ -274,7 +274,7 @@ func (e *Endpoint) readMsgs() error {
 			if err != nil {
 				return fmt.Errorf("GetFuncCall() %v: %w", req, err)
 			}
-			exe, err := argDeser(e.conn)
+			exe, err := argDeser(r)
 			if err != nil {
 				return fmt.Errorf("argDeserialize: %w", err)
 			}
@@ -289,7 +289,7 @@ func (e *Endpoint) readMsgs() error {
 
 		case rpcResponse:
 			var resp responsePacket
-			if err := resp.Deserialize(e.conn); err != nil {
+			if err := resp.Deserialize(r); err != nil {
 				return fmt.Errorf("failed to read response data:%w", err)
 			}
 			readFunc, err := e.popResponseReaderFunc(resp)
@@ -298,7 +298,7 @@ func (e *Endpoint) readMsgs() error {
 				log.Printf("skipping response num %d because we failed to find corresponding request func: %v", resp.ReqNum, err)
 				break
 			}
-			readFunc(e.conn)
+			readFunc(r)
 
 		default:
 			return fmt.Errorf("unexpected msg type: %d", h.typ)
@@ -332,7 +332,7 @@ func (e *Endpoint) Serve(conn io.ReadWriteCloser) error {
 
 	errC := make(chan error)
 	go func() {
-		errC <- e.readMsgs()
+		errC <- e.readMsgs(e.conn)
 	}()
 
 	return <-errC
