@@ -250,17 +250,8 @@ func (s _Irpc_interfaceTestrtnErrorWithMessageReq) Serialize(w io.Writer) error 
 }
 func (s *_Irpc_interfaceTestrtnErrorWithMessageReq) Deserialize(d *irpc.Decoder) error {
 	{ // string
-		{
-			var l int
-			if err := d.Int(&l); err != nil {
-				return fmt.Errorf("deserialize l of type 'int': %w", err)
-			}
-			sbuf := make([]byte, l)
-			_, err := io.ReadFull(d.R, sbuf)
-			if err != nil {
-				return fmt.Errorf("failed to read string data from reader: %w", err)
-			}
-			s.Param0_msg = string(sbuf)
+		if err := d.String(&s.Param0_msg); err != nil {
+			return fmt.Errorf("deserialize s.Param0_msg of type 'string': %w", err)
 		}
 	}
 	return nil
@@ -315,17 +306,8 @@ func (s *_Irpc_interfaceTestrtnErrorWithMessageResp) Deserialize(d *irpc.Decoder
 		} else {
 			var impl _error_interfaceTest_irpcInterfaceImpl
 			{ // Error()
-				{
-					var l int
-					if err := d.Int(&l); err != nil {
-						return fmt.Errorf("deserialize l of type 'int': %w", err)
-					}
-					sbuf := make([]byte, l)
-					_, err := io.ReadFull(d.R, sbuf)
-					if err != nil {
-						return fmt.Errorf("failed to read string data from reader: %w", err)
-					}
-					impl._Error_0_ = string(sbuf)
+				if err := d.String(&impl._Error_0_); err != nil {
+					return fmt.Errorf("deserialize impl._Error_0_ of type 'string': %w", err)
 				}
 			}
 			s.Param0_ = impl
@@ -401,17 +383,8 @@ func (s *_Irpc_interfaceTestrtnNilErrorResp) Deserialize(d *irpc.Decoder) error 
 		} else {
 			var impl _error_interfaceTest_irpcInterfaceImpl
 			{ // Error()
-				{
-					var l int
-					if err := d.Int(&l); err != nil {
-						return fmt.Errorf("deserialize l of type 'int': %w", err)
-					}
-					sbuf := make([]byte, l)
-					_, err := io.ReadFull(d.R, sbuf)
-					if err != nil {
-						return fmt.Errorf("failed to read string data from reader: %w", err)
-					}
-					impl._Error_0_ = string(sbuf)
+				if err := d.String(&impl._Error_0_); err != nil {
+					return fmt.Errorf("deserialize impl._Error_0_ of type 'string': %w", err)
 				}
 			}
 			s.Param0_ = impl
@@ -510,17 +483,8 @@ func (s *_Irpc_interfaceTestrtnTwoErrorsResp) Deserialize(d *irpc.Decoder) error
 		} else {
 			var impl _error_interfaceTest_irpcInterfaceImpl
 			{ // Error()
-				{
-					var l int
-					if err := d.Int(&l); err != nil {
-						return fmt.Errorf("deserialize l of type 'int': %w", err)
-					}
-					sbuf := make([]byte, l)
-					_, err := io.ReadFull(d.R, sbuf)
-					if err != nil {
-						return fmt.Errorf("failed to read string data from reader: %w", err)
-					}
-					impl._Error_0_ = string(sbuf)
+				if err := d.String(&impl._Error_0_); err != nil {
+					return fmt.Errorf("deserialize impl._Error_0_ of type 'string': %w", err)
 				}
 			}
 			s.Param0_ = impl
@@ -536,17 +500,8 @@ func (s *_Irpc_interfaceTestrtnTwoErrorsResp) Deserialize(d *irpc.Decoder) error
 		} else {
 			var impl _error_interfaceTest_irpcInterfaceImpl
 			{ // Error()
-				{
-					var l int
-					if err := d.Int(&l); err != nil {
-						return fmt.Errorf("deserialize l of type 'int': %w", err)
-					}
-					sbuf := make([]byte, l)
-					_, err := io.ReadFull(d.R, sbuf)
-					if err != nil {
-						return fmt.Errorf("failed to read string data from reader: %w", err)
-					}
-					impl._Error_0_ = string(sbuf)
+				if err := d.String(&impl._Error_0_); err != nil {
+					return fmt.Errorf("deserialize impl._Error_0_ of type 'string': %w", err)
 				}
 			}
 			s.Param1_ = impl
@@ -577,17 +532,8 @@ func (s _Irpc_interfaceTestrtnStringAndErrorReq) Serialize(w io.Writer) error {
 }
 func (s *_Irpc_interfaceTestrtnStringAndErrorReq) Deserialize(d *irpc.Decoder) error {
 	{ // string
-		{
-			var l int
-			if err := d.Int(&l); err != nil {
-				return fmt.Errorf("deserialize l of type 'int': %w", err)
-			}
-			sbuf := make([]byte, l)
-			_, err := io.ReadFull(d.R, sbuf)
-			if err != nil {
-				return fmt.Errorf("failed to read string data from reader: %w", err)
-			}
-			s.Param0_msg = string(sbuf)
+		if err := d.String(&s.Param0_msg); err != nil {
+			return fmt.Errorf("deserialize s.Param0_msg of type 'string': %w", err)
 		}
 	}
 	return nil
@@ -646,17 +592,8 @@ func (s _Irpc_interfaceTestrtnStringAndErrorResp) Serialize(w io.Writer) error {
 }
 func (s *_Irpc_interfaceTestrtnStringAndErrorResp) Deserialize(d *irpc.Decoder) error {
 	{ // string
-		{
-			var l int
-			if err := d.Int(&l); err != nil {
-				return fmt.Errorf("deserialize l of type 'int': %w", err)
-			}
-			sbuf := make([]byte, l)
-			_, err := io.ReadFull(d.R, sbuf)
-			if err != nil {
-				return fmt.Errorf("failed to read string data from reader: %w", err)
-			}
-			s.Param0_s = string(sbuf)
+		if err := d.String(&s.Param0_s); err != nil {
+			return fmt.Errorf("deserialize s.Param0_s of type 'string': %w", err)
 		}
 	}
 	{ // error
@@ -669,17 +606,8 @@ func (s *_Irpc_interfaceTestrtnStringAndErrorResp) Deserialize(d *irpc.Decoder) 
 		} else {
 			var impl _error_interfaceTest_irpcInterfaceImpl
 			{ // Error()
-				{
-					var l int
-					if err := d.Int(&l); err != nil {
-						return fmt.Errorf("deserialize l of type 'int': %w", err)
-					}
-					sbuf := make([]byte, l)
-					_, err := io.ReadFull(d.R, sbuf)
-					if err != nil {
-						return fmt.Errorf("failed to read string data from reader: %w", err)
-					}
-					impl._Error_0_ = string(sbuf)
+				if err := d.String(&impl._Error_0_); err != nil {
+					return fmt.Errorf("deserialize impl._Error_0_ of type 'string': %w", err)
 				}
 			}
 			s.Param1_err = impl
@@ -749,17 +677,8 @@ func (s *_Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedReq) Deseriali
 				}
 			}
 			{ // StringFunc()
-				{
-					var l int
-					if err := d.Int(&l); err != nil {
-						return fmt.Errorf("deserialize l of type 'int': %w", err)
-					}
-					sbuf := make([]byte, l)
-					_, err := io.ReadFull(d.R, sbuf)
-					if err != nil {
-						return fmt.Errorf("failed to read string data from reader: %w", err)
-					}
-					impl._StringFunc_0_ = string(sbuf)
+				if err := d.String(&impl._StringFunc_0_); err != nil {
+					return fmt.Errorf("deserialize impl._StringFunc_0_ of type 'string': %w", err)
 				}
 			}
 			s.Param0_ci = impl
@@ -872,17 +791,8 @@ func (s *_Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp) Deserial
 				}
 			}
 			{ // StringFunc()
-				{
-					var l int
-					if err := d.Int(&l); err != nil {
-						return fmt.Errorf("deserialize l of type 'int': %w", err)
-					}
-					sbuf := make([]byte, l)
-					_, err := io.ReadFull(d.R, sbuf)
-					if err != nil {
-						return fmt.Errorf("failed to read string data from reader: %w", err)
-					}
-					impl._StringFunc_0_ = string(sbuf)
+				if err := d.String(&impl._StringFunc_0_); err != nil {
+					return fmt.Errorf("deserialize impl._StringFunc_0_ of type 'string': %w", err)
 				}
 			}
 			s.Param0_ = impl
@@ -898,17 +808,8 @@ func (s *_Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp) Deserial
 		} else {
 			var impl _error_interfaceTest_irpcInterfaceImpl
 			{ // Error()
-				{
-					var l int
-					if err := d.Int(&l); err != nil {
-						return fmt.Errorf("deserialize l of type 'int': %w", err)
-					}
-					sbuf := make([]byte, l)
-					_, err := io.ReadFull(d.R, sbuf)
-					if err != nil {
-						return fmt.Errorf("failed to read string data from reader: %w", err)
-					}
-					impl._Error_0_ = string(sbuf)
+				if err := d.String(&impl._Error_0_); err != nil {
+					return fmt.Errorf("deserialize impl._Error_0_ of type 'string': %w", err)
 				}
 			}
 			s.Param1_ = impl
@@ -982,17 +883,8 @@ func (s _Irpc_customInterfaceStringFuncResp) Serialize(w io.Writer) error {
 }
 func (s *_Irpc_customInterfaceStringFuncResp) Deserialize(d *irpc.Decoder) error {
 	{ // string
-		{
-			var l int
-			if err := d.Int(&l); err != nil {
-				return fmt.Errorf("deserialize l of type 'int': %w", err)
-			}
-			sbuf := make([]byte, l)
-			_, err := io.ReadFull(d.R, sbuf)
-			if err != nil {
-				return fmt.Errorf("failed to read string data from reader: %w", err)
-			}
-			s.Param0_ = string(sbuf)
+		if err := d.String(&s.Param0_); err != nil {
+			return fmt.Errorf("deserialize s.Param0_ of type 'string': %w", err)
 		}
 	}
 	return nil

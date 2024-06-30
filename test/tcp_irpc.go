@@ -160,17 +160,8 @@ func (s *_Irpc_tcpTestApiDivResp) Deserialize(d *irpc.Decoder) error {
 		} else {
 			var impl _error_tcpTestApi_irpcInterfaceImpl
 			{ // Error()
-				{
-					var l int
-					if err := d.Int(&l); err != nil {
-						return fmt.Errorf("deserialize l of type 'int': %w", err)
-					}
-					sbuf := make([]byte, l)
-					_, err := io.ReadFull(d.R, sbuf)
-					if err != nil {
-						return fmt.Errorf("failed to read string data from reader: %w", err)
-					}
-					impl._Error_0_ = string(sbuf)
+				if err := d.String(&impl._Error_0_); err != nil {
+					return fmt.Errorf("deserialize impl._Error_0_ of type 'string': %w", err)
 				}
 			}
 			s.Param1_ = impl

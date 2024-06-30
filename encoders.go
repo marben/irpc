@@ -180,17 +180,11 @@ func (e stringEncoder) encode(buf bufInfo, varId string) string {
 }
 
 func (e stringEncoder) decode(varId string) string {
-	s := "var l int\n"
-	s += e.lenEncoder.decode("l")
-	s += fmt.Sprintf(`
-	sbuf := make([]byte, l)
-	_, err := io.ReadFull(d.R, sbuf)
-	if err != nil {
-		return fmt.Errorf("failed to read string data from reader: %%w", err)
-	}
-	%s = string(sbuf)
-	`, varId)
-	return "{\n" + s + "}\n"
+	sb := &strings.Builder{}
+	fmt.Fprintf(sb, `if err := d.String(&%s); err != nil{
+		return fmt.Errorf("deserialize %s of type 'string': %%w",err)
+	}`, varId, varId)
+	return sb.String()
 }
 
 func (e stringEncoder) requestBufSize() int {

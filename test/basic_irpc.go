@@ -1383,17 +1383,8 @@ func (s _Irpc_basicAPItoUpperStringReq) Serialize(w io.Writer) error {
 }
 func (s *_Irpc_basicAPItoUpperStringReq) Deserialize(d *irpc.Decoder) error {
 	{ // string
-		{
-			var l int
-			if err := d.Int(&l); err != nil {
-				return fmt.Errorf("deserialize l of type 'int': %w", err)
-			}
-			sbuf := make([]byte, l)
-			_, err := io.ReadFull(d.R, sbuf)
-			if err != nil {
-				return fmt.Errorf("failed to read string data from reader: %w", err)
-			}
-			s.Param0_s = string(sbuf)
+		if err := d.String(&s.Param0_s); err != nil {
+			return fmt.Errorf("deserialize s.Param0_s of type 'string': %w", err)
 		}
 	}
 	return nil
@@ -1421,17 +1412,8 @@ func (s _Irpc_basicAPItoUpperStringResp) Serialize(w io.Writer) error {
 }
 func (s *_Irpc_basicAPItoUpperStringResp) Deserialize(d *irpc.Decoder) error {
 	{ // string
-		{
-			var l int
-			if err := d.Int(&l); err != nil {
-				return fmt.Errorf("deserialize l of type 'int': %w", err)
-			}
-			sbuf := make([]byte, l)
-			_, err := io.ReadFull(d.R, sbuf)
-			if err != nil {
-				return fmt.Errorf("failed to read string data from reader: %w", err)
-			}
-			s.Param0_ = string(sbuf)
+		if err := d.String(&s.Param0_); err != nil {
+			return fmt.Errorf("deserialize s.Param0_ of type 'string': %w", err)
 		}
 	}
 	return nil
