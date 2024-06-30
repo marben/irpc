@@ -37,10 +37,10 @@ func newMathIRpcService(impl Math) *MathIRpcService { return &MathIRpcService{im
 func (ms *MathIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
 	case mathIrpcFuncAddId:
-		return func(r io.Reader) (irpc.FuncExecutor, error) {
+		return func(d *irpc.Decoder) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args addParams
-			if err := args.Deserialize(r); err != nil {
+			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func() irpc.Serializable {
@@ -102,8 +102,8 @@ func (p addParams) Serialize(w io.Writer) error {
 	return json.NewEncoder(w).Encode(p)
 }
 
-func (p *addParams) Deserialize(r io.Reader) error {
-	return json.NewDecoder(r).Decode(p)
+func (p *addParams) Deserialize(d *irpc.Decoder) error {
+	return json.NewDecoder(d.R).Decode(p)
 }
 
 type addRtnVals struct {
@@ -114,8 +114,8 @@ func (v addRtnVals) Serialize(w io.Writer) error {
 	return json.NewEncoder(w).Encode(v)
 }
 
-func (v *addRtnVals) Deserialize(r io.Reader) error {
-	return json.NewDecoder(r).Decode(v)
+func (v *addRtnVals) Deserialize(d *irpc.Decoder) error {
+	return json.NewDecoder(d.R).Decode(v)
 }
 
 func TestEndpointClientRegister(t *testing.T) {

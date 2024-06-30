@@ -15,7 +15,8 @@ func TestPacketHeaderSerializeDeserialize(t *testing.T) {
 	}
 
 	var phOut packetHeader
-	if err := phOut.Deserialize(buf); err != nil {
+	dec := NewDecoder(buf)
+	if err := phOut.Deserialize(dec); err != nil {
 		t.Fatalf("deserialize(): %v", err)
 	}
 
@@ -54,7 +55,8 @@ func BenchmarkPacketHeaderDeSerialization(b *testing.B) {
 	for range b.N {
 		var phOut packetHeader
 		buf2 := bytes.NewBuffer(data)
-		if err := phOut.Deserialize(buf2); err != nil {
+		dec := NewDecoder(buf2)
+		if err := phOut.Deserialize(dec); err != nil {
 			b.Fatalf("deserialization failed: %v", err)
 		}
 		if phOut != phInit {

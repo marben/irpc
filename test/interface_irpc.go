@@ -21,10 +21,10 @@ func (interfaceTestRpcService) Hash() []byte {
 func (s *interfaceTestRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // rtnErrorWithMessage
-		return func(r io.Reader) (irpc.FuncExecutor, error) {
+		return func(d *irpc.Decoder) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_interfaceTestrtnErrorWithMessageReq
-			if err := args.Deserialize(r); err != nil {
+			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func() irpc.Serializable {
@@ -35,10 +35,10 @@ func (s *interfaceTestRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeser
 			}, nil
 		}, nil
 	case 1: // rtnNilError
-		return func(r io.Reader) (irpc.FuncExecutor, error) {
+		return func(d *irpc.Decoder) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_interfaceTestrtnNilErrorReq
-			if err := args.Deserialize(r); err != nil {
+			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func() irpc.Serializable {
@@ -49,10 +49,10 @@ func (s *interfaceTestRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeser
 			}, nil
 		}, nil
 	case 2: // rtnTwoErrors
-		return func(r io.Reader) (irpc.FuncExecutor, error) {
+		return func(d *irpc.Decoder) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_interfaceTestrtnTwoErrorsReq
-			if err := args.Deserialize(r); err != nil {
+			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func() irpc.Serializable {
@@ -63,10 +63,10 @@ func (s *interfaceTestRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeser
 			}, nil
 		}, nil
 	case 3: // rtnStringAndError
-		return func(r io.Reader) (irpc.FuncExecutor, error) {
+		return func(d *irpc.Decoder) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_interfaceTestrtnStringAndErrorReq
-			if err := args.Deserialize(r); err != nil {
+			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func() irpc.Serializable {
@@ -77,10 +77,10 @@ func (s *interfaceTestRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeser
 			}, nil
 		}, nil
 	case 4: // passCustomInterfaceAndReturnItModified
-		return func(r io.Reader) (irpc.FuncExecutor, error) {
+		return func(d *irpc.Decoder) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedReq
-			if err := args.Deserialize(r); err != nil {
+			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func() irpc.Serializable {
@@ -108,10 +108,10 @@ func (customInterfaceRpcService) Hash() []byte {
 func (s *customInterfaceRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // IntFunc
-		return func(r io.Reader) (irpc.FuncExecutor, error) {
+		return func(d *irpc.Decoder) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_customInterfaceIntFuncReq
-			if err := args.Deserialize(r); err != nil {
+			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func() irpc.Serializable {
@@ -122,10 +122,10 @@ func (s *customInterfaceRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDes
 			}, nil
 		}, nil
 	case 1: // StringFunc
-		return func(r io.Reader) (irpc.FuncExecutor, error) {
+		return func(d *irpc.Decoder) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_customInterfaceStringFuncReq
-			if err := args.Deserialize(r); err != nil {
+			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func() irpc.Serializable {
@@ -248,17 +248,15 @@ func (s _Irpc_interfaceTestrtnErrorWithMessageReq) Serialize(w io.Writer) error 
 	}
 	return nil
 }
-func (s *_Irpc_interfaceTestrtnErrorWithMessageReq) Deserialize(r io.Reader) error {
+func (s *_Irpc_interfaceTestrtnErrorWithMessageReq) Deserialize(d *irpc.Decoder) error {
 	{ // string
 		{
 			var l int
-			b := make([]byte, 8)
-			if _, err := io.ReadFull(r, b[:8]); err != nil {
-				return fmt.Errorf("l int decode: %w", err)
+			if err := d.Int(&l); err != nil {
+				return fmt.Errorf("deserialize l of type 'int': %w", err)
 			}
-			l = int(binary.LittleEndian.Uint64(b))
 			sbuf := make([]byte, l)
-			_, err := io.ReadFull(r, sbuf)
+			_, err := io.ReadFull(d.R, sbuf)
 			if err != nil {
 				return fmt.Errorf("failed to read string data from reader: %w", err)
 			}
@@ -306,17 +304,11 @@ func (s _Irpc_interfaceTestrtnErrorWithMessageResp) Serialize(w io.Writer) error
 	}
 	return nil
 }
-func (s *_Irpc_interfaceTestrtnErrorWithMessageResp) Deserialize(r io.Reader) error {
+func (s *_Irpc_interfaceTestrtnErrorWithMessageResp) Deserialize(d *irpc.Decoder) error {
 	{ // error
 		var isNil bool
-		b := make([]byte, 1)
-		if _, err := io.ReadFull(r, b[:1]); err != nil {
-			return fmt.Errorf("isNil bool decode: %w", err)
-		}
-		if b[0] == 0 {
-			isNil = false
-		} else {
-			isNil = true
+		if err := d.Bool(&isNil); err != nil {
+			return fmt.Errorf("deserialize isNil of type 'bool': %w", err)
 		}
 		if isNil {
 			s.Param0_ = nil
@@ -325,13 +317,11 @@ func (s *_Irpc_interfaceTestrtnErrorWithMessageResp) Deserialize(r io.Reader) er
 			{ // Error()
 				{
 					var l int
-					b := make([]byte, 8)
-					if _, err := io.ReadFull(r, b[:8]); err != nil {
-						return fmt.Errorf("l int decode: %w", err)
+					if err := d.Int(&l); err != nil {
+						return fmt.Errorf("deserialize l of type 'int': %w", err)
 					}
-					l = int(binary.LittleEndian.Uint64(b))
 					sbuf := make([]byte, l)
-					_, err := io.ReadFull(r, sbuf)
+					_, err := io.ReadFull(d.R, sbuf)
 					if err != nil {
 						return fmt.Errorf("failed to read string data from reader: %w", err)
 					}
@@ -358,7 +348,7 @@ type _Irpc_interfaceTestrtnNilErrorReq struct {
 func (s _Irpc_interfaceTestrtnNilErrorReq) Serialize(w io.Writer) error {
 	return nil
 }
-func (s *_Irpc_interfaceTestrtnNilErrorReq) Deserialize(r io.Reader) error {
+func (s *_Irpc_interfaceTestrtnNilErrorReq) Deserialize(d *irpc.Decoder) error {
 	return nil
 }
 
@@ -400,17 +390,11 @@ func (s _Irpc_interfaceTestrtnNilErrorResp) Serialize(w io.Writer) error {
 	}
 	return nil
 }
-func (s *_Irpc_interfaceTestrtnNilErrorResp) Deserialize(r io.Reader) error {
+func (s *_Irpc_interfaceTestrtnNilErrorResp) Deserialize(d *irpc.Decoder) error {
 	{ // error
 		var isNil bool
-		b := make([]byte, 1)
-		if _, err := io.ReadFull(r, b[:1]); err != nil {
-			return fmt.Errorf("isNil bool decode: %w", err)
-		}
-		if b[0] == 0 {
-			isNil = false
-		} else {
-			isNil = true
+		if err := d.Bool(&isNil); err != nil {
+			return fmt.Errorf("deserialize isNil of type 'bool': %w", err)
 		}
 		if isNil {
 			s.Param0_ = nil
@@ -419,13 +403,11 @@ func (s *_Irpc_interfaceTestrtnNilErrorResp) Deserialize(r io.Reader) error {
 			{ // Error()
 				{
 					var l int
-					b := make([]byte, 8)
-					if _, err := io.ReadFull(r, b[:8]); err != nil {
-						return fmt.Errorf("l int decode: %w", err)
+					if err := d.Int(&l); err != nil {
+						return fmt.Errorf("deserialize l of type 'int': %w", err)
 					}
-					l = int(binary.LittleEndian.Uint64(b))
 					sbuf := make([]byte, l)
-					_, err := io.ReadFull(r, sbuf)
+					_, err := io.ReadFull(d.R, sbuf)
 					if err != nil {
 						return fmt.Errorf("failed to read string data from reader: %w", err)
 					}
@@ -444,7 +426,7 @@ type _Irpc_interfaceTestrtnTwoErrorsReq struct {
 func (s _Irpc_interfaceTestrtnTwoErrorsReq) Serialize(w io.Writer) error {
 	return nil
 }
-func (s *_Irpc_interfaceTestrtnTwoErrorsReq) Deserialize(r io.Reader) error {
+func (s *_Irpc_interfaceTestrtnTwoErrorsReq) Deserialize(d *irpc.Decoder) error {
 	return nil
 }
 
@@ -517,17 +499,11 @@ func (s _Irpc_interfaceTestrtnTwoErrorsResp) Serialize(w io.Writer) error {
 	}
 	return nil
 }
-func (s *_Irpc_interfaceTestrtnTwoErrorsResp) Deserialize(r io.Reader) error {
+func (s *_Irpc_interfaceTestrtnTwoErrorsResp) Deserialize(d *irpc.Decoder) error {
 	{ // error
 		var isNil bool
-		b := make([]byte, 1)
-		if _, err := io.ReadFull(r, b[:1]); err != nil {
-			return fmt.Errorf("isNil bool decode: %w", err)
-		}
-		if b[0] == 0 {
-			isNil = false
-		} else {
-			isNil = true
+		if err := d.Bool(&isNil); err != nil {
+			return fmt.Errorf("deserialize isNil of type 'bool': %w", err)
 		}
 		if isNil {
 			s.Param0_ = nil
@@ -536,13 +512,11 @@ func (s *_Irpc_interfaceTestrtnTwoErrorsResp) Deserialize(r io.Reader) error {
 			{ // Error()
 				{
 					var l int
-					b := make([]byte, 8)
-					if _, err := io.ReadFull(r, b[:8]); err != nil {
-						return fmt.Errorf("l int decode: %w", err)
+					if err := d.Int(&l); err != nil {
+						return fmt.Errorf("deserialize l of type 'int': %w", err)
 					}
-					l = int(binary.LittleEndian.Uint64(b))
 					sbuf := make([]byte, l)
-					_, err := io.ReadFull(r, sbuf)
+					_, err := io.ReadFull(d.R, sbuf)
 					if err != nil {
 						return fmt.Errorf("failed to read string data from reader: %w", err)
 					}
@@ -554,14 +528,8 @@ func (s *_Irpc_interfaceTestrtnTwoErrorsResp) Deserialize(r io.Reader) error {
 	}
 	{ // error
 		var isNil bool
-		b := make([]byte, 1)
-		if _, err := io.ReadFull(r, b[:1]); err != nil {
-			return fmt.Errorf("isNil bool decode: %w", err)
-		}
-		if b[0] == 0 {
-			isNil = false
-		} else {
-			isNil = true
+		if err := d.Bool(&isNil); err != nil {
+			return fmt.Errorf("deserialize isNil of type 'bool': %w", err)
 		}
 		if isNil {
 			s.Param1_ = nil
@@ -570,13 +538,11 @@ func (s *_Irpc_interfaceTestrtnTwoErrorsResp) Deserialize(r io.Reader) error {
 			{ // Error()
 				{
 					var l int
-					b := make([]byte, 8)
-					if _, err := io.ReadFull(r, b[:8]); err != nil {
-						return fmt.Errorf("l int decode: %w", err)
+					if err := d.Int(&l); err != nil {
+						return fmt.Errorf("deserialize l of type 'int': %w", err)
 					}
-					l = int(binary.LittleEndian.Uint64(b))
 					sbuf := make([]byte, l)
-					_, err := io.ReadFull(r, sbuf)
+					_, err := io.ReadFull(d.R, sbuf)
 					if err != nil {
 						return fmt.Errorf("failed to read string data from reader: %w", err)
 					}
@@ -609,17 +575,15 @@ func (s _Irpc_interfaceTestrtnStringAndErrorReq) Serialize(w io.Writer) error {
 	}
 	return nil
 }
-func (s *_Irpc_interfaceTestrtnStringAndErrorReq) Deserialize(r io.Reader) error {
+func (s *_Irpc_interfaceTestrtnStringAndErrorReq) Deserialize(d *irpc.Decoder) error {
 	{ // string
 		{
 			var l int
-			b := make([]byte, 8)
-			if _, err := io.ReadFull(r, b[:8]); err != nil {
-				return fmt.Errorf("l int decode: %w", err)
+			if err := d.Int(&l); err != nil {
+				return fmt.Errorf("deserialize l of type 'int': %w", err)
 			}
-			l = int(binary.LittleEndian.Uint64(b))
 			sbuf := make([]byte, l)
-			_, err := io.ReadFull(r, sbuf)
+			_, err := io.ReadFull(d.R, sbuf)
 			if err != nil {
 				return fmt.Errorf("failed to read string data from reader: %w", err)
 			}
@@ -680,17 +644,15 @@ func (s _Irpc_interfaceTestrtnStringAndErrorResp) Serialize(w io.Writer) error {
 	}
 	return nil
 }
-func (s *_Irpc_interfaceTestrtnStringAndErrorResp) Deserialize(r io.Reader) error {
+func (s *_Irpc_interfaceTestrtnStringAndErrorResp) Deserialize(d *irpc.Decoder) error {
 	{ // string
 		{
 			var l int
-			b := make([]byte, 8)
-			if _, err := io.ReadFull(r, b[:8]); err != nil {
-				return fmt.Errorf("l int decode: %w", err)
+			if err := d.Int(&l); err != nil {
+				return fmt.Errorf("deserialize l of type 'int': %w", err)
 			}
-			l = int(binary.LittleEndian.Uint64(b))
 			sbuf := make([]byte, l)
-			_, err := io.ReadFull(r, sbuf)
+			_, err := io.ReadFull(d.R, sbuf)
 			if err != nil {
 				return fmt.Errorf("failed to read string data from reader: %w", err)
 			}
@@ -699,14 +661,8 @@ func (s *_Irpc_interfaceTestrtnStringAndErrorResp) Deserialize(r io.Reader) erro
 	}
 	{ // error
 		var isNil bool
-		b := make([]byte, 1)
-		if _, err := io.ReadFull(r, b[:1]); err != nil {
-			return fmt.Errorf("isNil bool decode: %w", err)
-		}
-		if b[0] == 0 {
-			isNil = false
-		} else {
-			isNil = true
+		if err := d.Bool(&isNil); err != nil {
+			return fmt.Errorf("deserialize isNil of type 'bool': %w", err)
 		}
 		if isNil {
 			s.Param1_err = nil
@@ -715,13 +671,11 @@ func (s *_Irpc_interfaceTestrtnStringAndErrorResp) Deserialize(r io.Reader) erro
 			{ // Error()
 				{
 					var l int
-					b := make([]byte, 8)
-					if _, err := io.ReadFull(r, b[:8]); err != nil {
-						return fmt.Errorf("l int decode: %w", err)
+					if err := d.Int(&l); err != nil {
+						return fmt.Errorf("deserialize l of type 'int': %w", err)
 					}
-					l = int(binary.LittleEndian.Uint64(b))
 					sbuf := make([]byte, l)
-					_, err := io.ReadFull(r, sbuf)
+					_, err := io.ReadFull(d.R, sbuf)
 					if err != nil {
 						return fmt.Errorf("failed to read string data from reader: %w", err)
 					}
@@ -779,39 +733,29 @@ func (s _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedReq) Serialize(
 	}
 	return nil
 }
-func (s *_Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedReq) Deserialize(r io.Reader) error {
+func (s *_Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedReq) Deserialize(d *irpc.Decoder) error {
 	{ // customInterface
 		var isNil bool
-		b := make([]byte, 1)
-		if _, err := io.ReadFull(r, b[:1]); err != nil {
-			return fmt.Errorf("isNil bool decode: %w", err)
-		}
-		if b[0] == 0 {
-			isNil = false
-		} else {
-			isNil = true
+		if err := d.Bool(&isNil); err != nil {
+			return fmt.Errorf("deserialize isNil of type 'bool': %w", err)
 		}
 		if isNil {
 			s.Param0_ci = nil
 		} else {
 			var impl _customInterface_interfaceTest_irpcInterfaceImpl
 			{ // IntFunc()
-				b := make([]byte, 8)
-				if _, err := io.ReadFull(r, b[:8]); err != nil {
-					return fmt.Errorf("impl._IntFunc_0_ int decode: %w", err)
+				if err := d.Int(&impl._IntFunc_0_); err != nil {
+					return fmt.Errorf("deserialize impl._IntFunc_0_ of type 'int': %w", err)
 				}
-				impl._IntFunc_0_ = int(binary.LittleEndian.Uint64(b))
 			}
 			{ // StringFunc()
 				{
 					var l int
-					b := make([]byte, 8)
-					if _, err := io.ReadFull(r, b[:8]); err != nil {
-						return fmt.Errorf("l int decode: %w", err)
+					if err := d.Int(&l); err != nil {
+						return fmt.Errorf("deserialize l of type 'int': %w", err)
 					}
-					l = int(binary.LittleEndian.Uint64(b))
 					sbuf := make([]byte, l)
-					_, err := io.ReadFull(r, sbuf)
+					_, err := io.ReadFull(d.R, sbuf)
 					if err != nil {
 						return fmt.Errorf("failed to read string data from reader: %w", err)
 					}
@@ -912,39 +856,29 @@ func (s _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp) Serialize
 	}
 	return nil
 }
-func (s *_Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp) Deserialize(r io.Reader) error {
+func (s *_Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp) Deserialize(d *irpc.Decoder) error {
 	{ // customInterface
 		var isNil bool
-		b := make([]byte, 1)
-		if _, err := io.ReadFull(r, b[:1]); err != nil {
-			return fmt.Errorf("isNil bool decode: %w", err)
-		}
-		if b[0] == 0 {
-			isNil = false
-		} else {
-			isNil = true
+		if err := d.Bool(&isNil); err != nil {
+			return fmt.Errorf("deserialize isNil of type 'bool': %w", err)
 		}
 		if isNil {
 			s.Param0_ = nil
 		} else {
 			var impl _customInterface_interfaceTest_irpcInterfaceImpl
 			{ // IntFunc()
-				b := make([]byte, 8)
-				if _, err := io.ReadFull(r, b[:8]); err != nil {
-					return fmt.Errorf("impl._IntFunc_0_ int decode: %w", err)
+				if err := d.Int(&impl._IntFunc_0_); err != nil {
+					return fmt.Errorf("deserialize impl._IntFunc_0_ of type 'int': %w", err)
 				}
-				impl._IntFunc_0_ = int(binary.LittleEndian.Uint64(b))
 			}
 			{ // StringFunc()
 				{
 					var l int
-					b := make([]byte, 8)
-					if _, err := io.ReadFull(r, b[:8]); err != nil {
-						return fmt.Errorf("l int decode: %w", err)
+					if err := d.Int(&l); err != nil {
+						return fmt.Errorf("deserialize l of type 'int': %w", err)
 					}
-					l = int(binary.LittleEndian.Uint64(b))
 					sbuf := make([]byte, l)
-					_, err := io.ReadFull(r, sbuf)
+					_, err := io.ReadFull(d.R, sbuf)
 					if err != nil {
 						return fmt.Errorf("failed to read string data from reader: %w", err)
 					}
@@ -956,14 +890,8 @@ func (s *_Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp) Deserial
 	}
 	{ // error
 		var isNil bool
-		b := make([]byte, 1)
-		if _, err := io.ReadFull(r, b[:1]); err != nil {
-			return fmt.Errorf("isNil bool decode: %w", err)
-		}
-		if b[0] == 0 {
-			isNil = false
-		} else {
-			isNil = true
+		if err := d.Bool(&isNil); err != nil {
+			return fmt.Errorf("deserialize isNil of type 'bool': %w", err)
 		}
 		if isNil {
 			s.Param1_ = nil
@@ -972,13 +900,11 @@ func (s *_Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp) Deserial
 			{ // Error()
 				{
 					var l int
-					b := make([]byte, 8)
-					if _, err := io.ReadFull(r, b[:8]); err != nil {
-						return fmt.Errorf("l int decode: %w", err)
+					if err := d.Int(&l); err != nil {
+						return fmt.Errorf("deserialize l of type 'int': %w", err)
 					}
-					l = int(binary.LittleEndian.Uint64(b))
 					sbuf := make([]byte, l)
-					_, err := io.ReadFull(r, sbuf)
+					_, err := io.ReadFull(d.R, sbuf)
 					if err != nil {
 						return fmt.Errorf("failed to read string data from reader: %w", err)
 					}
@@ -997,7 +923,7 @@ type _Irpc_customInterfaceIntFuncReq struct {
 func (s _Irpc_customInterfaceIntFuncReq) Serialize(w io.Writer) error {
 	return nil
 }
-func (s *_Irpc_customInterfaceIntFuncReq) Deserialize(r io.Reader) error {
+func (s *_Irpc_customInterfaceIntFuncReq) Deserialize(d *irpc.Decoder) error {
 	return nil
 }
 
@@ -1015,13 +941,11 @@ func (s _Irpc_customInterfaceIntFuncResp) Serialize(w io.Writer) error {
 	}
 	return nil
 }
-func (s *_Irpc_customInterfaceIntFuncResp) Deserialize(r io.Reader) error {
+func (s *_Irpc_customInterfaceIntFuncResp) Deserialize(d *irpc.Decoder) error {
 	{ // int
-		b := make([]byte, 8)
-		if _, err := io.ReadFull(r, b[:8]); err != nil {
-			return fmt.Errorf("s.Param0_ int decode: %w", err)
+		if err := d.Int(&s.Param0_); err != nil {
+			return fmt.Errorf("deserialize s.Param0_ of type 'int': %w", err)
 		}
-		s.Param0_ = int(binary.LittleEndian.Uint64(b))
 	}
 	return nil
 }
@@ -1032,7 +956,7 @@ type _Irpc_customInterfaceStringFuncReq struct {
 func (s _Irpc_customInterfaceStringFuncReq) Serialize(w io.Writer) error {
 	return nil
 }
-func (s *_Irpc_customInterfaceStringFuncReq) Deserialize(r io.Reader) error {
+func (s *_Irpc_customInterfaceStringFuncReq) Deserialize(d *irpc.Decoder) error {
 	return nil
 }
 
@@ -1056,17 +980,15 @@ func (s _Irpc_customInterfaceStringFuncResp) Serialize(w io.Writer) error {
 	}
 	return nil
 }
-func (s *_Irpc_customInterfaceStringFuncResp) Deserialize(r io.Reader) error {
+func (s *_Irpc_customInterfaceStringFuncResp) Deserialize(d *irpc.Decoder) error {
 	{ // string
 		{
 			var l int
-			b := make([]byte, 8)
-			if _, err := io.ReadFull(r, b[:8]); err != nil {
-				return fmt.Errorf("l int decode: %w", err)
+			if err := d.Int(&l); err != nil {
+				return fmt.Errorf("deserialize l of type 'int': %w", err)
 			}
-			l = int(binary.LittleEndian.Uint64(b))
 			sbuf := make([]byte, l)
-			_, err := io.ReadFull(r, sbuf)
+			_, err := io.ReadFull(d.R, sbuf)
 			if err != nil {
 				return fmt.Errorf("failed to read string data from reader: %w", err)
 			}

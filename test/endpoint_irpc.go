@@ -22,10 +22,10 @@ func (endpointApiRpcService) Hash() []byte {
 func (s *endpointApiRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // Div
-		return func(r io.Reader) (irpc.FuncExecutor, error) {
+		return func(d *irpc.Decoder) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_endpointApiDivReq
-			if err := args.Deserialize(r); err != nil {
+			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func() irpc.Serializable {
@@ -85,20 +85,16 @@ func (s _Irpc_endpointApiDivReq) Serialize(w io.Writer) error {
 	}
 	return nil
 }
-func (s *_Irpc_endpointApiDivReq) Deserialize(r io.Reader) error {
+func (s *_Irpc_endpointApiDivReq) Deserialize(d *irpc.Decoder) error {
 	{ // float64
-		b := make([]byte, 8)
-		if _, err := io.ReadFull(r, b[:8]); err != nil {
-			return fmt.Errorf("s.Param0_a float64 decode: %w", err)
+		if err := d.Float64(&s.Param0_a); err != nil {
+			return fmt.Errorf("deserialize s.Param0_a of type 'float64': %w", err)
 		}
-		s.Param0_a = math.Float64frombits(binary.LittleEndian.Uint64(b))
 	}
 	{ // float64
-		b := make([]byte, 8)
-		if _, err := io.ReadFull(r, b[:8]); err != nil {
-			return fmt.Errorf("s.Param0_b float64 decode: %w", err)
+		if err := d.Float64(&s.Param0_b); err != nil {
+			return fmt.Errorf("deserialize s.Param0_b of type 'float64': %w", err)
 		}
-		s.Param0_b = math.Float64frombits(binary.LittleEndian.Uint64(b))
 	}
 	return nil
 }
@@ -148,24 +144,16 @@ func (s _Irpc_endpointApiDivResp) Serialize(w io.Writer) error {
 	}
 	return nil
 }
-func (s *_Irpc_endpointApiDivResp) Deserialize(r io.Reader) error {
+func (s *_Irpc_endpointApiDivResp) Deserialize(d *irpc.Decoder) error {
 	{ // float64
-		b := make([]byte, 8)
-		if _, err := io.ReadFull(r, b[:8]); err != nil {
-			return fmt.Errorf("s.Param0_ float64 decode: %w", err)
+		if err := d.Float64(&s.Param0_); err != nil {
+			return fmt.Errorf("deserialize s.Param0_ of type 'float64': %w", err)
 		}
-		s.Param0_ = math.Float64frombits(binary.LittleEndian.Uint64(b))
 	}
 	{ // error
 		var isNil bool
-		b := make([]byte, 1)
-		if _, err := io.ReadFull(r, b[:1]); err != nil {
-			return fmt.Errorf("isNil bool decode: %w", err)
-		}
-		if b[0] == 0 {
-			isNil = false
-		} else {
-			isNil = true
+		if err := d.Bool(&isNil); err != nil {
+			return fmt.Errorf("deserialize isNil of type 'bool': %w", err)
 		}
 		if isNil {
 			s.Param1_ = nil
@@ -174,13 +162,11 @@ func (s *_Irpc_endpointApiDivResp) Deserialize(r io.Reader) error {
 			{ // Error()
 				{
 					var l int
-					b := make([]byte, 8)
-					if _, err := io.ReadFull(r, b[:8]); err != nil {
-						return fmt.Errorf("l int decode: %w", err)
+					if err := d.Int(&l); err != nil {
+						return fmt.Errorf("deserialize l of type 'int': %w", err)
 					}
-					l = int(binary.LittleEndian.Uint64(b))
 					sbuf := make([]byte, l)
-					_, err := io.ReadFull(r, sbuf)
+					_, err := io.ReadFull(d.R, sbuf)
 					if err != nil {
 						return fmt.Errorf("failed to read string data from reader: %w", err)
 					}

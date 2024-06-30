@@ -32,9 +32,9 @@ type clientRegisterResp struct {
 func (c *clientRegisterService) GetFuncCall(funcId FuncId) (ArgDeserializer, error) {
 	switch funcId {
 	case 0:
-		return func(r io.Reader) (FuncExecutor, error) {
+		return func(d *Decoder) (FuncExecutor, error) {
 			var args clientRegisterReq
-			if err := args.Deserialize(r); err != nil {
+			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func() Serializable {
@@ -71,10 +71,8 @@ func (rp clientRegisterReq) Serialize(w io.Writer) error {
 	return nil
 }
 
-func (rp *clientRegisterReq) Deserialize(r io.Reader) error {
-	var err error
-	rp.ServiceHash, err = readByteSlice(r)
-	if err != nil {
+func (rp *clientRegisterReq) Deserialize(d *Decoder) error {
+	if err := d.ByteSlice(&rp.ServiceHash); err != nil {
 		return err
 	}
 
@@ -91,18 +89,12 @@ func (rp clientRegisterResp) Serialize(w io.Writer) error {
 	return nil
 }
 
-func (rp *clientRegisterResp) Deserialize(r io.Reader) error {
-	var err error
-	sid, err := readUint16(r)
-	if err != nil {
+func (rp *clientRegisterResp) Deserialize(d *Decoder) error {
+	if err := d.Uint16((*uint16)(&rp.ServiceId)); err != nil {
 		return err
 	}
-	rp.ServiceId = RegisteredServiceId(sid)
-
-	rp.Err, err = readString(r)
-	if err != nil {
+	if err := d.String(&rp.Err); err != nil {
 		return err
 	}
-
 	return nil
 }

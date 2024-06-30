@@ -29,95 +29,91 @@ var (
 		} else {
 			%[1]s[0] = 0
 		}`,
-		decStr: `if b[0] == 0 {
-			%[1]s = false
-		} else {
-			%[1]s = true
-		}`,
+		decStr:   "Bool",
 		typeName: "bool",
 		imps:     nil,
 	}
 	intEncoder = primitiveTypeEncoder{
 		bufSize:  8,
 		encStr:   "binary.LittleEndian.PutUint64(%s, uint64(%s))",
-		decStr:   "%s = int(binary.LittleEndian.Uint64(b))",
+		decStr:   "Int",
 		typeName: "int",
 		imps:     []string{binaryImport},
 	}
 	uintEncoder = primitiveTypeEncoder{
 		bufSize:  8,
 		encStr:   "binary.LittleEndian.PutUint64(%s, uint64(%s))",
-		decStr:   "%s = uint(binary.LittleEndian.Uint64(b))",
+		decStr:   "Uint",
 		typeName: "uint",
 		imps:     []string{binaryImport},
 	}
 	int8Encoder = primitiveTypeEncoder{
 		bufSize:  1,
 		encStr:   "%s[0] = byte(%s)",
-		decStr:   "%s = int8(b[0])",
+		decStr:   "Int8",
 		typeName: "int8",
 		imps:     nil,
 	}
 	uint8Encoder = primitiveTypeEncoder{
 		bufSize:  1,
 		encStr:   "%s[0] = byte(%s)",
-		decStr:   "%s = uint8(b[0])",
+		decStr:   "Uint8",
 		typeName: "uint8",
 		imps:     nil,
 	}
 	int16Encoder = primitiveTypeEncoder{
 		bufSize:  2,
 		encStr:   "binary.LittleEndian.PutUint16(%s, uint16(%s))",
-		decStr:   "%s = int16(binary.LittleEndian.Uint16(b))",
+		decStr:   "Int16",
 		typeName: "int16",
 		imps:     []string{binaryImport},
 	}
 	uint16Encoder = primitiveTypeEncoder{
 		bufSize:  2,
 		encStr:   "binary.LittleEndian.PutUint16(%s, %s)",
-		decStr:   "%s = binary.LittleEndian.Uint16(b)",
+		decStr:   "Uint16",
 		typeName: "uint16",
 		imps:     []string{binaryImport},
 	}
 	int32Encoder = primitiveTypeEncoder{
 		bufSize:  4,
 		encStr:   "binary.LittleEndian.PutUint32(%s, uint32(%s))",
-		decStr:   "%s = int32(binary.LittleEndian.Uint32(b))",
+		decStr:   "Int32",
 		typeName: "int32",
 		imps:     []string{binaryImport},
 	}
 	uint32Encoder = primitiveTypeEncoder{
 		bufSize:  4,
 		encStr:   "binary.LittleEndian.PutUint32(%s, %s)",
-		decStr:   "%s = binary.LittleEndian.Uint32(b)",
+		decStr:   "Uint32",
 		typeName: "uint32",
 		imps:     []string{binaryImport},
 	}
 	int64Encoder = primitiveTypeEncoder{
 		bufSize:  8,
 		encStr:   "binary.LittleEndian.PutUint64(%s, uint64(%s))",
-		decStr:   "%s = int64(binary.LittleEndian.Uint64(b))",
+		decStr:   "Int64",
 		typeName: "int64",
 		imps:     []string{binaryImport},
 	}
 	uint64Encoder = primitiveTypeEncoder{
 		bufSize:  8,
 		encStr:   "binary.LittleEndian.PutUint64(%s, %s)",
-		decStr:   "%s = binary.LittleEndian.Uint64(b)",
+		decStr:   "Uint64",
 		typeName: "uint64",
 		imps:     []string{binaryImport},
 	}
 	float32Encoder = primitiveTypeEncoder{
 		bufSize:  4,
 		encStr:   "binary.LittleEndian.PutUint32(%s, math.Float32bits(%s))",
-		decStr:   "%s = math.Float32frombits(binary.LittleEndian.Uint32(b))",
+		decStr:   "Float32",
 		typeName: "float32",
 		imps:     []string{binaryImport, mathImport},
 	}
 	float64Encoder = primitiveTypeEncoder{
 		bufSize:  8,
 		encStr:   "binary.LittleEndian.PutUint64(%s, math.Float64bits(%s))",
-		decStr:   "%s = math.Float64frombits(binary.LittleEndian.Uint64(b))",
+		decStr:   "Float64",
 		typeName: "float64",
 		imps:     []string{binaryImport, mathImport},
 	}
@@ -144,13 +140,9 @@ func (e primitiveTypeEncoder) encode(buf bufInfo, varId string) string {
 
 func (e primitiveTypeEncoder) decode(varId string) string {
 	sb := &strings.Builder{}
-	fmt.Fprintf(sb, "b := make([]byte, %d)", e.bufSize)
-	fmt.Fprintf(sb, `
-	if _, err := io.ReadFull(r, b[:%d]); err != nil {
-		return fmt.Errorf("%s %s decode: %%w", err)
-	}
-	`, e.bufSize, varId, e.typeName)
-	fmt.Fprintf(sb, e.decStr, varId)
+	fmt.Fprintf(sb, `if err := d.%s(&%s); err != nil{
+		return fmt.Errorf("deserialize %s of type '%s': %%w",err)
+	}`, e.decStr, varId, varId, e.typeName)
 	return sb.String()
 }
 
@@ -192,7 +184,7 @@ func (e stringEncoder) decode(varId string) string {
 	s += e.lenEncoder.decode("l")
 	s += fmt.Sprintf(`
 	sbuf := make([]byte, l)
-	_, err := io.ReadFull(r, sbuf)
+	_, err := io.ReadFull(d.R, sbuf)
 	if err != nil {
 		return fmt.Errorf("failed to read string data from reader: %%w", err)
 	}

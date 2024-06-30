@@ -22,10 +22,10 @@ func (sliceTestRpcService) Hash() []byte {
 func (s *sliceTestRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // SliceSum
-		return func(r io.Reader) (irpc.FuncExecutor, error) {
+		return func(d *irpc.Decoder) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_sliceTestSliceSumReq
-			if err := args.Deserialize(r); err != nil {
+			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func() irpc.Serializable {
@@ -36,10 +36,10 @@ func (s *sliceTestRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 			}, nil
 		}, nil
 	case 1: // VectMult
-		return func(r io.Reader) (irpc.FuncExecutor, error) {
+		return func(d *irpc.Decoder) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_sliceTestVectMultReq
-			if err := args.Deserialize(r); err != nil {
+			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func() irpc.Serializable {
@@ -50,10 +50,10 @@ func (s *sliceTestRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 			}, nil
 		}, nil
 	case 2: // SliceOfFloat64Sum
-		return func(r io.Reader) (irpc.FuncExecutor, error) {
+		return func(d *irpc.Decoder) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_sliceTestSliceOfFloat64SumReq
-			if err := args.Deserialize(r); err != nil {
+			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func() irpc.Serializable {
@@ -135,21 +135,17 @@ func (s _Irpc_sliceTestSliceSumReq) Serialize(w io.Writer) error {
 	}
 	return nil
 }
-func (s *_Irpc_sliceTestSliceSumReq) Deserialize(r io.Reader) error {
+func (s *_Irpc_sliceTestSliceSumReq) Deserialize(d *irpc.Decoder) error {
 	{ // []int
 		var l int
-		b := make([]byte, 8)
-		if _, err := io.ReadFull(r, b[:8]); err != nil {
-			return fmt.Errorf("l int decode: %w", err)
+		if err := d.Int(&l); err != nil {
+			return fmt.Errorf("deserialize l of type 'int': %w", err)
 		}
-		l = int(binary.LittleEndian.Uint64(b))
 		s.Param0_slice = make([]int, l)
 		for i := 0; i < l; i++ {
-			b := make([]byte, 8)
-			if _, err := io.ReadFull(r, b[:8]); err != nil {
-				return fmt.Errorf("s.Param0_slice[i] int decode: %w", err)
+			if err := d.Int(&s.Param0_slice[i]); err != nil {
+				return fmt.Errorf("deserialize s.Param0_slice[i] of type 'int': %w", err)
 			}
-			s.Param0_slice[i] = int(binary.LittleEndian.Uint64(b))
 		}
 	}
 	return nil
@@ -169,13 +165,11 @@ func (s _Irpc_sliceTestSliceSumResp) Serialize(w io.Writer) error {
 	}
 	return nil
 }
-func (s *_Irpc_sliceTestSliceSumResp) Deserialize(r io.Reader) error {
+func (s *_Irpc_sliceTestSliceSumResp) Deserialize(d *irpc.Decoder) error {
 	{ // int
-		b := make([]byte, 8)
-		if _, err := io.ReadFull(r, b[:8]); err != nil {
-			return fmt.Errorf("s.Param0_ int decode: %w", err)
+		if err := d.Int(&s.Param0_); err != nil {
+			return fmt.Errorf("deserialize s.Param0_ of type 'int': %w", err)
 		}
-		s.Param0_ = int(binary.LittleEndian.Uint64(b))
 	}
 	return nil
 }
@@ -210,29 +204,23 @@ func (s _Irpc_sliceTestVectMultReq) Serialize(w io.Writer) error {
 	}
 	return nil
 }
-func (s *_Irpc_sliceTestVectMultReq) Deserialize(r io.Reader) error {
+func (s *_Irpc_sliceTestVectMultReq) Deserialize(d *irpc.Decoder) error {
 	{ // []int
 		var l int
-		b := make([]byte, 8)
-		if _, err := io.ReadFull(r, b[:8]); err != nil {
-			return fmt.Errorf("l int decode: %w", err)
+		if err := d.Int(&l); err != nil {
+			return fmt.Errorf("deserialize l of type 'int': %w", err)
 		}
-		l = int(binary.LittleEndian.Uint64(b))
 		s.Param0_vect = make([]int, l)
 		for i := 0; i < l; i++ {
-			b := make([]byte, 8)
-			if _, err := io.ReadFull(r, b[:8]); err != nil {
-				return fmt.Errorf("s.Param0_vect[i] int decode: %w", err)
+			if err := d.Int(&s.Param0_vect[i]); err != nil {
+				return fmt.Errorf("deserialize s.Param0_vect[i] of type 'int': %w", err)
 			}
-			s.Param0_vect[i] = int(binary.LittleEndian.Uint64(b))
 		}
 	}
 	{ // int
-		b := make([]byte, 8)
-		if _, err := io.ReadFull(r, b[:8]); err != nil {
-			return fmt.Errorf("s.Param1_s int decode: %w", err)
+		if err := d.Int(&s.Param1_s); err != nil {
+			return fmt.Errorf("deserialize s.Param1_s of type 'int': %w", err)
 		}
-		s.Param1_s = int(binary.LittleEndian.Uint64(b))
 	}
 	return nil
 }
@@ -260,21 +248,17 @@ func (s _Irpc_sliceTestVectMultResp) Serialize(w io.Writer) error {
 	}
 	return nil
 }
-func (s *_Irpc_sliceTestVectMultResp) Deserialize(r io.Reader) error {
+func (s *_Irpc_sliceTestVectMultResp) Deserialize(d *irpc.Decoder) error {
 	{ // []int
 		var l int
-		b := make([]byte, 8)
-		if _, err := io.ReadFull(r, b[:8]); err != nil {
-			return fmt.Errorf("l int decode: %w", err)
+		if err := d.Int(&l); err != nil {
+			return fmt.Errorf("deserialize l of type 'int': %w", err)
 		}
-		l = int(binary.LittleEndian.Uint64(b))
 		s.Param0_ = make([]int, l)
 		for i := 0; i < l; i++ {
-			b := make([]byte, 8)
-			if _, err := io.ReadFull(r, b[:8]); err != nil {
-				return fmt.Errorf("s.Param0_[i] int decode: %w", err)
+			if err := d.Int(&s.Param0_[i]); err != nil {
+				return fmt.Errorf("deserialize s.Param0_[i] of type 'int': %w", err)
 			}
-			s.Param0_[i] = int(binary.LittleEndian.Uint64(b))
 		}
 	}
 	return nil
@@ -303,21 +287,17 @@ func (s _Irpc_sliceTestSliceOfFloat64SumReq) Serialize(w io.Writer) error {
 	}
 	return nil
 }
-func (s *_Irpc_sliceTestSliceOfFloat64SumReq) Deserialize(r io.Reader) error {
+func (s *_Irpc_sliceTestSliceOfFloat64SumReq) Deserialize(d *irpc.Decoder) error {
 	{ // []float64
 		var l int
-		b := make([]byte, 8)
-		if _, err := io.ReadFull(r, b[:8]); err != nil {
-			return fmt.Errorf("l int decode: %w", err)
+		if err := d.Int(&l); err != nil {
+			return fmt.Errorf("deserialize l of type 'int': %w", err)
 		}
-		l = int(binary.LittleEndian.Uint64(b))
 		s.Param0_slice = make([]float64, l)
 		for i := 0; i < l; i++ {
-			b := make([]byte, 8)
-			if _, err := io.ReadFull(r, b[:8]); err != nil {
-				return fmt.Errorf("s.Param0_slice[i] float64 decode: %w", err)
+			if err := d.Float64(&s.Param0_slice[i]); err != nil {
+				return fmt.Errorf("deserialize s.Param0_slice[i] of type 'float64': %w", err)
 			}
-			s.Param0_slice[i] = math.Float64frombits(binary.LittleEndian.Uint64(b))
 		}
 	}
 	return nil
@@ -337,13 +317,11 @@ func (s _Irpc_sliceTestSliceOfFloat64SumResp) Serialize(w io.Writer) error {
 	}
 	return nil
 }
-func (s *_Irpc_sliceTestSliceOfFloat64SumResp) Deserialize(r io.Reader) error {
+func (s *_Irpc_sliceTestSliceOfFloat64SumResp) Deserialize(d *irpc.Decoder) error {
 	{ // float64
-		b := make([]byte, 8)
-		if _, err := io.ReadFull(r, b[:8]); err != nil {
-			return fmt.Errorf("s.Param0_ float64 decode: %w", err)
+		if err := d.Float64(&s.Param0_); err != nil {
+			return fmt.Errorf("deserialize s.Param0_ of type 'float64': %w", err)
 		}
-		s.Param0_ = math.Float64frombits(binary.LittleEndian.Uint64(b))
 	}
 	return nil
 }

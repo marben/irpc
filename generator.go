@@ -163,10 +163,10 @@ func (sg paramStructGenerator) serializeFunc() string {
 
 func (sg paramStructGenerator) deserializeFunc() string {
 	sb := &strings.Builder{}
-	fmt.Fprintf(sb, "func (s *%s)Deserialize(r io.Reader) error {\n", sg.typeName)
+	fmt.Fprintf(sb, "func (s *%s)Deserialize(d *irpc.Decoder) error {\n", sg.typeName)
 	if len(sg.params) > 0 {
 		for _, p := range sg.params {
-			fmt.Fprintf(sb, "{ // %s\n", p.typeName)
+			fmt.Fprintf(sb, "{ // %s\n", p.typeName) // todo: remove brackets?
 			sb.WriteString(p.enc.decode("s." + p.structFieldName))
 			sb.WriteString("}\n")
 		}
@@ -330,10 +330,10 @@ func (sg serviceGenerator) code() string {
 
 	for _, m := range sg.methods {
 		fmt.Fprintf(sb, "case %d: // %s\n", m.index, m.name)
-		fmt.Fprintf(sb, `return func(r io.Reader) (irpc.FuncExecutor, error) {
+		fmt.Fprintf(sb, `return func(d *irpc.Decoder) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
 		 	var args %[1]s
-		 	if err := args.Deserialize(r); err != nil {
+		 	if err := args.Deserialize(d); err != nil {
 		 		return nil, err
 		 	}
 			return func() irpc.Serializable {
