@@ -16,116 +16,70 @@ type encoder interface {
 
 var (
 	boolEncoder = primitiveTypeEncoder{ // todo: could use bitpacking instead of one bool per byte
-		bufSize: 1,
-		encStr: `if %[2]s {
-			%[1]s[0] = 1
-		} else {
-			%[1]s[0] = 0
-		}`,
-		decStr:   "Bool",
-		typeName: "bool",
-		imps:     nil,
+		decFuncName: "Bool",
+		typeName:    "bool",
 	}
 	intEncoder = primitiveTypeEncoder{
-		bufSize:  8,
-		encStr:   "binary.LittleEndian.PutUint64(%s, uint64(%s))",
-		decStr:   "Int",
-		typeName: "int",
-		imps:     []string{irpcImport},
+		decFuncName: "Int",
+		typeName:    "int",
 	}
 	uintEncoder = primitiveTypeEncoder{
-		bufSize:  8,
-		encStr:   "binary.LittleEndian.PutUint64(%s, uint64(%s))",
-		decStr:   "Uint",
-		typeName: "uint",
-		imps:     []string{irpcImport},
+		decFuncName: "Uint",
+		typeName:    "uint",
 	}
 	int8Encoder = primitiveTypeEncoder{
-		bufSize:  1,
-		encStr:   "%s[0] = byte(%s)",
-		decStr:   "Int8",
-		typeName: "int8",
-		imps:     nil,
+		decFuncName: "Int8",
+		typeName:    "int8",
 	}
 	uint8Encoder = primitiveTypeEncoder{
-		bufSize:  1,
-		encStr:   "%s[0] = byte(%s)",
-		decStr:   "Uint8",
-		typeName: "uint8",
-		imps:     []string{irpcImport},
+		decFuncName: "Uint8",
+		typeName:    "uint8",
 	}
 	int16Encoder = primitiveTypeEncoder{
-		bufSize:  2,
-		encStr:   "binary.LittleEndian.PutUint16(%s, uint16(%s))",
-		decStr:   "Int16",
-		typeName: "int16",
-		imps:     []string{irpcImport},
+		decFuncName: "Int16",
+		typeName:    "int16",
 	}
 	uint16Encoder = primitiveTypeEncoder{
-		bufSize:  2,
-		encStr:   "binary.LittleEndian.PutUint16(%s, %s)",
-		decStr:   "Uint16",
-		typeName: "uint16",
-		imps:     []string{irpcImport},
+		decFuncName: "Uint16",
+		typeName:    "uint16",
 	}
 	int32Encoder = primitiveTypeEncoder{
-		bufSize:  4,
-		encStr:   "binary.LittleEndian.PutUint32(%s, uint32(%s))",
-		decStr:   "Int32",
-		typeName: "int32",
-		imps:     []string{irpcImport},
+		decFuncName: "Int32",
+		typeName:    "int32",
 	}
 	uint32Encoder = primitiveTypeEncoder{
-		bufSize:  4,
-		encStr:   "binary.LittleEndian.PutUint32(%s, %s)",
-		decStr:   "Uint32",
-		typeName: "uint32",
-		imps:     []string{irpcImport},
+		decFuncName: "Uint32",
+		typeName:    "uint32",
 	}
 	int64Encoder = primitiveTypeEncoder{
-		bufSize:  8,
-		encStr:   "binary.LittleEndian.PutUint64(%s, uint64(%s))",
-		decStr:   "Int64",
-		typeName: "int64",
-		imps:     []string{irpcImport},
+		decFuncName: "Int64",
+		typeName:    "int64",
 	}
 	uint64Encoder = primitiveTypeEncoder{
-		bufSize:  8,
-		encStr:   "binary.LittleEndian.PutUint64(%s, %s)",
-		decStr:   "Uint64",
-		typeName: "uint64",
-		imps:     []string{irpcImport},
+		decFuncName: "Uint64",
+		typeName:    "uint64",
 	}
 	float32Encoder = primitiveTypeEncoder{
-		bufSize:  4,
-		encStr:   "binary.LittleEndian.PutUint32(%s, math.Float32bits(%s))",
-		decStr:   "Float32",
-		typeName: "float32",
-		imps:     []string{irpcImport},
+		decFuncName: "Float32",
+		typeName:    "float32",
 	}
 	float64Encoder = primitiveTypeEncoder{
-		bufSize:  8,
-		encStr:   "binary.LittleEndian.PutUint64(%s, math.Float64bits(%s))",
-		decStr:   "Float64",
-		typeName: "float64",
-		imps:     []string{irpcImport},
+		decFuncName: "Float64",
+		typeName:    "float64",
 	}
 )
 
 type primitiveTypeEncoder struct {
-	bufSize        int
-	encStr, decStr string
-	typeName       string
-	imps           []string
+	decFuncName string
+	typeName    string
 }
 
 func (e primitiveTypeEncoder) encode(varId string) string {
 	sb := &strings.Builder{}
-	// fmt.Fprintf(sb, "e := irpc.NewEncoder(w)\n")
 	fmt.Fprintf(sb, `if err := e.%s(%s); err != nil {
 		return fmt.Errorf("serialize %s of type '%s': %%w", err)
 	}
-	`, e.decStr, varId, varId, e.typeName)
+	`, e.decFuncName, varId, varId, e.typeName)
 
 	return sb.String()
 }
@@ -135,12 +89,12 @@ func (e primitiveTypeEncoder) decode(varId string) string {
 	fmt.Fprintf(sb, `if err := d.%s(&%s); err != nil{
 		return fmt.Errorf("deserialize %s of type '%s': %%w",err)
 	}
-	`, e.decStr, varId, varId, e.typeName)
+	`, e.decFuncName, varId, varId, e.typeName)
 	return sb.String()
 }
 
 func (e primitiveTypeEncoder) imports() []string {
-	return append(e.imps, fmtImport)
+	return []string{irpcImport, fmtImport}
 }
 
 func (e primitiveTypeEncoder) codeblock() string {
