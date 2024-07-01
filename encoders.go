@@ -8,10 +8,10 @@ import (
 )
 
 type encoder interface {
-	encode(varId string) string // inline variable encode
-	decode(varId string) string // inline variable decode
-	imports() []string          // necessary imports
-	codeblock() string          // requested encoder's code block at top level
+	encode(varId string, existingVars []string) string // inline variable encode
+	decode(varId string, existingVars []string) string // inline variable decode
+	imports() []string                                 // necessary imports
+	codeblock() string                                 // requested encoder's code block at top level
 }
 
 func varEncoder(apiName string, t types.Type) (encoder, error) {
@@ -130,7 +130,7 @@ type primitiveTypeEncoder struct {
 	typeName    string
 }
 
-func (e primitiveTypeEncoder) encode(varId string) string {
+func (e primitiveTypeEncoder) encode(varId string, existingVars []string) string {
 	sb := &strings.Builder{}
 	fmt.Fprintf(sb, `if err := e.%s(%s); err != nil {
 		return fmt.Errorf("serialize %s of type '%s': %%w", err)
@@ -140,7 +140,7 @@ func (e primitiveTypeEncoder) encode(varId string) string {
 	return sb.String()
 }
 
-func (e primitiveTypeEncoder) decode(varId string) string {
+func (e primitiveTypeEncoder) decode(varId string, existingVars []string) string {
 	sb := &strings.Builder{}
 	fmt.Fprintf(sb, `if err := d.%s(&%s); err != nil{
 		return fmt.Errorf("deserialize %s of type '%s': %%w",err)
@@ -178,32 +178,44 @@ func newSliceEncoder(apiName string, t *types.Slice) (sliceEncoder, error) {
 	}, nil
 }
 
-func (e sliceEncoder) encode(varId string) string {
+func (e sliceEncoder) encode(varId string, existingVars []string) string {
 	sb := &strings.Builder{}
+
+	// length
 	fmt.Fprintf(sb, "{ // %s\n", varId)
 	fmt.Fprintf(sb, "var l int = len(%s)\n", varId)
-	sb.WriteString(e.lenEnc.encode("l"))
+	sb.WriteString(e.lenEnc.encode("l", existingVars))
+	existingVars = append(existingVars, "l")
+
+	// for loop
+	itName := generateSliceIteratorName(existingVars)
 	fmt.Fprintf(sb, `
-	for i := 0; i < l; i++ {
+	for %[1]s := 0; %[1]s < l; %[1]s++ {
 		%s
 	}
-	`, e.elemEnc.encode(varId+"[i]"))
+	`, itName, e.elemEnc.encode(varId+"["+itName+"]", append(existingVars, itName)))
 	sb.WriteString("}\n")
 
 	return sb.String()
 }
 
-func (e sliceEncoder) decode(varId string) string {
+func (e sliceEncoder) decode(varId string, existingVars []string) string {
 	sb := &strings.Builder{}
+
+	// length
 	fmt.Fprintf(sb, "{ // %s\n", varId)
 	sb.WriteString("var l int\n")
-	sb.WriteString(e.lenEnc.decode("l"))
+	sb.WriteString(e.lenEnc.decode("l", existingVars))
+	existingVars = append(existingVars, "l")
+
+	// for loop
+	itName := generateSliceIteratorName(existingVars)
 	fmt.Fprintf(sb, `
 	%s = make([]%s, l)
-	for i := 0; i < l; i++ {
+	for %[3]s := 0; %[3]s < l; %[3]s++ {
 		%s
 	}
-	`, varId, e.elemType.String(), e.elemEnc.decode(varId+"[i]"))
+	`, varId, e.elemType.String(), itName, e.elemEnc.decode(varId+"["+itName+"]", append(existingVars, itName)))
 	sb.WriteString("}\n")
 
 	return sb.String()
@@ -244,18 +256,18 @@ func newNamedStructEncoder(apiName string, s *types.Struct) (namedStructEncoder,
 	}, nil
 }
 
-func (e namedStructEncoder) encode(varId string) string {
+func (e namedStructEncoder) encode(varId string, existingVars []string) string {
 	sb := strings.Builder{}
 	for _, f := range e.fields {
-		sb.WriteString(f.enc.encode(varId + "." + f.name))
+		sb.WriteString(f.enc.encode(varId+"."+f.name, existingVars))
 	}
 	return sb.String()
 }
 
-func (e namedStructEncoder) decode(varId string) string {
+func (e namedStructEncoder) decode(varId string, existingVars []string) string {
 	sb := &strings.Builder{}
 	for _, f := range e.fields {
-		sb.WriteString(f.enc.decode(varId + "." + f.name))
+		sb.WriteString(f.enc.decode(varId+"."+f.name, existingVars))
 	}
 	return sb.String()
 }
@@ -357,7 +369,7 @@ func newInterfaceEncoder(name string, apiName string, it *types.Interface) (inte
 	}, nil
 }
 
-func (e interfaceEncoder) encode(varId string) string {
+func (e interfaceEncoder) encode(varId string, existingVars []string) string {
 	sb := &strings.Builder{}
 	sb.WriteString("{\n") // separate block
 	fmt.Fprintf(sb, `var isNil bool
@@ -365,7 +377,7 @@ func (e interfaceEncoder) encode(varId string) string {
 		isNil = true
 	}
 	%s
-	`, varId, boolEncoder.encode("isNil"))
+	`, varId, boolEncoder.encode("isNil", existingVars))
 	sb.WriteString("if !isNil{\n")
 	for _, f := range e.fncs {
 		fmt.Fprintf(sb, "{ // %s()\n", f.funcName)
@@ -377,7 +389,7 @@ func (e interfaceEncoder) encode(varId string) string {
 		}
 		fmt.Fprintf(sb, ":= %s.%s()\n", varId, f.funcName)
 		for _, v := range f.results {
-			sb.WriteString(v.enc.encode(v.implParamName))
+			sb.WriteString(v.enc.encode(v.implParamName, existingVars))
 		}
 		sb.WriteString("}\n")
 	}
@@ -387,7 +399,7 @@ func (e interfaceEncoder) encode(varId string) string {
 	return sb.String()
 }
 
-func (e interfaceEncoder) decode(varId string) string {
+func (e interfaceEncoder) decode(varId string, existingVars []string) string {
 	sb := &strings.Builder{}
 	sb.WriteString("{\n") // separate block
 	fmt.Fprintf(sb, `var isNil bool
@@ -395,13 +407,13 @@ func (e interfaceEncoder) decode(varId string) string {
 	if isNil {
 		%s = nil
 	} else {
-	`, boolEncoder.decode("isNil"), varId)
+	`, boolEncoder.decode("isNil", existingVars), varId)
 
 	fmt.Fprintf(sb, "var impl %s\n", e.implTypeName)
 	for _, f := range e.fncs {
 		fmt.Fprintf(sb, "{ // %s()\n", f.funcName)
 		for _, v := range f.results {
-			sb.WriteString(v.enc.decode("impl." + v.implParamName))
+			sb.WriteString(v.enc.decode("impl."+v.implParamName, existingVars))
 		}
 		sb.WriteString("}\n")
 	}

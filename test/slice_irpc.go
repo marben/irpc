@@ -60,6 +60,20 @@ func (s *sliceTestRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 				return resp
 			}, nil
 		}, nil
+	case 3: // SliceOfSlicesSum
+		return func(d *irpc.Decoder) (irpc.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_sliceTestSliceOfSlicesSumReq
+			if err := args.Deserialize(d); err != nil {
+				return nil, err
+			}
+			return func() irpc.Serializable {
+				// EXECUTE
+				var resp _Irpc_sliceTestSliceOfSlicesSumResp
+				resp.Param0_ = s.impl.SliceOfSlicesSum(args.Param0_slice)
+				return resp
+			}, nil
+		}, nil
 	default:
 		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, string(s.Hash()))
 	}
@@ -104,6 +118,16 @@ func (_c *sliceTestRpcClient) SliceOfFloat64Sum(slice []float64) float64 {
 	}
 	var resp _Irpc_sliceTestSliceOfFloat64SumResp
 	if err := _c.endpoint.CallRemoteFunc(_c.id, 2, req, &resp); err != nil {
+		panic(err)
+	}
+	return resp.Param0_
+}
+func (_c *sliceTestRpcClient) SliceOfSlicesSum(slice [][]int) int {
+	var req = _Irpc_sliceTestSliceOfSlicesSumReq{
+		Param0_slice: slice,
+	}
+	var resp _Irpc_sliceTestSliceOfSlicesSumResp
+	if err := _c.endpoint.CallRemoteFunc(_c.id, 3, req, &resp); err != nil {
 		panic(err)
 	}
 	return resp.Param0_
@@ -298,6 +322,82 @@ func (s _Irpc_sliceTestSliceOfFloat64SumResp) Serialize(e *irpc.Encoder) error {
 func (s *_Irpc_sliceTestSliceOfFloat64SumResp) Deserialize(d *irpc.Decoder) error {
 	if err := d.Float64(&s.Param0_); err != nil {
 		return fmt.Errorf("deserialize s.Param0_ of type 'float64': %w", err)
+	}
+	return nil
+}
+
+type _Irpc_sliceTestSliceOfSlicesSumReq struct {
+	Param0_slice [][]int
+}
+
+func (s _Irpc_sliceTestSliceOfSlicesSumReq) Serialize(e *irpc.Encoder) error {
+	{ // s.Param0_slice
+		var l int = len(s.Param0_slice)
+		if err := e.Int(l); err != nil {
+			return fmt.Errorf("serialize l of type 'int': %w", err)
+		}
+
+		for i := 0; i < l; i++ {
+			{ // s.Param0_slice[i]
+				var l int = len(s.Param0_slice[i])
+				if err := e.Int(l); err != nil {
+					return fmt.Errorf("serialize l of type 'int': %w", err)
+				}
+
+				for j := 0; j < l; j++ {
+					if err := e.Int(s.Param0_slice[i][j]); err != nil {
+						return fmt.Errorf("serialize s.Param0_slice[i][j] of type 'int': %w", err)
+					}
+
+				}
+			}
+
+		}
+	}
+	return nil
+}
+func (s *_Irpc_sliceTestSliceOfSlicesSumReq) Deserialize(d *irpc.Decoder) error {
+	{ // s.Param0_slice
+		var l int
+		if err := d.Int(&l); err != nil {
+			return fmt.Errorf("deserialize l of type 'int': %w", err)
+		}
+
+		s.Param0_slice = make([][]int, l)
+		for i := 0; i < l; i++ {
+			{ // s.Param0_slice[i]
+				var l int
+				if err := d.Int(&l); err != nil {
+					return fmt.Errorf("deserialize l of type 'int': %w", err)
+				}
+
+				s.Param0_slice[i] = make([]int, l)
+				for j := 0; j < l; j++ {
+					if err := d.Int(&s.Param0_slice[i][j]); err != nil {
+						return fmt.Errorf("deserialize s.Param0_slice[i][j] of type 'int': %w", err)
+					}
+
+				}
+			}
+
+		}
+	}
+	return nil
+}
+
+type _Irpc_sliceTestSliceOfSlicesSumResp struct {
+	Param0_ int
+}
+
+func (s _Irpc_sliceTestSliceOfSlicesSumResp) Serialize(e *irpc.Encoder) error {
+	if err := e.Int(s.Param0_); err != nil {
+		return fmt.Errorf("serialize s.Param0_ of type 'int': %w", err)
+	}
+	return nil
+}
+func (s *_Irpc_sliceTestSliceOfSlicesSumResp) Deserialize(d *irpc.Decoder) error {
+	if err := d.Int(&s.Param0_); err != nil {
+		return fmt.Errorf("deserialize s.Param0_ of type 'int': %w", err)
 	}
 	return nil
 }

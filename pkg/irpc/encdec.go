@@ -245,7 +245,7 @@ func (e *Encoder) ByteSlice(v []byte) error {
 	return nil
 }
 
-// todo: make slices generic?
+// we don't do generic slices as it generally adds time and allocations
 func (d *Decoder) ByteSlice(dst *[]byte) error {
 	var l int64
 	if err := d.Int64(&l); err != nil {

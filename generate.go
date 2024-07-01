@@ -1,6 +1,7 @@
 package main
 
 import (
+	"slices"
 	"unicode"
 )
 
@@ -43,4 +44,19 @@ loop:
 		}
 	}
 	return varName
+}
+
+// encoding/decoding of slices of slices requires unique iterator names
+// we generate them from variable name, but we need to remove some characters
+// replaces '[' ']' '.' with underscore
+func generateSliceIteratorName(existingVars []string) string {
+	possibleNames := []string{"i", "j", "k", "l", "m", "n"}
+	for {
+		for i, n := range possibleNames {
+			if !slices.Contains(existingVars, n) {
+				return n
+			}
+			possibleNames[i] = n + "_"
+		}
+	}
 }

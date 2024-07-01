@@ -42,4 +42,10 @@ func TestSlice(t *testing.T) {
 	if resF != 1.1+2.2+float64(skew) {
 		t.Fatalf("unexpected float64 sum %f", resF)
 	}
+
+	// SLICE OF SLICE
+	resS := c.SliceOfSlicesSum([][]int{{1, 2}, {3, 4, 5}})
+	if resS != 1+2+3+4+5 {
+		t.Fatalf("unexpected slice sum: %d", resS)
+	}
 }

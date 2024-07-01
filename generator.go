@@ -136,7 +136,7 @@ func (sg paramStructGenerator) serializeFunc() string {
 	fmt.Fprintf(sb, "func (s %s)Serialize(e *irpc.Encoder) error {\n", sg.typeName)
 	if len(sg.params) > 0 {
 		for _, p := range sg.params {
-			sb.WriteString(p.enc.encode("s." + p.structFieldName))
+			sb.WriteString(p.enc.encode("s."+p.structFieldName, nil))
 		}
 	}
 	sb.WriteString("return nil\n}")
@@ -149,7 +149,7 @@ func (sg paramStructGenerator) deserializeFunc() string {
 	fmt.Fprintf(sb, "func (s *%s)Deserialize(d *irpc.Decoder) error {\n", sg.typeName)
 	if len(sg.params) > 0 {
 		for _, p := range sg.params {
-			sb.WriteString(p.enc.decode("s." + p.structFieldName))
+			sb.WriteString(p.enc.decode("s."+p.structFieldName, nil))
 		}
 	}
 	sb.WriteString("return nil\n}")

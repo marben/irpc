@@ -6,6 +6,7 @@ type sliceTest interface {
 	SliceSum(slice []int) int
 	VectMult(vect []int, s int) []int
 	SliceOfFloat64Sum(slice []float64) float64
+	SliceOfSlicesSum(slice [][]int) int
 }
 
 type sliceTestImpl struct {
@@ -34,4 +35,14 @@ func (st sliceTestImpl) SliceOfFloat64Sum(slice []float64) float64 {
 		sum += v
 	}
 	return sum + float64(st.skew)
+}
+
+func (st sliceTestImpl) SliceOfSlicesSum(slice [][]int) int {
+	var sum int
+	for _, s := range slice {
+		for _, v := range s {
+			sum += v
+		}
+	}
+	return sum
 }
