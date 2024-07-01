@@ -2,7 +2,6 @@ package irpc
 
 import (
 	"fmt"
-	"io"
 )
 
 /*
@@ -63,8 +62,8 @@ func (c *clientRegisterService) Hash() []byte {
 	return nil
 }
 
-func (rp clientRegisterReq) Serialize(w io.Writer) error {
-	if err := writeByteSlice(w, rp.ServiceHash); err != nil {
+func (rp clientRegisterReq) Serialize(e *Encoder) error {
+	if err := e.ByteSlice(rp.ServiceHash); err != nil {
 		return err
 	}
 
@@ -79,11 +78,11 @@ func (rp *clientRegisterReq) Deserialize(d *Decoder) error {
 	return nil
 }
 
-func (rp clientRegisterResp) Serialize(w io.Writer) error {
-	if err := writeUint16(w, uint16(rp.ServiceId)); err != nil {
+func (rp clientRegisterResp) Serialize(e *Encoder) error {
+	if err := e.Uint16(uint16(rp.ServiceId)); err != nil {
 		return err
 	}
-	if err := writeString(w, rp.Err); err != nil {
+	if err := e.String(rp.Err); err != nil {
 		return err
 	}
 	return nil

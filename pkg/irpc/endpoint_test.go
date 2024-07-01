@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"testing"
 
 	"github.com/marben/irpc/pkg/irpc"
@@ -98,8 +97,8 @@ type addParams struct {
 	B int
 }
 
-func (p addParams) Serialize(w io.Writer) error {
-	return json.NewEncoder(w).Encode(p)
+func (p addParams) Serialize(e *irpc.Encoder) error {
+	return json.NewEncoder(e.W).Encode(p) // todo: remove json
 }
 
 func (p *addParams) Deserialize(d *irpc.Decoder) error {
@@ -110,8 +109,8 @@ type addRtnVals struct {
 	Res int
 }
 
-func (v addRtnVals) Serialize(w io.Writer) error {
-	return json.NewEncoder(w).Encode(v)
+func (v addRtnVals) Serialize(e *irpc.Encoder) error {
+	return json.NewEncoder(e.W).Encode(v) // todo: remove json
 }
 
 func (v *addRtnVals) Deserialize(d *irpc.Decoder) error {

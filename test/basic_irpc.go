@@ -2,11 +2,8 @@
 package irpctestpkg
 
 import (
-	"encoding/binary"
 	"fmt"
 	"github.com/marben/irpc/pkg/irpc"
-	"io"
-	"math"
 )
 
 type basicAPIRpcService struct {
@@ -496,32 +493,21 @@ type _Irpc_basicAPIaddByteReq struct {
 	Param1_b byte
 }
 
-func (s _Irpc_basicAPIaddByteReq) Serialize(w io.Writer) error {
-	b := make([]byte, 1)
-	{ // byte
-		b[0] = byte(s.Param0_a)
-		if _, err := w.Write(b[:1]); err != nil {
-			return fmt.Errorf("s.Param0_a uint8 write: %w", err)
-		}
+func (s _Irpc_basicAPIaddByteReq) Serialize(e *irpc.Encoder) error {
+	if err := e.Uint8(s.Param0_a); err != nil {
+		return fmt.Errorf("serialize s.Param0_a of type 'uint8': %w", err)
 	}
-	{ // byte
-		b[0] = byte(s.Param1_b)
-		if _, err := w.Write(b[:1]); err != nil {
-			return fmt.Errorf("s.Param1_b uint8 write: %w", err)
-		}
+	if err := e.Uint8(s.Param1_b); err != nil {
+		return fmt.Errorf("serialize s.Param1_b of type 'uint8': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddByteReq) Deserialize(d *irpc.Decoder) error {
-	{ // byte
-		if err := d.Uint8(&s.Param0_a); err != nil {
-			return fmt.Errorf("deserialize s.Param0_a of type 'uint8': %w", err)
-		}
+	if err := d.Uint8(&s.Param0_a); err != nil {
+		return fmt.Errorf("deserialize s.Param0_a of type 'uint8': %w", err)
 	}
-	{ // byte
-		if err := d.Uint8(&s.Param1_b); err != nil {
-			return fmt.Errorf("deserialize s.Param1_b of type 'uint8': %w", err)
-		}
+	if err := d.Uint8(&s.Param1_b); err != nil {
+		return fmt.Errorf("deserialize s.Param1_b of type 'uint8': %w", err)
 	}
 	return nil
 }
@@ -530,21 +516,15 @@ type _Irpc_basicAPIaddByteResp struct {
 	Param0_ byte
 }
 
-func (s _Irpc_basicAPIaddByteResp) Serialize(w io.Writer) error {
-	b := make([]byte, 1)
-	{ // byte
-		b[0] = byte(s.Param0_)
-		if _, err := w.Write(b[:1]); err != nil {
-			return fmt.Errorf("s.Param0_ uint8 write: %w", err)
-		}
+func (s _Irpc_basicAPIaddByteResp) Serialize(e *irpc.Encoder) error {
+	if err := e.Uint8(s.Param0_); err != nil {
+		return fmt.Errorf("serialize s.Param0_ of type 'uint8': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddByteResp) Deserialize(d *irpc.Decoder) error {
-	{ // byte
-		if err := d.Uint8(&s.Param0_); err != nil {
-			return fmt.Errorf("deserialize s.Param0_ of type 'uint8': %w", err)
-		}
+	if err := d.Uint8(&s.Param0_); err != nil {
+		return fmt.Errorf("deserialize s.Param0_ of type 'uint8': %w", err)
 	}
 	return nil
 }
@@ -554,32 +534,21 @@ type _Irpc_basicAPIaddIntReq struct {
 	Param1_b int
 }
 
-func (s _Irpc_basicAPIaddIntReq) Serialize(w io.Writer) error {
-	b := make([]byte, 8)
-	{ // int
-		binary.LittleEndian.PutUint64(b, uint64(s.Param0_a))
-		if _, err := w.Write(b[:8]); err != nil {
-			return fmt.Errorf("s.Param0_a int write: %w", err)
-		}
+func (s _Irpc_basicAPIaddIntReq) Serialize(e *irpc.Encoder) error {
+	if err := e.Int(s.Param0_a); err != nil {
+		return fmt.Errorf("serialize s.Param0_a of type 'int': %w", err)
 	}
-	{ // int
-		binary.LittleEndian.PutUint64(b, uint64(s.Param1_b))
-		if _, err := w.Write(b[:8]); err != nil {
-			return fmt.Errorf("s.Param1_b int write: %w", err)
-		}
+	if err := e.Int(s.Param1_b); err != nil {
+		return fmt.Errorf("serialize s.Param1_b of type 'int': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddIntReq) Deserialize(d *irpc.Decoder) error {
-	{ // int
-		if err := d.Int(&s.Param0_a); err != nil {
-			return fmt.Errorf("deserialize s.Param0_a of type 'int': %w", err)
-		}
+	if err := d.Int(&s.Param0_a); err != nil {
+		return fmt.Errorf("deserialize s.Param0_a of type 'int': %w", err)
 	}
-	{ // int
-		if err := d.Int(&s.Param1_b); err != nil {
-			return fmt.Errorf("deserialize s.Param1_b of type 'int': %w", err)
-		}
+	if err := d.Int(&s.Param1_b); err != nil {
+		return fmt.Errorf("deserialize s.Param1_b of type 'int': %w", err)
 	}
 	return nil
 }
@@ -588,21 +557,15 @@ type _Irpc_basicAPIaddIntResp struct {
 	Param0_ int
 }
 
-func (s _Irpc_basicAPIaddIntResp) Serialize(w io.Writer) error {
-	b := make([]byte, 8)
-	{ // int
-		binary.LittleEndian.PutUint64(b, uint64(s.Param0_))
-		if _, err := w.Write(b[:8]); err != nil {
-			return fmt.Errorf("s.Param0_ int write: %w", err)
-		}
+func (s _Irpc_basicAPIaddIntResp) Serialize(e *irpc.Encoder) error {
+	if err := e.Int(s.Param0_); err != nil {
+		return fmt.Errorf("serialize s.Param0_ of type 'int': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddIntResp) Deserialize(d *irpc.Decoder) error {
-	{ // int
-		if err := d.Int(&s.Param0_); err != nil {
-			return fmt.Errorf("deserialize s.Param0_ of type 'int': %w", err)
-		}
+	if err := d.Int(&s.Param0_); err != nil {
+		return fmt.Errorf("deserialize s.Param0_ of type 'int': %w", err)
 	}
 	return nil
 }
@@ -612,32 +575,21 @@ type _Irpc_basicAPIswapIntReq struct {
 	Param1_b int
 }
 
-func (s _Irpc_basicAPIswapIntReq) Serialize(w io.Writer) error {
-	b := make([]byte, 8)
-	{ // int
-		binary.LittleEndian.PutUint64(b, uint64(s.Param0_a))
-		if _, err := w.Write(b[:8]); err != nil {
-			return fmt.Errorf("s.Param0_a int write: %w", err)
-		}
+func (s _Irpc_basicAPIswapIntReq) Serialize(e *irpc.Encoder) error {
+	if err := e.Int(s.Param0_a); err != nil {
+		return fmt.Errorf("serialize s.Param0_a of type 'int': %w", err)
 	}
-	{ // int
-		binary.LittleEndian.PutUint64(b, uint64(s.Param1_b))
-		if _, err := w.Write(b[:8]); err != nil {
-			return fmt.Errorf("s.Param1_b int write: %w", err)
-		}
+	if err := e.Int(s.Param1_b); err != nil {
+		return fmt.Errorf("serialize s.Param1_b of type 'int': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIswapIntReq) Deserialize(d *irpc.Decoder) error {
-	{ // int
-		if err := d.Int(&s.Param0_a); err != nil {
-			return fmt.Errorf("deserialize s.Param0_a of type 'int': %w", err)
-		}
+	if err := d.Int(&s.Param0_a); err != nil {
+		return fmt.Errorf("deserialize s.Param0_a of type 'int': %w", err)
 	}
-	{ // int
-		if err := d.Int(&s.Param1_b); err != nil {
-			return fmt.Errorf("deserialize s.Param1_b of type 'int': %w", err)
-		}
+	if err := d.Int(&s.Param1_b); err != nil {
+		return fmt.Errorf("deserialize s.Param1_b of type 'int': %w", err)
 	}
 	return nil
 }
@@ -647,32 +599,21 @@ type _Irpc_basicAPIswapIntResp struct {
 	Param1_ int
 }
 
-func (s _Irpc_basicAPIswapIntResp) Serialize(w io.Writer) error {
-	b := make([]byte, 8)
-	{ // int
-		binary.LittleEndian.PutUint64(b, uint64(s.Param0_))
-		if _, err := w.Write(b[:8]); err != nil {
-			return fmt.Errorf("s.Param0_ int write: %w", err)
-		}
+func (s _Irpc_basicAPIswapIntResp) Serialize(e *irpc.Encoder) error {
+	if err := e.Int(s.Param0_); err != nil {
+		return fmt.Errorf("serialize s.Param0_ of type 'int': %w", err)
 	}
-	{ // int
-		binary.LittleEndian.PutUint64(b, uint64(s.Param1_))
-		if _, err := w.Write(b[:8]); err != nil {
-			return fmt.Errorf("s.Param1_ int write: %w", err)
-		}
+	if err := e.Int(s.Param1_); err != nil {
+		return fmt.Errorf("serialize s.Param1_ of type 'int': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIswapIntResp) Deserialize(d *irpc.Decoder) error {
-	{ // int
-		if err := d.Int(&s.Param0_); err != nil {
-			return fmt.Errorf("deserialize s.Param0_ of type 'int': %w", err)
-		}
+	if err := d.Int(&s.Param0_); err != nil {
+		return fmt.Errorf("deserialize s.Param0_ of type 'int': %w", err)
 	}
-	{ // int
-		if err := d.Int(&s.Param1_); err != nil {
-			return fmt.Errorf("deserialize s.Param1_ of type 'int': %w", err)
-		}
+	if err := d.Int(&s.Param1_); err != nil {
+		return fmt.Errorf("deserialize s.Param1_ of type 'int': %w", err)
 	}
 	return nil
 }
@@ -682,32 +623,21 @@ type _Irpc_basicAPIsubUintReq struct {
 	Param0_b uint
 }
 
-func (s _Irpc_basicAPIsubUintReq) Serialize(w io.Writer) error {
-	b := make([]byte, 8)
-	{ // uint
-		binary.LittleEndian.PutUint64(b, uint64(s.Param0_a))
-		if _, err := w.Write(b[:8]); err != nil {
-			return fmt.Errorf("s.Param0_a uint write: %w", err)
-		}
+func (s _Irpc_basicAPIsubUintReq) Serialize(e *irpc.Encoder) error {
+	if err := e.Uint(s.Param0_a); err != nil {
+		return fmt.Errorf("serialize s.Param0_a of type 'uint': %w", err)
 	}
-	{ // uint
-		binary.LittleEndian.PutUint64(b, uint64(s.Param0_b))
-		if _, err := w.Write(b[:8]); err != nil {
-			return fmt.Errorf("s.Param0_b uint write: %w", err)
-		}
+	if err := e.Uint(s.Param0_b); err != nil {
+		return fmt.Errorf("serialize s.Param0_b of type 'uint': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIsubUintReq) Deserialize(d *irpc.Decoder) error {
-	{ // uint
-		if err := d.Uint(&s.Param0_a); err != nil {
-			return fmt.Errorf("deserialize s.Param0_a of type 'uint': %w", err)
-		}
+	if err := d.Uint(&s.Param0_a); err != nil {
+		return fmt.Errorf("deserialize s.Param0_a of type 'uint': %w", err)
 	}
-	{ // uint
-		if err := d.Uint(&s.Param0_b); err != nil {
-			return fmt.Errorf("deserialize s.Param0_b of type 'uint': %w", err)
-		}
+	if err := d.Uint(&s.Param0_b); err != nil {
+		return fmt.Errorf("deserialize s.Param0_b of type 'uint': %w", err)
 	}
 	return nil
 }
@@ -716,21 +646,15 @@ type _Irpc_basicAPIsubUintResp struct {
 	Param0_ uint
 }
 
-func (s _Irpc_basicAPIsubUintResp) Serialize(w io.Writer) error {
-	b := make([]byte, 8)
-	{ // uint
-		binary.LittleEndian.PutUint64(b, uint64(s.Param0_))
-		if _, err := w.Write(b[:8]); err != nil {
-			return fmt.Errorf("s.Param0_ uint write: %w", err)
-		}
+func (s _Irpc_basicAPIsubUintResp) Serialize(e *irpc.Encoder) error {
+	if err := e.Uint(s.Param0_); err != nil {
+		return fmt.Errorf("serialize s.Param0_ of type 'uint': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIsubUintResp) Deserialize(d *irpc.Decoder) error {
-	{ // uint
-		if err := d.Uint(&s.Param0_); err != nil {
-			return fmt.Errorf("deserialize s.Param0_ of type 'uint': %w", err)
-		}
+	if err := d.Uint(&s.Param0_); err != nil {
+		return fmt.Errorf("deserialize s.Param0_ of type 'uint': %w", err)
 	}
 	return nil
 }
@@ -740,32 +664,21 @@ type _Irpc_basicAPIaddInt8Req struct {
 	Param0_b int8
 }
 
-func (s _Irpc_basicAPIaddInt8Req) Serialize(w io.Writer) error {
-	b := make([]byte, 1)
-	{ // int8
-		b[0] = byte(s.Param0_a)
-		if _, err := w.Write(b[:1]); err != nil {
-			return fmt.Errorf("s.Param0_a int8 write: %w", err)
-		}
+func (s _Irpc_basicAPIaddInt8Req) Serialize(e *irpc.Encoder) error {
+	if err := e.Int8(s.Param0_a); err != nil {
+		return fmt.Errorf("serialize s.Param0_a of type 'int8': %w", err)
 	}
-	{ // int8
-		b[0] = byte(s.Param0_b)
-		if _, err := w.Write(b[:1]); err != nil {
-			return fmt.Errorf("s.Param0_b int8 write: %w", err)
-		}
+	if err := e.Int8(s.Param0_b); err != nil {
+		return fmt.Errorf("serialize s.Param0_b of type 'int8': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddInt8Req) Deserialize(d *irpc.Decoder) error {
-	{ // int8
-		if err := d.Int8(&s.Param0_a); err != nil {
-			return fmt.Errorf("deserialize s.Param0_a of type 'int8': %w", err)
-		}
+	if err := d.Int8(&s.Param0_a); err != nil {
+		return fmt.Errorf("deserialize s.Param0_a of type 'int8': %w", err)
 	}
-	{ // int8
-		if err := d.Int8(&s.Param0_b); err != nil {
-			return fmt.Errorf("deserialize s.Param0_b of type 'int8': %w", err)
-		}
+	if err := d.Int8(&s.Param0_b); err != nil {
+		return fmt.Errorf("deserialize s.Param0_b of type 'int8': %w", err)
 	}
 	return nil
 }
@@ -774,21 +687,15 @@ type _Irpc_basicAPIaddInt8Resp struct {
 	Param0_ int8
 }
 
-func (s _Irpc_basicAPIaddInt8Resp) Serialize(w io.Writer) error {
-	b := make([]byte, 1)
-	{ // int8
-		b[0] = byte(s.Param0_)
-		if _, err := w.Write(b[:1]); err != nil {
-			return fmt.Errorf("s.Param0_ int8 write: %w", err)
-		}
+func (s _Irpc_basicAPIaddInt8Resp) Serialize(e *irpc.Encoder) error {
+	if err := e.Int8(s.Param0_); err != nil {
+		return fmt.Errorf("serialize s.Param0_ of type 'int8': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddInt8Resp) Deserialize(d *irpc.Decoder) error {
-	{ // int8
-		if err := d.Int8(&s.Param0_); err != nil {
-			return fmt.Errorf("deserialize s.Param0_ of type 'int8': %w", err)
-		}
+	if err := d.Int8(&s.Param0_); err != nil {
+		return fmt.Errorf("deserialize s.Param0_ of type 'int8': %w", err)
 	}
 	return nil
 }
@@ -798,32 +705,21 @@ type _Irpc_basicAPIaddUint8Req struct {
 	Param0_b uint8
 }
 
-func (s _Irpc_basicAPIaddUint8Req) Serialize(w io.Writer) error {
-	b := make([]byte, 1)
-	{ // uint8
-		b[0] = byte(s.Param0_a)
-		if _, err := w.Write(b[:1]); err != nil {
-			return fmt.Errorf("s.Param0_a uint8 write: %w", err)
-		}
+func (s _Irpc_basicAPIaddUint8Req) Serialize(e *irpc.Encoder) error {
+	if err := e.Uint8(s.Param0_a); err != nil {
+		return fmt.Errorf("serialize s.Param0_a of type 'uint8': %w", err)
 	}
-	{ // uint8
-		b[0] = byte(s.Param0_b)
-		if _, err := w.Write(b[:1]); err != nil {
-			return fmt.Errorf("s.Param0_b uint8 write: %w", err)
-		}
+	if err := e.Uint8(s.Param0_b); err != nil {
+		return fmt.Errorf("serialize s.Param0_b of type 'uint8': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddUint8Req) Deserialize(d *irpc.Decoder) error {
-	{ // uint8
-		if err := d.Uint8(&s.Param0_a); err != nil {
-			return fmt.Errorf("deserialize s.Param0_a of type 'uint8': %w", err)
-		}
+	if err := d.Uint8(&s.Param0_a); err != nil {
+		return fmt.Errorf("deserialize s.Param0_a of type 'uint8': %w", err)
 	}
-	{ // uint8
-		if err := d.Uint8(&s.Param0_b); err != nil {
-			return fmt.Errorf("deserialize s.Param0_b of type 'uint8': %w", err)
-		}
+	if err := d.Uint8(&s.Param0_b); err != nil {
+		return fmt.Errorf("deserialize s.Param0_b of type 'uint8': %w", err)
 	}
 	return nil
 }
@@ -832,21 +728,15 @@ type _Irpc_basicAPIaddUint8Resp struct {
 	Param0_ uint8
 }
 
-func (s _Irpc_basicAPIaddUint8Resp) Serialize(w io.Writer) error {
-	b := make([]byte, 1)
-	{ // uint8
-		b[0] = byte(s.Param0_)
-		if _, err := w.Write(b[:1]); err != nil {
-			return fmt.Errorf("s.Param0_ uint8 write: %w", err)
-		}
+func (s _Irpc_basicAPIaddUint8Resp) Serialize(e *irpc.Encoder) error {
+	if err := e.Uint8(s.Param0_); err != nil {
+		return fmt.Errorf("serialize s.Param0_ of type 'uint8': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddUint8Resp) Deserialize(d *irpc.Decoder) error {
-	{ // uint8
-		if err := d.Uint8(&s.Param0_); err != nil {
-			return fmt.Errorf("deserialize s.Param0_ of type 'uint8': %w", err)
-		}
+	if err := d.Uint8(&s.Param0_); err != nil {
+		return fmt.Errorf("deserialize s.Param0_ of type 'uint8': %w", err)
 	}
 	return nil
 }
@@ -856,32 +746,21 @@ type _Irpc_basicAPIaddInt16Req struct {
 	Param0_b int16
 }
 
-func (s _Irpc_basicAPIaddInt16Req) Serialize(w io.Writer) error {
-	b := make([]byte, 2)
-	{ // int16
-		binary.LittleEndian.PutUint16(b, uint16(s.Param0_a))
-		if _, err := w.Write(b[:2]); err != nil {
-			return fmt.Errorf("s.Param0_a int16 write: %w", err)
-		}
+func (s _Irpc_basicAPIaddInt16Req) Serialize(e *irpc.Encoder) error {
+	if err := e.Int16(s.Param0_a); err != nil {
+		return fmt.Errorf("serialize s.Param0_a of type 'int16': %w", err)
 	}
-	{ // int16
-		binary.LittleEndian.PutUint16(b, uint16(s.Param0_b))
-		if _, err := w.Write(b[:2]); err != nil {
-			return fmt.Errorf("s.Param0_b int16 write: %w", err)
-		}
+	if err := e.Int16(s.Param0_b); err != nil {
+		return fmt.Errorf("serialize s.Param0_b of type 'int16': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddInt16Req) Deserialize(d *irpc.Decoder) error {
-	{ // int16
-		if err := d.Int16(&s.Param0_a); err != nil {
-			return fmt.Errorf("deserialize s.Param0_a of type 'int16': %w", err)
-		}
+	if err := d.Int16(&s.Param0_a); err != nil {
+		return fmt.Errorf("deserialize s.Param0_a of type 'int16': %w", err)
 	}
-	{ // int16
-		if err := d.Int16(&s.Param0_b); err != nil {
-			return fmt.Errorf("deserialize s.Param0_b of type 'int16': %w", err)
-		}
+	if err := d.Int16(&s.Param0_b); err != nil {
+		return fmt.Errorf("deserialize s.Param0_b of type 'int16': %w", err)
 	}
 	return nil
 }
@@ -890,21 +769,15 @@ type _Irpc_basicAPIaddInt16Resp struct {
 	Param0_ int16
 }
 
-func (s _Irpc_basicAPIaddInt16Resp) Serialize(w io.Writer) error {
-	b := make([]byte, 2)
-	{ // int16
-		binary.LittleEndian.PutUint16(b, uint16(s.Param0_))
-		if _, err := w.Write(b[:2]); err != nil {
-			return fmt.Errorf("s.Param0_ int16 write: %w", err)
-		}
+func (s _Irpc_basicAPIaddInt16Resp) Serialize(e *irpc.Encoder) error {
+	if err := e.Int16(s.Param0_); err != nil {
+		return fmt.Errorf("serialize s.Param0_ of type 'int16': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddInt16Resp) Deserialize(d *irpc.Decoder) error {
-	{ // int16
-		if err := d.Int16(&s.Param0_); err != nil {
-			return fmt.Errorf("deserialize s.Param0_ of type 'int16': %w", err)
-		}
+	if err := d.Int16(&s.Param0_); err != nil {
+		return fmt.Errorf("deserialize s.Param0_ of type 'int16': %w", err)
 	}
 	return nil
 }
@@ -914,32 +787,21 @@ type _Irpc_basicAPIaddUint16Req struct {
 	Param0_b uint16
 }
 
-func (s _Irpc_basicAPIaddUint16Req) Serialize(w io.Writer) error {
-	b := make([]byte, 2)
-	{ // uint16
-		binary.LittleEndian.PutUint16(b, s.Param0_a)
-		if _, err := w.Write(b[:2]); err != nil {
-			return fmt.Errorf("s.Param0_a uint16 write: %w", err)
-		}
+func (s _Irpc_basicAPIaddUint16Req) Serialize(e *irpc.Encoder) error {
+	if err := e.Uint16(s.Param0_a); err != nil {
+		return fmt.Errorf("serialize s.Param0_a of type 'uint16': %w", err)
 	}
-	{ // uint16
-		binary.LittleEndian.PutUint16(b, s.Param0_b)
-		if _, err := w.Write(b[:2]); err != nil {
-			return fmt.Errorf("s.Param0_b uint16 write: %w", err)
-		}
+	if err := e.Uint16(s.Param0_b); err != nil {
+		return fmt.Errorf("serialize s.Param0_b of type 'uint16': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddUint16Req) Deserialize(d *irpc.Decoder) error {
-	{ // uint16
-		if err := d.Uint16(&s.Param0_a); err != nil {
-			return fmt.Errorf("deserialize s.Param0_a of type 'uint16': %w", err)
-		}
+	if err := d.Uint16(&s.Param0_a); err != nil {
+		return fmt.Errorf("deserialize s.Param0_a of type 'uint16': %w", err)
 	}
-	{ // uint16
-		if err := d.Uint16(&s.Param0_b); err != nil {
-			return fmt.Errorf("deserialize s.Param0_b of type 'uint16': %w", err)
-		}
+	if err := d.Uint16(&s.Param0_b); err != nil {
+		return fmt.Errorf("deserialize s.Param0_b of type 'uint16': %w", err)
 	}
 	return nil
 }
@@ -948,21 +810,15 @@ type _Irpc_basicAPIaddUint16Resp struct {
 	Param0_ uint16
 }
 
-func (s _Irpc_basicAPIaddUint16Resp) Serialize(w io.Writer) error {
-	b := make([]byte, 2)
-	{ // uint16
-		binary.LittleEndian.PutUint16(b, s.Param0_)
-		if _, err := w.Write(b[:2]); err != nil {
-			return fmt.Errorf("s.Param0_ uint16 write: %w", err)
-		}
+func (s _Irpc_basicAPIaddUint16Resp) Serialize(e *irpc.Encoder) error {
+	if err := e.Uint16(s.Param0_); err != nil {
+		return fmt.Errorf("serialize s.Param0_ of type 'uint16': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddUint16Resp) Deserialize(d *irpc.Decoder) error {
-	{ // uint16
-		if err := d.Uint16(&s.Param0_); err != nil {
-			return fmt.Errorf("deserialize s.Param0_ of type 'uint16': %w", err)
-		}
+	if err := d.Uint16(&s.Param0_); err != nil {
+		return fmt.Errorf("deserialize s.Param0_ of type 'uint16': %w", err)
 	}
 	return nil
 }
@@ -972,32 +828,21 @@ type _Irpc_basicAPIaddInt32Req struct {
 	Param0_b int32
 }
 
-func (s _Irpc_basicAPIaddInt32Req) Serialize(w io.Writer) error {
-	b := make([]byte, 4)
-	{ // int32
-		binary.LittleEndian.PutUint32(b, uint32(s.Param0_a))
-		if _, err := w.Write(b[:4]); err != nil {
-			return fmt.Errorf("s.Param0_a int32 write: %w", err)
-		}
+func (s _Irpc_basicAPIaddInt32Req) Serialize(e *irpc.Encoder) error {
+	if err := e.Int32(s.Param0_a); err != nil {
+		return fmt.Errorf("serialize s.Param0_a of type 'int32': %w", err)
 	}
-	{ // int32
-		binary.LittleEndian.PutUint32(b, uint32(s.Param0_b))
-		if _, err := w.Write(b[:4]); err != nil {
-			return fmt.Errorf("s.Param0_b int32 write: %w", err)
-		}
+	if err := e.Int32(s.Param0_b); err != nil {
+		return fmt.Errorf("serialize s.Param0_b of type 'int32': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddInt32Req) Deserialize(d *irpc.Decoder) error {
-	{ // int32
-		if err := d.Int32(&s.Param0_a); err != nil {
-			return fmt.Errorf("deserialize s.Param0_a of type 'int32': %w", err)
-		}
+	if err := d.Int32(&s.Param0_a); err != nil {
+		return fmt.Errorf("deserialize s.Param0_a of type 'int32': %w", err)
 	}
-	{ // int32
-		if err := d.Int32(&s.Param0_b); err != nil {
-			return fmt.Errorf("deserialize s.Param0_b of type 'int32': %w", err)
-		}
+	if err := d.Int32(&s.Param0_b); err != nil {
+		return fmt.Errorf("deserialize s.Param0_b of type 'int32': %w", err)
 	}
 	return nil
 }
@@ -1006,21 +851,15 @@ type _Irpc_basicAPIaddInt32Resp struct {
 	Param0_ int32
 }
 
-func (s _Irpc_basicAPIaddInt32Resp) Serialize(w io.Writer) error {
-	b := make([]byte, 4)
-	{ // int32
-		binary.LittleEndian.PutUint32(b, uint32(s.Param0_))
-		if _, err := w.Write(b[:4]); err != nil {
-			return fmt.Errorf("s.Param0_ int32 write: %w", err)
-		}
+func (s _Irpc_basicAPIaddInt32Resp) Serialize(e *irpc.Encoder) error {
+	if err := e.Int32(s.Param0_); err != nil {
+		return fmt.Errorf("serialize s.Param0_ of type 'int32': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddInt32Resp) Deserialize(d *irpc.Decoder) error {
-	{ // int32
-		if err := d.Int32(&s.Param0_); err != nil {
-			return fmt.Errorf("deserialize s.Param0_ of type 'int32': %w", err)
-		}
+	if err := d.Int32(&s.Param0_); err != nil {
+		return fmt.Errorf("deserialize s.Param0_ of type 'int32': %w", err)
 	}
 	return nil
 }
@@ -1030,32 +869,21 @@ type _Irpc_basicAPIaddUint32Req struct {
 	Param0_b uint32
 }
 
-func (s _Irpc_basicAPIaddUint32Req) Serialize(w io.Writer) error {
-	b := make([]byte, 4)
-	{ // uint32
-		binary.LittleEndian.PutUint32(b, s.Param0_a)
-		if _, err := w.Write(b[:4]); err != nil {
-			return fmt.Errorf("s.Param0_a uint32 write: %w", err)
-		}
+func (s _Irpc_basicAPIaddUint32Req) Serialize(e *irpc.Encoder) error {
+	if err := e.Uint32(s.Param0_a); err != nil {
+		return fmt.Errorf("serialize s.Param0_a of type 'uint32': %w", err)
 	}
-	{ // uint32
-		binary.LittleEndian.PutUint32(b, s.Param0_b)
-		if _, err := w.Write(b[:4]); err != nil {
-			return fmt.Errorf("s.Param0_b uint32 write: %w", err)
-		}
+	if err := e.Uint32(s.Param0_b); err != nil {
+		return fmt.Errorf("serialize s.Param0_b of type 'uint32': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddUint32Req) Deserialize(d *irpc.Decoder) error {
-	{ // uint32
-		if err := d.Uint32(&s.Param0_a); err != nil {
-			return fmt.Errorf("deserialize s.Param0_a of type 'uint32': %w", err)
-		}
+	if err := d.Uint32(&s.Param0_a); err != nil {
+		return fmt.Errorf("deserialize s.Param0_a of type 'uint32': %w", err)
 	}
-	{ // uint32
-		if err := d.Uint32(&s.Param0_b); err != nil {
-			return fmt.Errorf("deserialize s.Param0_b of type 'uint32': %w", err)
-		}
+	if err := d.Uint32(&s.Param0_b); err != nil {
+		return fmt.Errorf("deserialize s.Param0_b of type 'uint32': %w", err)
 	}
 	return nil
 }
@@ -1064,21 +892,15 @@ type _Irpc_basicAPIaddUint32Resp struct {
 	Param0_ uint32
 }
 
-func (s _Irpc_basicAPIaddUint32Resp) Serialize(w io.Writer) error {
-	b := make([]byte, 4)
-	{ // uint32
-		binary.LittleEndian.PutUint32(b, s.Param0_)
-		if _, err := w.Write(b[:4]); err != nil {
-			return fmt.Errorf("s.Param0_ uint32 write: %w", err)
-		}
+func (s _Irpc_basicAPIaddUint32Resp) Serialize(e *irpc.Encoder) error {
+	if err := e.Uint32(s.Param0_); err != nil {
+		return fmt.Errorf("serialize s.Param0_ of type 'uint32': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddUint32Resp) Deserialize(d *irpc.Decoder) error {
-	{ // uint32
-		if err := d.Uint32(&s.Param0_); err != nil {
-			return fmt.Errorf("deserialize s.Param0_ of type 'uint32': %w", err)
-		}
+	if err := d.Uint32(&s.Param0_); err != nil {
+		return fmt.Errorf("deserialize s.Param0_ of type 'uint32': %w", err)
 	}
 	return nil
 }
@@ -1088,32 +910,21 @@ type _Irpc_basicAPIaddInt64Req struct {
 	Param0_b int64
 }
 
-func (s _Irpc_basicAPIaddInt64Req) Serialize(w io.Writer) error {
-	b := make([]byte, 8)
-	{ // int64
-		binary.LittleEndian.PutUint64(b, uint64(s.Param0_a))
-		if _, err := w.Write(b[:8]); err != nil {
-			return fmt.Errorf("s.Param0_a int64 write: %w", err)
-		}
+func (s _Irpc_basicAPIaddInt64Req) Serialize(e *irpc.Encoder) error {
+	if err := e.Int64(s.Param0_a); err != nil {
+		return fmt.Errorf("serialize s.Param0_a of type 'int64': %w", err)
 	}
-	{ // int64
-		binary.LittleEndian.PutUint64(b, uint64(s.Param0_b))
-		if _, err := w.Write(b[:8]); err != nil {
-			return fmt.Errorf("s.Param0_b int64 write: %w", err)
-		}
+	if err := e.Int64(s.Param0_b); err != nil {
+		return fmt.Errorf("serialize s.Param0_b of type 'int64': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddInt64Req) Deserialize(d *irpc.Decoder) error {
-	{ // int64
-		if err := d.Int64(&s.Param0_a); err != nil {
-			return fmt.Errorf("deserialize s.Param0_a of type 'int64': %w", err)
-		}
+	if err := d.Int64(&s.Param0_a); err != nil {
+		return fmt.Errorf("deserialize s.Param0_a of type 'int64': %w", err)
 	}
-	{ // int64
-		if err := d.Int64(&s.Param0_b); err != nil {
-			return fmt.Errorf("deserialize s.Param0_b of type 'int64': %w", err)
-		}
+	if err := d.Int64(&s.Param0_b); err != nil {
+		return fmt.Errorf("deserialize s.Param0_b of type 'int64': %w", err)
 	}
 	return nil
 }
@@ -1122,21 +933,15 @@ type _Irpc_basicAPIaddInt64Resp struct {
 	Param0_ int64
 }
 
-func (s _Irpc_basicAPIaddInt64Resp) Serialize(w io.Writer) error {
-	b := make([]byte, 8)
-	{ // int64
-		binary.LittleEndian.PutUint64(b, uint64(s.Param0_))
-		if _, err := w.Write(b[:8]); err != nil {
-			return fmt.Errorf("s.Param0_ int64 write: %w", err)
-		}
+func (s _Irpc_basicAPIaddInt64Resp) Serialize(e *irpc.Encoder) error {
+	if err := e.Int64(s.Param0_); err != nil {
+		return fmt.Errorf("serialize s.Param0_ of type 'int64': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddInt64Resp) Deserialize(d *irpc.Decoder) error {
-	{ // int64
-		if err := d.Int64(&s.Param0_); err != nil {
-			return fmt.Errorf("deserialize s.Param0_ of type 'int64': %w", err)
-		}
+	if err := d.Int64(&s.Param0_); err != nil {
+		return fmt.Errorf("deserialize s.Param0_ of type 'int64': %w", err)
 	}
 	return nil
 }
@@ -1146,32 +951,21 @@ type _Irpc_basicAPIaddUint64Req struct {
 	Param0_b uint64
 }
 
-func (s _Irpc_basicAPIaddUint64Req) Serialize(w io.Writer) error {
-	b := make([]byte, 8)
-	{ // uint64
-		binary.LittleEndian.PutUint64(b, s.Param0_a)
-		if _, err := w.Write(b[:8]); err != nil {
-			return fmt.Errorf("s.Param0_a uint64 write: %w", err)
-		}
+func (s _Irpc_basicAPIaddUint64Req) Serialize(e *irpc.Encoder) error {
+	if err := e.Uint64(s.Param0_a); err != nil {
+		return fmt.Errorf("serialize s.Param0_a of type 'uint64': %w", err)
 	}
-	{ // uint64
-		binary.LittleEndian.PutUint64(b, s.Param0_b)
-		if _, err := w.Write(b[:8]); err != nil {
-			return fmt.Errorf("s.Param0_b uint64 write: %w", err)
-		}
+	if err := e.Uint64(s.Param0_b); err != nil {
+		return fmt.Errorf("serialize s.Param0_b of type 'uint64': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddUint64Req) Deserialize(d *irpc.Decoder) error {
-	{ // uint64
-		if err := d.Uint64(&s.Param0_a); err != nil {
-			return fmt.Errorf("deserialize s.Param0_a of type 'uint64': %w", err)
-		}
+	if err := d.Uint64(&s.Param0_a); err != nil {
+		return fmt.Errorf("deserialize s.Param0_a of type 'uint64': %w", err)
 	}
-	{ // uint64
-		if err := d.Uint64(&s.Param0_b); err != nil {
-			return fmt.Errorf("deserialize s.Param0_b of type 'uint64': %w", err)
-		}
+	if err := d.Uint64(&s.Param0_b); err != nil {
+		return fmt.Errorf("deserialize s.Param0_b of type 'uint64': %w", err)
 	}
 	return nil
 }
@@ -1180,21 +974,15 @@ type _Irpc_basicAPIaddUint64Resp struct {
 	Param0_ uint64
 }
 
-func (s _Irpc_basicAPIaddUint64Resp) Serialize(w io.Writer) error {
-	b := make([]byte, 8)
-	{ // uint64
-		binary.LittleEndian.PutUint64(b, s.Param0_)
-		if _, err := w.Write(b[:8]); err != nil {
-			return fmt.Errorf("s.Param0_ uint64 write: %w", err)
-		}
+func (s _Irpc_basicAPIaddUint64Resp) Serialize(e *irpc.Encoder) error {
+	if err := e.Uint64(s.Param0_); err != nil {
+		return fmt.Errorf("serialize s.Param0_ of type 'uint64': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddUint64Resp) Deserialize(d *irpc.Decoder) error {
-	{ // uint64
-		if err := d.Uint64(&s.Param0_); err != nil {
-			return fmt.Errorf("deserialize s.Param0_ of type 'uint64': %w", err)
-		}
+	if err := d.Uint64(&s.Param0_); err != nil {
+		return fmt.Errorf("deserialize s.Param0_ of type 'uint64': %w", err)
 	}
 	return nil
 }
@@ -1204,32 +992,21 @@ type _Irpc_basicAPIaddFloat64Req struct {
 	Param0_b float64
 }
 
-func (s _Irpc_basicAPIaddFloat64Req) Serialize(w io.Writer) error {
-	b := make([]byte, 8)
-	{ // float64
-		binary.LittleEndian.PutUint64(b, math.Float64bits(s.Param0_a))
-		if _, err := w.Write(b[:8]); err != nil {
-			return fmt.Errorf("s.Param0_a float64 write: %w", err)
-		}
+func (s _Irpc_basicAPIaddFloat64Req) Serialize(e *irpc.Encoder) error {
+	if err := e.Float64(s.Param0_a); err != nil {
+		return fmt.Errorf("serialize s.Param0_a of type 'float64': %w", err)
 	}
-	{ // float64
-		binary.LittleEndian.PutUint64(b, math.Float64bits(s.Param0_b))
-		if _, err := w.Write(b[:8]); err != nil {
-			return fmt.Errorf("s.Param0_b float64 write: %w", err)
-		}
+	if err := e.Float64(s.Param0_b); err != nil {
+		return fmt.Errorf("serialize s.Param0_b of type 'float64': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddFloat64Req) Deserialize(d *irpc.Decoder) error {
-	{ // float64
-		if err := d.Float64(&s.Param0_a); err != nil {
-			return fmt.Errorf("deserialize s.Param0_a of type 'float64': %w", err)
-		}
+	if err := d.Float64(&s.Param0_a); err != nil {
+		return fmt.Errorf("deserialize s.Param0_a of type 'float64': %w", err)
 	}
-	{ // float64
-		if err := d.Float64(&s.Param0_b); err != nil {
-			return fmt.Errorf("deserialize s.Param0_b of type 'float64': %w", err)
-		}
+	if err := d.Float64(&s.Param0_b); err != nil {
+		return fmt.Errorf("deserialize s.Param0_b of type 'float64': %w", err)
 	}
 	return nil
 }
@@ -1238,21 +1015,15 @@ type _Irpc_basicAPIaddFloat64Resp struct {
 	Param0_ float64
 }
 
-func (s _Irpc_basicAPIaddFloat64Resp) Serialize(w io.Writer) error {
-	b := make([]byte, 8)
-	{ // float64
-		binary.LittleEndian.PutUint64(b, math.Float64bits(s.Param0_))
-		if _, err := w.Write(b[:8]); err != nil {
-			return fmt.Errorf("s.Param0_ float64 write: %w", err)
-		}
+func (s _Irpc_basicAPIaddFloat64Resp) Serialize(e *irpc.Encoder) error {
+	if err := e.Float64(s.Param0_); err != nil {
+		return fmt.Errorf("serialize s.Param0_ of type 'float64': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddFloat64Resp) Deserialize(d *irpc.Decoder) error {
-	{ // float64
-		if err := d.Float64(&s.Param0_); err != nil {
-			return fmt.Errorf("deserialize s.Param0_ of type 'float64': %w", err)
-		}
+	if err := d.Float64(&s.Param0_); err != nil {
+		return fmt.Errorf("deserialize s.Param0_ of type 'float64': %w", err)
 	}
 	return nil
 }
@@ -1262,32 +1033,21 @@ type _Irpc_basicAPIaddFloat32Req struct {
 	Param0_b float32
 }
 
-func (s _Irpc_basicAPIaddFloat32Req) Serialize(w io.Writer) error {
-	b := make([]byte, 4)
-	{ // float32
-		binary.LittleEndian.PutUint32(b, math.Float32bits(s.Param0_a))
-		if _, err := w.Write(b[:4]); err != nil {
-			return fmt.Errorf("s.Param0_a float32 write: %w", err)
-		}
+func (s _Irpc_basicAPIaddFloat32Req) Serialize(e *irpc.Encoder) error {
+	if err := e.Float32(s.Param0_a); err != nil {
+		return fmt.Errorf("serialize s.Param0_a of type 'float32': %w", err)
 	}
-	{ // float32
-		binary.LittleEndian.PutUint32(b, math.Float32bits(s.Param0_b))
-		if _, err := w.Write(b[:4]); err != nil {
-			return fmt.Errorf("s.Param0_b float32 write: %w", err)
-		}
+	if err := e.Float32(s.Param0_b); err != nil {
+		return fmt.Errorf("serialize s.Param0_b of type 'float32': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddFloat32Req) Deserialize(d *irpc.Decoder) error {
-	{ // float32
-		if err := d.Float32(&s.Param0_a); err != nil {
-			return fmt.Errorf("deserialize s.Param0_a of type 'float32': %w", err)
-		}
+	if err := d.Float32(&s.Param0_a); err != nil {
+		return fmt.Errorf("deserialize s.Param0_a of type 'float32': %w", err)
 	}
-	{ // float32
-		if err := d.Float32(&s.Param0_b); err != nil {
-			return fmt.Errorf("deserialize s.Param0_b of type 'float32': %w", err)
-		}
+	if err := d.Float32(&s.Param0_b); err != nil {
+		return fmt.Errorf("deserialize s.Param0_b of type 'float32': %w", err)
 	}
 	return nil
 }
@@ -1296,21 +1056,15 @@ type _Irpc_basicAPIaddFloat32Resp struct {
 	Param0_ float32
 }
 
-func (s _Irpc_basicAPIaddFloat32Resp) Serialize(w io.Writer) error {
-	b := make([]byte, 4)
-	{ // float32
-		binary.LittleEndian.PutUint32(b, math.Float32bits(s.Param0_))
-		if _, err := w.Write(b[:4]); err != nil {
-			return fmt.Errorf("s.Param0_ float32 write: %w", err)
-		}
+func (s _Irpc_basicAPIaddFloat32Resp) Serialize(e *irpc.Encoder) error {
+	if err := e.Float32(s.Param0_); err != nil {
+		return fmt.Errorf("serialize s.Param0_ of type 'float32': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddFloat32Resp) Deserialize(d *irpc.Decoder) error {
-	{ // float32
-		if err := d.Float32(&s.Param0_); err != nil {
-			return fmt.Errorf("deserialize s.Param0_ of type 'float32': %w", err)
-		}
+	if err := d.Float32(&s.Param0_); err != nil {
+		return fmt.Errorf("deserialize s.Param0_ of type 'float32': %w", err)
 	}
 	return nil
 }
@@ -1319,21 +1073,15 @@ type _Irpc_basicAPItoUpperReq struct {
 	Param0_c rune
 }
 
-func (s _Irpc_basicAPItoUpperReq) Serialize(w io.Writer) error {
-	b := make([]byte, 4)
-	{ // rune
-		binary.LittleEndian.PutUint32(b, uint32(s.Param0_c))
-		if _, err := w.Write(b[:4]); err != nil {
-			return fmt.Errorf("s.Param0_c int32 write: %w", err)
-		}
+func (s _Irpc_basicAPItoUpperReq) Serialize(e *irpc.Encoder) error {
+	if err := e.Int32(s.Param0_c); err != nil {
+		return fmt.Errorf("serialize s.Param0_c of type 'int32': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPItoUpperReq) Deserialize(d *irpc.Decoder) error {
-	{ // rune
-		if err := d.Int32(&s.Param0_c); err != nil {
-			return fmt.Errorf("deserialize s.Param0_c of type 'int32': %w", err)
-		}
+	if err := d.Int32(&s.Param0_c); err != nil {
+		return fmt.Errorf("deserialize s.Param0_c of type 'int32': %w", err)
 	}
 	return nil
 }
@@ -1342,21 +1090,15 @@ type _Irpc_basicAPItoUpperResp struct {
 	Param0_ rune
 }
 
-func (s _Irpc_basicAPItoUpperResp) Serialize(w io.Writer) error {
-	b := make([]byte, 4)
-	{ // rune
-		binary.LittleEndian.PutUint32(b, uint32(s.Param0_))
-		if _, err := w.Write(b[:4]); err != nil {
-			return fmt.Errorf("s.Param0_ int32 write: %w", err)
-		}
+func (s _Irpc_basicAPItoUpperResp) Serialize(e *irpc.Encoder) error {
+	if err := e.Int32(s.Param0_); err != nil {
+		return fmt.Errorf("serialize s.Param0_ of type 'int32': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPItoUpperResp) Deserialize(d *irpc.Decoder) error {
-	{ // rune
-		if err := d.Int32(&s.Param0_); err != nil {
-			return fmt.Errorf("deserialize s.Param0_ of type 'int32': %w", err)
-		}
+	if err := d.Int32(&s.Param0_); err != nil {
+		return fmt.Errorf("deserialize s.Param0_ of type 'int32': %w", err)
 	}
 	return nil
 }
@@ -1365,27 +1107,15 @@ type _Irpc_basicAPItoUpperStringReq struct {
 	Param0_s string
 }
 
-func (s _Irpc_basicAPItoUpperStringReq) Serialize(w io.Writer) error {
-	b := make([]byte, 8)
-	{ // string
-		var l int = len(s.Param0_s)
-		binary.LittleEndian.PutUint64(b, uint64(l))
-		if _, err := w.Write(b[:8]); err != nil {
-			return fmt.Errorf("l int write: %w", err)
-		}
-
-		_, err := w.Write([]byte(s.Param0_s))
-		if err != nil {
-			return fmt.Errorf("failed to write string to writer: %w", err)
-		}
+func (s _Irpc_basicAPItoUpperStringReq) Serialize(e *irpc.Encoder) error {
+	if err := e.String(s.Param0_s); err != nil {
+		return err
 	}
 	return nil
 }
 func (s *_Irpc_basicAPItoUpperStringReq) Deserialize(d *irpc.Decoder) error {
-	{ // string
-		if err := d.String(&s.Param0_s); err != nil {
-			return fmt.Errorf("deserialize s.Param0_s of type 'string': %w", err)
-		}
+	if err := d.String(&s.Param0_s); err != nil {
+		return fmt.Errorf("deserialize s.Param0_s of type 'string': %w", err)
 	}
 	return nil
 }
@@ -1394,27 +1124,15 @@ type _Irpc_basicAPItoUpperStringResp struct {
 	Param0_ string
 }
 
-func (s _Irpc_basicAPItoUpperStringResp) Serialize(w io.Writer) error {
-	b := make([]byte, 8)
-	{ // string
-		var l int = len(s.Param0_)
-		binary.LittleEndian.PutUint64(b, uint64(l))
-		if _, err := w.Write(b[:8]); err != nil {
-			return fmt.Errorf("l int write: %w", err)
-		}
-
-		_, err := w.Write([]byte(s.Param0_))
-		if err != nil {
-			return fmt.Errorf("failed to write string to writer: %w", err)
-		}
+func (s _Irpc_basicAPItoUpperStringResp) Serialize(e *irpc.Encoder) error {
+	if err := e.String(s.Param0_); err != nil {
+		return err
 	}
 	return nil
 }
 func (s *_Irpc_basicAPItoUpperStringResp) Deserialize(d *irpc.Decoder) error {
-	{ // string
-		if err := d.String(&s.Param0_); err != nil {
-			return fmt.Errorf("deserialize s.Param0_ of type 'string': %w", err)
-		}
+	if err := d.String(&s.Param0_); err != nil {
+		return fmt.Errorf("deserialize s.Param0_ of type 'string': %w", err)
 	}
 	return nil
 }
@@ -1423,25 +1141,15 @@ type _Irpc_basicAPInegBoolReq struct {
 	Param0_ok bool
 }
 
-func (s _Irpc_basicAPInegBoolReq) Serialize(w io.Writer) error {
-	b := make([]byte, 1)
-	{ // bool
-		if s.Param0_ok {
-			b[0] = 1
-		} else {
-			b[0] = 0
-		}
-		if _, err := w.Write(b[:1]); err != nil {
-			return fmt.Errorf("s.Param0_ok bool write: %w", err)
-		}
+func (s _Irpc_basicAPInegBoolReq) Serialize(e *irpc.Encoder) error {
+	if err := e.Bool(s.Param0_ok); err != nil {
+		return fmt.Errorf("serialize s.Param0_ok of type 'bool': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPInegBoolReq) Deserialize(d *irpc.Decoder) error {
-	{ // bool
-		if err := d.Bool(&s.Param0_ok); err != nil {
-			return fmt.Errorf("deserialize s.Param0_ok of type 'bool': %w", err)
-		}
+	if err := d.Bool(&s.Param0_ok); err != nil {
+		return fmt.Errorf("deserialize s.Param0_ok of type 'bool': %w", err)
 	}
 	return nil
 }
@@ -1450,25 +1158,15 @@ type _Irpc_basicAPInegBoolResp struct {
 	Param0_ bool
 }
 
-func (s _Irpc_basicAPInegBoolResp) Serialize(w io.Writer) error {
-	b := make([]byte, 1)
-	{ // bool
-		if s.Param0_ {
-			b[0] = 1
-		} else {
-			b[0] = 0
-		}
-		if _, err := w.Write(b[:1]); err != nil {
-			return fmt.Errorf("s.Param0_ bool write: %w", err)
-		}
+func (s _Irpc_basicAPInegBoolResp) Serialize(e *irpc.Encoder) error {
+	if err := e.Bool(s.Param0_); err != nil {
+		return fmt.Errorf("serialize s.Param0_ of type 'bool': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPInegBoolResp) Deserialize(d *irpc.Decoder) error {
-	{ // bool
-		if err := d.Bool(&s.Param0_); err != nil {
-			return fmt.Errorf("deserialize s.Param0_ of type 'bool': %w", err)
-		}
+	if err := d.Bool(&s.Param0_); err != nil {
+		return fmt.Errorf("deserialize s.Param0_ of type 'bool': %w", err)
 	}
 	return nil
 }

@@ -8,17 +8,11 @@ import (
 )
 
 type encoder interface {
-	encode(buf bufInfo, varId string) string // inline variable encode
-	requestBufSize() int                     // returns the buffer size needed for encoding (only for the fix-sized fields)
-	decode(varId string) string              // inline variable decode
-	imports() []string                       // necessary imports
-	codeblock() string                       // requested encoder's code block at top level
-}
-
-// bufInfo describes allocated byte slice used binary encoding of fixed-sized values
-type bufInfo struct {
-	varName string
-	length  int
+	encode(varId string) string // inline variable encode
+	requestBufSize() int        // returns the buffer size needed for encoding (only for the fix-sized fields)
+	decode(varId string) string // inline variable decode
+	imports() []string          // necessary imports
+	codeblock() string          // requested encoder's code block at top level
 }
 
 var (
@@ -38,14 +32,14 @@ var (
 		encStr:   "binary.LittleEndian.PutUint64(%s, uint64(%s))",
 		decStr:   "Int",
 		typeName: "int",
-		imps:     []string{binaryImport},
+		imps:     []string{irpcImport},
 	}
 	uintEncoder = primitiveTypeEncoder{
 		bufSize:  8,
 		encStr:   "binary.LittleEndian.PutUint64(%s, uint64(%s))",
 		decStr:   "Uint",
 		typeName: "uint",
-		imps:     []string{binaryImport},
+		imps:     []string{irpcImport},
 	}
 	int8Encoder = primitiveTypeEncoder{
 		bufSize:  1,
@@ -59,63 +53,63 @@ var (
 		encStr:   "%s[0] = byte(%s)",
 		decStr:   "Uint8",
 		typeName: "uint8",
-		imps:     nil,
+		imps:     []string{irpcImport},
 	}
 	int16Encoder = primitiveTypeEncoder{
 		bufSize:  2,
 		encStr:   "binary.LittleEndian.PutUint16(%s, uint16(%s))",
 		decStr:   "Int16",
 		typeName: "int16",
-		imps:     []string{binaryImport},
+		imps:     []string{irpcImport},
 	}
 	uint16Encoder = primitiveTypeEncoder{
 		bufSize:  2,
 		encStr:   "binary.LittleEndian.PutUint16(%s, %s)",
 		decStr:   "Uint16",
 		typeName: "uint16",
-		imps:     []string{binaryImport},
+		imps:     []string{irpcImport},
 	}
 	int32Encoder = primitiveTypeEncoder{
 		bufSize:  4,
 		encStr:   "binary.LittleEndian.PutUint32(%s, uint32(%s))",
 		decStr:   "Int32",
 		typeName: "int32",
-		imps:     []string{binaryImport},
+		imps:     []string{irpcImport},
 	}
 	uint32Encoder = primitiveTypeEncoder{
 		bufSize:  4,
 		encStr:   "binary.LittleEndian.PutUint32(%s, %s)",
 		decStr:   "Uint32",
 		typeName: "uint32",
-		imps:     []string{binaryImport},
+		imps:     []string{irpcImport},
 	}
 	int64Encoder = primitiveTypeEncoder{
 		bufSize:  8,
 		encStr:   "binary.LittleEndian.PutUint64(%s, uint64(%s))",
 		decStr:   "Int64",
 		typeName: "int64",
-		imps:     []string{binaryImport},
+		imps:     []string{irpcImport},
 	}
 	uint64Encoder = primitiveTypeEncoder{
 		bufSize:  8,
 		encStr:   "binary.LittleEndian.PutUint64(%s, %s)",
 		decStr:   "Uint64",
 		typeName: "uint64",
-		imps:     []string{binaryImport},
+		imps:     []string{irpcImport},
 	}
 	float32Encoder = primitiveTypeEncoder{
 		bufSize:  4,
 		encStr:   "binary.LittleEndian.PutUint32(%s, math.Float32bits(%s))",
 		decStr:   "Float32",
 		typeName: "float32",
-		imps:     []string{binaryImport, mathImport},
+		imps:     []string{irpcImport},
 	}
 	float64Encoder = primitiveTypeEncoder{
 		bufSize:  8,
 		encStr:   "binary.LittleEndian.PutUint64(%s, math.Float64bits(%s))",
 		decStr:   "Float64",
 		typeName: "float64",
-		imps:     []string{binaryImport, mathImport},
+		imps:     []string{irpcImport},
 	}
 )
 
@@ -126,14 +120,13 @@ type primitiveTypeEncoder struct {
 	imps           []string
 }
 
-func (e primitiveTypeEncoder) encode(buf bufInfo, varId string) string {
+func (e primitiveTypeEncoder) encode(varId string) string {
 	sb := &strings.Builder{}
-	fmt.Fprintf(sb, e.encStr, buf.varName, varId)
-	fmt.Fprintf(sb, `
-	if _, err := w.Write(%s[:%d]); err != nil {
-		return fmt.Errorf("%s %s write: %%w", err)
+	// fmt.Fprintf(sb, "e := irpc.NewEncoder(w)\n")
+	fmt.Fprintf(sb, `if err := e.%s(%s); err != nil {
+		return fmt.Errorf("serialize %s of type '%s': %%w", err)
 	}
-	`, buf.varName, e.bufSize, varId, e.typeName)
+	`, e.decStr, varId, varId, e.typeName)
 
 	return sb.String()
 }
@@ -142,7 +135,8 @@ func (e primitiveTypeEncoder) decode(varId string) string {
 	sb := &strings.Builder{}
 	fmt.Fprintf(sb, `if err := d.%s(&%s); err != nil{
 		return fmt.Errorf("deserialize %s of type '%s': %%w",err)
-	}`, e.decStr, varId, varId, e.typeName)
+	}
+	`, e.decStr, varId, varId, e.typeName)
 	return sb.String()
 }
 
@@ -167,23 +161,22 @@ func newStringEncoder() stringEncoder {
 	return stringEncoder{intEncoder}
 }
 
-func (e stringEncoder) encode(buf bufInfo, varId string) string {
-	s := fmt.Sprintf("var l int = len(%s)\n", varId)
-	s += e.lenEncoder.encode(buf, "l")
-	s += fmt.Sprintf(`
-	_, err := w.Write([]byte(%s))
-	if err != nil {
-		return fmt.Errorf("failed to write string to writer: %%w", err)
+func (e stringEncoder) encode(varId string) string {
+	sb := &strings.Builder{}
+	fmt.Fprintf(sb, `if err := e.String(%s); err != nil {
+		return err
 	}
 	`, varId)
-	return s
+
+	return sb.String()
 }
 
 func (e stringEncoder) decode(varId string) string {
 	sb := &strings.Builder{}
 	fmt.Fprintf(sb, `if err := d.String(&%s); err != nil{
 		return fmt.Errorf("deserialize %s of type 'string': %%w",err)
-	}`, varId, varId)
+	}
+	`, varId, varId)
 	return sb.String()
 }
 
@@ -218,28 +211,33 @@ func newSliceEncoder(apiName string, t *types.Slice) (sliceEncoder, error) {
 	}, nil
 }
 
-func (e sliceEncoder) encode(buf bufInfo, varId string) string {
+func (e sliceEncoder) encode(varId string) string {
 	sb := &strings.Builder{}
+	fmt.Fprintf(sb, "{ // %s\n", varId)
 	fmt.Fprintf(sb, "var l int = len(%s)\n", varId)
-	sb.WriteString(e.lenEnc.encode(buf, "l"))
+	sb.WriteString(e.lenEnc.encode("l"))
 	fmt.Fprintf(sb, `
 	for i := 0; i < l; i++ {
 		%s
 	}
-	`, e.elemEnc.encode(buf, varId+"[i]"))
+	`, e.elemEnc.encode(varId+"[i]"))
+	sb.WriteString("}\n")
 
 	return sb.String()
 }
 
 func (e sliceEncoder) decode(varId string) string {
 	sb := &strings.Builder{}
+	fmt.Fprintf(sb, "{ // %s\n", varId)
 	sb.WriteString("var l int\n")
 	sb.WriteString(e.lenEnc.decode("l"))
 	fmt.Fprintf(sb, `
 	%s = make([]%s, l)
 	for i := 0; i < l; i++ {
 		%s
-	}`, varId, e.elemType.String(), e.elemEnc.decode(varId+"[i]"))
+	}
+	`, varId, e.elemType.String(), e.elemEnc.decode(varId+"[i]"))
+	sb.WriteString("}\n")
 
 	return sb.String()
 }
@@ -283,12 +281,10 @@ func newNamedStructEncoder(apiName string, s *types.Struct) (namedStructEncoder,
 	}, nil
 }
 
-func (e namedStructEncoder) encode(buf bufInfo, varId string) string {
+func (e namedStructEncoder) encode(varId string) string {
 	sb := strings.Builder{}
 	for _, f := range e.fields {
-		sb.WriteString("{\n") // todo: add type to comments, like in paramstruct generator
-		sb.WriteString(f.enc.encode(buf, varId+"."+f.name))
-		sb.WriteString("}\n")
+		sb.WriteString(f.enc.encode(varId + "." + f.name))
 	}
 	return sb.String()
 }
@@ -296,9 +292,7 @@ func (e namedStructEncoder) encode(buf bufInfo, varId string) string {
 func (e namedStructEncoder) decode(varId string) string {
 	sb := &strings.Builder{}
 	for _, f := range e.fields {
-		sb.WriteString("{\n") // todo: add type to comments, like in paramstruct generator
 		sb.WriteString(f.enc.decode(varId + "." + f.name))
-		sb.WriteString("}\n")
 	}
 	return sb.String()
 }
@@ -408,14 +402,15 @@ func newInterfaceEncoder(name string, apiName string, it *types.Interface) (inte
 	}, nil
 }
 
-func (e interfaceEncoder) encode(buf bufInfo, varId string) string {
+func (e interfaceEncoder) encode(varId string) string {
 	sb := &strings.Builder{}
+	sb.WriteString("{\n") // separate block
 	fmt.Fprintf(sb, `var isNil bool
 	if %s == nil {
 		isNil = true
 	}
 	%s
-	`, varId, boolEncoder.encode(buf, "isNil"))
+	`, varId, boolEncoder.encode("isNil"))
 	sb.WriteString("if !isNil{\n")
 	for _, f := range e.fncs {
 		fmt.Fprintf(sb, "{ // %s()\n", f.funcName)
@@ -427,17 +422,19 @@ func (e interfaceEncoder) encode(buf bufInfo, varId string) string {
 		}
 		fmt.Fprintf(sb, ":= %s.%s()\n", varId, f.funcName)
 		for _, v := range f.results {
-			sb.WriteString(v.enc.encode(buf, v.implParamName))
+			sb.WriteString(v.enc.encode(v.implParamName))
 		}
 		sb.WriteString("}\n")
 	}
 	sb.WriteString("}\n") // if !isNil
+	sb.WriteString("}\n") // separate block
 
 	return sb.String()
 }
 
 func (e interfaceEncoder) decode(varId string) string {
 	sb := &strings.Builder{}
+	sb.WriteString("{\n") // separate block
 	fmt.Fprintf(sb, `var isNil bool
 	%s
 	if isNil {
@@ -455,6 +452,7 @@ func (e interfaceEncoder) decode(varId string) string {
 	}
 	fmt.Fprintf(sb, "%s = impl\n", varId)
 	sb.WriteString("}\n") // else {
+	sb.WriteString("}\n") // separate block
 
 	return sb.String()
 }

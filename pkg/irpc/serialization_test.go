@@ -10,7 +10,8 @@ func TestPacketHeaderSerializeDeserialize(t *testing.T) {
 		typ: rpcRequest,
 	}
 	buf := bytes.NewBuffer(nil)
-	if err := phIn.Serialize(buf); err != nil {
+	enc := NewEncoder(buf)
+	if err := phIn.Serialize(enc); err != nil {
 		t.Fatalf("serialize(): %v", err)
 	}
 
@@ -34,7 +35,8 @@ func BenchmarkPacketHeaderSerialization(b *testing.B) {
 	b.ResetTimer()
 	for range b.N {
 		buf.Reset()
-		if err := ph.Serialize(buf); err != nil {
+		enc := NewEncoder(buf)
+		if err := ph.Serialize(enc); err != nil {
 			b.Fatalf("serialization failed: %v", err)
 		}
 		length = buf.Len()
@@ -47,7 +49,8 @@ func BenchmarkPacketHeaderDeSerialization(b *testing.B) {
 		typ: rpcRequest,
 	}
 	buf := bytes.NewBuffer(nil)
-	if err := phInit.Serialize(buf); err != nil {
+	enc := NewEncoder(buf)
+	if err := phInit.Serialize(enc); err != nil {
 		b.Fatal("failed to serialize test packet")
 	}
 	data := buf.Bytes()

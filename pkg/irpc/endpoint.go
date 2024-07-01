@@ -60,7 +60,7 @@ type FuncExecutor func() Serializable
 
 // our generated code function calls' arguments implements Serializable/Deserializble
 type Serializable interface {
-	Serialize(w io.Writer) error
+	Serialize(e *Encoder) error
 }
 type Deserializable interface {
 	Deserialize(d *Decoder) error
@@ -77,8 +77,9 @@ type Endpoint struct {
 
 	closed atomic.Bool
 
-	conn     io.ReadWriteCloser
-	connWMux sync.Mutex
+	conn     io.ReadWriteCloser // use encoder/decoder for i/o . conn only for closing
+	enc      *Encoder
+	connWMux sync.Mutex // locks connection and encoder
 
 	reqNum    ReqNumT // serial number of our next request	// todo: sort out overflow (and test?)
 	reqNumMux sync.Mutex
@@ -243,7 +244,7 @@ func (e *Endpoint) serializeToConn(data ...Serializable) error {
 	defer e.connWMux.Unlock()
 
 	for _, s := range data {
-		if err := s.Serialize(e.conn); err != nil {
+		if err := s.Serialize(e.enc); err != nil {
 			return fmt.Errorf("Serialize: %w", err)
 		}
 	}
@@ -346,6 +347,7 @@ func (e *Endpoint) Serve(conn io.ReadWriteCloser) error {
 
 	e.connWMux.Lock()
 	e.conn = conn
+	e.enc = NewEncoder(conn)
 	e.connWMux.Unlock()
 
 	// unblock all waiting client requests

@@ -108,7 +108,6 @@ type paramStructGenerator struct {
 
 func newParamStructGenerator(typeName string, params []varField) (paramStructGenerator, error) {
 	imports := newOrderedSet[string]()
-	imports.add(ioImport) // every Serialize() Deserialize() needs io import
 	for _, p := range params {
 		imports.add(p.enc.imports()...)
 	}
@@ -140,20 +139,10 @@ func (sg paramStructGenerator) serializeFunc() string {
 	}
 
 	sb := &strings.Builder{}
-	fmt.Fprintf(sb, "func (s %s)Serialize(w io.Writer) error {\n", sg.typeName)
-	var bi bufInfo
-	if bufSize > 0 {
-		fmt.Fprintf(sb, "b := make([]byte, %d)\n", bufSize)
-		bi = bufInfo{
-			varName: "b",
-			length:  bufSize,
-		}
-	}
+	fmt.Fprintf(sb, "func (s %s)Serialize(e *irpc.Encoder) error {\n", sg.typeName)
 	if len(sg.params) > 0 {
 		for _, p := range sg.params {
-			fmt.Fprintf(sb, "{ // %s\n", p.typeName)
-			sb.WriteString(p.enc.encode(bi, "s."+p.structFieldName))
-			sb.WriteString("}\n")
+			sb.WriteString(p.enc.encode("s." + p.structFieldName))
 		}
 	}
 	sb.WriteString("return nil\n}")
@@ -166,9 +155,7 @@ func (sg paramStructGenerator) deserializeFunc() string {
 	fmt.Fprintf(sb, "func (s *%s)Deserialize(d *irpc.Decoder) error {\n", sg.typeName)
 	if len(sg.params) > 0 {
 		for _, p := range sg.params {
-			fmt.Fprintf(sb, "{ // %s\n", p.typeName) // todo: remove brackets?
 			sb.WriteString(p.enc.decode("s." + p.structFieldName))
-			sb.WriteString("}\n")
 		}
 	}
 	sb.WriteString("return nil\n}")

@@ -2,10 +2,8 @@
 package irpctestpkg
 
 import (
-	"encoding/binary"
 	"fmt"
 	"github.com/marben/irpc/pkg/irpc"
-	"io"
 )
 
 type interfaceTestRpcService struct {
@@ -232,27 +230,15 @@ type _Irpc_interfaceTestrtnErrorWithMessageReq struct {
 	Param0_msg string
 }
 
-func (s _Irpc_interfaceTestrtnErrorWithMessageReq) Serialize(w io.Writer) error {
-	b := make([]byte, 8)
-	{ // string
-		var l int = len(s.Param0_msg)
-		binary.LittleEndian.PutUint64(b, uint64(l))
-		if _, err := w.Write(b[:8]); err != nil {
-			return fmt.Errorf("l int write: %w", err)
-		}
-
-		_, err := w.Write([]byte(s.Param0_msg))
-		if err != nil {
-			return fmt.Errorf("failed to write string to writer: %w", err)
-		}
+func (s _Irpc_interfaceTestrtnErrorWithMessageReq) Serialize(e *irpc.Encoder) error {
+	if err := e.String(s.Param0_msg); err != nil {
+		return err
 	}
 	return nil
 }
 func (s *_Irpc_interfaceTestrtnErrorWithMessageReq) Deserialize(d *irpc.Decoder) error {
-	{ // string
-		if err := d.String(&s.Param0_msg); err != nil {
-			return fmt.Errorf("deserialize s.Param0_msg of type 'string': %w", err)
-		}
+	if err := d.String(&s.Param0_msg); err != nil {
+		return fmt.Errorf("deserialize s.Param0_msg of type 'string': %w", err)
 	}
 	return nil
 }
@@ -261,34 +247,21 @@ type _Irpc_interfaceTestrtnErrorWithMessageResp struct {
 	Param0_ error
 }
 
-func (s _Irpc_interfaceTestrtnErrorWithMessageResp) Serialize(w io.Writer) error {
-	b := make([]byte, 8)
-	{ // error
+func (s _Irpc_interfaceTestrtnErrorWithMessageResp) Serialize(e *irpc.Encoder) error {
+	{
 		var isNil bool
 		if s.Param0_ == nil {
 			isNil = true
 		}
-		if isNil {
-			b[0] = 1
-		} else {
-			b[0] = 0
-		}
-		if _, err := w.Write(b[:1]); err != nil {
-			return fmt.Errorf("isNil bool write: %w", err)
+		if err := e.Bool(isNil); err != nil {
+			return fmt.Errorf("serialize isNil of type 'bool': %w", err)
 		}
 
 		if !isNil {
 			{ // Error()
 				_Error_0_ := s.Param0_.Error()
-				var l int = len(_Error_0_)
-				binary.LittleEndian.PutUint64(b, uint64(l))
-				if _, err := w.Write(b[:8]); err != nil {
-					return fmt.Errorf("l int write: %w", err)
-				}
-
-				_, err := w.Write([]byte(_Error_0_))
-				if err != nil {
-					return fmt.Errorf("failed to write string to writer: %w", err)
+				if err := e.String(_Error_0_); err != nil {
+					return err
 				}
 			}
 		}
@@ -296,11 +269,12 @@ func (s _Irpc_interfaceTestrtnErrorWithMessageResp) Serialize(w io.Writer) error
 	return nil
 }
 func (s *_Irpc_interfaceTestrtnErrorWithMessageResp) Deserialize(d *irpc.Decoder) error {
-	{ // error
+	{
 		var isNil bool
 		if err := d.Bool(&isNil); err != nil {
 			return fmt.Errorf("deserialize isNil of type 'bool': %w", err)
 		}
+
 		if isNil {
 			s.Param0_ = nil
 		} else {
@@ -327,7 +301,7 @@ func (i _error_interfaceTest_irpcInterfaceImpl) Error() string {
 type _Irpc_interfaceTestrtnNilErrorReq struct {
 }
 
-func (s _Irpc_interfaceTestrtnNilErrorReq) Serialize(w io.Writer) error {
+func (s _Irpc_interfaceTestrtnNilErrorReq) Serialize(e *irpc.Encoder) error {
 	return nil
 }
 func (s *_Irpc_interfaceTestrtnNilErrorReq) Deserialize(d *irpc.Decoder) error {
@@ -338,34 +312,21 @@ type _Irpc_interfaceTestrtnNilErrorResp struct {
 	Param0_ error
 }
 
-func (s _Irpc_interfaceTestrtnNilErrorResp) Serialize(w io.Writer) error {
-	b := make([]byte, 8)
-	{ // error
+func (s _Irpc_interfaceTestrtnNilErrorResp) Serialize(e *irpc.Encoder) error {
+	{
 		var isNil bool
 		if s.Param0_ == nil {
 			isNil = true
 		}
-		if isNil {
-			b[0] = 1
-		} else {
-			b[0] = 0
-		}
-		if _, err := w.Write(b[:1]); err != nil {
-			return fmt.Errorf("isNil bool write: %w", err)
+		if err := e.Bool(isNil); err != nil {
+			return fmt.Errorf("serialize isNil of type 'bool': %w", err)
 		}
 
 		if !isNil {
 			{ // Error()
 				_Error_0_ := s.Param0_.Error()
-				var l int = len(_Error_0_)
-				binary.LittleEndian.PutUint64(b, uint64(l))
-				if _, err := w.Write(b[:8]); err != nil {
-					return fmt.Errorf("l int write: %w", err)
-				}
-
-				_, err := w.Write([]byte(_Error_0_))
-				if err != nil {
-					return fmt.Errorf("failed to write string to writer: %w", err)
+				if err := e.String(_Error_0_); err != nil {
+					return err
 				}
 			}
 		}
@@ -373,11 +334,12 @@ func (s _Irpc_interfaceTestrtnNilErrorResp) Serialize(w io.Writer) error {
 	return nil
 }
 func (s *_Irpc_interfaceTestrtnNilErrorResp) Deserialize(d *irpc.Decoder) error {
-	{ // error
+	{
 		var isNil bool
 		if err := d.Bool(&isNil); err != nil {
 			return fmt.Errorf("deserialize isNil of type 'bool': %w", err)
 		}
+
 		if isNil {
 			s.Param0_ = nil
 		} else {
@@ -396,7 +358,7 @@ func (s *_Irpc_interfaceTestrtnNilErrorResp) Deserialize(d *irpc.Decoder) error 
 type _Irpc_interfaceTestrtnTwoErrorsReq struct {
 }
 
-func (s _Irpc_interfaceTestrtnTwoErrorsReq) Serialize(w io.Writer) error {
+func (s _Irpc_interfaceTestrtnTwoErrorsReq) Serialize(e *irpc.Encoder) error {
 	return nil
 }
 func (s *_Irpc_interfaceTestrtnTwoErrorsReq) Deserialize(d *irpc.Decoder) error {
@@ -408,64 +370,39 @@ type _Irpc_interfaceTestrtnTwoErrorsResp struct {
 	Param1_ error
 }
 
-func (s _Irpc_interfaceTestrtnTwoErrorsResp) Serialize(w io.Writer) error {
-	b := make([]byte, 8)
-	{ // error
+func (s _Irpc_interfaceTestrtnTwoErrorsResp) Serialize(e *irpc.Encoder) error {
+	{
 		var isNil bool
 		if s.Param0_ == nil {
 			isNil = true
 		}
-		if isNil {
-			b[0] = 1
-		} else {
-			b[0] = 0
-		}
-		if _, err := w.Write(b[:1]); err != nil {
-			return fmt.Errorf("isNil bool write: %w", err)
+		if err := e.Bool(isNil); err != nil {
+			return fmt.Errorf("serialize isNil of type 'bool': %w", err)
 		}
 
 		if !isNil {
 			{ // Error()
 				_Error_0_ := s.Param0_.Error()
-				var l int = len(_Error_0_)
-				binary.LittleEndian.PutUint64(b, uint64(l))
-				if _, err := w.Write(b[:8]); err != nil {
-					return fmt.Errorf("l int write: %w", err)
-				}
-
-				_, err := w.Write([]byte(_Error_0_))
-				if err != nil {
-					return fmt.Errorf("failed to write string to writer: %w", err)
+				if err := e.String(_Error_0_); err != nil {
+					return err
 				}
 			}
 		}
 	}
-	{ // error
+	{
 		var isNil bool
 		if s.Param1_ == nil {
 			isNil = true
 		}
-		if isNil {
-			b[0] = 1
-		} else {
-			b[0] = 0
-		}
-		if _, err := w.Write(b[:1]); err != nil {
-			return fmt.Errorf("isNil bool write: %w", err)
+		if err := e.Bool(isNil); err != nil {
+			return fmt.Errorf("serialize isNil of type 'bool': %w", err)
 		}
 
 		if !isNil {
 			{ // Error()
 				_Error_0_ := s.Param1_.Error()
-				var l int = len(_Error_0_)
-				binary.LittleEndian.PutUint64(b, uint64(l))
-				if _, err := w.Write(b[:8]); err != nil {
-					return fmt.Errorf("l int write: %w", err)
-				}
-
-				_, err := w.Write([]byte(_Error_0_))
-				if err != nil {
-					return fmt.Errorf("failed to write string to writer: %w", err)
+				if err := e.String(_Error_0_); err != nil {
+					return err
 				}
 			}
 		}
@@ -473,11 +410,12 @@ func (s _Irpc_interfaceTestrtnTwoErrorsResp) Serialize(w io.Writer) error {
 	return nil
 }
 func (s *_Irpc_interfaceTestrtnTwoErrorsResp) Deserialize(d *irpc.Decoder) error {
-	{ // error
+	{
 		var isNil bool
 		if err := d.Bool(&isNil); err != nil {
 			return fmt.Errorf("deserialize isNil of type 'bool': %w", err)
 		}
+
 		if isNil {
 			s.Param0_ = nil
 		} else {
@@ -490,11 +428,12 @@ func (s *_Irpc_interfaceTestrtnTwoErrorsResp) Deserialize(d *irpc.Decoder) error
 			s.Param0_ = impl
 		}
 	}
-	{ // error
+	{
 		var isNil bool
 		if err := d.Bool(&isNil); err != nil {
 			return fmt.Errorf("deserialize isNil of type 'bool': %w", err)
 		}
+
 		if isNil {
 			s.Param1_ = nil
 		} else {
@@ -514,27 +453,15 @@ type _Irpc_interfaceTestrtnStringAndErrorReq struct {
 	Param0_msg string
 }
 
-func (s _Irpc_interfaceTestrtnStringAndErrorReq) Serialize(w io.Writer) error {
-	b := make([]byte, 8)
-	{ // string
-		var l int = len(s.Param0_msg)
-		binary.LittleEndian.PutUint64(b, uint64(l))
-		if _, err := w.Write(b[:8]); err != nil {
-			return fmt.Errorf("l int write: %w", err)
-		}
-
-		_, err := w.Write([]byte(s.Param0_msg))
-		if err != nil {
-			return fmt.Errorf("failed to write string to writer: %w", err)
-		}
+func (s _Irpc_interfaceTestrtnStringAndErrorReq) Serialize(e *irpc.Encoder) error {
+	if err := e.String(s.Param0_msg); err != nil {
+		return err
 	}
 	return nil
 }
 func (s *_Irpc_interfaceTestrtnStringAndErrorReq) Deserialize(d *irpc.Decoder) error {
-	{ // string
-		if err := d.String(&s.Param0_msg); err != nil {
-			return fmt.Errorf("deserialize s.Param0_msg of type 'string': %w", err)
-		}
+	if err := d.String(&s.Param0_msg); err != nil {
+		return fmt.Errorf("deserialize s.Param0_msg of type 'string': %w", err)
 	}
 	return nil
 }
@@ -544,46 +471,24 @@ type _Irpc_interfaceTestrtnStringAndErrorResp struct {
 	Param1_err error
 }
 
-func (s _Irpc_interfaceTestrtnStringAndErrorResp) Serialize(w io.Writer) error {
-	b := make([]byte, 8)
-	{ // string
-		var l int = len(s.Param0_s)
-		binary.LittleEndian.PutUint64(b, uint64(l))
-		if _, err := w.Write(b[:8]); err != nil {
-			return fmt.Errorf("l int write: %w", err)
-		}
-
-		_, err := w.Write([]byte(s.Param0_s))
-		if err != nil {
-			return fmt.Errorf("failed to write string to writer: %w", err)
-		}
+func (s _Irpc_interfaceTestrtnStringAndErrorResp) Serialize(e *irpc.Encoder) error {
+	if err := e.String(s.Param0_s); err != nil {
+		return err
 	}
-	{ // error
+	{
 		var isNil bool
 		if s.Param1_err == nil {
 			isNil = true
 		}
-		if isNil {
-			b[0] = 1
-		} else {
-			b[0] = 0
-		}
-		if _, err := w.Write(b[:1]); err != nil {
-			return fmt.Errorf("isNil bool write: %w", err)
+		if err := e.Bool(isNil); err != nil {
+			return fmt.Errorf("serialize isNil of type 'bool': %w", err)
 		}
 
 		if !isNil {
 			{ // Error()
 				_Error_0_ := s.Param1_err.Error()
-				var l int = len(_Error_0_)
-				binary.LittleEndian.PutUint64(b, uint64(l))
-				if _, err := w.Write(b[:8]); err != nil {
-					return fmt.Errorf("l int write: %w", err)
-				}
-
-				_, err := w.Write([]byte(_Error_0_))
-				if err != nil {
-					return fmt.Errorf("failed to write string to writer: %w", err)
+				if err := e.String(_Error_0_); err != nil {
+					return err
 				}
 			}
 		}
@@ -591,16 +496,15 @@ func (s _Irpc_interfaceTestrtnStringAndErrorResp) Serialize(w io.Writer) error {
 	return nil
 }
 func (s *_Irpc_interfaceTestrtnStringAndErrorResp) Deserialize(d *irpc.Decoder) error {
-	{ // string
-		if err := d.String(&s.Param0_s); err != nil {
-			return fmt.Errorf("deserialize s.Param0_s of type 'string': %w", err)
-		}
+	if err := d.String(&s.Param0_s); err != nil {
+		return fmt.Errorf("deserialize s.Param0_s of type 'string': %w", err)
 	}
-	{ // error
+	{
 		var isNil bool
 		if err := d.Bool(&isNil); err != nil {
 			return fmt.Errorf("deserialize isNil of type 'bool': %w", err)
 		}
+
 		if isNil {
 			s.Param1_err = nil
 		} else {
@@ -620,41 +524,27 @@ type _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedReq struct {
 	Param0_ci customInterface
 }
 
-func (s _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedReq) Serialize(w io.Writer) error {
-	b := make([]byte, 8)
-	{ // customInterface
+func (s _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedReq) Serialize(e *irpc.Encoder) error {
+	{
 		var isNil bool
 		if s.Param0_ci == nil {
 			isNil = true
 		}
-		if isNil {
-			b[0] = 1
-		} else {
-			b[0] = 0
-		}
-		if _, err := w.Write(b[:1]); err != nil {
-			return fmt.Errorf("isNil bool write: %w", err)
+		if err := e.Bool(isNil); err != nil {
+			return fmt.Errorf("serialize isNil of type 'bool': %w", err)
 		}
 
 		if !isNil {
 			{ // IntFunc()
 				_IntFunc_0_ := s.Param0_ci.IntFunc()
-				binary.LittleEndian.PutUint64(b, uint64(_IntFunc_0_))
-				if _, err := w.Write(b[:8]); err != nil {
-					return fmt.Errorf("_IntFunc_0_ int write: %w", err)
+				if err := e.Int(_IntFunc_0_); err != nil {
+					return fmt.Errorf("serialize _IntFunc_0_ of type 'int': %w", err)
 				}
 			}
 			{ // StringFunc()
 				_StringFunc_0_ := s.Param0_ci.StringFunc()
-				var l int = len(_StringFunc_0_)
-				binary.LittleEndian.PutUint64(b, uint64(l))
-				if _, err := w.Write(b[:8]); err != nil {
-					return fmt.Errorf("l int write: %w", err)
-				}
-
-				_, err := w.Write([]byte(_StringFunc_0_))
-				if err != nil {
-					return fmt.Errorf("failed to write string to writer: %w", err)
+				if err := e.String(_StringFunc_0_); err != nil {
+					return err
 				}
 			}
 		}
@@ -662,11 +552,12 @@ func (s _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedReq) Serialize(
 	return nil
 }
 func (s *_Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedReq) Deserialize(d *irpc.Decoder) error {
-	{ // customInterface
+	{
 		var isNil bool
 		if err := d.Bool(&isNil); err != nil {
 			return fmt.Errorf("deserialize isNil of type 'bool': %w", err)
 		}
+
 		if isNil {
 			s.Param0_ci = nil
 		} else {
@@ -704,71 +595,45 @@ type _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp struct {
 	Param1_ error
 }
 
-func (s _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp) Serialize(w io.Writer) error {
-	b := make([]byte, 8)
-	{ // customInterface
+func (s _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp) Serialize(e *irpc.Encoder) error {
+	{
 		var isNil bool
 		if s.Param0_ == nil {
 			isNil = true
 		}
-		if isNil {
-			b[0] = 1
-		} else {
-			b[0] = 0
-		}
-		if _, err := w.Write(b[:1]); err != nil {
-			return fmt.Errorf("isNil bool write: %w", err)
+		if err := e.Bool(isNil); err != nil {
+			return fmt.Errorf("serialize isNil of type 'bool': %w", err)
 		}
 
 		if !isNil {
 			{ // IntFunc()
 				_IntFunc_0_ := s.Param0_.IntFunc()
-				binary.LittleEndian.PutUint64(b, uint64(_IntFunc_0_))
-				if _, err := w.Write(b[:8]); err != nil {
-					return fmt.Errorf("_IntFunc_0_ int write: %w", err)
+				if err := e.Int(_IntFunc_0_); err != nil {
+					return fmt.Errorf("serialize _IntFunc_0_ of type 'int': %w", err)
 				}
 			}
 			{ // StringFunc()
 				_StringFunc_0_ := s.Param0_.StringFunc()
-				var l int = len(_StringFunc_0_)
-				binary.LittleEndian.PutUint64(b, uint64(l))
-				if _, err := w.Write(b[:8]); err != nil {
-					return fmt.Errorf("l int write: %w", err)
-				}
-
-				_, err := w.Write([]byte(_StringFunc_0_))
-				if err != nil {
-					return fmt.Errorf("failed to write string to writer: %w", err)
+				if err := e.String(_StringFunc_0_); err != nil {
+					return err
 				}
 			}
 		}
 	}
-	{ // error
+	{
 		var isNil bool
 		if s.Param1_ == nil {
 			isNil = true
 		}
-		if isNil {
-			b[0] = 1
-		} else {
-			b[0] = 0
-		}
-		if _, err := w.Write(b[:1]); err != nil {
-			return fmt.Errorf("isNil bool write: %w", err)
+		if err := e.Bool(isNil); err != nil {
+			return fmt.Errorf("serialize isNil of type 'bool': %w", err)
 		}
 
 		if !isNil {
 			{ // Error()
 				_Error_0_ := s.Param1_.Error()
-				var l int = len(_Error_0_)
-				binary.LittleEndian.PutUint64(b, uint64(l))
-				if _, err := w.Write(b[:8]); err != nil {
-					return fmt.Errorf("l int write: %w", err)
-				}
-
-				_, err := w.Write([]byte(_Error_0_))
-				if err != nil {
-					return fmt.Errorf("failed to write string to writer: %w", err)
+				if err := e.String(_Error_0_); err != nil {
+					return err
 				}
 			}
 		}
@@ -776,11 +641,12 @@ func (s _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp) Serialize
 	return nil
 }
 func (s *_Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp) Deserialize(d *irpc.Decoder) error {
-	{ // customInterface
+	{
 		var isNil bool
 		if err := d.Bool(&isNil); err != nil {
 			return fmt.Errorf("deserialize isNil of type 'bool': %w", err)
 		}
+
 		if isNil {
 			s.Param0_ = nil
 		} else {
@@ -798,11 +664,12 @@ func (s *_Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp) Deserial
 			s.Param0_ = impl
 		}
 	}
-	{ // error
+	{
 		var isNil bool
 		if err := d.Bool(&isNil); err != nil {
 			return fmt.Errorf("deserialize isNil of type 'bool': %w", err)
 		}
+
 		if isNil {
 			s.Param1_ = nil
 		} else {
@@ -821,7 +688,7 @@ func (s *_Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp) Deserial
 type _Irpc_customInterfaceIntFuncReq struct {
 }
 
-func (s _Irpc_customInterfaceIntFuncReq) Serialize(w io.Writer) error {
+func (s _Irpc_customInterfaceIntFuncReq) Serialize(e *irpc.Encoder) error {
 	return nil
 }
 func (s *_Irpc_customInterfaceIntFuncReq) Deserialize(d *irpc.Decoder) error {
@@ -832,21 +699,15 @@ type _Irpc_customInterfaceIntFuncResp struct {
 	Param0_ int
 }
 
-func (s _Irpc_customInterfaceIntFuncResp) Serialize(w io.Writer) error {
-	b := make([]byte, 8)
-	{ // int
-		binary.LittleEndian.PutUint64(b, uint64(s.Param0_))
-		if _, err := w.Write(b[:8]); err != nil {
-			return fmt.Errorf("s.Param0_ int write: %w", err)
-		}
+func (s _Irpc_customInterfaceIntFuncResp) Serialize(e *irpc.Encoder) error {
+	if err := e.Int(s.Param0_); err != nil {
+		return fmt.Errorf("serialize s.Param0_ of type 'int': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_customInterfaceIntFuncResp) Deserialize(d *irpc.Decoder) error {
-	{ // int
-		if err := d.Int(&s.Param0_); err != nil {
-			return fmt.Errorf("deserialize s.Param0_ of type 'int': %w", err)
-		}
+	if err := d.Int(&s.Param0_); err != nil {
+		return fmt.Errorf("deserialize s.Param0_ of type 'int': %w", err)
 	}
 	return nil
 }
@@ -854,7 +715,7 @@ func (s *_Irpc_customInterfaceIntFuncResp) Deserialize(d *irpc.Decoder) error {
 type _Irpc_customInterfaceStringFuncReq struct {
 }
 
-func (s _Irpc_customInterfaceStringFuncReq) Serialize(w io.Writer) error {
+func (s _Irpc_customInterfaceStringFuncReq) Serialize(e *irpc.Encoder) error {
 	return nil
 }
 func (s *_Irpc_customInterfaceStringFuncReq) Deserialize(d *irpc.Decoder) error {
@@ -865,27 +726,15 @@ type _Irpc_customInterfaceStringFuncResp struct {
 	Param0_ string
 }
 
-func (s _Irpc_customInterfaceStringFuncResp) Serialize(w io.Writer) error {
-	b := make([]byte, 8)
-	{ // string
-		var l int = len(s.Param0_)
-		binary.LittleEndian.PutUint64(b, uint64(l))
-		if _, err := w.Write(b[:8]); err != nil {
-			return fmt.Errorf("l int write: %w", err)
-		}
-
-		_, err := w.Write([]byte(s.Param0_))
-		if err != nil {
-			return fmt.Errorf("failed to write string to writer: %w", err)
-		}
+func (s _Irpc_customInterfaceStringFuncResp) Serialize(e *irpc.Encoder) error {
+	if err := e.String(s.Param0_); err != nil {
+		return err
 	}
 	return nil
 }
 func (s *_Irpc_customInterfaceStringFuncResp) Deserialize(d *irpc.Decoder) error {
-	{ // string
-		if err := d.String(&s.Param0_); err != nil {
-			return fmt.Errorf("deserialize s.Param0_ of type 'string': %w", err)
-		}
+	if err := d.String(&s.Param0_); err != nil {
+		return fmt.Errorf("deserialize s.Param0_ of type 'string': %w", err)
 	}
 	return nil
 }

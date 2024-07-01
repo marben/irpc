@@ -2,11 +2,8 @@
 package irpctestpkg
 
 import (
-	"encoding/binary"
 	"fmt"
 	"github.com/marben/irpc/pkg/irpc"
-	"io"
-	"math"
 )
 
 type endpointApiRpcService struct {
@@ -69,32 +66,21 @@ type _Irpc_endpointApiDivReq struct {
 	Param0_b float64
 }
 
-func (s _Irpc_endpointApiDivReq) Serialize(w io.Writer) error {
-	b := make([]byte, 8)
-	{ // float64
-		binary.LittleEndian.PutUint64(b, math.Float64bits(s.Param0_a))
-		if _, err := w.Write(b[:8]); err != nil {
-			return fmt.Errorf("s.Param0_a float64 write: %w", err)
-		}
+func (s _Irpc_endpointApiDivReq) Serialize(e *irpc.Encoder) error {
+	if err := e.Float64(s.Param0_a); err != nil {
+		return fmt.Errorf("serialize s.Param0_a of type 'float64': %w", err)
 	}
-	{ // float64
-		binary.LittleEndian.PutUint64(b, math.Float64bits(s.Param0_b))
-		if _, err := w.Write(b[:8]); err != nil {
-			return fmt.Errorf("s.Param0_b float64 write: %w", err)
-		}
+	if err := e.Float64(s.Param0_b); err != nil {
+		return fmt.Errorf("serialize s.Param0_b of type 'float64': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_endpointApiDivReq) Deserialize(d *irpc.Decoder) error {
-	{ // float64
-		if err := d.Float64(&s.Param0_a); err != nil {
-			return fmt.Errorf("deserialize s.Param0_a of type 'float64': %w", err)
-		}
+	if err := d.Float64(&s.Param0_a); err != nil {
+		return fmt.Errorf("deserialize s.Param0_a of type 'float64': %w", err)
 	}
-	{ // float64
-		if err := d.Float64(&s.Param0_b); err != nil {
-			return fmt.Errorf("deserialize s.Param0_b of type 'float64': %w", err)
-		}
+	if err := d.Float64(&s.Param0_b); err != nil {
+		return fmt.Errorf("deserialize s.Param0_b of type 'float64': %w", err)
 	}
 	return nil
 }
@@ -104,40 +90,24 @@ type _Irpc_endpointApiDivResp struct {
 	Param1_ error
 }
 
-func (s _Irpc_endpointApiDivResp) Serialize(w io.Writer) error {
-	b := make([]byte, 8)
-	{ // float64
-		binary.LittleEndian.PutUint64(b, math.Float64bits(s.Param0_))
-		if _, err := w.Write(b[:8]); err != nil {
-			return fmt.Errorf("s.Param0_ float64 write: %w", err)
-		}
+func (s _Irpc_endpointApiDivResp) Serialize(e *irpc.Encoder) error {
+	if err := e.Float64(s.Param0_); err != nil {
+		return fmt.Errorf("serialize s.Param0_ of type 'float64': %w", err)
 	}
-	{ // error
+	{
 		var isNil bool
 		if s.Param1_ == nil {
 			isNil = true
 		}
-		if isNil {
-			b[0] = 1
-		} else {
-			b[0] = 0
-		}
-		if _, err := w.Write(b[:1]); err != nil {
-			return fmt.Errorf("isNil bool write: %w", err)
+		if err := e.Bool(isNil); err != nil {
+			return fmt.Errorf("serialize isNil of type 'bool': %w", err)
 		}
 
 		if !isNil {
 			{ // Error()
 				_Error_0_ := s.Param1_.Error()
-				var l int = len(_Error_0_)
-				binary.LittleEndian.PutUint64(b, uint64(l))
-				if _, err := w.Write(b[:8]); err != nil {
-					return fmt.Errorf("l int write: %w", err)
-				}
-
-				_, err := w.Write([]byte(_Error_0_))
-				if err != nil {
-					return fmt.Errorf("failed to write string to writer: %w", err)
+				if err := e.String(_Error_0_); err != nil {
+					return err
 				}
 			}
 		}
@@ -145,16 +115,15 @@ func (s _Irpc_endpointApiDivResp) Serialize(w io.Writer) error {
 	return nil
 }
 func (s *_Irpc_endpointApiDivResp) Deserialize(d *irpc.Decoder) error {
-	{ // float64
-		if err := d.Float64(&s.Param0_); err != nil {
-			return fmt.Errorf("deserialize s.Param0_ of type 'float64': %w", err)
-		}
+	if err := d.Float64(&s.Param0_); err != nil {
+		return fmt.Errorf("deserialize s.Param0_ of type 'float64': %w", err)
 	}
-	{ // error
+	{
 		var isNil bool
 		if err := d.Bool(&isNil); err != nil {
 			return fmt.Errorf("deserialize isNil of type 'bool': %w", err)
 		}
+
 		if isNil {
 			s.Param1_ = nil
 		} else {
