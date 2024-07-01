@@ -1,7 +1,6 @@
 package irpc
 
 import (
-	"encoding/binary"
 	"errors"
 	"fmt"
 	"io"
@@ -13,10 +12,6 @@ import (
 var ErrServiceAlreadyRegistered = errors.New("service already registered")
 var ErrEndpointClosed = errors.New("endpoint is closed")
 var ErrServiceNotFound = errors.New("service not found")
-
-// const DefaultMaxMsgLength = 10 * 1024 * 1024 // 10 MiB for now
-
-var endian = binary.LittleEndian
 
 type packetType uint8
 

@@ -107,7 +107,7 @@ func (s _Irpc_tcpTestApiDivResp) Serialize(e *irpc.Encoder) error {
 			{ // Error()
 				_Error_0_ := s.Param1_.Error()
 				if err := e.String(_Error_0_); err != nil {
-					return err
+					return fmt.Errorf("serialize _Error_0_ of type 'string': %w", err)
 				}
 			}
 		}

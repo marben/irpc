@@ -45,7 +45,7 @@ func varEncoder(apiName string, t types.Type) (encoder, error) {
 		case types.Float64:
 			return float64Encoder, nil
 		case types.String:
-			return newStringEncoder(), nil
+			return stringEncoder, nil
 		default:
 			return nil, fmt.Errorf("unsupported basic type '%s'", t.Name())
 		}
@@ -64,7 +64,6 @@ func varEncoder(apiName string, t types.Type) (encoder, error) {
 	default:
 		return nil, fmt.Errorf("unsupported type '%T' of %s ", t, t)
 	}
-
 }
 
 var (
@@ -120,6 +119,10 @@ var (
 		decFuncName: "Float64",
 		typeName:    "float64",
 	}
+	stringEncoder = primitiveTypeEncoder{
+		decFuncName: "String",
+		typeName:    "string",
+	}
 )
 
 type primitiveTypeEncoder struct {
@@ -154,42 +157,8 @@ func (e primitiveTypeEncoder) codeblock() string {
 	return ""
 }
 
-// todo: perhaps rewrite using slice encoder?
-type stringEncoder struct {
-	lenEncoder encoder
-}
-
-func newStringEncoder() stringEncoder {
-	return stringEncoder{intEncoder}
-}
-
-func (e stringEncoder) encode(varId string) string {
-	sb := &strings.Builder{}
-	fmt.Fprintf(sb, `if err := e.String(%s); err != nil {
-		return err
-	}
-	`, varId)
-
-	return sb.String()
-}
-
-func (e stringEncoder) decode(varId string) string {
-	sb := &strings.Builder{}
-	fmt.Fprintf(sb, `if err := d.String(&%s); err != nil{
-		return fmt.Errorf("deserialize %s of type 'string': %%w",err)
-	}
-	`, varId, varId)
-	return sb.String()
-}
-
-func (e stringEncoder) imports() []string {
-	return append(e.lenEncoder.imports(), fmtImport)
-}
-
-func (e stringEncoder) codeblock() string {
-	return ""
-}
-
+// slice encoder doesn't use generic slice function for performance reasons
+// unrolling the code in place reduces time and allocs
 type sliceEncoder struct {
 	elemEnc  encoder
 	lenEnc   encoder

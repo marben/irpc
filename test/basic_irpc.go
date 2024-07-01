@@ -1109,7 +1109,7 @@ type _Irpc_basicAPItoUpperStringReq struct {
 
 func (s _Irpc_basicAPItoUpperStringReq) Serialize(e *irpc.Encoder) error {
 	if err := e.String(s.Param0_s); err != nil {
-		return err
+		return fmt.Errorf("serialize s.Param0_s of type 'string': %w", err)
 	}
 	return nil
 }
@@ -1126,7 +1126,7 @@ type _Irpc_basicAPItoUpperStringResp struct {
 
 func (s _Irpc_basicAPItoUpperStringResp) Serialize(e *irpc.Encoder) error {
 	if err := e.String(s.Param0_); err != nil {
-		return err
+		return fmt.Errorf("serialize s.Param0_ of type 'string': %w", err)
 	}
 	return nil
 }

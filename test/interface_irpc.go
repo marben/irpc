@@ -232,7 +232,7 @@ type _Irpc_interfaceTestrtnErrorWithMessageReq struct {
 
 func (s _Irpc_interfaceTestrtnErrorWithMessageReq) Serialize(e *irpc.Encoder) error {
 	if err := e.String(s.Param0_msg); err != nil {
-		return err
+		return fmt.Errorf("serialize s.Param0_msg of type 'string': %w", err)
 	}
 	return nil
 }
@@ -261,7 +261,7 @@ func (s _Irpc_interfaceTestrtnErrorWithMessageResp) Serialize(e *irpc.Encoder) e
 			{ // Error()
 				_Error_0_ := s.Param0_.Error()
 				if err := e.String(_Error_0_); err != nil {
-					return err
+					return fmt.Errorf("serialize _Error_0_ of type 'string': %w", err)
 				}
 			}
 		}
@@ -326,7 +326,7 @@ func (s _Irpc_interfaceTestrtnNilErrorResp) Serialize(e *irpc.Encoder) error {
 			{ // Error()
 				_Error_0_ := s.Param0_.Error()
 				if err := e.String(_Error_0_); err != nil {
-					return err
+					return fmt.Errorf("serialize _Error_0_ of type 'string': %w", err)
 				}
 			}
 		}
@@ -384,7 +384,7 @@ func (s _Irpc_interfaceTestrtnTwoErrorsResp) Serialize(e *irpc.Encoder) error {
 			{ // Error()
 				_Error_0_ := s.Param0_.Error()
 				if err := e.String(_Error_0_); err != nil {
-					return err
+					return fmt.Errorf("serialize _Error_0_ of type 'string': %w", err)
 				}
 			}
 		}
@@ -402,7 +402,7 @@ func (s _Irpc_interfaceTestrtnTwoErrorsResp) Serialize(e *irpc.Encoder) error {
 			{ // Error()
 				_Error_0_ := s.Param1_.Error()
 				if err := e.String(_Error_0_); err != nil {
-					return err
+					return fmt.Errorf("serialize _Error_0_ of type 'string': %w", err)
 				}
 			}
 		}
@@ -455,7 +455,7 @@ type _Irpc_interfaceTestrtnStringAndErrorReq struct {
 
 func (s _Irpc_interfaceTestrtnStringAndErrorReq) Serialize(e *irpc.Encoder) error {
 	if err := e.String(s.Param0_msg); err != nil {
-		return err
+		return fmt.Errorf("serialize s.Param0_msg of type 'string': %w", err)
 	}
 	return nil
 }
@@ -473,7 +473,7 @@ type _Irpc_interfaceTestrtnStringAndErrorResp struct {
 
 func (s _Irpc_interfaceTestrtnStringAndErrorResp) Serialize(e *irpc.Encoder) error {
 	if err := e.String(s.Param0_s); err != nil {
-		return err
+		return fmt.Errorf("serialize s.Param0_s of type 'string': %w", err)
 	}
 	{
 		var isNil bool
@@ -488,7 +488,7 @@ func (s _Irpc_interfaceTestrtnStringAndErrorResp) Serialize(e *irpc.Encoder) err
 			{ // Error()
 				_Error_0_ := s.Param1_err.Error()
 				if err := e.String(_Error_0_); err != nil {
-					return err
+					return fmt.Errorf("serialize _Error_0_ of type 'string': %w", err)
 				}
 			}
 		}
@@ -544,7 +544,7 @@ func (s _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedReq) Serialize(
 			{ // StringFunc()
 				_StringFunc_0_ := s.Param0_ci.StringFunc()
 				if err := e.String(_StringFunc_0_); err != nil {
-					return err
+					return fmt.Errorf("serialize _StringFunc_0_ of type 'string': %w", err)
 				}
 			}
 		}
@@ -615,7 +615,7 @@ func (s _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp) Serialize
 			{ // StringFunc()
 				_StringFunc_0_ := s.Param0_.StringFunc()
 				if err := e.String(_StringFunc_0_); err != nil {
-					return err
+					return fmt.Errorf("serialize _StringFunc_0_ of type 'string': %w", err)
 				}
 			}
 		}
@@ -633,7 +633,7 @@ func (s _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp) Serialize
 			{ // Error()
 				_Error_0_ := s.Param1_.Error()
 				if err := e.String(_Error_0_); err != nil {
-					return err
+					return fmt.Errorf("serialize _Error_0_ of type 'string': %w", err)
 				}
 			}
 		}
@@ -728,7 +728,7 @@ type _Irpc_customInterfaceStringFuncResp struct {
 
 func (s _Irpc_customInterfaceStringFuncResp) Serialize(e *irpc.Encoder) error {
 	if err := e.String(s.Param0_); err != nil {
-		return err
+		return fmt.Errorf("serialize s.Param0_ of type 'string': %w", err)
 	}
 	return nil
 }
