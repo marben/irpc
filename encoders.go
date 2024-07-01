@@ -9,7 +9,6 @@ import (
 
 type encoder interface {
 	encode(varId string) string // inline variable encode
-	requestBufSize() int        // returns the buffer size needed for encoding (only for the fix-sized fields)
 	decode(varId string) string // inline variable decode
 	imports() []string          // necessary imports
 	codeblock() string          // requested encoder's code block at top level
@@ -140,10 +139,6 @@ func (e primitiveTypeEncoder) decode(varId string) string {
 	return sb.String()
 }
 
-func (e primitiveTypeEncoder) requestBufSize() int {
-	return e.bufSize
-}
-
 func (e primitiveTypeEncoder) imports() []string {
 	return append(e.imps, fmtImport)
 }
@@ -178,10 +173,6 @@ func (e stringEncoder) decode(varId string) string {
 	}
 	`, varId, varId)
 	return sb.String()
-}
-
-func (e stringEncoder) requestBufSize() int {
-	return e.lenEncoder.requestBufSize()
 }
 
 func (e stringEncoder) imports() []string {
@@ -242,10 +233,6 @@ func (e sliceEncoder) decode(varId string) string {
 	return sb.String()
 }
 
-func (e sliceEncoder) requestBufSize() int {
-	return max(e.elemEnc.requestBufSize(), e.lenEnc.requestBufSize())
-}
-
 func (e sliceEncoder) imports() []string {
 	return append(e.elemEnc.imports(), e.lenEnc.imports()...)
 }
@@ -295,14 +282,6 @@ func (e namedStructEncoder) decode(varId string) string {
 		sb.WriteString(f.enc.decode(varId + "." + f.name))
 	}
 	return sb.String()
-}
-
-func (e namedStructEncoder) requestBufSize() int {
-	bufSize := 0
-	for _, f := range e.fields {
-		bufSize = max(bufSize, f.enc.requestBufSize())
-	}
-	return bufSize
 }
 
 func (e namedStructEncoder) imports() []string {
@@ -455,16 +434,6 @@ func (e interfaceEncoder) decode(varId string) string {
 	sb.WriteString("}\n") // separate block
 
 	return sb.String()
-}
-
-func (e interfaceEncoder) requestBufSize() int {
-	bufSize := 0
-	for _, f := range e.fncs {
-		for _, v := range f.results {
-			bufSize = max(bufSize, v.enc.requestBufSize())
-		}
-	}
-	return bufSize
 }
 
 func (e interfaceEncoder) imports() []string {

@@ -132,12 +132,6 @@ func (sg paramStructGenerator) code() string {
 }
 
 func (sg paramStructGenerator) serializeFunc() string {
-	// find the requested size for out buffer
-	bufSize := 0
-	for _, vf := range sg.params {
-		bufSize = max(bufSize, vf.enc.requestBufSize())
-	}
-
 	sb := &strings.Builder{}
 	fmt.Fprintf(sb, "func (s %s)Serialize(e *irpc.Encoder) error {\n", sg.typeName)
 	if len(sg.params) > 0 {
