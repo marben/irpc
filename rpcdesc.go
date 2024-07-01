@@ -13,8 +13,7 @@ import (
 type rpcInterface struct {
 	typeSpec *ast.TypeSpec
 	astIface *ast.InterfaceType
-	// typesInterface *types.Interface // todo: probably unnecessary
-	methods []rpcMethod
+	methods  []rpcMethod
 }
 
 func newRpcInterface(typesInfo *types.Info, typeSpec *ast.TypeSpec, astIface *ast.InterfaceType) (rpcInterface, error) {
