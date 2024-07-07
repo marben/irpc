@@ -38,7 +38,7 @@ func generateStructConstructorName(structName string) string {
 func generateUniqueVarname(varName string, existingVars []varField) string {
 loop:
 	for _, vf := range existingVars {
-		if vf.name == varName {
+		if vf.name() == varName {
 			varName += "_"
 			goto loop
 		}

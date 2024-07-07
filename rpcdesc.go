@@ -38,14 +38,14 @@ func (i rpcInterface) name() string {
 	return i.typeSpec.Name.String()
 }
 
-func (i rpcInterface) print(prefix string) string {
+func (i rpcInterface) print(q types.Qualifier, prefix string) string {
 	if len(i.methods) == 0 {
 		return fmt.Sprintf("%stype %s interface{}\n", prefix, i.name())
 	}
 
 	s := fmt.Sprintf("%stype %s interface{\n", prefix, i.name())
 	for _, m := range i.methods {
-		s += fmt.Sprintf("%s\t%s\n", prefix, m.print())
+		s += fmt.Sprintf("%s\t%s\n", prefix, m.print(q))
 	}
 	s += fmt.Sprintf("%s}\n", prefix)
 
@@ -82,9 +82,9 @@ func newRpcMethod(typesInfo *types.Info, astField *ast.Field) (rpcMethod, error)
 	return rpcMethod{name: methodName, astField: astField, params: params, results: results}, nil
 }
 
-func (m rpcMethod) print() string {
-	params := "(" + printParamList(m.params) + ")"
-	results := printParamList(m.results)
+func (m rpcMethod) print(q types.Qualifier) string {
+	params := "(" + printParamList(q, m.params) + ")"
+	results := printParamList(q, m.results)
 	if len(m.results) > 1 {
 		results = "(" + results + ")"
 	}
@@ -92,10 +92,10 @@ func (m rpcMethod) print() string {
 }
 
 // comma separated list of variable names and types. ex: "a int, b float64"
-func printParamList(list []rpcParam) string {
+func printParamList(q types.Qualifier, list []rpcParam) string {
 	s := ""
 	for i, p := range list {
-		s += fmt.Sprintf("%s %s", p.name, p.typeName)
+		s += fmt.Sprintf("%s %s", p.name, p.typeName(q))
 		if i != len(list)-1 {
 			s += ","
 		}
@@ -113,14 +113,14 @@ func loadRpcParamList(typesInfo *types.Info, list []*ast.Field) ([]rpcParam, err
 		}
 		if field.Names == nil {
 			// parameter doesn't have name, just a type (typically function returns)
-			param, err := newRpcParam(pos, "", tv)
+			param, err := newRpcParam(pos, "", tv.Type)
 			if err != nil {
 				return nil, fmt.Errorf("newRpcParam on pos %d: %w", pos, err)
 			}
 			params = append(params, param)
 		} else {
 			for _, name := range field.Names {
-				param, err := newRpcParam(pos, name.Name, tv)
+				param, err := newRpcParam(pos, name.Name, tv.Type)
 				if err != nil {
 					return nil, fmt.Errorf("newRpcParam on pos %d: %w", pos, err)
 				}
@@ -131,69 +131,68 @@ func loadRpcParamList(typesInfo *types.Info, list []*ast.Field) ([]rpcParam, err
 	return params, nil
 }
 
+// represents function parameters/return value
 type rpcParam struct {
-	pos          int
-	name         string
-	typeName     string
-	typeAndValue types.TypeAndValue // todo: is it needed?
+	pos  int // position in field
+	name string
+	typ  types.Type
 }
 
-func newRpcParam(position int, name string, tv types.TypeAndValue) (rpcParam, error) {
-	var typeName string
-	switch t := tv.Type.(type) {
-	case *types.Basic:
-		typeName = t.Name()
-	case *types.Named:
-		typeName = t.Obj().Name()
-	case *types.Slice:
-		typeName = t.String()
-	default:
-		return rpcParam{}, fmt.Errorf("unsupported param type %T", t)
-	}
-
+func newRpcParam(position int, name string, typ types.Type) (rpcParam, error) {
 	return rpcParam{
-		pos:          position,
-		name:         name,
-		typeName:     typeName,
-		typeAndValue: tv,
+		pos:  position,
+		name: name,
+		typ:  typ,
 	}, nil
 }
 
+func (rp rpcParam) typeName(q types.Qualifier) string {
+	return types.TypeString(rp.typ, q)
+}
+
 type rpcFileDesc struct {
-	filename    string
-	packageName string
-	ifaces      []rpcInterface
+	filename string
+	pkg      *packages.Package
+	ifaces   []rpcInterface
 }
 
 func loadRpcFileDesc(filename string) (rpcFileDesc, error) {
 	cfg := &packages.Config{
-		Mode: packages.NeedTypes | packages.NeedDeps | packages.NeedImports | packages.NeedSyntax | packages.NeedTypesInfo,
+		Mode: packages.NeedTypes | packages.NeedDeps | packages.NeedImports | packages.NeedSyntax | packages.NeedTypesInfo | packages.NeedFiles,
 	}
-	ps, err := packages.Load(cfg, filename)
+	packages, err := packages.Load(cfg, filename)
 	if err != nil {
 		return rpcFileDesc{}, fmt.Errorf("packages.Load(): %w", err)
 	}
 
-	if len(ps) != 1 {
-		return rpcFileDesc{}, fmt.Errorf("unexpectedly %d packages returned for file %q", len(ps), filename)
+	// packages.Load() seems to be designed to parse multiple files (passed in go command style (./... etc))
+	// we only care about one file though, therefore it should always be the first in the array in following code
+
+	if len(packages) != 1 {
+		return rpcFileDesc{}, fmt.Errorf("unexpectedly %d packages returned for file %q", len(packages), filename)
 	}
 
-	p := ps[0]
+	pkg := packages[0]
 
-	if len(p.Syntax) != 1 {
-		return rpcFileDesc{}, fmt.Errorf("unexpectedly %d ast syntax trees returned", len(p.Syntax))
+	if len(pkg.Syntax) != 1 {
+		return rpcFileDesc{}, fmt.Errorf("unexpectedly %d ast syntax trees returned", len(pkg.Syntax))
 	}
-	fileAst := p.Syntax[0]
+	fileAst := pkg.Syntax[0]
 
-	ifaces, err := loadRpcInterfaces(fileAst, p.TypesInfo)
+	ifaces, err := loadRpcInterfaces(fileAst, pkg.TypesInfo)
 	if err != nil {
 		return rpcFileDesc{}, fmt.Errorf("loadRpcInterfaces: %w", err)
 	}
 
 	return rpcFileDesc{
-		filename:    filename,
-		ifaces:      ifaces,
-		packageName: fileAst.Name.Name}, nil
+		filename: filename,
+		pkg:      pkg,
+		ifaces:   ifaces,
+	}, nil
+}
+
+func (fd *rpcFileDesc) packageName() string {
+	return fd.pkg.Types.Name()
 }
 
 func loadRpcInterfaces(fileAst *ast.File, tInfo *types.Info) ([]rpcInterface, error) {
@@ -226,10 +225,10 @@ func loadRpcInterfaces(fileAst *ast.File, tInfo *types.Info) ([]rpcInterface, er
 	return ifaces, nil
 }
 
-func (f rpcFileDesc) print() string {
-	s := fmt.Sprintf("%s:\n", f.filename)
-	for _, i := range f.ifaces {
-		s += i.print("\t")
+func (fd rpcFileDesc) print(q types.Qualifier) string {
+	s := fmt.Sprintf("%s:\n", fd.filename)
+	for _, i := range fd.ifaces {
+		s += i.print(q, "\t")
 	}
 	return s
 }

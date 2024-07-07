@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"go/types"
 	"os"
 	"strings"
 )
@@ -46,7 +47,9 @@ func processInputFile(inputFile string) error {
 	}
 	// fmt.Print(fd.print())
 
-	g, err := newGenerator(fd)
+	qualifier := types.RelativeTo(fd.pkg.Types)
+
+	g, err := newGenerator(fd, qualifier)
 	if err != nil {
 		return fmt.Errorf("newGenerator for file '%s': %w", inputFile, err)
 	}

@@ -14,7 +14,7 @@ type encoder interface {
 	codeblock() string                                 // requested encoder's code block at top level
 }
 
-func varEncoder(apiName string, t types.Type) (encoder, error) {
+func varEncoder(apiName string, t types.Type, q types.Qualifier) (encoder, error) {
 	switch t := t.(type) {
 	case *types.Basic:
 		switch t.Kind() {
@@ -50,14 +50,14 @@ func varEncoder(apiName string, t types.Type) (encoder, error) {
 			return nil, fmt.Errorf("unsupported basic type '%s'", t.Name())
 		}
 	case *types.Slice:
-		return newSliceEncoder(apiName, t)
+		return newSliceEncoder(apiName, t, q)
 	case *types.Named:
 		name := t.Obj().Name()
 		switch ut := t.Underlying().(type) {
 		case *types.Struct:
-			return newNamedStructEncoder(apiName, ut)
+			return newNamedStructEncoder(apiName, ut, q)
 		case *types.Interface:
-			return newInterfaceEncoder(name, apiName, ut)
+			return newInterfaceEncoder(name, apiName, ut, q)
 		default:
 			return nil, fmt.Errorf("unsupported named type: %s", ut)
 		}
@@ -163,10 +163,11 @@ type sliceEncoder struct {
 	elemEnc  encoder
 	lenEnc   encoder
 	elemType types.Type
+	q        types.Qualifier
 }
 
-func newSliceEncoder(apiName string, t *types.Slice) (sliceEncoder, error) {
-	elemEnc, err := varEncoder(apiName, t.Elem())
+func newSliceEncoder(apiName string, t *types.Slice, q types.Qualifier) (sliceEncoder, error) {
+	elemEnc, err := varEncoder(apiName, t.Elem(), q)
 	if err != nil {
 		return sliceEncoder{}, fmt.Errorf("unsupported slice underlying type %s: %w", t.Elem(), err)
 	}
@@ -175,6 +176,7 @@ func newSliceEncoder(apiName string, t *types.Slice) (sliceEncoder, error) {
 		elemEnc:  elemEnc,
 		lenEnc:   intEncoder,
 		elemType: t.Elem(),
+		q:        q,
 	}, nil
 }
 
@@ -215,7 +217,7 @@ func (e sliceEncoder) decode(varId string, existingVars []string) string {
 	for %[3]s := 0; %[3]s < l; %[3]s++ {
 		%s
 	}
-	`, varId, e.elemType.String(), itName, e.elemEnc.decode(varId+"["+itName+"]", append(existingVars, itName)))
+	`, varId, types.TypeString(e.elemType, e.q), itName, e.elemEnc.decode(varId+"["+itName+"]", append(existingVars, itName)))
 	sb.WriteString("}\n")
 
 	return sb.String()
@@ -238,11 +240,11 @@ type namedStructEncoder struct {
 	fields []structField
 }
 
-func newNamedStructEncoder(apiName string, s *types.Struct) (namedStructEncoder, error) {
+func newNamedStructEncoder(apiName string, s *types.Struct, q types.Qualifier) (namedStructEncoder, error) {
 	structFields := []structField{}
 	for i := 0; i < s.NumFields(); i++ {
 		f := s.Field(i)
-		enc, err := varEncoder(apiName, f.Type())
+		enc, err := varEncoder(apiName, f.Type(), q)
 		if err != nil {
 			return namedStructEncoder{}, fmt.Errorf("cannot encode structs field '%s' of type '%s': %w", f.Name(), f.Type(), err)
 		}
@@ -328,7 +330,7 @@ type interfaceEncoder struct {
 	implTypeName string
 }
 
-func newInterfaceEncoder(name string, apiName string, it *types.Interface) (interfaceEncoder, error) {
+func newInterfaceEncoder(name string, apiName string, it *types.Interface, q types.Qualifier) (interfaceEncoder, error) {
 	fncs := []ifaceFunc{}
 	for i := 0; i < it.NumMethods(); i++ {
 		m := it.Method(i)
@@ -341,7 +343,7 @@ func newInterfaceEncoder(name string, apiName string, it *types.Interface) (inte
 		results := []ifaceRtnVar{}
 		for i := 0; i < sig.Results().Len(); i++ {
 			r := sig.Results().At(i)
-			enc, err := varEncoder(apiName, r.Type())
+			enc, err := varEncoder(apiName, r.Type(), q)
 			if err != nil {
 				return interfaceEncoder{}, fmt.Errorf("newInterfaceEncoder: no encoder for %s of type %s: %w", r.Name(), r.Type(), err)
 			}

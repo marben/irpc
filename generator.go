@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"go/types"
 	"io"
 	"log"
 	"strings"
@@ -16,7 +17,7 @@ type generator struct {
 	params   []paramStructGenerator
 }
 
-func newGenerator(fd rpcFileDesc) (generator, error) {
+func newGenerator(fd rpcFileDesc, q types.Qualifier) (generator, error) {
 	imports := newOrderedSet[string]()
 	services := []serviceGenerator{}
 	clients := []clientGenerator{}
@@ -24,7 +25,7 @@ func newGenerator(fd rpcFileDesc) (generator, error) {
 	for _, iface := range fd.ifaces {
 		methods := []methodGenerator{}
 		for i, m := range iface.methods {
-			mg, err := newMethodGenerator(iface.name(), i, m)
+			mg, err := newMethodGenerator(iface.name(), i, m, q)
 			if err != nil {
 				return generator{}, fmt.Errorf("method '%s' generator: %w", m.name, err)
 			}
@@ -58,7 +59,7 @@ func newGenerator(fd rpcFileDesc) (generator, error) {
 }
 
 func (g generator) write(w io.Writer) error {
-	genF := newGenFile(g.fd.packageName)
+	genF := newGenFile(g.fd.packageName())
 	genF.addImport(g.imports...)
 
 	// SERVICES
@@ -122,7 +123,7 @@ func newParamStructGenerator(typeName string, params []varField) (paramStructGen
 func (sg paramStructGenerator) code() string {
 	def := fmt.Sprintf("type %s struct{\n", sg.typeName)
 	for _, p := range sg.params {
-		def += p.structFieldName + " " + p.typeName + "\n"
+		def += p.structFieldName() + " " + p.typeName() + "\n"
 	}
 	def += "\n}\n"
 	def += sg.serializeFunc() + "\n"
@@ -136,7 +137,7 @@ func (sg paramStructGenerator) serializeFunc() string {
 	fmt.Fprintf(sb, "func (s %s)Serialize(e *irpc.Encoder) error {\n", sg.typeName)
 	if len(sg.params) > 0 {
 		for _, p := range sg.params {
-			sb.WriteString(p.enc.encode("s."+p.structFieldName, nil))
+			sb.WriteString(p.enc.encode("s."+p.structFieldName(), nil))
 		}
 	}
 	sb.WriteString("return nil\n}")
@@ -149,7 +150,7 @@ func (sg paramStructGenerator) deserializeFunc() string {
 	fmt.Fprintf(sb, "func (s *%s)Deserialize(d *irpc.Decoder) error {\n", sg.typeName)
 	if len(sg.params) > 0 {
 		for _, p := range sg.params {
-			sb.WriteString(p.enc.decode("s."+p.structFieldName, nil))
+			sb.WriteString(p.enc.decode("s."+p.structFieldName(), nil))
 		}
 	}
 	sb.WriteString("return nil\n}")
@@ -161,7 +162,7 @@ func (sg paramStructGenerator) deserializeFunc() string {
 func (sg paramStructGenerator) funcCallParams() string {
 	b := &strings.Builder{}
 	for i, v := range sg.params {
-		fmt.Fprintf(b, "%s %s", v.name, v.typeName)
+		fmt.Fprintf(b, "%s %s", v.name(), v.typeName())
 		if i != len(sg.params)-1 {
 			b.WriteString(",")
 		}
@@ -176,7 +177,7 @@ func (sg paramStructGenerator) funcCallParams() string {
 func (sg paramStructGenerator) paramListPrefixed(prefix string) string {
 	sb := &strings.Builder{}
 	for i, p := range sg.params {
-		fmt.Fprintf(sb, "%s%s", prefix, p.structFieldName)
+		fmt.Fprintf(sb, "%s%s", prefix, p.structFieldName())
 		if i != len(sg.params)-1 {
 			sb.WriteString(",")
 		}
@@ -193,26 +194,36 @@ func (sg paramStructGenerator) encoders() []encoder {
 	return encs
 }
 
+// represents a variable in param struct which in turn represents function parameter/return value
 type varField struct {
-	name            string
-	typeName        string
-	structFieldName string
-	enc             encoder
+	param rpcParam
+	enc   encoder
+	q     types.Qualifier
 }
 
-func newVarField(apiName string, p rpcParam) (varField, error) {
-	structFieldName := fmt.Sprintf("Param%d_%s", p.pos, p.name)
-	enc, err := varEncoder(apiName, p.typeAndValue.Type)
+func newVarField(apiName string, p rpcParam, q types.Qualifier) (varField, error) {
+	enc, err := varEncoder(apiName, p.typ, q)
 	if err != nil {
-		return varField{}, fmt.Errorf("param field for type '%s': %w", p.typeName, err)
+		return varField{}, fmt.Errorf("param field for type '%s': %w", p.typeName(q), err)
 	}
 
 	return varField{
-		name:            p.name,
-		typeName:        p.typeName,
-		structFieldName: structFieldName,
-		enc:             enc,
+		param: p,
+		enc:   enc,
+		q:     q,
 	}, nil
+}
+
+func (vf varField) structFieldName() string {
+	return fmt.Sprintf("Param%d_%s", vf.param.pos, vf.param.name)
+}
+
+func (vf varField) name() string {
+	return vf.param.name
+}
+
+func (vf varField) typeName() string {
+	return vf.param.typeName(vf.q)
 }
 
 type methodGenerator struct {
@@ -220,14 +231,15 @@ type methodGenerator struct {
 	index     int
 	req, resp paramStructGenerator
 	imports   []string
+	q         types.Qualifier
 }
 
-func newMethodGenerator(ifaceName string, index int, m rpcMethod) (methodGenerator, error) {
+func newMethodGenerator(ifaceName string, index int, m rpcMethod, q types.Qualifier) (methodGenerator, error) {
 	imports := newOrderedSet[string]()
 	reqStructTypeName := "_Irpc_" + ifaceName + m.name + "Req"
 	reqFields := []varField{}
 	for _, param := range m.params {
-		rf, err := newVarField(ifaceName, param)
+		rf, err := newVarField(ifaceName, param, q)
 		if err != nil {
 			return methodGenerator{}, fmt.Errorf("newVarField for param '%s': %w", param.name, err)
 		}
@@ -242,7 +254,7 @@ func newMethodGenerator(ifaceName string, index int, m rpcMethod) (methodGenerat
 	respStructTypeName := "_Irpc_" + ifaceName + m.name + "Resp"
 	respFields := []varField{}
 	for _, result := range m.results {
-		rf, err := newVarField(ifaceName, result)
+		rf, err := newVarField(ifaceName, result, q)
 		if err != nil {
 			return methodGenerator{}, fmt.Errorf("newVarField for param '%s': %w", result.name, err)
 		}
@@ -260,6 +272,7 @@ func newMethodGenerator(ifaceName string, index int, m rpcMethod) (methodGenerat
 		req:     req,
 		resp:    resp,
 		imports: imports.ordered,
+		q:       q,
 	}, nil
 }
 
@@ -383,7 +396,7 @@ func (cg clientGenerator) code() string {
 		// request construction
 		fmt.Fprintf(b, "var %s = %s {\n", reqVarName, m.req.typeName)
 		for _, p := range m.req.params {
-			fmt.Fprintf(b, "%s: %s,\n", p.structFieldName, p.name)
+			fmt.Fprintf(b, "%s: %s,\n", p.structFieldName(), p.name())
 		}
 		fmt.Fprintf(b, "}\n") // end struct assignment
 
@@ -398,7 +411,7 @@ func (cg clientGenerator) code() string {
 		// return values
 		fmt.Fprintf(b, "return ")
 		for i, f := range m.resp.params {
-			fmt.Fprintf(b, "%s.%s", respVarName, f.structFieldName)
+			fmt.Fprintf(b, "%s.%s", respVarName, f.structFieldName())
 			if i != len(m.resp.params)-1 {
 				fmt.Fprintf(b, ",")
 			}
