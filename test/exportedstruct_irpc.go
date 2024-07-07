@@ -6,17 +6,17 @@ import (
 	"github.com/marben/irpc/pkg/irpc"
 )
 
-type FileServerRpcService struct {
+type FileServerIRpcService struct {
 	impl FileServer
 }
 
-func NewFileServerRpcService(impl FileServer) *FileServerRpcService {
-	return &FileServerRpcService{impl: impl}
+func NewFileServerIRpcService(impl FileServer) *FileServerIRpcService {
+	return &FileServerIRpcService{impl: impl}
 }
-func (FileServerRpcService) Hash() []byte {
-	return []byte("FileServerRpcService")
+func (FileServerIRpcService) Hash() []byte {
+	return []byte("FileServerIRpcService")
 }
-func (s *FileServerRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
+func (s *FileServerIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // ListFiles
 		return func(d *irpc.Decoder) (irpc.FuncExecutor, error) {
@@ -37,19 +37,19 @@ func (s *FileServerRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserial
 	}
 }
 
-type FileServerRpcClient struct {
+type FileServerIRpcClient struct {
 	endpoint *irpc.Endpoint
 	id       irpc.RegisteredServiceId
 }
 
-func NewFileServerRpcClient(endpoint *irpc.Endpoint) (*FileServerRpcClient, error) {
-	id, err := endpoint.RegisterClient([]byte("FileServerRpcService"))
+func NewFileServerIRpcClient(endpoint *irpc.Endpoint) (*FileServerIRpcClient, error) {
+	id, err := endpoint.RegisterClient([]byte("FileServerIRpcService"))
 	if err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &FileServerRpcClient{endpoint: endpoint, id: id}, nil
+	return &FileServerIRpcClient{endpoint: endpoint, id: id}, nil
 }
-func (_c *FileServerRpcClient) ListFiles() ([]FileInfo, error) {
+func (_c *FileServerIRpcClient) ListFiles() ([]FileInfo, error) {
 	var req = _Irpc_FileServerListFilesReq{}
 	var resp _Irpc_FileServerListFilesResp
 	if err := _c.endpoint.CallRemoteFunc(_c.id, 0, req, &resp); err != nil {

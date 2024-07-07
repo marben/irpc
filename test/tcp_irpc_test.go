@@ -13,10 +13,10 @@ func TestTcpClientServer(t *testing.T) {
 		t.Fatalf("failed to create local tcp endpoints: %v", err)
 	}
 
-	service := newTcpTestApiRpcService(tcpTestApiImpl{})
+	service := newTcpTestApiIRpcService(tcpTestApiImpl{})
 	ep1.RegisterServices(service)
 
-	client, err := newTcpTestApiRpcClient(ep2)
+	client, err := newTcpTestApiIRpcClient(ep2)
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
 	}

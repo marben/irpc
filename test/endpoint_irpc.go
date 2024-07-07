@@ -6,17 +6,17 @@ import (
 	"github.com/marben/irpc/pkg/irpc"
 )
 
-type endpointApiRpcService struct {
+type endpointApiIRpcService struct {
 	impl endpointApi
 }
 
-func newEndpointApiRpcService(impl endpointApi) *endpointApiRpcService {
-	return &endpointApiRpcService{impl: impl}
+func newEndpointApiIRpcService(impl endpointApi) *endpointApiIRpcService {
+	return &endpointApiIRpcService{impl: impl}
 }
-func (endpointApiRpcService) Hash() []byte {
-	return []byte("endpointApiRpcService")
+func (endpointApiIRpcService) Hash() []byte {
+	return []byte("endpointApiIRpcService")
 }
-func (s *endpointApiRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
+func (s *endpointApiIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // Div
 		return func(d *irpc.Decoder) (irpc.FuncExecutor, error) {
@@ -37,19 +37,19 @@ func (s *endpointApiRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseria
 	}
 }
 
-type endpointApiRpcClient struct {
+type endpointApiIRpcClient struct {
 	endpoint *irpc.Endpoint
 	id       irpc.RegisteredServiceId
 }
 
-func newEndpointApiRpcClient(endpoint *irpc.Endpoint) (*endpointApiRpcClient, error) {
-	id, err := endpoint.RegisterClient([]byte("endpointApiRpcService"))
+func newEndpointApiIRpcClient(endpoint *irpc.Endpoint) (*endpointApiIRpcClient, error) {
+	id, err := endpoint.RegisterClient([]byte("endpointApiIRpcService"))
 	if err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &endpointApiRpcClient{endpoint: endpoint, id: id}, nil
+	return &endpointApiIRpcClient{endpoint: endpoint, id: id}, nil
 }
-func (_c *endpointApiRpcClient) Div(a float64, b float64) (float64, error) {
+func (_c *endpointApiIRpcClient) Div(a float64, b float64) (float64, error) {
 	var req = _Irpc_endpointApiDivReq{
 		Param0_a: a,
 		Param0_b: b,

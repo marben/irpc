@@ -6,17 +6,17 @@ import (
 	"github.com/marben/irpc/pkg/irpc"
 )
 
-type structAPIRpcService struct {
+type structAPIIRpcService struct {
 	impl structAPI
 }
 
-func newStructAPIRpcService(impl structAPI) *structAPIRpcService {
-	return &structAPIRpcService{impl: impl}
+func newStructAPIIRpcService(impl structAPI) *structAPIIRpcService {
+	return &structAPIIRpcService{impl: impl}
 }
-func (structAPIRpcService) Hash() []byte {
-	return []byte("structAPIRpcService")
+func (structAPIIRpcService) Hash() []byte {
+	return []byte("structAPIIRpcService")
 }
-func (s *structAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
+func (s *structAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // VectSum
 		return func(d *irpc.Decoder) (irpc.FuncExecutor, error) {
@@ -65,19 +65,19 @@ func (s *structAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 	}
 }
 
-type structAPIRpcClient struct {
+type structAPIIRpcClient struct {
 	endpoint *irpc.Endpoint
 	id       irpc.RegisteredServiceId
 }
 
-func newStructAPIRpcClient(endpoint *irpc.Endpoint) (*structAPIRpcClient, error) {
-	id, err := endpoint.RegisterClient([]byte("structAPIRpcService"))
+func newStructAPIIRpcClient(endpoint *irpc.Endpoint) (*structAPIIRpcClient, error) {
+	id, err := endpoint.RegisterClient([]byte("structAPIIRpcService"))
 	if err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &structAPIRpcClient{endpoint: endpoint, id: id}, nil
+	return &structAPIIRpcClient{endpoint: endpoint, id: id}, nil
 }
-func (_c *structAPIRpcClient) VectSum(v vect3) int {
+func (_c *structAPIIRpcClient) VectSum(v vect3) int {
 	var req = _Irpc_structAPIVectSumReq{
 		Param0_v: v,
 	}
@@ -87,7 +87,7 @@ func (_c *structAPIRpcClient) VectSum(v vect3) int {
 	}
 	return resp.Param0_
 }
-func (_c *structAPIRpcClient) Vect3x3Sum(v vect3x3) vect3 {
+func (_c *structAPIIRpcClient) Vect3x3Sum(v vect3x3) vect3 {
 	var req = _Irpc_structAPIVect3x3SumReq{
 		Param0_v: v,
 	}
@@ -97,7 +97,7 @@ func (_c *structAPIRpcClient) Vect3x3Sum(v vect3x3) vect3 {
 	}
 	return resp.Param0_
 }
-func (_c *structAPIRpcClient) SumSliceStruct(s sliceStruct) int {
+func (_c *structAPIIRpcClient) SumSliceStruct(s sliceStruct) int {
 	var req = _Irpc_structAPISumSliceStructReq{
 		Param0_s: s,
 	}

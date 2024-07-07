@@ -6,17 +6,17 @@ import (
 	"github.com/marben/irpc/pkg/irpc"
 )
 
-type interfaceTestRpcService struct {
+type interfaceTestIRpcService struct {
 	impl interfaceTest
 }
 
-func newInterfaceTestRpcService(impl interfaceTest) *interfaceTestRpcService {
-	return &interfaceTestRpcService{impl: impl}
+func newInterfaceTestIRpcService(impl interfaceTest) *interfaceTestIRpcService {
+	return &interfaceTestIRpcService{impl: impl}
 }
-func (interfaceTestRpcService) Hash() []byte {
-	return []byte("interfaceTestRpcService")
+func (interfaceTestIRpcService) Hash() []byte {
+	return []byte("interfaceTestIRpcService")
 }
-func (s *interfaceTestRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
+func (s *interfaceTestIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // rtnErrorWithMessage
 		return func(d *irpc.Decoder) (irpc.FuncExecutor, error) {
@@ -93,17 +93,17 @@ func (s *interfaceTestRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeser
 	}
 }
 
-type customInterfaceRpcService struct {
+type customInterfaceIRpcService struct {
 	impl customInterface
 }
 
-func newCustomInterfaceRpcService(impl customInterface) *customInterfaceRpcService {
-	return &customInterfaceRpcService{impl: impl}
+func newCustomInterfaceIRpcService(impl customInterface) *customInterfaceIRpcService {
+	return &customInterfaceIRpcService{impl: impl}
 }
-func (customInterfaceRpcService) Hash() []byte {
-	return []byte("customInterfaceRpcService")
+func (customInterfaceIRpcService) Hash() []byte {
+	return []byte("customInterfaceIRpcService")
 }
-func (s *customInterfaceRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
+func (s *customInterfaceIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // IntFunc
 		return func(d *irpc.Decoder) (irpc.FuncExecutor, error) {
@@ -138,19 +138,19 @@ func (s *customInterfaceRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDes
 	}
 }
 
-type interfaceTestRpcClient struct {
+type interfaceTestIRpcClient struct {
 	endpoint *irpc.Endpoint
 	id       irpc.RegisteredServiceId
 }
 
-func newInterfaceTestRpcClient(endpoint *irpc.Endpoint) (*interfaceTestRpcClient, error) {
-	id, err := endpoint.RegisterClient([]byte("interfaceTestRpcService"))
+func newInterfaceTestIRpcClient(endpoint *irpc.Endpoint) (*interfaceTestIRpcClient, error) {
+	id, err := endpoint.RegisterClient([]byte("interfaceTestIRpcService"))
 	if err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &interfaceTestRpcClient{endpoint: endpoint, id: id}, nil
+	return &interfaceTestIRpcClient{endpoint: endpoint, id: id}, nil
 }
-func (_c *interfaceTestRpcClient) rtnErrorWithMessage(msg string) error {
+func (_c *interfaceTestIRpcClient) rtnErrorWithMessage(msg string) error {
 	var req = _Irpc_interfaceTestrtnErrorWithMessageReq{
 		Param0_msg: msg,
 	}
@@ -160,7 +160,7 @@ func (_c *interfaceTestRpcClient) rtnErrorWithMessage(msg string) error {
 	}
 	return resp.Param0_
 }
-func (_c *interfaceTestRpcClient) rtnNilError() error {
+func (_c *interfaceTestIRpcClient) rtnNilError() error {
 	var req = _Irpc_interfaceTestrtnNilErrorReq{}
 	var resp _Irpc_interfaceTestrtnNilErrorResp
 	if err := _c.endpoint.CallRemoteFunc(_c.id, 1, req, &resp); err != nil {
@@ -168,7 +168,7 @@ func (_c *interfaceTestRpcClient) rtnNilError() error {
 	}
 	return resp.Param0_
 }
-func (_c *interfaceTestRpcClient) rtnTwoErrors() (error, error) {
+func (_c *interfaceTestIRpcClient) rtnTwoErrors() (error, error) {
 	var req = _Irpc_interfaceTestrtnTwoErrorsReq{}
 	var resp _Irpc_interfaceTestrtnTwoErrorsResp
 	if err := _c.endpoint.CallRemoteFunc(_c.id, 2, req, &resp); err != nil {
@@ -176,7 +176,7 @@ func (_c *interfaceTestRpcClient) rtnTwoErrors() (error, error) {
 	}
 	return resp.Param0_, resp.Param1_
 }
-func (_c *interfaceTestRpcClient) rtnStringAndError(msg string) (s string, err error) {
+func (_c *interfaceTestIRpcClient) rtnStringAndError(msg string) (s string, err error) {
 	var req = _Irpc_interfaceTestrtnStringAndErrorReq{
 		Param0_msg: msg,
 	}
@@ -186,7 +186,7 @@ func (_c *interfaceTestRpcClient) rtnStringAndError(msg string) (s string, err e
 	}
 	return resp.Param0_s, resp.Param1_err
 }
-func (_c *interfaceTestRpcClient) passCustomInterfaceAndReturnItModified(ci customInterface) (customInterface, error) {
+func (_c *interfaceTestIRpcClient) passCustomInterfaceAndReturnItModified(ci customInterface) (customInterface, error) {
 	var req = _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedReq{
 		Param0_ci: ci,
 	}
@@ -197,19 +197,19 @@ func (_c *interfaceTestRpcClient) passCustomInterfaceAndReturnItModified(ci cust
 	return resp.Param0_, resp.Param1_
 }
 
-type customInterfaceRpcClient struct {
+type customInterfaceIRpcClient struct {
 	endpoint *irpc.Endpoint
 	id       irpc.RegisteredServiceId
 }
 
-func newCustomInterfaceRpcClient(endpoint *irpc.Endpoint) (*customInterfaceRpcClient, error) {
-	id, err := endpoint.RegisterClient([]byte("customInterfaceRpcService"))
+func newCustomInterfaceIRpcClient(endpoint *irpc.Endpoint) (*customInterfaceIRpcClient, error) {
+	id, err := endpoint.RegisterClient([]byte("customInterfaceIRpcService"))
 	if err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &customInterfaceRpcClient{endpoint: endpoint, id: id}, nil
+	return &customInterfaceIRpcClient{endpoint: endpoint, id: id}, nil
 }
-func (_c *customInterfaceRpcClient) IntFunc() int {
+func (_c *customInterfaceIRpcClient) IntFunc() int {
 	var req = _Irpc_customInterfaceIntFuncReq{}
 	var resp _Irpc_customInterfaceIntFuncResp
 	if err := _c.endpoint.CallRemoteFunc(_c.id, 0, req, &resp); err != nil {
@@ -217,7 +217,7 @@ func (_c *customInterfaceRpcClient) IntFunc() int {
 	}
 	return resp.Param0_
 }
-func (_c *customInterfaceRpcClient) StringFunc() string {
+func (_c *customInterfaceIRpcClient) StringFunc() string {
 	var req = _Irpc_customInterfaceStringFuncReq{}
 	var resp _Irpc_customInterfaceStringFuncResp
 	if err := _c.endpoint.CallRemoteFunc(_c.id, 1, req, &resp); err != nil {

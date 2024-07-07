@@ -6,17 +6,17 @@ import (
 	"github.com/marben/irpc/pkg/irpc"
 )
 
-type basicAPIRpcService struct {
+type basicAPIIRpcService struct {
 	impl basicAPI
 }
 
-func newBasicAPIRpcService(impl basicAPI) *basicAPIRpcService {
-	return &basicAPIRpcService{impl: impl}
+func newBasicAPIIRpcService(impl basicAPI) *basicAPIIRpcService {
+	return &basicAPIIRpcService{impl: impl}
 }
-func (basicAPIRpcService) Hash() []byte {
-	return []byte("basicAPIRpcService")
+func (basicAPIIRpcService) Hash() []byte {
+	return []byte("basicAPIIRpcService")
 }
-func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
+func (s *basicAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // addByte
 		return func(d *irpc.Decoder) (irpc.FuncExecutor, error) {
@@ -261,36 +261,36 @@ func (s *basicAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializ
 	}
 }
 
-type emptyAPIRpcService struct {
+type emptyAPIIRpcService struct {
 	impl emptyAPI
 }
 
-func newEmptyAPIRpcService(impl emptyAPI) *emptyAPIRpcService {
-	return &emptyAPIRpcService{impl: impl}
+func newEmptyAPIIRpcService(impl emptyAPI) *emptyAPIIRpcService {
+	return &emptyAPIIRpcService{impl: impl}
 }
-func (emptyAPIRpcService) Hash() []byte {
-	return []byte("emptyAPIRpcService")
+func (emptyAPIIRpcService) Hash() []byte {
+	return []byte("emptyAPIIRpcService")
 }
-func (s *emptyAPIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
+func (s *emptyAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
 	default:
 		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, string(s.Hash()))
 	}
 }
 
-type basicAPIRpcClient struct {
+type basicAPIIRpcClient struct {
 	endpoint *irpc.Endpoint
 	id       irpc.RegisteredServiceId
 }
 
-func newBasicAPIRpcClient(endpoint *irpc.Endpoint) (*basicAPIRpcClient, error) {
-	id, err := endpoint.RegisterClient([]byte("basicAPIRpcService"))
+func newBasicAPIIRpcClient(endpoint *irpc.Endpoint) (*basicAPIIRpcClient, error) {
+	id, err := endpoint.RegisterClient([]byte("basicAPIIRpcService"))
 	if err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &basicAPIRpcClient{endpoint: endpoint, id: id}, nil
+	return &basicAPIIRpcClient{endpoint: endpoint, id: id}, nil
 }
-func (_c *basicAPIRpcClient) addByte(a byte, b byte) byte {
+func (_c *basicAPIIRpcClient) addByte(a byte, b byte) byte {
 	var req = _Irpc_basicAPIaddByteReq{
 		Param0_a: a,
 		Param1_b: b,
@@ -301,7 +301,7 @@ func (_c *basicAPIRpcClient) addByte(a byte, b byte) byte {
 	}
 	return resp.Param0_
 }
-func (_c *basicAPIRpcClient) addInt(a int, b int) int {
+func (_c *basicAPIIRpcClient) addInt(a int, b int) int {
 	var req = _Irpc_basicAPIaddIntReq{
 		Param0_a: a,
 		Param1_b: b,
@@ -312,7 +312,7 @@ func (_c *basicAPIRpcClient) addInt(a int, b int) int {
 	}
 	return resp.Param0_
 }
-func (_c *basicAPIRpcClient) swapInt(a int, b int) (int, int) {
+func (_c *basicAPIIRpcClient) swapInt(a int, b int) (int, int) {
 	var req = _Irpc_basicAPIswapIntReq{
 		Param0_a: a,
 		Param1_b: b,
@@ -323,7 +323,7 @@ func (_c *basicAPIRpcClient) swapInt(a int, b int) (int, int) {
 	}
 	return resp.Param0_, resp.Param1_
 }
-func (_c *basicAPIRpcClient) subUint(a uint, b uint) uint {
+func (_c *basicAPIIRpcClient) subUint(a uint, b uint) uint {
 	var req = _Irpc_basicAPIsubUintReq{
 		Param0_a: a,
 		Param0_b: b,
@@ -334,7 +334,7 @@ func (_c *basicAPIRpcClient) subUint(a uint, b uint) uint {
 	}
 	return resp.Param0_
 }
-func (_c *basicAPIRpcClient) addInt8(a int8, b int8) int8 {
+func (_c *basicAPIIRpcClient) addInt8(a int8, b int8) int8 {
 	var req = _Irpc_basicAPIaddInt8Req{
 		Param0_a: a,
 		Param0_b: b,
@@ -345,7 +345,7 @@ func (_c *basicAPIRpcClient) addInt8(a int8, b int8) int8 {
 	}
 	return resp.Param0_
 }
-func (_c *basicAPIRpcClient) addUint8(a uint8, b uint8) uint8 {
+func (_c *basicAPIIRpcClient) addUint8(a uint8, b uint8) uint8 {
 	var req = _Irpc_basicAPIaddUint8Req{
 		Param0_a: a,
 		Param0_b: b,
@@ -356,7 +356,7 @@ func (_c *basicAPIRpcClient) addUint8(a uint8, b uint8) uint8 {
 	}
 	return resp.Param0_
 }
-func (_c *basicAPIRpcClient) addInt16(a int16, b int16) int16 {
+func (_c *basicAPIIRpcClient) addInt16(a int16, b int16) int16 {
 	var req = _Irpc_basicAPIaddInt16Req{
 		Param0_a: a,
 		Param0_b: b,
@@ -367,7 +367,7 @@ func (_c *basicAPIRpcClient) addInt16(a int16, b int16) int16 {
 	}
 	return resp.Param0_
 }
-func (_c *basicAPIRpcClient) addUint16(a uint16, b uint16) uint16 {
+func (_c *basicAPIIRpcClient) addUint16(a uint16, b uint16) uint16 {
 	var req = _Irpc_basicAPIaddUint16Req{
 		Param0_a: a,
 		Param0_b: b,
@@ -378,7 +378,7 @@ func (_c *basicAPIRpcClient) addUint16(a uint16, b uint16) uint16 {
 	}
 	return resp.Param0_
 }
-func (_c *basicAPIRpcClient) addInt32(a int32, b int32) int32 {
+func (_c *basicAPIIRpcClient) addInt32(a int32, b int32) int32 {
 	var req = _Irpc_basicAPIaddInt32Req{
 		Param0_a: a,
 		Param0_b: b,
@@ -389,7 +389,7 @@ func (_c *basicAPIRpcClient) addInt32(a int32, b int32) int32 {
 	}
 	return resp.Param0_
 }
-func (_c *basicAPIRpcClient) addUint32(a uint32, b uint32) uint32 {
+func (_c *basicAPIIRpcClient) addUint32(a uint32, b uint32) uint32 {
 	var req = _Irpc_basicAPIaddUint32Req{
 		Param0_a: a,
 		Param0_b: b,
@@ -400,7 +400,7 @@ func (_c *basicAPIRpcClient) addUint32(a uint32, b uint32) uint32 {
 	}
 	return resp.Param0_
 }
-func (_c *basicAPIRpcClient) addInt64(a int64, b int64) int64 {
+func (_c *basicAPIIRpcClient) addInt64(a int64, b int64) int64 {
 	var req = _Irpc_basicAPIaddInt64Req{
 		Param0_a: a,
 		Param0_b: b,
@@ -411,7 +411,7 @@ func (_c *basicAPIRpcClient) addInt64(a int64, b int64) int64 {
 	}
 	return resp.Param0_
 }
-func (_c *basicAPIRpcClient) addUint64(a uint64, b uint64) uint64 {
+func (_c *basicAPIIRpcClient) addUint64(a uint64, b uint64) uint64 {
 	var req = _Irpc_basicAPIaddUint64Req{
 		Param0_a: a,
 		Param0_b: b,
@@ -422,7 +422,7 @@ func (_c *basicAPIRpcClient) addUint64(a uint64, b uint64) uint64 {
 	}
 	return resp.Param0_
 }
-func (_c *basicAPIRpcClient) addFloat64(a float64, b float64) float64 {
+func (_c *basicAPIIRpcClient) addFloat64(a float64, b float64) float64 {
 	var req = _Irpc_basicAPIaddFloat64Req{
 		Param0_a: a,
 		Param0_b: b,
@@ -433,7 +433,7 @@ func (_c *basicAPIRpcClient) addFloat64(a float64, b float64) float64 {
 	}
 	return resp.Param0_
 }
-func (_c *basicAPIRpcClient) addFloat32(a float32, b float32) float32 {
+func (_c *basicAPIIRpcClient) addFloat32(a float32, b float32) float32 {
 	var req = _Irpc_basicAPIaddFloat32Req{
 		Param0_a: a,
 		Param0_b: b,
@@ -444,7 +444,7 @@ func (_c *basicAPIRpcClient) addFloat32(a float32, b float32) float32 {
 	}
 	return resp.Param0_
 }
-func (_c *basicAPIRpcClient) toUpper(c rune) rune {
+func (_c *basicAPIIRpcClient) toUpper(c rune) rune {
 	var req = _Irpc_basicAPItoUpperReq{
 		Param0_c: c,
 	}
@@ -454,7 +454,7 @@ func (_c *basicAPIRpcClient) toUpper(c rune) rune {
 	}
 	return resp.Param0_
 }
-func (_c *basicAPIRpcClient) toUpperString(s string) string {
+func (_c *basicAPIIRpcClient) toUpperString(s string) string {
 	var req = _Irpc_basicAPItoUpperStringReq{
 		Param0_s: s,
 	}
@@ -464,7 +464,7 @@ func (_c *basicAPIRpcClient) toUpperString(s string) string {
 	}
 	return resp.Param0_
 }
-func (_c *basicAPIRpcClient) negBool(ok bool) bool {
+func (_c *basicAPIIRpcClient) negBool(ok bool) bool {
 	var req = _Irpc_basicAPInegBoolReq{
 		Param0_ok: ok,
 	}
@@ -475,17 +475,17 @@ func (_c *basicAPIRpcClient) negBool(ok bool) bool {
 	return resp.Param0_
 }
 
-type emptyAPIRpcClient struct {
+type emptyAPIIRpcClient struct {
 	endpoint *irpc.Endpoint
 	id       irpc.RegisteredServiceId
 }
 
-func newEmptyAPIRpcClient(endpoint *irpc.Endpoint) (*emptyAPIRpcClient, error) {
-	id, err := endpoint.RegisterClient([]byte("emptyAPIRpcService"))
+func newEmptyAPIIRpcClient(endpoint *irpc.Endpoint) (*emptyAPIIRpcClient, error) {
+	id, err := endpoint.RegisterClient([]byte("emptyAPIIRpcService"))
 	if err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &emptyAPIRpcClient{endpoint: endpoint, id: id}, nil
+	return &emptyAPIIRpcClient{endpoint: endpoint, id: id}, nil
 }
 
 type _Irpc_basicAPIaddByteReq struct {

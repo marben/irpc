@@ -6,17 +6,17 @@ import (
 	"github.com/marben/irpc/pkg/irpc"
 )
 
-type sliceTestRpcService struct {
+type sliceTestIRpcService struct {
 	impl sliceTest
 }
 
-func newSliceTestRpcService(impl sliceTest) *sliceTestRpcService {
-	return &sliceTestRpcService{impl: impl}
+func newSliceTestIRpcService(impl sliceTest) *sliceTestIRpcService {
+	return &sliceTestIRpcService{impl: impl}
 }
-func (sliceTestRpcService) Hash() []byte {
-	return []byte("sliceTestRpcService")
+func (sliceTestIRpcService) Hash() []byte {
+	return []byte("sliceTestIRpcService")
 }
-func (s *sliceTestRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
+func (s *sliceTestIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // SliceSum
 		return func(d *irpc.Decoder) (irpc.FuncExecutor, error) {
@@ -79,19 +79,19 @@ func (s *sliceTestRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 	}
 }
 
-type sliceTestRpcClient struct {
+type sliceTestIRpcClient struct {
 	endpoint *irpc.Endpoint
 	id       irpc.RegisteredServiceId
 }
 
-func newSliceTestRpcClient(endpoint *irpc.Endpoint) (*sliceTestRpcClient, error) {
-	id, err := endpoint.RegisterClient([]byte("sliceTestRpcService"))
+func newSliceTestIRpcClient(endpoint *irpc.Endpoint) (*sliceTestIRpcClient, error) {
+	id, err := endpoint.RegisterClient([]byte("sliceTestIRpcService"))
 	if err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &sliceTestRpcClient{endpoint: endpoint, id: id}, nil
+	return &sliceTestIRpcClient{endpoint: endpoint, id: id}, nil
 }
-func (_c *sliceTestRpcClient) SliceSum(slice []int) int {
+func (_c *sliceTestIRpcClient) SliceSum(slice []int) int {
 	var req = _Irpc_sliceTestSliceSumReq{
 		Param0_slice: slice,
 	}
@@ -101,7 +101,7 @@ func (_c *sliceTestRpcClient) SliceSum(slice []int) int {
 	}
 	return resp.Param0_
 }
-func (_c *sliceTestRpcClient) VectMult(vect []int, s int) []int {
+func (_c *sliceTestIRpcClient) VectMult(vect []int, s int) []int {
 	var req = _Irpc_sliceTestVectMultReq{
 		Param0_vect: vect,
 		Param1_s:    s,
@@ -112,7 +112,7 @@ func (_c *sliceTestRpcClient) VectMult(vect []int, s int) []int {
 	}
 	return resp.Param0_
 }
-func (_c *sliceTestRpcClient) SliceOfFloat64Sum(slice []float64) float64 {
+func (_c *sliceTestIRpcClient) SliceOfFloat64Sum(slice []float64) float64 {
 	var req = _Irpc_sliceTestSliceOfFloat64SumReq{
 		Param0_slice: slice,
 	}
@@ -122,7 +122,7 @@ func (_c *sliceTestRpcClient) SliceOfFloat64Sum(slice []float64) float64 {
 	}
 	return resp.Param0_
 }
-func (_c *sliceTestRpcClient) SliceOfSlicesSum(slice [][]int) int {
+func (_c *sliceTestIRpcClient) SliceOfSlicesSum(slice [][]int) int {
 	var req = _Irpc_sliceTestSliceOfSlicesSumReq{
 		Param0_slice: slice,
 	}

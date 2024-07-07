@@ -6,17 +6,17 @@ import (
 	"github.com/marben/irpc/pkg/irpc"
 )
 
-type tcpTestApiRpcService struct {
+type tcpTestApiIRpcService struct {
 	impl tcpTestApi
 }
 
-func newTcpTestApiRpcService(impl tcpTestApi) *tcpTestApiRpcService {
-	return &tcpTestApiRpcService{impl: impl}
+func newTcpTestApiIRpcService(impl tcpTestApi) *tcpTestApiIRpcService {
+	return &tcpTestApiIRpcService{impl: impl}
 }
-func (tcpTestApiRpcService) Hash() []byte {
-	return []byte("tcpTestApiRpcService")
+func (tcpTestApiIRpcService) Hash() []byte {
+	return []byte("tcpTestApiIRpcService")
 }
-func (s *tcpTestApiRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
+func (s *tcpTestApiIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // Div
 		return func(d *irpc.Decoder) (irpc.FuncExecutor, error) {
@@ -37,19 +37,19 @@ func (s *tcpTestApiRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserial
 	}
 }
 
-type tcpTestApiRpcClient struct {
+type tcpTestApiIRpcClient struct {
 	endpoint *irpc.Endpoint
 	id       irpc.RegisteredServiceId
 }
 
-func newTcpTestApiRpcClient(endpoint *irpc.Endpoint) (*tcpTestApiRpcClient, error) {
-	id, err := endpoint.RegisterClient([]byte("tcpTestApiRpcService"))
+func newTcpTestApiIRpcClient(endpoint *irpc.Endpoint) (*tcpTestApiIRpcClient, error) {
+	id, err := endpoint.RegisterClient([]byte("tcpTestApiIRpcService"))
 	if err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &tcpTestApiRpcClient{endpoint: endpoint, id: id}, nil
+	return &tcpTestApiIRpcClient{endpoint: endpoint, id: id}, nil
 }
-func (_c *tcpTestApiRpcClient) Div(a float64, b float64) (float64, error) {
+func (_c *tcpTestApiIRpcClient) Div(a float64, b float64) (float64, error) {
 	var req = _Irpc_tcpTestApiDivReq{
 		Param0_a: a,
 		Param0_b: b,

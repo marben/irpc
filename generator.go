@@ -34,15 +34,15 @@ func newGenerator(fd rpcFileDesc, q types.Qualifier) (generator, error) {
 			paramStructs = append(paramStructs, mg.req, mg.resp)
 		}
 
-		serviceId := iface.name() + "RpcService"
+		serviceId := iface.name() + "IRpcService"
 
-		sg, err := newServiceGenerator(iface.name()+"RpcService", iface.name(), serviceId, methods)
+		sg, err := newServiceGenerator(iface.name()+"IRpcService", iface.name(), serviceId, methods)
 		if err != nil {
 			return generator{}, fmt.Errorf("service generator for iface: %s: %w", iface.name(), err)
 		}
 		services = append(services, sg)
 
-		cg, err := newClientGenerator(iface.name()+"RpcClient", serviceId, methods)
+		cg, err := newClientGenerator(iface.name()+"IRpcClient", serviceId, methods)
 		if err != nil {
 			return generator{}, fmt.Errorf("client generator for iface: %s: %w", iface.name(), err)
 		}

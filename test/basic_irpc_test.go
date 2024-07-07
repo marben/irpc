@@ -29,12 +29,12 @@ func TestBasic(t *testing.T) {
 
 	skew := 2
 	// t.Logf("creating service")
-	service := newBasicAPIRpcService(basicApiImpl{skew: skew})
+	service := newBasicAPIIRpcService(basicApiImpl{skew: skew})
 	// t.Logf("registering service")
 	serviceEp.RegisterServices(service)
 
 	// t.Logf("creating client")
-	c, err := newBasicAPIRpcClient(clientEp)
+	c, err := newBasicAPIIRpcClient(clientEp)
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
 	}
@@ -252,11 +252,11 @@ func BenchmarkClientRegister(b *testing.B) {
 		go serviceEp.Serve(crw)
 
 		skew := 2
-		service := newBasicAPIRpcService(basicApiImpl{skew: skew})
+		service := newBasicAPIIRpcService(basicApiImpl{skew: skew})
 		serviceEp.RegisterServices(service)
 
 		// register client (network communication)
-		_, err = newBasicAPIRpcClient(clientEp)
+		_, err = newBasicAPIIRpcClient(clientEp)
 		if err != nil {
 			b.Fatalf("failed to create client: %v", err)
 		}
@@ -290,10 +290,10 @@ func BenchmarkAddInt64(b *testing.B) {
 	go clientEp.Serve(crw)
 
 	skew := 2
-	service := newBasicAPIRpcService(basicApiImpl{skew: skew})
+	service := newBasicAPIIRpcService(basicApiImpl{skew: skew})
 	serviceEp.RegisterServices(service)
 
-	c, err := newBasicAPIRpcClient(clientEp)
+	c, err := newBasicAPIIRpcClient(clientEp)
 	if err != nil {
 		b.Fatalf("failed to create client: %v", err)
 	}
