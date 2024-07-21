@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"sort"
 	"sync"
 	"sync/atomic"
@@ -350,6 +351,12 @@ func (e *Endpoint) Serve(conn io.ReadWriteCloser) error {
 
 	dec := NewDecoder(e.conn)
 	if err := e.readMsgs(dec); err != nil {
+		if errors.Is(err, net.ErrClosed) {
+			// TODO: this creates dependency on net package. not sure if it's wanted + doesn't solve pipes, etc...
+			// TODO: maybe simply implement connection close handshake and get rid of this bit altogether?
+			e.closed.Store(true)
+			return ErrEndpointClosed
+		}
 		if errClose := e.conn.Close(); errClose != nil {
 			return errors.Join(err, fmt.Errorf("conn.Close(): %w", err))
 		}
