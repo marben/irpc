@@ -1,6 +1,7 @@
 package irpc
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"io"
@@ -73,9 +74,10 @@ type Endpoint struct {
 
 	closed atomic.Bool
 
-	conn     io.ReadWriteCloser // use encoder/decoder for i/o . conn only for closing
-	enc      *Encoder
-	connWMux sync.Mutex // locks connection and encoder
+	connCloser io.Closer     // close the connection
+	bufWriter  *bufio.Writer // buffered Writer of the connection
+	enc        *Encoder      // does encoding on the bufWriter
+	connWMux   sync.Mutex    // locks connection and encoder
 
 	reqNum    ReqNumT // serial number of our next request	// todo: sort out overflow (and test?)
 	reqNumMux sync.Mutex
@@ -114,13 +116,13 @@ func (e *Endpoint) Close() error {
 
 	e.closed.Store(true)
 
-	if e.conn == nil {
+	if e.connCloser == nil {
 		// log.Println("close called before serve")
 		// close was called before serve
 		return nil
 	}
 
-	return e.conn.Close()
+	return e.connCloser.Close()
 }
 
 // registers client on remote endpoint
@@ -245,6 +247,10 @@ func (e *Endpoint) serializeToConn(data ...Serializable) error {
 		}
 	}
 
+	if err := e.bufWriter.Flush(); err != nil {
+		return fmt.Errorf("bufWriter.Flush(): %w", err)
+	}
+
 	return nil
 }
 
@@ -342,14 +348,17 @@ func (e *Endpoint) Serve(conn io.ReadWriteCloser) error {
 	}
 
 	e.connWMux.Lock()
-	e.conn = conn
-	e.enc = NewEncoder(conn)
+	e.connCloser = conn
+	e.bufWriter = bufio.NewWriter(conn)
+	e.enc = NewEncoder(e.bufWriter)
 	e.connWMux.Unlock()
 
 	// unblock all waiting client requests
 	close(e.awaitConnC)
 
-	dec := NewDecoder(e.conn)
+	bufReader := bufio.NewReader(conn)
+
+	dec := NewDecoder(bufReader)
 	if err := e.readMsgs(dec); err != nil {
 		if errors.Is(err, net.ErrClosed) {
 			// TODO: this creates dependency on net package. not sure if it's wanted + doesn't solve pipes, etc...
@@ -357,7 +366,7 @@ func (e *Endpoint) Serve(conn io.ReadWriteCloser) error {
 			e.closed.Store(true)
 			return ErrEndpointClosed
 		}
-		if errClose := e.conn.Close(); errClose != nil {
+		if errClose := e.connCloser.Close(); errClose != nil {
 			return errors.Join(err, fmt.Errorf("conn.Close(): %w", err))
 		}
 		return err
