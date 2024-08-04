@@ -346,6 +346,7 @@ func (e *Endpoint) Serve(conn io.ReadWriteCloser) error {
 	if e.closed.Load() {
 		return ErrEndpointClosed
 	}
+	defer e.closed.Store(true)
 
 	e.connWMux.Lock()
 	e.connCloser = conn
@@ -360,10 +361,11 @@ func (e *Endpoint) Serve(conn io.ReadWriteCloser) error {
 
 	dec := NewDecoder(bufReader)
 	if err := e.readMsgs(dec); err != nil {
-		if errors.Is(err, net.ErrClosed) {
+		// net.ErrClose seems to be returned when connection has been closed on our side
+		// io.EOF seems to be returned, when connection has been closed on the other side
+		if errors.Is(err, net.ErrClosed) || errors.Is(err, io.EOF) {
 			// TODO: this creates dependency on net package. not sure if it's wanted + doesn't solve pipes, etc...
 			// TODO: maybe simply implement connection close handshake and get rid of this bit altogether?
-			e.closed.Store(true)
 			return ErrEndpointClosed
 		}
 		if errClose := e.connCloser.Close(); errClose != nil {

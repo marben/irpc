@@ -49,6 +49,7 @@ func CreateLocalTcpEndpoints(l testLogger) (*irpc.Endpoint, *irpc.Endpoint, erro
 	ep1 := irpc.NewEndpoint()
 	ep2 := irpc.NewEndpoint()
 
+	// todo: turn to Fatalf on wrong Serve() return
 	go func() {
 		if err := ep1.Serve(c1); err != nil {
 			l.Logf("ep1.Serve(): %v\n", err)

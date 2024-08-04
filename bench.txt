@@ -1,17 +1,19 @@
 PASS
-ok  	github.com/marben/irpc	0.002s
---- FAIL: TestIrpcServer (0.00s)
-    server_test.go:57: Server.Close() returned: currently, Close is a no op
-FAIL
-exit status 1
-FAIL	github.com/marben/irpc/pkg/irpc	0.003s
+ok  	github.com/marben/irpc	0.003s
+goos: linux
+goarch: amd64
+pkg: github.com/marben/irpc/pkg/irpc
+cpu: Intel(R) Core(TM) i7-8665U CPU @ 1.90GHz
+BenchmarkPacketHeaderSerialization-8     	57067806	        19.92 ns/op	         1.000 Byte_len	       8 B/op	       1 allocs/op
+BenchmarkPacketHeaderDeSerialization-8   	20492856	        57.72 ns/op	      56 B/op	       2 allocs/op
+PASS
+ok  	github.com/marben/irpc/pkg/irpc	3.365s
 goos: linux
 goarch: amd64
 pkg: github.com/marben/irpc/test
 cpu: Intel(R) Core(TM) i7-8665U CPU @ 1.90GHz
-BenchmarkClientRegister-8   	    7988	    245926 ns/op	        34.00 rBytes/rpc	        13.00 wBytes/rpc	   22528 B/op	     121 allocs/op
-BenchmarkAddInt64-8         	   58790	     19398 ns/op	        11.00 rBytes/rpc	        23.00 wBytes/rpc	     288 B/op	      11 allocs/op
+BenchmarkClientRegister-8   	    9758	   1156347 ns/op	        34.00 rBytes/rpc	        13.00 wBytes/rpc	   22516 B/op	     121 allocs/op
+BenchmarkAddInt64-8         	   55605	     20080 ns/op	        11.00 rBytes/rpc	        23.00 wBytes/rpc	     288 B/op	      11 allocs/op
 PASS
-ok  	github.com/marben/irpc/test	3.353s
+ok  	github.com/marben/irpc/test	13.673s
 ?   	github.com/marben/irpc/test/testtools	[no test files]
-FAIL

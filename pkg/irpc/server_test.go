@@ -1,7 +1,6 @@
 package irpc_test
 
 import (
-	"log"
 	"net"
 	"testing"
 
@@ -9,18 +8,21 @@ import (
 	irpctestpkg "github.com/marben/irpc/test"
 )
 
+func TestTcpServerDial(t *testing.T) {
+
+}
+
 func TestIrpcServer(t *testing.T) {
-	s := irpc.NewServer()
+	server := irpc.NewServer()
 
 	l, err := net.Listen("tcp", ":")
 	if err != nil {
 		t.Fatalf("failed to create listener: %v", err)
 	}
-	// defer l.Close()
 
 	skew := 8
 	mathService := irpctestpkg.NewMathIRpcService(irpctestpkg.MathImpl{Skew: skew})
-	s.RegisterService(mathService)
+	server.RegisterService(mathService)
 
 	localAddr := l.Addr().String()
 	clientConn, err := net.Dial("tcp", localAddr)
@@ -29,16 +31,11 @@ func TestIrpcServer(t *testing.T) {
 	}
 
 	clientEp := irpc.NewEndpoint()
-	go func() {
-		if err := clientEp.Serve(clientConn); err != nil {
-			log.Fatalf("clientEp.Serve(): %+v", err)
-		}
-	}()
+	clientErrC := make(chan error)
+	go func() { clientErrC <- clientEp.Serve(clientConn) }()
 
 	serveC := make(chan error)
-	go func() {
-		serveC <- s.Serve(l)
-	}()
+	go func() { serveC <- server.Serve(l) }()
 
 	client, err := irpctestpkg.NewMathIRpcClient(clientEp)
 	if err != nil {
@@ -50,13 +47,16 @@ func TestIrpcServer(t *testing.T) {
 		t.Fatalf("client.Add(1,2): %+v", err)
 	}
 	if res != 1+2+skew {
-		t.Fatalf("unexpected reult: %d", res)
+		t.Fatalf("unexpected result: %d", res)
 	}
 
-	if err := s.Close(); err != nil {
+	if err := server.Close(); err != nil {
 		t.Fatalf("Server.Close() returned: %+v", err)
 	}
-	if err := serveC; err != nil {
-		t.Fatalf("s.Serve(): %+v", err)
+	if err := <-serveC; err != irpc.ErrServerClosed {
+		t.Errorf("server.Serve(): %+v", err)
+	}
+	if err := <-clientErrC; err != irpc.ErrEndpointClosed {
+		t.Errorf("clientEp.Serve(): %+v", err)
 	}
 }
