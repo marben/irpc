@@ -2,7 +2,6 @@ package irpctestpkg
 
 import (
 	"io"
-	"log"
 	"math"
 	"sync"
 	"testing"
@@ -14,18 +13,8 @@ import (
 func TestBasic(t *testing.T) {
 	p1, p2 := testtools.NewDoubleEndedPipe()
 
-	clientEp := irpc.NewEndpoint()
-	go func() {
-		if err := clientEp.Serve(p1); err != nil {
-			log.Printf("clientEp.Serve(): %+v", err)
-		}
-	}()
-	serviceEp := irpc.NewEndpoint()
-	go func() {
-		if err := serviceEp.Serve(p2); err != nil {
-			log.Printf("serviceEp.Serve(): %+v", err)
-		}
-	}()
+	clientEp := irpc.NewEndpoint(p1)
+	serviceEp := irpc.NewEndpoint(p2)
 
 	skew := 2
 	// t.Logf("creating service")
@@ -186,6 +175,13 @@ func TestBasic(t *testing.T) {
 	s := c.toUpperString("abcŘža")
 	if s != "ABCŘŽA" {
 		t.Fatalf("unepected toUpperString result: '%s'", s)
+	}
+
+	if err := serviceEp.Close(); err != nil {
+		t.Fatalf("serviceEp.Close(): %+v", err)
+	}
+	if err := clientEp.Close(); err != nil {
+		t.Fatalf("clientEp.Close(): %+v", err)
 	}
 }
 

@@ -46,20 +46,7 @@ func CreateLocalTcpEndpoints(l testLogger) (*irpc.Endpoint, *irpc.Endpoint, erro
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to create local tcp pipe")
 	}
-	ep1 := irpc.NewEndpoint()
-	ep2 := irpc.NewEndpoint()
-
-	// todo: turn to Fatalf on wrong Serve() return
-	go func() {
-		if err := ep1.Serve(c1); err != nil {
-			l.Logf("ep1.Serve(): %v\n", err)
-		}
-	}()
-	go func() {
-		if err := ep2.Serve(c2); err != nil {
-			l.Logf("ep2.Serve(): %v\n", err)
-		}
-	}()
-
+	ep1 := irpc.NewEndpoint(c1)
+	ep2 := irpc.NewEndpoint(c2)
 	return ep1, ep2, nil
 }

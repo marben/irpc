@@ -82,8 +82,7 @@ func (s *Server) Serve(lis net.Listener) error {
 			return fmt.Errorf("listener.Accept(): %w", err)
 		}
 
-		ep := NewEndpoint()
-		ep.RegisterServices(s.services...)
+		ep := NewEndpoint(conn, s.services...)
 
 		s.clientsMux.Lock()
 		defer s.clientsMux.Unlock()
@@ -94,7 +93,6 @@ func (s *Server) Serve(lis net.Listener) error {
 			defer s.clientsWg.Done()
 
 			// not sure what to do about errors (serve loop of http.Server doesn't seem to care, so we will follow suit for now)
-			_ = ep.Serve(conn)
 			s.clientsMux.Lock()
 			defer s.clientsMux.Unlock()
 			delete(s.clients, ep)

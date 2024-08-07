@@ -8,12 +8,12 @@ import (
 	"net"
 	"sort"
 	"sync"
-	"sync/atomic"
 )
 
 var ErrServiceAlreadyRegistered = errors.New("service already registered")
 var ErrEndpointClosed = errors.New("endpoint is closed")
 var ErrServiceNotFound = errors.New("service not found")
+var errProtocolError = errors.New("rpc protocol error")
 
 type packetType uint8
 
@@ -42,9 +42,9 @@ type FuncId uint16
 type ReqNumT uint16
 
 const (
-	// clientRegistrationService is used to register other services (and give them their ids)
+	// clientRegistrationServiceId is used to register other services (and give them their ids)
 	// 0 is not used, so that uninitialized clients (with service id = 0), errors out
-	clientRegistrationService RegisteredServiceId = iota + 1
+	clientRegistrationServiceId RegisteredServiceId = iota + 1
 )
 
 type Service interface {
@@ -67,62 +67,121 @@ type Deserializable interface {
 // there needs to be a serving endpoint on both sides of connection for communication to work
 type Endpoint struct {
 	// maps registered service's hash to it's given id
-	serviceHashes   map[string]RegisteredServiceId
-	clientsServices map[RegisteredServiceId]Service
-	nextServiceId   RegisteredServiceId
-	servicesMux     sync.RWMutex
-
-	closed atomic.Bool
+	serviceHashes map[string]RegisteredServiceId
+	services      map[RegisteredServiceId]Service
+	nextServiceId RegisteredServiceId
+	servicesMux   sync.RWMutex
 
 	connCloser io.Closer     // close the connection
-	bufWriter  *bufio.Writer // buffered Writer of the connection
+	bufWriter  *bufio.Writer // buffered Writer of the connection	// only used for flushing. rest of code should use encoder
 	enc        *Encoder      // does encoding on the bufWriter
-	connWMux   sync.Mutex    // locks connection and encoder
+	wMux       sync.Mutex    // todo: make it one shared mutex for whole endpoint?
 
-	reqNum    ReqNumT // serial number of our next request	// todo: sort out overflow (and test?)
-	reqNumMux sync.Mutex
+	dec *Decoder
 
-	awaitConnC chan struct{} // read from this channel will unblock once Endpoint.Serve() was called, meaning we are sending/receiving (and conn != nil)
+	reqNum    ReqNumT    // serial number of our next request	// todo: sort out overflow (and test?)
+	reqNumMux sync.Mutex // todo: maybe not necessary as request requires writer mutex lock - can be shared?
 
 	responseReaders    map[ReqNumT]func(d *Decoder)
 	responseReadersMux sync.Mutex
+
+	// closed    bool
+	serveErrC chan error
 }
 
-func NewEndpoint() *Endpoint {
+func NewEndpoint(conn io.ReadWriteCloser, services ...Service) *Endpoint {
+	bufWriter := bufio.NewWriter(conn)
 	ep := &Endpoint{
 		serviceHashes:   make(map[string]RegisteredServiceId),
-		clientsServices: make(map[RegisteredServiceId]Service),
+		services:        make(map[RegisteredServiceId]Service),
 		responseReaders: make(map[ReqNumT]func(d *Decoder)),
-		awaitConnC:      make(chan struct{}),
-		nextServiceId:   clientRegistrationService + 1,
+		nextServiceId:   clientRegistrationServiceId + 1,
+		connCloser:      conn,
+		bufWriter:       bufWriter,
+		enc:             NewEncoder(bufWriter),
+		dec:             NewDecoder(bufio.NewReader(conn)),
+		serveErrC:       make(chan error, 1),
 	}
 
 	// default service for registering clients
 	regService := &clientRegisterService{ep: ep}
-	ep.clientsServices[clientRegistrationService] = regService
+	ep.services[clientRegistrationServiceId] = regService
+
+	ep.RegisterServices(services...)
+
+	go func() { ep.serveErrC <- ep.serve() }()
 
 	return ep
 }
 
-// immediately stops serving any requests
-// Close closes the underlying connection and return conn.Close()'s
+// Close immediately stops serving any requests
+// Close closes the underlying connection
+// Close returns ErrEndpointClosed if the Endpoint was already closed
 func (e *Endpoint) Close() error {
-	if e.closed.Load() {
+	e.wMux.Lock()
+	defer e.wMux.Unlock()
+
+	if e.connCloser == nil {
 		return ErrEndpointClosed
 	}
 
-	e.connWMux.Lock()
-	defer e.connWMux.Unlock()
+	// e.wMux.Lock()
+	// defer e.wMux.Unlock()
 
-	e.closed.Store(true)
+	// if e.isClosed() {
+	// 	return ErrEndpointClosed
+	// }
 
-	if e.connCloser == nil {
-		// log.Println("close called before serve")
-		// close was called before serve
-		return nil
+	// if e.closed.Load() {
+	// 	return ErrEndpointClosed
+	// }
+
+	// e.encMux.Lock()
+	// defer e.encMux.Unlock()
+
+	// e.closed.Store(true)
+
+	// if e.connCloser == nil {
+	// log.Println("close called before serve")
+	// close was called before serve
+	// return nil
+	// }
+
+	/*
+		e.wMux.Lock()
+		if e.connCloser == nil {
+			// serve has already deleted the conn => conn already closed
+			e.wMux.Unlock()
+			return ErrEndpointClosed
+		}
+
+		// connection is still running, so we close it
+		// that triggers the running e.serve(), which does the cleanup and send err to error channel
+		if err := e.connCloser.Close(); err != nil {
+			return fmt.Errorf("connection.Close(): %w", err)
+		}
+		e.wMux.Unlock()
+		// log.Println("setting connCloser to nil")
+		// e.connCloser = nil
+	*/
+
+	// closing connection signs endpint.serve() that it has to quit by causing the reads to err
+	// if err := e.closeConnIfOpened(); err != nil {
+	// 	return err
+	// }
+
+	if err := e.connCloser.Close(); err != nil {
+		return fmt.Errorf("conn.Close(): %w", err)
 	}
 
-	return e.connCloser.Close()
+	e.connCloser = nil
+
+	// error from serve()
+	if err := <-e.serveErrC; err != nil {
+		return fmt.Errorf("serve(): %w", err)
+	}
+
+	return nil
 }
 
 // registers client on remote endpoint
@@ -131,18 +190,20 @@ func (e *Endpoint) Close() error {
 func (e *Endpoint) RegisterClient(serviceHash []byte) (RegisteredServiceId, error) {
 	req := clientRegisterReq{ServiceHash: serviceHash}
 	resp := clientRegisterResp{}
-	if err := e.CallRemoteFunc(clientRegistrationService, 0 /* currently there is just one function */, req, &resp); err != nil {
+	if err := e.CallRemoteFunc(clientRegistrationServiceId, 0 /* currently there is just one function */, req, &resp); err != nil {
 		return 0, fmt.Errorf("failed to register client %q: %w", serviceHash, err)
 	}
 
 	return resp.ServiceId, nil
 }
 
+// getService returns ErrServiceNotFound if id was not found,
+// nil otherwise
 func (e *Endpoint) getService(id RegisteredServiceId) (Service, error) {
 	e.servicesMux.RLock()
 	defer e.servicesMux.RUnlock()
 
-	s, found := e.clientsServices[id]
+	s, found := e.services[id]
 	if !found {
 		return nil, ErrServiceNotFound
 	}
@@ -158,8 +219,12 @@ func (e *Endpoint) genNewRequestNumber() ReqNumT {
 	return reqNum
 }
 
+func (e *Endpoint) isClosed() bool {
+	return e.connCloser == nil
+}
+
 func (e *Endpoint) CallRemoteFunc(serviceId RegisteredServiceId, funcId FuncId, reqData Serializable, respData Deserializable) error {
-	if e.closed.Load() {
+	if e.isClosed() {
 		return ErrEndpointClosed
 	}
 
@@ -212,7 +277,7 @@ func (e *Endpoint) RegisterServices(services ...Service) error {
 		e.nextServiceId++
 
 		e.serviceHashes[string(service.Hash())] = id
-		e.clientsServices[id] = service
+		e.services[id] = service
 	}
 
 	return nil
@@ -236,10 +301,10 @@ func (e *Endpoint) RegisteredServices() []string {
 // func (e *Endpoint) serializeToConn(header packetHeader, data Serializable) error {
 func (e *Endpoint) serializeToConn(data ...Serializable) error {
 	// make sure we have a connection
-	<-e.awaitConnC
+	// <-e.awaitConnC
 
-	e.connWMux.Lock()
-	defer e.connWMux.Unlock()
+	e.wMux.Lock()
+	defer e.wMux.Unlock()
 
 	for _, s := range data {
 		if err := s.Serialize(e.enc); err != nil {
@@ -271,44 +336,49 @@ func (e *Endpoint) sendResponse(reqNum ReqNumT, respData Serializable) error {
 	return nil
 }
 
-func (e *Endpoint) readMsgs(dec *Decoder) error {
-	errC := make(chan error)
+// processMsgs is the main incoming messages process loop
+// returns wrapped errProtocolError if the error is on a protocol level
+// returns wrapped reader error otherwise (conn closed etc...)
+func (e *Endpoint) processMsgs(dec *Decoder) error {
+	respCrrC := make(chan error)
 	for {
 		select {
-		case err := <-errC:
+		case err := <-respCrrC:
 			return err
 		default:
 		}
 
 		var h packetHeader
 		if err := h.Deserialize(dec); err != nil {
-			return fmt.Errorf("failed to read header: %w", err)
+			return fmt.Errorf("read header: %w", err)
 		}
 
 		switch h.typ {
 		case rpcRequest:
 			var req requestPacket
 			if err := req.Deserialize(dec); err != nil {
-				return fmt.Errorf("failed to read received request :%w", err)
+				return fmt.Errorf("read request packet:%w", err)
 			}
 
 			service, err := e.getService(req.ServiceId)
 			if err != nil {
-				return fmt.Errorf("getService() %v: %w", req, err)
+				return errors.Join(errProtocolError, fmt.Errorf("getService() %v: %w", req, err))
 			}
 			argDeser, err := service.GetFuncCall(req.FuncId)
 			if err != nil {
 				return fmt.Errorf("GetFuncCall() %v: %w", req, err)
 			}
-			exe, err := argDeser(dec)
+			funcExec, err := argDeser(dec)
 			if err != nil {
 				return fmt.Errorf("argDeserialize: %w", err)
 			}
 			go func() {
-				resp := exe()
+				// call the function
+				resp := funcExec()
 
+				// todo: imho, this allows for multiple goroutines to keep writing to the channel even though it is already abandoned -> deadlock
 				if err := e.sendResponse(req.ReqNum, resp); err != nil {
-					errC <- fmt.Errorf("failed to send response for request %d: %w", req.ReqNum, err)
+					respCrrC <- fmt.Errorf("failed to send response for request %d: %w", req.ReqNum, err)
 					return
 				}
 			}()
@@ -342,36 +412,51 @@ func (e *Endpoint) popResponseReaderFunc(resp responsePacket) (func(d *Decoder),
 	return f, nil
 }
 
-func (e *Endpoint) Serve(conn io.ReadWriteCloser) error {
-	if e.closed.Load() {
-		return ErrEndpointClosed
-	}
-	defer e.closed.Store(true)
+// serve returns ErrEndpointClosed on normal close
+func (e *Endpoint) serve() error {
+	// if e.closed.Load() {
+	// 	return ErrEndpointClosed
+	// }
+	// defer e.closed.Store(true)
 
-	e.connWMux.Lock()
-	e.connCloser = conn
-	e.bufWriter = bufio.NewWriter(conn)
-	e.enc = NewEncoder(e.bufWriter)
-	e.connWMux.Unlock()
+	// e.connWMux.Lock()
+	// e.connCloser = conn
+	// e.bufWriter = bufio.NewWriter(conn)
+	// e.enc = NewEncoder(e.bufWriter)
+	// e.connWMux.Unlock()
 
 	// unblock all waiting client requests
-	close(e.awaitConnC)
+	// close(e.awaitConnC)
 
-	bufReader := bufio.NewReader(conn)
+	// bufReader := bufio.NewReader(conn)
 
-	dec := NewDecoder(bufReader)
-	if err := e.readMsgs(dec); err != nil {
+	// dec := NewDecoder(bufReader)
+	// defer func() {
+	// 	e.wMux.Lock()
+	// 	defer e.wMux.Unlock()
+
+	// 	e.connCloser = nil
+	// }()
+
+	if err := e.processMsgs(e.dec); err != nil {
+
 		// net.ErrClose seems to be returned when connection has been closed on our side
 		// io.EOF seems to be returned, when connection has been closed on the other side
-		if errors.Is(err, net.ErrClosed) || errors.Is(err, io.EOF) {
+		if errors.Is(err, net.ErrClosed) || errors.Is(err, io.EOF) || errors.Is(err, io.ErrClosedPipe) {
 			// TODO: this creates dependency on net package. not sure if it's wanted + doesn't solve pipes, etc...
 			// TODO: maybe simply implement connection close handshake and get rid of this bit altogether?
-			return ErrEndpointClosed
+			// these are sign of correct connecton closing, co no error
+			return nil
 		}
-		if errClose := e.connCloser.Close(); errClose != nil {
-			return errors.Join(err, fmt.Errorf("conn.Close(): %w", err))
-		}
+
+		// uncertain about the error, we call connection.Close(), just in case
 		return err
+		// log.Printf("readMsgs: %+v\net.connCloser: %+v", err, e.connCloser)
+		// if !e.isClosed() {
+		// 	if errClose := e.connCloser.Close(); errClose != nil {
+		// 		return errors.Join(err, fmt.Errorf("conn.Close(): %w", err))
+		// 	}
+		// }
 	}
 
 	return nil

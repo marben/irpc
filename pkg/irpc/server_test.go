@@ -30,9 +30,7 @@ func TestIrpcServer(t *testing.T) {
 		t.Fatalf("net.Dial(%s): %v", localAddr, err)
 	}
 
-	clientEp := irpc.NewEndpoint()
-	clientErrC := make(chan error)
-	go func() { clientErrC <- clientEp.Serve(clientConn) }()
+	clientEp := irpc.NewEndpoint(clientConn)
 
 	serveC := make(chan error)
 	go func() { serveC <- server.Serve(l) }()
@@ -56,7 +54,8 @@ func TestIrpcServer(t *testing.T) {
 	if err := <-serveC; err != irpc.ErrServerClosed {
 		t.Errorf("server.Serve(): %+v", err)
 	}
-	if err := <-clientErrC; err != irpc.ErrEndpointClosed {
-		t.Errorf("clientEp.Serve(): %+v", err)
+
+	if err := clientEp.Close(); err != nil {
+		t.Fatalf("clientEp.Close(): %+v", err)
 	}
 }

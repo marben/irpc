@@ -44,9 +44,7 @@ func BenchmarkClientRegister2(b *testing.B) {
 			b.Fatalf("net.Dial(%s): %v", sl.Addr().String(), err)
 		}
 		log.Println("connected")
-		clientEp := irpc.NewEndpoint()
-		clientErrC := make(chan error, 1)
-		go func() { clientErrC <- clientEp.Serve(clientConn) }()
+		clientEp := irpc.NewEndpoint(clientConn)
 
 		// CLIENT REGISTER
 		log.Println("registering")
@@ -60,10 +58,6 @@ func BenchmarkClientRegister2(b *testing.B) {
 			b.Fatalf("clientEp.Close(): %+v", err)
 		}
 
-		clientServeErr := <-clientErrC
-		if clientServeErr != irpc.ErrEndpointClosed {
-			b.Fatalf("clientEp.Serve(): %+v", clientServeErr)
-		}
 		log.Println("another iter")
 	}
 	if err := server.Close(); err != nil {
@@ -84,12 +78,10 @@ func BenchmarkClientRegister(b *testing.B) {
 			b.Fatalf("create tcp pipe: %v", err)
 		}
 
-		clientEp := irpc.NewEndpoint()
-		go clientEp.Serve(p1)
+		clientEp := irpc.NewEndpoint(p1)
 
 		crw := &CountingReadWriteCloser{rwc: p2}
-		serviceEp := irpc.NewEndpoint()
-		go serviceEp.Serve(crw)
+		serviceEp := irpc.NewEndpoint(p2)
 
 		skew := 2
 		service := newBasicAPIIRpcService(basicApiImpl{skew: skew})
@@ -114,6 +106,13 @@ func BenchmarkClientRegister(b *testing.B) {
 		rb += crw.rBytes
 		wb += crw.wBytes
 		// b.StartTimer()
+
+		if err := serviceEp.Close(); err != nil {
+			b.Fatalf("serviceEp.Close(): %+v", err)
+		}
+		if err := clientEp.Close(); err != nil {
+			b.Fatalf("clientEp.Close(): %+v", err)
+		}
 	}
 	b.ReportMetric(float64(rb)/float64(b.N), "rBytes/rpc")
 	b.ReportMetric(float64(wb)/float64(b.N), "wBytes/rpc")
@@ -125,12 +124,10 @@ func BenchmarkAddInt64(b *testing.B) {
 		b.Fatalf("failed to create local tcp connection: %v", err)
 	}
 
-	serviceEp := irpc.NewEndpoint()
-	go serviceEp.Serve(p2)
+	serviceEp := irpc.NewEndpoint(p2)
 
 	crw := &CountingReadWriteCloser{rwc: p1}
-	clientEp := irpc.NewEndpoint()
-	go clientEp.Serve(crw)
+	clientEp := irpc.NewEndpoint(crw)
 
 	skew := 2
 	service := newBasicAPIIRpcService(basicApiImpl{skew: skew})
@@ -156,7 +153,10 @@ func BenchmarkAddInt64(b *testing.B) {
 	if err := clientEp.Close(); err != nil {
 		b.Fatalf("clientEp.Close(): %v", err)
 	}
-	// if err := serviceEp.Close(); err != nil {
-	// 	b.Fatalf("serviceEp.Close(): %v", err)
-	// }
+	if err := serviceEp.Close(); err != nil {
+		b.Fatalf("serviceEp.Close(): %+v", err)
+	}
+	if err := clientEp.Close(); err != nil {
+		b.Fatalf("clientEp.Close(): %+v", err)
+	}
 }
