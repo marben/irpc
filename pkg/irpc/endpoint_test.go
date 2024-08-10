@@ -3,6 +3,7 @@ package irpc_test
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"testing"
 
 	"github.com/marben/irpc/pkg/irpc"
@@ -167,71 +168,17 @@ func TestEndpointRemoteFunc(t *testing.T) {
 	if res != 1+2+skew {
 		t.Fatalf("expected result of 3, but got %d", res)
 	}
-	// todo: close endpoints
+
+	if err := clientEndpoint.Close(); err != nil {
+		t.Fatalf("client.Close(): %+v", err)
+	}
+
+	// clientEndpoint notifies us about Close and immediately closes underlying connection
+	// if err := serviceEndpoint.Close(); err != irpc.ErrEndpointClosed {
+	// 	t.Fatalf("unexpected close error: %+v", err)
+	// }
+	<-serviceEndpoint.Ctx.Done()
 }
-
-// this blocks - for obvious reasons.
-// todo: implement context cancelling
-/*
-func TestCallBeforeServe(t *testing.T) {
-	clientEndpoint, serviceEndpoint := irpc.NewEndpoint(), irpc.NewEndpoint()
-
-	if err := serviceEndpoint.RegisterServices(newMathIRpcService(MathImpl{})); err != nil {
-		t.Fatalf("registering math service failed with: %+v", err)
-	}
-
-	clientA, err := NewMathIrpcClient(clientEndpoint)
-	if err != nil {
-		t.Fatalf("failed to create client: %v", err)
-	}
-
-	resC := make(chan int)
-
-	go func() { resC <- clientA.Add(1, 4) }()
-	// hopefully the client call will be made during this sleep
-	time.Sleep(200 * time.Millisecond)
-
-	pClient, pB := testtools.NewDoubleEndedPipe()
-
-	// first we connect the client endpoint, which should trigger write to connection. but it's not read yet
-	go func() {
-		clientEndpoint.Serve(pClient)
-	}()
-
-	// another sleep to make sure the write was performed
-	time.Sleep(200 * time.Millisecond)
-
-	// finally we start the service's endpoint Serve()
-	// now the service should read, process and return result to client
-	go func() {
-		serviceEndpoint.Serve(pB)
-	}()
-
-	// wait for the client to obtain result
-	res := <-resC
-	if res != 5 {
-		t.Fatalf("expected result 5, but got %d", res)
-	}
-}
-*/
-
-// func TestServeAfterClose(t *testing.T) {
-// 	c1, c2 := testtools.NewDoubleEndedPipe()
-// 	ep1, ep2 := irpc.NewEndpoint(c1), irpc.NewEndpoint(c2)
-// 	// go func() { ep1.Serve(c1) }()
-// 	// go func() { ep2.Serve(c2) }()
-
-// 	if err := ep1.Close(); err != nil {
-// 		t.Fatalf("unexpected close err: %v", err)
-// 	}
-// 	if err2 := ep1.Serve(c1); !errors.Is(err2, irpc.ErrEndpointClosed) {
-// 		t.Fatalf("unexpected error on second close: %v", err2)
-// 	}
-// 	// close after close
-// 	if err3 := ep1.Close(); !errors.Is(err3, irpc.ErrEndpointClosed) {
-// 		t.Fatalf("second close returned: %v", err3)
-// 	}
-// }
 
 // performs remote func call both A->B and B->A
 func TestBothSidesRemoteCall(t *testing.T) {
@@ -242,11 +189,14 @@ func TestBothSidesRemoteCall(t *testing.T) {
 
 	// b is skewed by 2
 	endpointB := irpc.NewEndpoint(pB, newMathIRpcService(MathImpl{resultSkew: 2}))
+	// irpc.NewEndpoint(pB, newMathIRpcService(MathImpl{resultSkew: 2}))
 
+	log.Println("creating client a")
 	clientA, err := NewMathIrpcClient(endpointA)
 	if err != nil {
 		t.Fatalf("new clientA: %+v", err)
 	}
+
 	clientB, err := NewMathIrpcClient(endpointB)
 	if err != nil {
 		t.Fatalf("new clientB: %+v", err)
@@ -260,6 +210,44 @@ func TestBothSidesRemoteCall(t *testing.T) {
 	resFromA := clientB.Add(1, 2)
 	if resFromA != 4 {
 		t.Fatalf("service A (skewed by 1) returned %d instead of 4", resFromA)
+	}
+	if err := endpointB.Close(); err != nil {
+		t.Fatalf("enpointB.Close(): %+v", err)
+	}
+	<-endpointA.Ctx.Done()
+}
+
+func TestLocalEndpointClose(t *testing.T) {
+	conn1, conn2, err := testtools.CreateLocalTcpConnPipe()
+	if err != nil {
+		t.Fatalf("new tcp pipe: %+v", err)
+	}
+
+	serviceImpl := testtools.NewTestServiceImpl(99)
+	serviceBackend := testtools.NewTestServiceIRpcService(serviceImpl)
+	epRemote := irpc.NewEndpoint(conn1, serviceBackend)
+	defer epRemote.Close()
+
+	epLocal := irpc.NewEndpoint(conn2)
+
+	client, err := testtools.NewTestServiceIRpcClient(epLocal)
+	if err != nil {
+		t.Fatalf("NewClient(): %+v", err)
+	}
+	res, err := client.DivErr(6, 3)
+	if err != nil {
+		t.Fatalf("client.Err(): %+v", err)
+	}
+	if res != 6/3+serviceImpl.Skew {
+		t.Fatalf("unexpected result: %d", res)
+	}
+
+	if err := epLocal.Close(); err != nil {
+		t.Fatalf("epLocal.Close(): %+v", err)
+	}
+
+	if _, err := client.DivErr(6, 2); err != irpc.ErrEndpointClosed {
+		t.Fatalf("unexpected error: %+v", err)
 	}
 }
 

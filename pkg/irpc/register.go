@@ -37,8 +37,8 @@ func (c *clientRegisterService) GetFuncCall(funcId FuncId) (ArgDeserializer, err
 				return nil, err
 			}
 			return func() Serializable {
-				c.ep.servicesMux.RLock()
-				defer c.ep.servicesMux.RUnlock()
+				c.ep.m.Lock()
+				defer c.ep.m.Unlock()
 
 				var resp clientRegisterResp
 				serviceId, found := c.ep.serviceHashes[string(args.ServiceHash)]
