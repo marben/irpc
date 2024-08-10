@@ -56,7 +56,8 @@ func (_c *MathIRpcClient) Add(a int, b int) (int, error) {
 	}
 	var resp _Irpc_MathAddResp
 	if err := _c.endpoint.CallRemoteFunc(_c.id, 0, req, &resp); err != nil {
-		panic(err)
+		var zero _Irpc_MathAddResp
+		return zero.Param0_, err
 	}
 	return resp.Param0_, resp.Param1_
 }

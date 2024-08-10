@@ -156,7 +156,7 @@ func (_c *interfaceTestIRpcClient) rtnErrorWithMessage(msg string) error {
 	}
 	var resp _Irpc_interfaceTestrtnErrorWithMessageResp
 	if err := _c.endpoint.CallRemoteFunc(_c.id, 0, req, &resp); err != nil {
-		panic(err)
+		return err
 	}
 	return resp.Param0_
 }
@@ -164,7 +164,7 @@ func (_c *interfaceTestIRpcClient) rtnNilError() error {
 	var req = _Irpc_interfaceTestrtnNilErrorReq{}
 	var resp _Irpc_interfaceTestrtnNilErrorResp
 	if err := _c.endpoint.CallRemoteFunc(_c.id, 1, req, &resp); err != nil {
-		panic(err)
+		return err
 	}
 	return resp.Param0_
 }
@@ -172,7 +172,8 @@ func (_c *interfaceTestIRpcClient) rtnTwoErrors() (error, error) {
 	var req = _Irpc_interfaceTestrtnTwoErrorsReq{}
 	var resp _Irpc_interfaceTestrtnTwoErrorsResp
 	if err := _c.endpoint.CallRemoteFunc(_c.id, 2, req, &resp); err != nil {
-		panic(err)
+		var zero _Irpc_interfaceTestrtnTwoErrorsResp
+		return zero.Param0_, err
 	}
 	return resp.Param0_, resp.Param1_
 }
@@ -182,7 +183,8 @@ func (_c *interfaceTestIRpcClient) rtnStringAndError(msg string) (s string, err 
 	}
 	var resp _Irpc_interfaceTestrtnStringAndErrorResp
 	if err := _c.endpoint.CallRemoteFunc(_c.id, 3, req, &resp); err != nil {
-		panic(err)
+		var zero _Irpc_interfaceTestrtnStringAndErrorResp
+		return zero.Param0_s, err
 	}
 	return resp.Param0_s, resp.Param1_err
 }
@@ -192,7 +194,8 @@ func (_c *interfaceTestIRpcClient) passCustomInterfaceAndReturnItModified(ci cus
 	}
 	var resp _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp
 	if err := _c.endpoint.CallRemoteFunc(_c.id, 4, req, &resp); err != nil {
-		panic(err)
+		var zero _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp
+		return zero.Param0_, err
 	}
 	return resp.Param0_, resp.Param1_
 }
@@ -213,7 +216,7 @@ func (_c *customInterfaceIRpcClient) IntFunc() int {
 	var req = _Irpc_customInterfaceIntFuncReq{}
 	var resp _Irpc_customInterfaceIntFuncResp
 	if err := _c.endpoint.CallRemoteFunc(_c.id, 0, req, &resp); err != nil {
-		panic(err)
+		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
 	return resp.Param0_
 }
@@ -221,7 +224,7 @@ func (_c *customInterfaceIRpcClient) StringFunc() string {
 	var req = _Irpc_customInterfaceStringFuncReq{}
 	var resp _Irpc_customInterfaceStringFuncResp
 	if err := _c.endpoint.CallRemoteFunc(_c.id, 1, req, &resp); err != nil {
-		panic(err)
+		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
 	return resp.Param0_
 }

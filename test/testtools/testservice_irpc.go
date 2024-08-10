@@ -70,7 +70,7 @@ func (_c *TestServiceIRpcClient) Div(a int, b int) int {
 	}
 	var resp _Irpc_TestServiceDivResp
 	if err := _c.endpoint.CallRemoteFunc(_c.id, 0, req, &resp); err != nil {
-		panic(err)
+		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
 	return resp.Param0_
 }
@@ -81,7 +81,8 @@ func (_c *TestServiceIRpcClient) DivErr(a int, b int) (int, error) {
 	}
 	var resp _Irpc_TestServiceDivErrResp
 	if err := _c.endpoint.CallRemoteFunc(_c.id, 1, req, &resp); err != nil {
-		panic(err)
+		var zero _Irpc_TestServiceDivErrResp
+		return zero.Param0_, err
 	}
 	return resp.Param0_, resp.Param1_
 }

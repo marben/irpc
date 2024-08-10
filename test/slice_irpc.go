@@ -97,7 +97,7 @@ func (_c *sliceTestIRpcClient) SliceSum(slice []int) int {
 	}
 	var resp _Irpc_sliceTestSliceSumResp
 	if err := _c.endpoint.CallRemoteFunc(_c.id, 0, req, &resp); err != nil {
-		panic(err)
+		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
 	return resp.Param0_
 }
@@ -108,7 +108,7 @@ func (_c *sliceTestIRpcClient) VectMult(vect []int, s int) []int {
 	}
 	var resp _Irpc_sliceTestVectMultResp
 	if err := _c.endpoint.CallRemoteFunc(_c.id, 1, req, &resp); err != nil {
-		panic(err)
+		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
 	return resp.Param0_
 }
@@ -118,7 +118,7 @@ func (_c *sliceTestIRpcClient) SliceOfFloat64Sum(slice []float64) float64 {
 	}
 	var resp _Irpc_sliceTestSliceOfFloat64SumResp
 	if err := _c.endpoint.CallRemoteFunc(_c.id, 2, req, &resp); err != nil {
-		panic(err)
+		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
 	return resp.Param0_
 }
@@ -128,7 +128,7 @@ func (_c *sliceTestIRpcClient) SliceOfSlicesSum(slice [][]int) int {
 	}
 	var resp _Irpc_sliceTestSliceOfSlicesSumResp
 	if err := _c.endpoint.CallRemoteFunc(_c.id, 3, req, &resp); err != nil {
-		panic(err)
+		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
 	return resp.Param0_
 }

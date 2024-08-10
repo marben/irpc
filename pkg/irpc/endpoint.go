@@ -211,8 +211,7 @@ func (e *Endpoint) sendRpcRequest(serviceId RegisteredServiceId, funcId FuncId, 
 	}
 
 	if err := e.serializePacketToConnLocked(reqType, requestHeader, reqData); err != nil {
-		// todo: whe should shutdown the enpoint here!!
-		return nil, fmt.Errorf("write request: %w", err)
+		return nil, err
 	}
 
 	// upon response receive, this function will be called

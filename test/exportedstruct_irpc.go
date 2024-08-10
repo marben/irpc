@@ -53,7 +53,8 @@ func (_c *FileServerIRpcClient) ListFiles() ([]FileInfo, error) {
 	var req = _Irpc_FileServerListFilesReq{}
 	var resp _Irpc_FileServerListFilesResp
 	if err := _c.endpoint.CallRemoteFunc(_c.id, 0, req, &resp); err != nil {
-		panic(err)
+		var zero _Irpc_FileServerListFilesResp
+		return zero.Param0_, err
 	}
 	return resp.Param0_, resp.Param1_
 }

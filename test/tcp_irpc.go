@@ -56,7 +56,8 @@ func (_c *tcpTestApiIRpcClient) Div(a float64, b float64) (float64, error) {
 	}
 	var resp _Irpc_tcpTestApiDivResp
 	if err := _c.endpoint.CallRemoteFunc(_c.id, 0, req, &resp); err != nil {
-		panic(err)
+		var zero _Irpc_tcpTestApiDivResp
+		return zero.Param0_, err
 	}
 	return resp.Param0_, resp.Param1_
 }

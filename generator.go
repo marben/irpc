@@ -185,6 +185,16 @@ func (sg paramStructGenerator) paramListPrefixed(prefix string) string {
 	return sb.String()
 }
 
+func (sg paramStructGenerator) isLastTypeError() bool {
+	if len(sg.params) == 0 {
+		return false
+	}
+
+	last := sg.params[len(sg.params)-1]
+	return last.param.typ.String() == "error"
+	// log.Printf("last type: %+v", last.param.typ.String())
+}
+
 func (sg paramStructGenerator) encoders() []encoder {
 	encs := []encoder{}
 	for _, p := range sg.params {
@@ -400,13 +410,26 @@ func (cg clientGenerator) code() string {
 		}
 		fmt.Fprintf(b, "}\n") // end struct assignment
 
-		// func call
+		// response
 		fmt.Fprintf(b, "var %s %s\n", respVarName, m.resp.typeName)
-		s := `if err := %s.endpoint.CallRemoteFunc(%[1]s.id, %d, %s, &%s); err != nil {
-			panic(err)
+
+		// func call
+		fmt.Fprintf(b, "if err := %s.endpoint.CallRemoteFunc(%[1]s.id, %d, %s, &%s); err != nil {\n", cg.fncReceiverName, m.index, reqVarName, respVarName)
+		if m.resp.isLastTypeError() {
+			// declare zero var, because i don't know, how to directly instantiate zero values
+			if len(m.resp.params) > 1 {
+				fmt.Fprintf(b, "var zero %s\n", m.resp.typeName)
+			}
+			fmt.Fprintf(b, "return ")
+			for i := 0; i < len(m.resp.params)-1; i++ {
+				p := m.resp.params[i]
+				fmt.Fprintf(b, "%s.%s,", "zero", p.structFieldName())
+			}
+			fmt.Fprintf(b, "err\n")
+		} else {
+			fmt.Fprintf(b, "panic(err) // to avoid panic, make your func return error and regenerate the code\n")
 		}
-		`
-		fmt.Fprintf(b, s, cg.fncReceiverName, m.index, reqVarName, respVarName)
+		fmt.Fprintf(b, "}\n")
 
 		// return values
 		fmt.Fprintf(b, "return ")

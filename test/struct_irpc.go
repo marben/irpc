@@ -83,7 +83,7 @@ func (_c *structAPIIRpcClient) VectSum(v vect3) int {
 	}
 	var resp _Irpc_structAPIVectSumResp
 	if err := _c.endpoint.CallRemoteFunc(_c.id, 0, req, &resp); err != nil {
-		panic(err)
+		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
 	return resp.Param0_
 }
@@ -93,7 +93,7 @@ func (_c *structAPIIRpcClient) Vect3x3Sum(v vect3x3) vect3 {
 	}
 	var resp _Irpc_structAPIVect3x3SumResp
 	if err := _c.endpoint.CallRemoteFunc(_c.id, 1, req, &resp); err != nil {
-		panic(err)
+		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
 	return resp.Param0_
 }
@@ -103,7 +103,7 @@ func (_c *structAPIIRpcClient) SumSliceStruct(s sliceStruct) int {
 	}
 	var resp _Irpc_structAPISumSliceStructResp
 	if err := _c.endpoint.CallRemoteFunc(_c.id, 2, req, &resp); err != nil {
-		panic(err)
+		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
 	return resp.Param0_
 }
