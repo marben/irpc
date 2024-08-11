@@ -7,7 +7,7 @@ import (
 )
 
 func TestError(t *testing.T) {
-	localEp, remoteEp, err := testtools.CreateLocalTcpEndpoints(t)
+	localEp, remoteEp, err := testtools.CreateLocalTcpEndpoints()
 	if err != nil {
 		t.Fatalf("create endpoints: %v", err)
 	}

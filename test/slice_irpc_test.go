@@ -8,7 +8,7 @@ import (
 )
 
 func TestSlice(t *testing.T) {
-	localEp, remoteEp, err := testtools.CreateLocalTcpEndpoints(t)
+	localEp, remoteEp, err := testtools.CreateLocalTcpEndpoints()
 	if err != nil {
 		t.Fatalf("create enpoints: %v", err)
 	}

@@ -20,7 +20,8 @@ func TestEndpointClose(t *testing.T) {
 	if err := ep1.Close(); err != nil {
 		t.Fatalf("ep1.Close(): %v", err)
 	}
-	if err := ep2.Close(); err != nil {
+	<-ep2.Ctx.Done() // need to wait for readMsgs goroutine to process the 'closingNowPacket'
+	if err := ep2.Close(); !errors.Is(err, irpc.ErrEndpointClosed) {
 		t.Fatalf("ep2.Close(): %v", err)
 	}
 

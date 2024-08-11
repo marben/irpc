@@ -119,7 +119,7 @@ func (v *addRtnVals) Deserialize(d *irpc.Decoder) error {
 }
 
 func TestEndpointClientRegister(t *testing.T) {
-	ep1, ep2, err := testtools.CreateLocalTcpEndpoints(t)
+	ep1, ep2, err := testtools.CreateLocalTcpEndpoints()
 	if err != nil {
 		t.Fatalf("create tcp: %v", err)
 	}
@@ -254,6 +254,111 @@ func TestLocalEndpointClose(t *testing.T) {
 	if _, err := client.DivErr(6, 2); !errors.Is(err, irpc.ErrEndpointClosed) {
 		t.Fatalf("unexpected error: %+v", err)
 	}
+}
+
+// tests if waiting func calls errors out after endpoint close
+func TestClosingServiceEpWithWaitingFuncCalls(t *testing.T) {
+	serviceEp, clientEp, err := testtools.CreateLocalTcpEndpoints()
+	if err != nil {
+		t.Fatalf("create local tcp endpints: %+v", err)
+	}
+
+	unlockC := make(chan struct{})
+	insideDivC := make(chan struct{}, 1)
+
+	service := testtools.NewTestServiceImpl(0)
+	// blocking function
+	service.DivErrFunc = func(a, b int) (int, error) {
+		//inform about our
+		insideDivC <- struct{}{}
+
+		// wait for unlock
+		log.Println("DivErr() waiting for unlock")
+		<-unlockC
+		log.Println("DivErr() unlocked and returning")
+		return a / b, nil
+	}
+
+	serviceEp.RegisterServices(testtools.NewTestServiceIRpcService(service))
+
+	client, err := testtools.NewTestServiceIRpcClient(clientEp)
+	if err != nil {
+		t.Fatalf("new client: %+v", err)
+	}
+
+	rtnC := make(chan error)
+	go func() {
+		// this blocks on 'unlock' channel
+		_, err := client.DivErr(6, 2)
+		// however should err out on encpoint close
+		rtnC <- err
+	}()
+
+	// make sure the DivErr() is running
+	<-insideDivC
+
+	if err := serviceEp.Close(); err != nil {
+		t.Fatalf("ep1.Close(): %+v", err)
+	}
+
+	// the blocked client.DivErr should now err out
+	if err := <-rtnC; err != irpc.ErrEndpointClosed {
+		t.Fatalf("DivErr(): %+v", err)
+	}
+
+	close(unlockC)
+}
+
+func TestClosingClientEpWithWaitingFuncCalls(t *testing.T) {
+	serviceEp, clientEp, err := testtools.CreateLocalTcpEndpoints()
+	if err != nil {
+		t.Fatalf("create local tcp endpints: %+v", err)
+	}
+
+	unlockC := make(chan struct{})
+	insideDivC := make(chan struct{}, 1)
+
+	service := testtools.NewTestServiceImpl(0)
+	// blocking function
+	service.DivErrFunc = func(a, b int) (int, error) {
+		//inform about our
+		insideDivC <- struct{}{}
+
+		// wait for unlock
+		log.Println("DivErr() waiting for unlock")
+		<-unlockC
+		log.Println("DivErr() unlocked and returning")
+		return a / b, nil
+	}
+
+	serviceEp.RegisterServices(testtools.NewTestServiceIRpcService(service))
+
+	client, err := testtools.NewTestServiceIRpcClient(clientEp)
+	if err != nil {
+		t.Fatalf("new client: %+v", err)
+	}
+
+	rtnC := make(chan error)
+	go func() {
+		// this blocks on 'unlock' channel
+		_, err := client.DivErr(6, 2)
+		// however should err out on encpoint close
+		rtnC <- err
+	}()
+
+	// make sure the DivErr() is running
+	<-insideDivC
+
+	if err := clientEp.Close(); err != nil {
+		t.Fatalf("ep1.Close(): %+v", err)
+	}
+
+	// the blocked client.DivErr should now err out
+	if err := <-rtnC; err != irpc.ErrEndpointClosed {
+		t.Fatalf("DivErr(): %+v", err)
+	}
+
+	close(unlockC)
 }
 
 // todo: uncomment

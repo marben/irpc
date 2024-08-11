@@ -37,11 +37,7 @@ func CreateLocalTcpConnPipe() (net.Conn, net.Conn, error) {
 	}
 }
 
-type testLogger interface {
-	Logf(format string, args ...any)
-}
-
-func CreateLocalTcpEndpoints(l testLogger) (*irpc.Endpoint, *irpc.Endpoint, error) {
+func CreateLocalTcpEndpoints() (*irpc.Endpoint, *irpc.Endpoint, error) {
 	c1, c2, err := CreateLocalTcpConnPipe()
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to create local tcp pipe")

@@ -17,17 +17,13 @@ func TestBasic(t *testing.T) {
 	serviceEp := irpc.NewEndpoint(p2)
 
 	skew := 2
-	// t.Logf("creating service")
 	service := newBasicAPIIRpcService(basicApiImpl{skew: skew})
-	// t.Logf("registering service")
 	serviceEp.RegisterServices(service)
 
-	// t.Logf("creating client")
 	c, err := newBasicAPIIRpcClient(clientEp)
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
 	}
-	// t.Logf("client up and running")
 
 	// BOOL
 	negTrue := c.negBool(true)
@@ -177,10 +173,11 @@ func TestBasic(t *testing.T) {
 		t.Fatalf("unepected toUpperString result: '%s'", s)
 	}
 
+	// close endpoints
 	if err := serviceEp.Close(); err != nil {
 		t.Fatalf("serviceEp.Close(): %+v", err)
 	}
-	if err := clientEp.Close(); err != nil {
+	if err := clientEp.Close(); err != irpc.ErrEndpointClosed {
 		t.Fatalf("clientEp.Close(): %+v", err)
 	}
 }

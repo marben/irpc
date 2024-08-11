@@ -81,7 +81,7 @@ type Endpoint struct {
 
 	responseReaders map[ReqNumT]func(d *Decoder)
 
-	serveErrC chan error
+	msgReadErrC chan error // error returned by message read go routine
 
 	m sync.Mutex
 
@@ -103,7 +103,7 @@ func NewEndpoint(conn io.ReadWriteCloser, services ...Service) *Endpoint {
 		connCloser:      conn,
 		bufWriter:       bufWriter,
 		enc:             NewEncoder(bufWriter),
-		serveErrC:       make(chan error, 1),
+		msgReadErrC:     make(chan error, 1),
 		Ctx:             ctx,
 		ctxCancel:       cancel,
 	}
@@ -117,7 +117,7 @@ func NewEndpoint(conn io.ReadWriteCloser, services ...Service) *Endpoint {
 	// our read loop
 	go func() {
 		dec := NewDecoder(bufio.NewReader(conn))
-		ep.serveErrC <- ep.readMsgs(dec)
+		ep.msgReadErrC <- ep.readMsgs(dec)
 	}()
 
 	return ep
@@ -142,7 +142,7 @@ func (e *Endpoint) Close() error {
 
 	// no more conn writing after this
 	e.closing.Store(true)
-	e.ctxCancel()
+	e.ctxCancel() // this errs out waiting rpc calls
 
 	// we are the ones closing the underlying connection
 	// this makes read loop err out
@@ -155,7 +155,7 @@ func (e *Endpoint) Close() error {
 
 	// conn close triggers reader error
 	// we don't care about the error
-	<-e.serveErrC
+	<-e.msgReadErrC
 
 	return nil
 }
@@ -193,8 +193,6 @@ func (e *Endpoint) genNewRequestNumberLocked() ReqNumT {
 }
 
 func (e *Endpoint) sendRpcRequest(serviceId RegisteredServiceId, funcId FuncId, reqData Serializable, respData Deserializable) (chan error, error) {
-	errC := make(chan error, 1)
-
 	e.m.Lock()
 	defer e.m.Unlock()
 
@@ -214,25 +212,28 @@ func (e *Endpoint) sendRpcRequest(serviceId RegisteredServiceId, funcId FuncId, 
 		return nil, err
 	}
 
+	deserErrC := make(chan error, 1)
+
 	// upon response receive, this function will be called
 	e.responseReaders[reqNum] = func(d *Decoder) {
-		errC <- respData.Deserialize(d)
+		deserErrC <- respData.Deserialize(d)
 	}
 
-	return errC, nil
+	return deserErrC, nil
 }
 
 func (e *Endpoint) CallRemoteFunc(serviceId RegisteredServiceId, funcId FuncId, reqData Serializable, respData Deserializable) error {
-	respErrC, err := e.sendRpcRequest(serviceId, funcId, reqData, respData)
+	deserErrC, err := e.sendRpcRequest(serviceId, funcId, reqData, respData)
 	if err != nil {
 		return err
 	}
 
-	if err := <-respErrC; err != nil {
-		return fmt.Errorf("deserialization failed: %w", err)
+	select {
+	case err := <-deserErrC:
+		return err
+	case <-e.Ctx.Done():
+		return ErrEndpointClosed
 	}
-
-	return nil
 }
 
 // todo: variadic is not such a great idea - what if only one error fails to register? what to return?
@@ -300,7 +301,7 @@ func (e *Endpoint) sendResponse(reqNum ReqNumT, respData Serializable) error {
 // returns wrapped errProtocolError if the error is on a protocol level
 // returns wrapped reader error otherwise (conn closed etc...)
 func (e *Endpoint) readMsgs(dec *Decoder) error {
-	respCrrC := make(chan error)
+	respCrrC := make(chan error) // todo: get rid of this channel. seems wrong
 	for {
 		select {
 		case err := <-respCrrC:
@@ -357,8 +358,7 @@ func (e *Endpoint) readMsgs(dec *Decoder) error {
 		case closingNowPacket:
 			log.Println("counterpart is closing now")
 			e.closing.Store(true)
-			e.ctxCancel()
-			// todo: trigger closing
+			e.ctxCancel() // close waiting functions
 			return ErrEndpointClosed
 
 		default:
