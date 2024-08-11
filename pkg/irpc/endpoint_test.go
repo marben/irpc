@@ -2,6 +2,7 @@ package irpc_test
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"testing"
@@ -247,6 +248,10 @@ func TestLocalEndpointClose(t *testing.T) {
 	}
 
 	if _, err := client.DivErr(6, 2); err != irpc.ErrEndpointClosed {
+		t.Fatalf("unexpected error: %+v", err)
+	}
+
+	if _, err := client.DivErr(6, 2); !errors.Is(err, irpc.ErrEndpointClosed) {
 		t.Fatalf("unexpected error: %+v", err)
 	}
 }
