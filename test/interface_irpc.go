@@ -2,6 +2,7 @@
 package irpctestpkg
 
 import (
+	"context"
 	"fmt"
 	"github.com/marben/irpc/pkg/irpc"
 )
@@ -25,7 +26,7 @@ func (s *interfaceTestIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDese
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_interfaceTestrtnErrorWithMessageResp
 				resp.Param0_ = s.impl.rtnErrorWithMessage(args.Param0_msg)
@@ -39,7 +40,7 @@ func (s *interfaceTestIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDese
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_interfaceTestrtnNilErrorResp
 				resp.Param0_ = s.impl.rtnNilError()
@@ -53,7 +54,7 @@ func (s *interfaceTestIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDese
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_interfaceTestrtnTwoErrorsResp
 				resp.Param0_, resp.Param1_ = s.impl.rtnTwoErrors()
@@ -67,7 +68,7 @@ func (s *interfaceTestIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDese
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_interfaceTestrtnStringAndErrorResp
 				resp.Param0_s, resp.Param1_err = s.impl.rtnStringAndError(args.Param0_msg)
@@ -81,7 +82,7 @@ func (s *interfaceTestIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDese
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp
 				resp.Param0_, resp.Param1_ = s.impl.passCustomInterfaceAndReturnItModified(args.Param0_ci)
@@ -112,7 +113,7 @@ func (s *customInterfaceIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDe
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_customInterfaceIntFuncResp
 				resp.Param0_ = s.impl.IntFunc()
@@ -126,7 +127,7 @@ func (s *customInterfaceIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDe
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_customInterfaceStringFuncResp
 				resp.Param0_ = s.impl.StringFunc()

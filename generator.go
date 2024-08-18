@@ -295,7 +295,7 @@ type serviceGenerator struct {
 }
 
 func newServiceGenerator(serviceTypeName, ifaceTypeName, serviceId string, methods []methodGenerator) (serviceGenerator, error) {
-	imports := []string{fmtImport}
+	imports := []string{fmtImport, contextImport}
 
 	return serviceGenerator{
 		ifaceName:       ifaceTypeName,
@@ -340,7 +340,7 @@ func (sg serviceGenerator) code() string {
 		 	if err := args.Deserialize(d); err != nil {
 		 		return nil, err
 		 	}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp %[2]s
 				%[3]s = s.impl.%[4]s(%[5]s)

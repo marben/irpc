@@ -173,7 +173,7 @@ func TestBasic(t *testing.T) {
 		t.Fatalf("unepected toUpperString result: '%s'", s)
 	}
 
-	// close endpoints
+	// close endpoint
 	if err := serviceEp.Close(); err != nil {
 		t.Fatalf("serviceEp.Close(): %+v", err)
 	}

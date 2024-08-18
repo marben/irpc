@@ -2,6 +2,7 @@
 package irpctestpkg
 
 import (
+	"context"
 	"fmt"
 	"github.com/marben/irpc/pkg/irpc"
 )
@@ -25,7 +26,7 @@ func (s *structAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserial
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_structAPIVectSumResp
 				resp.Param0_ = s.impl.VectSum(args.Param0_v)
@@ -39,7 +40,7 @@ func (s *structAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserial
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_structAPIVect3x3SumResp
 				resp.Param0_ = s.impl.Vect3x3Sum(args.Param0_v)
@@ -53,7 +54,7 @@ func (s *structAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserial
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_structAPISumSliceStructResp
 				resp.Param0_ = s.impl.SumSliceStruct(args.Param0_s)

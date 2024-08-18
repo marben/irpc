@@ -1,6 +1,7 @@
 package irpc_test
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -45,7 +46,7 @@ func (ms *MathIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp addRtnVals
 				resp.Res = ms.impl.Add(args.A, args.B)

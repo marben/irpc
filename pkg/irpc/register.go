@@ -1,6 +1,7 @@
 package irpc
 
 import (
+	"context"
 	"fmt"
 )
 
@@ -36,7 +37,7 @@ func (c *clientRegisterService) GetFuncCall(funcId FuncId) (ArgDeserializer, err
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() Serializable {
+			return func(ctx context.Context) Serializable {
 				c.ep.m.Lock()
 				defer c.ep.m.Unlock()
 

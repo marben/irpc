@@ -59,7 +59,7 @@ type Service interface {
 }
 
 type ArgDeserializer func(d *Decoder) (FuncExecutor, error)
-type FuncExecutor func() Serializable
+type FuncExecutor func(ctx context.Context) Serializable
 
 // our generated code function calls' arguments implements Serializable/Deserializble
 type Serializable interface {
@@ -341,6 +341,7 @@ func (e *Endpoint) readMsgs(dec *Decoder) error {
 				return fmt.Errorf("argDeserialize: %w", err)
 			}
 
+			// waits until worker slot is available (blocks here on too many long rpcs)
 			if err := e.funcWorkers.Acquire(e.Ctx, 1); err != nil {
 				return fmt.Errorf("worker semaphore.Acquire(): %w", err)
 			}
@@ -348,7 +349,7 @@ func (e *Endpoint) readMsgs(dec *Decoder) error {
 			go func() {
 				defer e.funcWorkers.Release(1)
 				// call the function
-				resp := funcExec()
+				resp := funcExec(e.Ctx)
 
 				// todo: imho, this allows for multiple goroutines to keep writing to the channel even though it is already abandoned -> deadlock
 				if err := e.sendResponse(req.ReqNum, resp); err != nil {

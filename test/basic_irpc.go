@@ -2,6 +2,7 @@
 package irpctestpkg
 
 import (
+	"context"
 	"fmt"
 	"github.com/marben/irpc/pkg/irpc"
 )
@@ -25,7 +26,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddByteResp
 				resp.Param0_ = s.impl.addByte(args.Param0_a, args.Param1_b)
@@ -39,7 +40,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddIntResp
 				resp.Param0_ = s.impl.addInt(args.Param0_a, args.Param1_b)
@@ -53,7 +54,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIswapIntResp
 				resp.Param0_, resp.Param1_ = s.impl.swapInt(args.Param0_a, args.Param1_b)
@@ -67,7 +68,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIsubUintResp
 				resp.Param0_ = s.impl.subUint(args.Param0_a, args.Param0_b)
@@ -81,7 +82,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddInt8Resp
 				resp.Param0_ = s.impl.addInt8(args.Param0_a, args.Param0_b)
@@ -95,7 +96,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddUint8Resp
 				resp.Param0_ = s.impl.addUint8(args.Param0_a, args.Param0_b)
@@ -109,7 +110,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddInt16Resp
 				resp.Param0_ = s.impl.addInt16(args.Param0_a, args.Param0_b)
@@ -123,7 +124,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddUint16Resp
 				resp.Param0_ = s.impl.addUint16(args.Param0_a, args.Param0_b)
@@ -137,7 +138,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddInt32Resp
 				resp.Param0_ = s.impl.addInt32(args.Param0_a, args.Param0_b)
@@ -151,7 +152,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddUint32Resp
 				resp.Param0_ = s.impl.addUint32(args.Param0_a, args.Param0_b)
@@ -165,7 +166,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddInt64Resp
 				resp.Param0_ = s.impl.addInt64(args.Param0_a, args.Param0_b)
@@ -179,7 +180,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddUint64Resp
 				resp.Param0_ = s.impl.addUint64(args.Param0_a, args.Param0_b)
@@ -193,7 +194,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddFloat64Resp
 				resp.Param0_ = s.impl.addFloat64(args.Param0_a, args.Param0_b)
@@ -207,7 +208,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddFloat32Resp
 				resp.Param0_ = s.impl.addFloat32(args.Param0_a, args.Param0_b)
@@ -221,7 +222,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPItoUpperResp
 				resp.Param0_ = s.impl.toUpper(args.Param0_c)
@@ -235,7 +236,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPItoUpperStringResp
 				resp.Param0_ = s.impl.toUpperString(args.Param0_s)
@@ -249,7 +250,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPInegBoolResp
 				resp.Param0_ = s.impl.negBool(args.Param0_ok)

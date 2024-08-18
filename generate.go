@@ -6,12 +6,13 @@ import (
 )
 
 const (
-	irpcImport   = "github.com/marben/irpc/pkg/irpc"
-	binaryImport = "encoding/binary"
-	fmtImport    = "fmt"
-	ioImport     = "io"
-	bytesImport  = "bytes"
-	mathImport   = "math"
+	irpcImport    = "github.com/marben/irpc/pkg/irpc"
+	binaryImport  = "encoding/binary"
+	fmtImport     = "fmt"
+	ioImport      = "io"
+	bytesImport   = "bytes"
+	mathImport    = "math"
+	contextImport = "context"
 )
 
 // generates the 'NewSomething(){}' function name

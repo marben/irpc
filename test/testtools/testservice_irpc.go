@@ -2,6 +2,7 @@
 package testtools
 
 import (
+	"context"
 	"fmt"
 	"github.com/marben/irpc/pkg/irpc"
 )
@@ -25,7 +26,7 @@ func (s *TestServiceIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseri
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_TestServiceDivResp
 				resp.Param0_ = s.impl.Div(args.Param0_a, args.Param0_b)
@@ -39,7 +40,7 @@ func (s *TestServiceIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseri
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_TestServiceDivErrResp
 				resp.Param0_, resp.Param1_ = s.impl.DivErr(args.Param0_a, args.Param0_b)

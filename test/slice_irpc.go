@@ -2,6 +2,7 @@
 package irpctestpkg
 
 import (
+	"context"
 	"fmt"
 	"github.com/marben/irpc/pkg/irpc"
 )
@@ -25,7 +26,7 @@ func (s *sliceTestIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserial
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_sliceTestSliceSumResp
 				resp.Param0_ = s.impl.SliceSum(args.Param0_slice)
@@ -39,7 +40,7 @@ func (s *sliceTestIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserial
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_sliceTestVectMultResp
 				resp.Param0_ = s.impl.VectMult(args.Param0_vect, args.Param1_s)
@@ -53,7 +54,7 @@ func (s *sliceTestIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserial
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_sliceTestSliceOfFloat64SumResp
 				resp.Param0_ = s.impl.SliceOfFloat64Sum(args.Param0_slice)
@@ -67,7 +68,7 @@ func (s *sliceTestIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserial
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_sliceTestSliceOfSlicesSumResp
 				resp.Param0_ = s.impl.SliceOfSlicesSum(args.Param0_slice)

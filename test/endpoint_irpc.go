@@ -2,6 +2,7 @@
 package irpctestpkg
 
 import (
+	"context"
 	"fmt"
 	"github.com/marben/irpc/pkg/irpc"
 )
@@ -25,7 +26,7 @@ func (s *endpointApiIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseri
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func() irpc.Serializable {
+			return func(ctx context.Context) irpc.Serializable {
 				// EXECUTE
 				var resp _Irpc_endpointApiDivResp
 				resp.Param0_, resp.Param1_ = s.impl.Div(args.Param0_a, args.Param0_b)
