@@ -9,6 +9,8 @@ import (
 	"log"
 	"sync"
 	"sync/atomic"
+
+	"golang.org/x/sync/semaphore"
 )
 
 var ErrServiceAlreadyRegistered = errors.New("service already registered")
@@ -23,6 +25,8 @@ const (
 	rpcResponsePacket
 	closingNowPacket // inform counterpart that i will immediately close the connection
 )
+
+const ParallelWorkers = 3 // todo: should be configurable for each endpoint
 
 type packetHeader struct {
 	typ packetType
@@ -85,11 +89,13 @@ type Endpoint struct {
 
 	m sync.Mutex
 
-	closing atomic.Bool // todo: maybe replace with Enpoint.Ctx
+	closing atomic.Bool // todo: maybe replace with Endpoint.Ctx
 
 	// context ends with the closing of endpoint
 	Ctx       context.Context // todo: this is a test. not sure about the design.
 	ctxCancel context.CancelFunc
+
+	funcWorkers *semaphore.Weighted
 }
 
 func NewEndpoint(conn io.ReadWriteCloser, services ...Service) *Endpoint {
@@ -106,6 +112,7 @@ func NewEndpoint(conn io.ReadWriteCloser, services ...Service) *Endpoint {
 		msgReadErrC:     make(chan error, 1),
 		Ctx:             ctx,
 		ctxCancel:       cancel,
+		funcWorkers:     semaphore.NewWeighted(ParallelWorkers),
 	}
 
 	// default service for registering clients
@@ -301,10 +308,10 @@ func (e *Endpoint) sendResponse(reqNum ReqNumT, respData Serializable) error {
 // returns wrapped errProtocolError if the error is on a protocol level
 // returns wrapped reader error otherwise (conn closed etc...)
 func (e *Endpoint) readMsgs(dec *Decoder) error {
-	respCrrC := make(chan error) // todo: get rid of this channel. seems wrong
+	respErrC := make(chan error) // todo: get rid of this channel. seems wrong
 	for {
 		select {
-		case err := <-respCrrC:
+		case err := <-respErrC:
 			return err
 		default:
 		}
@@ -333,13 +340,19 @@ func (e *Endpoint) readMsgs(dec *Decoder) error {
 			if err != nil {
 				return fmt.Errorf("argDeserialize: %w", err)
 			}
+
+			if err := e.funcWorkers.Acquire(e.Ctx, 1); err != nil {
+				return fmt.Errorf("worker semaphore.Acquire(): %w", err)
+			}
+			// a goroutine is created for each remote call
 			go func() {
+				defer e.funcWorkers.Release(1)
 				// call the function
 				resp := funcExec()
 
 				// todo: imho, this allows for multiple goroutines to keep writing to the channel even though it is already abandoned -> deadlock
 				if err := e.sendResponse(req.ReqNum, resp); err != nil {
-					respCrrC <- fmt.Errorf("failed to send response for request %d: %w", req.ReqNum, err)
+					respErrC <- fmt.Errorf("failed to send response for request %d: %w", req.ReqNum, err)
 					return
 				}
 			}()

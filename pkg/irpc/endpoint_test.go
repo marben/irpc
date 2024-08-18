@@ -5,7 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/marben/irpc/pkg/irpc"
 	"github.com/marben/irpc/test/testtools"
@@ -359,6 +361,61 @@ func TestClosingClientEpWithWaitingFuncCalls(t *testing.T) {
 	}
 
 	close(unlockC)
+}
+
+func TestMaxWorkersNumber(t *testing.T) {
+	serviceEp, clientEp, err := testtools.CreateLocalTcpEndpoints()
+	if err != nil {
+		t.Fatalf("create local tcp endpints: %+v", err)
+	}
+
+	service := testtools.NewTestServiceImpl(0)
+
+	unlockC := make(chan struct{})
+	resC := make(chan int)
+	service.DivFunc = func(a, b int) int {
+		resC <- a + b
+		<-unlockC
+		return a + b
+	}
+
+	serviceEp.RegisterServices(testtools.NewTestServiceIRpcService(service))
+
+	client, err := testtools.NewTestServiceIRpcClient(clientEp)
+	if err != nil {
+		t.Fatalf("new client: %+v", err)
+	}
+
+	// start max parrallel workers + 1 calls in parallel goroutines
+	wg := sync.WaitGroup{}
+	for i := range irpc.ParallelWorkers + 1 {
+		wg.Add(1)
+		go func() {
+			if res := client.Div(i, 3); res != i+3 {
+				log.Fatalf("unexpected result: %d", res)
+			}
+			wg.Done()
+		}()
+	}
+
+	// only max parallel workers should get started and send to resC
+	for range irpc.ParallelWorkers {
+		<-resC
+	}
+
+	// we don't have any means (atm) of making sure rpc call has arrived
+	// instead we wait some time to make sure the func doesn't get called
+	select {
+	case res := <-resC:
+		t.Fatalf("unexpectedly obtained result: %d", res)
+	case <-time.After(100 * time.Millisecond):
+		break
+	}
+	// wait timed out (means the last goroutine didn't get called)
+	// closing the wait channel should unlock all gouroutines and let the last one pass
+	close(unlockC)
+	<-resC
+	wg.Wait() // no reason really, just to be sure
 }
 
 // todo: uncomment
