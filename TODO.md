@@ -1,4 +1,3 @@
-- implement endpoint shutdown function
 - get rid of all panic
  - when service is not running on the other end, and our function returns error, return some irpc error
 - figure out error handling and what to do on server side panics
@@ -10,9 +9,7 @@
 - see other peoples solution for time.Time (embedded pointers etc...)
 - implement bitpacking writer. first for slice of bool, eventually perhaps
     for everything? (could use some benchmarking before that though)
-- change naming of generated files from _gen.go to _irpc.go? (stringer uses _string.go)
 - check capnproto - something similar?
-- perhaps rename generated names of RpcService and RpcClient to IrpcService etc? rpc is quite generic, Irpc points directly to specific part of code
 - get rid of fmt import(mostly used for errors) to possibly reduce size of wasm binary?
 - consider moving the irpc package from `irpc/pkg/irpc` to `irpc/irpc`
 - implement and test sending big messages with different endpoint.MaxMsgLen. client should be splitting msgs etc?
