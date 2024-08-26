@@ -121,15 +121,20 @@ func newParamStructGenerator(typeName string, params []varField) (paramStructGen
 }
 
 func (sg paramStructGenerator) code() string {
-	def := fmt.Sprintf("type %s struct{\n", sg.typeName)
+	sb := &strings.Builder{}
+	fmt.Fprintf(sb, "type %s struct{\n", sg.typeName)
 	for _, p := range sg.params {
-		def += p.structFieldName() + " " + p.typeName() + "\n"
+		if p.isContext() {
+			// we comment out context var as it is not filled anyway
+			sb.WriteString("//")
+		}
+		sb.WriteString(p.structFieldName() + " " + p.typeName() + "\n")
 	}
-	def += "\n}\n"
-	def += sg.serializeFunc() + "\n"
-	def += sg.deserializeFunc()
+	sb.WriteString("\n}\n")
+	sb.WriteString(sg.serializeFunc() + "\n")
+	sb.WriteString(sg.deserializeFunc())
 
-	return def
+	return sb.String()
 }
 
 func (sg paramStructGenerator) serializeFunc() string {
@@ -236,12 +241,18 @@ func (vf varField) typeName() string {
 	return vf.param.typeName(vf.q)
 }
 
+// returns true if field is of type context.Context
+func (vf varField) isContext() bool {
+	return vf.typeName() == "context.Context"
+}
+
 type methodGenerator struct {
 	name      string
 	index     int
 	req, resp paramStructGenerator
 	imports   []string
 	q         types.Qualifier
+	ctxVar    string // context used for method call (either there is context param, or we use context.Background() )
 }
 
 func newMethodGenerator(ifaceName string, index int, m rpcMethod, q types.Qualifier) (methodGenerator, error) {
@@ -249,11 +260,11 @@ func newMethodGenerator(ifaceName string, index int, m rpcMethod, q types.Qualif
 	reqStructTypeName := "_Irpc_" + ifaceName + m.name + "Req"
 	reqFields := []varField{}
 	for _, param := range m.params {
-		rf, err := newVarField(ifaceName, param, q)
+		vf, err := newVarField(ifaceName, param, q)
 		if err != nil {
 			return methodGenerator{}, fmt.Errorf("newVarField for param '%s': %w", param.name, err)
 		}
-		reqFields = append(reqFields, rf)
+		reqFields = append(reqFields, vf)
 	}
 	req, err := newParamStructGenerator(reqStructTypeName, reqFields)
 	if err != nil {
@@ -264,17 +275,40 @@ func newMethodGenerator(ifaceName string, index int, m rpcMethod, q types.Qualif
 	respStructTypeName := "_Irpc_" + ifaceName + m.name + "Resp"
 	respFields := []varField{}
 	for _, result := range m.results {
-		rf, err := newVarField(ifaceName, result, q)
+		vf, err := newVarField(ifaceName, result, q)
 		if err != nil {
 			return methodGenerator{}, fmt.Errorf("newVarField for param '%s': %w", result.name, err)
 		}
-		respFields = append(respFields, rf)
+		// we don't support returning context.Context
+		if vf.isContext() {
+			return methodGenerator{}, fmt.Errorf("unsupported context.Context as return value for varfiled: %s - %s", ifaceName, m.name)
+		}
+		respFields = append(respFields, vf)
 	}
 	resp, err := newParamStructGenerator(respStructTypeName, respFields)
 	if err != nil {
 		return methodGenerator{}, fmt.Errorf("new resp struct for method '%s': %w", m.name, err)
 	}
 	imports.add(resp.imports...)
+
+	// context
+	// we currently only support one or no context var
+	// multiple ctx vars could be combined, but it doesn't make much sense and i cannot be bothered atm
+	ctxParams := []varField{}
+	for _, p := range req.params {
+		if p.isContext() {
+			ctxParams = append(ctxParams, p)
+		}
+	}
+	var ctxVarName string
+	switch len(ctxParams) {
+	case 0:
+		ctxVarName = "context.Background()"
+	case 1:
+		ctxVarName = ctxParams[0].name()
+	default:
+		return methodGenerator{}, fmt.Errorf("%s - %s : cannot have more than one context parameter", ifaceName, m.name)
+	}
 
 	return methodGenerator{
 		name:    m.name,
@@ -283,7 +317,34 @@ func newMethodGenerator(ifaceName string, index int, m rpcMethod, q types.Qualif
 		resp:    resp,
 		imports: imports.ordered,
 		q:       q,
+		ctxVar:  ctxVarName,
 	}, nil
+}
+
+func (mg methodGenerator) executorFuncCode() string {
+	return fmt.Sprintf(`func(ctx context.Context) irpc.Serializable {
+				// EXECUTE
+				var resp %[1]s
+				%[2]s = s.impl.%[3]s(%[4]s)
+				return resp
+			}`, mg.resp.typeName, mg.resp.paramListPrefixed("resp."), mg.name, mg.requestParamsListPrefixed("args.", "ctx"))
+}
+
+// creates method call list with each var prefixed with 'prefix'
+// replaces any parameter of type context.Context with 'ctxVarName'
+func (mg methodGenerator) requestParamsListPrefixed(prefix, ctxVarName string) string {
+	sb := &strings.Builder{}
+	for i, p := range mg.req.params {
+		if p.isContext() {
+			sb.WriteString(ctxVarName)
+		} else {
+			fmt.Fprintf(sb, "%s%s", prefix, p.structFieldName())
+		}
+		if i != len(mg.req.params) {
+			sb.WriteString(",")
+		}
+	}
+	return sb.String()
 }
 
 type serviceGenerator struct {
@@ -336,18 +397,13 @@ func (sg serviceGenerator) code() string {
 		fmt.Fprintf(sb, "case %d: // %s\n", m.index, m.name)
 		fmt.Fprintf(sb, `return func(d *irpc.Decoder) (irpc.FuncExecutor, error) {
 			// DESERIALIZE
-		 	var args %[1]s
+		 	var args %s
 		 	if err := args.Deserialize(d); err != nil {
 		 		return nil, err
 		 	}
-			return func(ctx context.Context) irpc.Serializable {
-				// EXECUTE
-				var resp %[2]s
-				%[3]s = s.impl.%[4]s(%[5]s)
-				return resp
-			}, nil
+			return %s, nil
 		}, nil
-		 `, m.req.typeName, m.resp.typeName, m.resp.paramListPrefixed("resp."), m.name, m.req.paramListPrefixed("args."))
+		 `, m.req.typeName, m.executorFuncCode())
 	}
 	fmt.Fprintf(sb, `default:
 			return nil, fmt.Errorf("function '%%d' doesn't exist on service '%%s'", funcId, string(s.Hash()))
@@ -387,7 +443,7 @@ func (cg clientGenerator) code() string {
 	}
 
 	func %[2]s(endpoint *irpc.Endpoint) (*%[1]s, error) {
-		id, err := endpoint.RegisterClient([]byte("%[3]s"))
+		id, err := endpoint.RegisterClient(context.Background(),[]byte("%[3]s"))
 		if err != nil {
 			return nil, fmt.Errorf("register failed: %%w", err)
 		}
@@ -406,6 +462,10 @@ func (cg clientGenerator) code() string {
 		// request construction
 		fmt.Fprintf(b, "var %s = %s {\n", reqVarName, m.req.typeName)
 		for _, p := range m.req.params {
+			if p.isContext() {
+				// we skip contexts, as they are treated special
+				b.WriteString("// ")
+			}
 			fmt.Fprintf(b, "%s: %s,\n", p.structFieldName(), p.name())
 		}
 		fmt.Fprintf(b, "}\n") // end struct assignment
@@ -414,7 +474,7 @@ func (cg clientGenerator) code() string {
 		fmt.Fprintf(b, "var %s %s\n", respVarName, m.resp.typeName)
 
 		// func call
-		fmt.Fprintf(b, "if err := %s.endpoint.CallRemoteFunc(%[1]s.id, %d, %s, &%s); err != nil {\n", cg.fncReceiverName, m.index, reqVarName, respVarName)
+		fmt.Fprintf(b, "if err := %s.endpoint.CallRemoteFunc(%s,%[1]s.id, %[3]d, %s, &%s); err != nil {\n", cg.fncReceiverName, m.ctxVar, m.index, reqVarName, respVarName)
 		if m.resp.isLastTypeError() {
 			// declare zero var, because i don't know, how to directly instantiate zero values
 			if len(m.resp.params) > 1 {

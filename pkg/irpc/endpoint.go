@@ -17,16 +17,23 @@ var ErrServiceAlreadyRegistered = errors.New("service already registered")
 var ErrEndpointClosed = errors.New("endpoint is closed")
 var ErrServiceNotFound = errors.New("service not found")
 var errProtocolError = errors.New("rpc protocol error")
+var ErrContextWaitTimedOut = errors.New("context wait timed out")
+
+// todo: make one irpc error with err type iota inside
 
 type packetType uint8
 
 const (
-	rpcRequestPacket packetType = iota + 1
-	rpcResponsePacket
-	closingNowPacket // inform counterpart that i will immediately close the connection
+	rpcRequestPacketType packetType = iota + 1
+	rpcResponsePacketType
+	closingNowPacketType // inform counterpart that i will immediately close the connection
+	ctxEndPacketType     // informs service runner that the provided function context expired
 )
 
-const ParallelWorkers = 3 // todo: should be configurable for each endpoint
+// todo: should be configurable for each endpoint
+const (
+	ParallelWorkers = 3
+)
 
 type packetHeader struct {
 	typ packetType
@@ -40,6 +47,11 @@ type requestPacket struct {
 
 type responsePacket struct {
 	ReqNum ReqNumT // request number that initiated this response
+}
+
+type ctxEndPacket struct {
+	ReqNum ReqNumT
+	ErrStr string
 }
 
 // client registers to a service (by hash). upon registration, service is given 'RegisteredServiceId'
@@ -83,9 +95,17 @@ type Endpoint struct {
 
 	reqNum ReqNumT // serial number of our next request	// todo: sort out overflow (and test?)
 
-	responseReaders map[ReqNumT]func(d *Decoder)
+	pendingRequests map[ReqNumT]pendingRequest
 
-	msgReadErrC chan error // error returned by message read go routine
+	// limits the number of active workers
+	serviceWorkersSem *semaphore.Weighted
+
+	// active running workers
+	// lock m before accessing
+	serviceWorkers map[ReqNumT]serviceWorker
+
+	// error returned by message read go routine
+	readLoopErrC chan error
 
 	m sync.Mutex
 
@@ -93,26 +113,25 @@ type Endpoint struct {
 
 	// context ends with the closing of endpoint
 	Ctx       context.Context // todo: this is a test. not sure about the design.
-	ctxCancel context.CancelFunc
-
-	funcWorkers *semaphore.Weighted
+	ctxCancel context.CancelCauseFunc
 }
 
 func NewEndpoint(conn io.ReadWriteCloser, services ...Service) *Endpoint {
 	bufWriter := bufio.NewWriter(conn)
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancelCause(context.Background())
 	ep := &Endpoint{
-		serviceHashes:   make(map[string]RegisteredServiceId),
-		services:        make(map[RegisteredServiceId]Service),
-		responseReaders: make(map[ReqNumT]func(d *Decoder)),
-		nextServiceId:   clientRegistrationServiceId + 1,
-		connCloser:      conn,
-		bufWriter:       bufWriter,
-		enc:             NewEncoder(bufWriter),
-		msgReadErrC:     make(chan error, 1),
-		Ctx:             ctx,
-		ctxCancel:       cancel,
-		funcWorkers:     semaphore.NewWeighted(ParallelWorkers),
+		serviceHashes:     make(map[string]RegisteredServiceId),
+		services:          make(map[RegisteredServiceId]Service),
+		pendingRequests:   make(map[ReqNumT]pendingRequest),
+		serviceWorkers:    make(map[ReqNumT]serviceWorker),
+		nextServiceId:     clientRegistrationServiceId + 1,
+		connCloser:        conn,
+		bufWriter:         bufWriter,
+		enc:               NewEncoder(bufWriter),
+		readLoopErrC:      make(chan error, 1),
+		Ctx:               ctx,
+		ctxCancel:         cancel,
+		serviceWorkersSem: semaphore.NewWeighted(ParallelWorkers),
 	}
 
 	// default service for registering clients
@@ -124,10 +143,28 @@ func NewEndpoint(conn io.ReadWriteCloser, services ...Service) *Endpoint {
 	// our read loop
 	go func() {
 		dec := NewDecoder(bufio.NewReader(conn))
-		ep.msgReadErrC <- ep.readMsgs(dec)
+		switch err := ep.readMsgs(dec); err {
+		case ErrEndpointClosed:
+			// panic(err)
+			// todo: we need to call close
+			ep.readLoopErrC <- ErrEndpointClosed // todo: wrong?
+		default:
+			// log.Fatalf("err: %+v", err)
+			// panic(err)
+			// todo: close etc...
+			ep.readLoopErrC <- ErrEndpointClosed // wrong!
+			// panic(fmt.Sprintf("readMsg: %s", err.Error()))	// todo: uncomment and figure out proper closing pattern
+		}
 	}()
 
 	return ep
+}
+
+// this is currently just a placeholder for internal err state which should eventually
+// do a clean Close of the endpoint
+func (e *Endpoint) errClose(err error) {
+	log.Printf("internal error close(): %+v", err)
+	panic(err)
 }
 
 // Close immediately stops serving any requests
@@ -143,13 +180,13 @@ func (e *Endpoint) Close() error {
 
 	// we have mutex. no other writes happening now
 	// sign to our counterpart, that we are about to close connection
-	if err := e.serializePacketToConnLocked(packetHeader{typ: closingNowPacket}); err != nil {
+	if err := e.serializePacketToConnLocked(packetHeader{typ: closingNowPacketType}); err != nil {
 		return fmt.Errorf("notify counterpart: %w", err)
 	}
 
 	// no more conn writing after this
 	e.closing.Store(true)
-	e.ctxCancel() // this errs out waiting rpc calls
+	e.ctxCancel(ErrEndpointClosed) // this errs out waiting rpc calls
 
 	// we are the ones closing the underlying connection
 	// this makes read loop err out
@@ -162,7 +199,7 @@ func (e *Endpoint) Close() error {
 
 	// conn close triggers reader error
 	// we don't care about the error
-	<-e.msgReadErrC
+	<-e.readLoopErrC
 
 	return nil
 }
@@ -170,10 +207,10 @@ func (e *Endpoint) Close() error {
 // registers client on remote endpoint
 // if there is no corresponding service registered on remote node, returns error
 // todo: rename to RegisterRemoteClient
-func (e *Endpoint) RegisterClient(serviceHash []byte) (RegisteredServiceId, error) {
+func (e *Endpoint) RegisterClient(ctx context.Context, serviceHash []byte) (RegisteredServiceId, error) {
 	req := clientRegisterReq{ServiceHash: serviceHash}
 	resp := clientRegisterResp{}
-	if err := e.CallRemoteFunc(clientRegistrationServiceId, 0 /* currently there is just one function */, req, &resp); err != nil {
+	if err := e.CallRemoteFunc(ctx, clientRegistrationServiceId, 0 /* currently there is just one function */, req, &resp); err != nil {
 		return 0, fmt.Errorf("failed to register client %q: %w", serviceHash, err)
 	}
 
@@ -199,47 +236,82 @@ func (e *Endpoint) genNewRequestNumberLocked() ReqNumT {
 	return reqNum
 }
 
-func (e *Endpoint) sendRpcRequest(serviceId RegisteredServiceId, funcId FuncId, reqData Serializable, respData Deserializable) (chan error, error) {
+func (e *Endpoint) sendRpcRequest(serviceId RegisteredServiceId, funcId FuncId, reqData Serializable, respData Deserializable) (pendingRequest, error) {
 	e.m.Lock()
 	defer e.m.Unlock()
 
 	reqNum := e.genNewRequestNumberLocked()
 
-	reqType := packetHeader{
-		typ: rpcRequestPacket,
+	header := packetHeader{
+		typ: rpcRequestPacketType,
 	}
 
-	requestHeader := requestPacket{
+	requestDef := requestPacket{
 		ReqNum:    reqNum,
 		ServiceId: serviceId,
 		FuncId:    funcId,
 	}
 
-	if err := e.serializePacketToConnLocked(reqType, requestHeader, reqData); err != nil {
-		return nil, err
+	if err := e.serializePacketToConnLocked(header, requestDef, reqData); err != nil {
+		return pendingRequest{}, err
 	}
 
-	deserErrC := make(chan error, 1)
-
-	// upon response receive, this function will be called
-	e.responseReaders[reqNum] = func(d *Decoder) {
-		deserErrC <- respData.Deserialize(d)
+	pr := pendingRequest{
+		reqNum:    reqNum,
+		resp:      respData,
+		deserErrC: make(chan error, 1),
 	}
 
-	return deserErrC, nil
+	e.pendingRequests[reqNum] = pr
+
+	return pr, nil
 }
 
-func (e *Endpoint) CallRemoteFunc(serviceId RegisteredServiceId, funcId FuncId, reqData Serializable, respData Deserializable) error {
-	deserErrC, err := e.sendRpcRequest(serviceId, funcId, reqData, respData)
+func (e *Endpoint) sendContextCancelation(req ReqNumT, cause error) error {
+	log.Printf("sending cancel context request with err: %+v", cause)
+	header := packetHeader{typ: ctxEndPacketType}
+	ctxEndDef := ctxEndPacket{
+		ReqNum: req,
+		ErrStr: cause.Error(),
+	}
+
+	e.m.Lock()
+	defer e.m.Unlock()
+	if err := e.serializePacketToConnLocked(header, ctxEndDef); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (e *Endpoint) CallRemoteFunc(ctx context.Context, serviceId RegisteredServiceId, funcId FuncId, reqData Serializable, respData Deserializable) error {
+	pendingReq, err := e.sendRpcRequest(serviceId, funcId, reqData, respData)
 	if err != nil {
 		return err
 	}
 
 	select {
-	case err := <-deserErrC:
+	// response has arrived
+	case err := <-pendingReq.deserErrC:
 		return err
+
+	// global endpoint's context ended
 	case <-e.Ctx.Done():
+
 		return ErrEndpointClosed
+
+	// the client provided context expired
+	case <-ctx.Done():
+		if err := e.sendContextCancelation(pendingReq.reqNum, context.Cause(ctx)); err != nil {
+			return fmt.Errorf("failed to cancel request %d: %w", e.reqNum, err)
+		}
+
+		select {
+		case err := <-pendingReq.deserErrC:
+			return err
+		case <-e.Ctx.Done():
+			return ErrEndpointClosed
+		}
 	}
 }
 
@@ -291,7 +363,7 @@ func (e *Endpoint) sendResponse(reqNum ReqNumT, respData Serializable) error {
 	}
 
 	header := packetHeader{
-		typ: rpcResponsePacket,
+		typ: rpcResponsePacketType,
 	}
 
 	e.m.Lock()
@@ -304,25 +376,18 @@ func (e *Endpoint) sendResponse(reqNum ReqNumT, respData Serializable) error {
 	return nil
 }
 
-// readMsgs is the main incoming messages process loop
-// returns wrapped errProtocolError if the error is on a protocol level
-// returns wrapped reader error otherwise (conn closed etc...)
+// readMsgs is the main incoming messages processing loop
+// returns wrapped errProtocolError(todo: actually it doesn't) if the error is on a protocol level	// todo: make sure it does
+// returns ErrEndpointClosed if we received close request packet
 func (e *Endpoint) readMsgs(dec *Decoder) error {
-	respErrC := make(chan error) // todo: get rid of this channel. seems wrong
 	for {
-		select {
-		case err := <-respErrC:
-			return err
-		default:
-		}
-
 		var h packetHeader
 		if err := h.Deserialize(dec); err != nil {
 			return fmt.Errorf("read header: %w", err)
 		}
 
 		switch h.typ {
-		case rpcRequestPacket:
+		case rpcRequestPacketType:
 			var req requestPacket
 			if err := req.Deserialize(dec); err != nil {
 				return fmt.Errorf("read request packet:%w", err)
@@ -342,53 +407,121 @@ func (e *Endpoint) readMsgs(dec *Decoder) error {
 			}
 
 			// waits until worker slot is available (blocks here on too many long rpcs)
-			if err := e.funcWorkers.Acquire(e.Ctx, 1); err != nil {
-				return fmt.Errorf("worker semaphore.Acquire(): %w", err)
+			err = e.startServiceWorker(req.ReqNum, funcExec)
+			if err != nil {
+				return fmt.Errorf("new worker: %w", err)
 			}
-			// a goroutine is created for each remote call
-			go func() {
-				defer e.funcWorkers.Release(1)
-				// call the function
-				resp := funcExec(e.Ctx)
 
-				// todo: imho, this allows for multiple goroutines to keep writing to the channel even though it is already abandoned -> deadlock
-				if err := e.sendResponse(req.ReqNum, resp); err != nil {
-					respErrC <- fmt.Errorf("failed to send response for request %d: %w", req.ReqNum, err)
-					return
-				}
-			}()
-
-		case rpcResponsePacket:
+		case rpcResponsePacketType:
 			var resp responsePacket
 			if err := resp.Deserialize(dec); err != nil {
 				return fmt.Errorf("failed to read response data:%w", err)
 			}
-			readFunc, err := e.popResponseReaderFunc(resp)
+			pr, err := e.popPendingRequest(resp.ReqNum)
 			if err != nil {
-				return fmt.Errorf("request %q not found", resp.ReqNum)
+				return fmt.Errorf("request not found: %w", err)
 			}
-			readFunc(dec)
 
-		case closingNowPacket:
-			log.Println("counterpart is closing now")
-			e.closing.Store(true)
-			e.ctxCancel() // close waiting functions
+			pr.deserErrC <- pr.resp.Deserialize(dec)
+
+		case closingNowPacketType:
+			// todo: maybe just return err and let handler close the endpoint?
+			e.closing.Store(true)          // todo: is this used?
+			e.ctxCancel(ErrEndpointClosed) // close waiting functions
 			return ErrEndpointClosed
 
+		case ctxEndPacketType:
+			var cancelRequest ctxEndPacket
+			if err := cancelRequest.Deserialize(dec); err != nil {
+				return fmt.Errorf("failed to deserialize context cancelation request: %w", err)
+			}
+			log.Printf("service: context for req %d has been cancelled with %q", cancelRequest.ReqNum, cancelRequest.ErrStr)
+			clientErr := errors.New(cancelRequest.ErrStr)
+			e.cancelRequest(cancelRequest.ReqNum, clientErr)
+
 		default:
-			return fmt.Errorf("unexpected msg type: %d", h.typ)
+			panic(fmt.Sprintf("unexpected packet type: %+v", h.typ)) // todo: remove panic, just return error
 		}
 	}
 }
 
-func (e *Endpoint) popResponseReaderFunc(resp responsePacket) (func(d *Decoder), error) {
+func (e *Endpoint) cancelRequest(rnum ReqNumT, cancelErr error) {
 	e.m.Lock()
 	defer e.m.Unlock()
 
-	f, found := e.responseReaders[resp.ReqNum]
+	rw, found := e.serviceWorkers[rnum]
 	if !found {
-		return nil, fmt.Errorf("response reader num %d not found", resp.ReqNum)
+		// the work may have finished, while this request was on the way.
+		// we don't care
+		return
 	}
-	delete(e.responseReaders, resp.ReqNum)
-	return f, nil
+
+	rw.cancel(cancelErr)
+}
+
+// blocks until worker slot is available
+func (e *Endpoint) startServiceWorker(reqNum ReqNumT, exe FuncExecutor) error {
+	// waits until worker slot is available (blocks here on too many long rpcs)
+	// todo: probably switch to channel based worker pool, which allows to check for context cancellation
+	if err := e.serviceWorkersSem.Acquire(e.Ctx, 1); err != nil {
+		return fmt.Errorf("worker semaphore.Acquire(): %w", err)
+	}
+
+	ctxCancelable, cancel := context.WithCancelCause(e.Ctx)
+
+	rw := serviceWorker{
+		cancel: cancel,
+	}
+
+	// a goroutine is created for each remote call
+
+	e.m.Lock()
+	e.serviceWorkers[reqNum] = rw
+	e.m.Unlock()
+
+	go func() {
+		defer func() {
+			e.m.Lock()
+			defer e.m.Unlock()
+			delete(e.serviceWorkers, reqNum)
+		}()
+
+		defer e.serviceWorkersSem.Release(1)
+
+		resp := exe(ctxCancelable)
+
+		// log.Printf("exec finished. sending response for request %d", reqNum)
+		if err := e.sendResponse(reqNum, resp); err != nil {
+			if errors.Is(err, ErrEndpointClosed) {
+				return
+			}
+			e.errClose(fmt.Errorf("failed to send response for request %d: %v", reqNum, err))
+		}
+	}()
+
+	return nil
+}
+
+func (e *Endpoint) popPendingRequest(reqNum ReqNumT) (pendingRequest, error) {
+	e.m.Lock()
+	defer e.m.Unlock()
+
+	pr, found := e.pendingRequests[reqNum]
+	if !found {
+		return pendingRequest{}, fmt.Errorf("pending request %d not found", reqNum)
+	}
+	delete(e.pendingRequests, reqNum)
+	return pr, nil
+}
+
+// represents a pending request that is being executed on the opposing endpoint
+type pendingRequest struct {
+	reqNum    ReqNumT
+	resp      Deserializable
+	deserErrC chan error
+}
+
+// a request from opposing endpoint, that we are executing
+type serviceWorker struct {
+	cancel context.CancelCauseFunc // todo: we don't need this struct for just a function pointer
 }

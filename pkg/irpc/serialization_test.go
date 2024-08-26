@@ -7,7 +7,7 @@ import (
 
 func TestPacketHeaderSerializeDeserialize(t *testing.T) {
 	phIn := packetHeader{
-		typ: rpcRequestPacket,
+		typ: rpcRequestPacketType,
 	}
 	buf := bytes.NewBuffer(nil)
 	enc := NewEncoder(buf)
@@ -28,7 +28,7 @@ func TestPacketHeaderSerializeDeserialize(t *testing.T) {
 
 func BenchmarkPacketHeaderSerialization(b *testing.B) {
 	ph := packetHeader{
-		typ: rpcRequestPacket,
+		typ: rpcRequestPacketType,
 	}
 	var length int
 	buf := bytes.NewBuffer(make([]byte, 100))
@@ -46,7 +46,7 @@ func BenchmarkPacketHeaderSerialization(b *testing.B) {
 
 func BenchmarkPacketHeaderDeSerialization(b *testing.B) {
 	phInit := packetHeader{
-		typ: rpcRequestPacket,
+		typ: rpcRequestPacketType,
 	}
 	buf := bytes.NewBuffer(nil)
 	enc := NewEncoder(buf)

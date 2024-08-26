@@ -145,7 +145,7 @@ type interfaceTestIRpcClient struct {
 }
 
 func newInterfaceTestIRpcClient(endpoint *irpc.Endpoint) (*interfaceTestIRpcClient, error) {
-	id, err := endpoint.RegisterClient([]byte("interfaceTestIRpcService"))
+	id, err := endpoint.RegisterClient(context.Background(), []byte("interfaceTestIRpcService"))
 	if err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -156,7 +156,7 @@ func (_c *interfaceTestIRpcClient) rtnErrorWithMessage(msg string) error {
 		Param0_msg: msg,
 	}
 	var resp _Irpc_interfaceTestrtnErrorWithMessageResp
-	if err := _c.endpoint.CallRemoteFunc(_c.id, 0, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
 		return err
 	}
 	return resp.Param0_
@@ -164,7 +164,7 @@ func (_c *interfaceTestIRpcClient) rtnErrorWithMessage(msg string) error {
 func (_c *interfaceTestIRpcClient) rtnNilError() error {
 	var req = _Irpc_interfaceTestrtnNilErrorReq{}
 	var resp _Irpc_interfaceTestrtnNilErrorResp
-	if err := _c.endpoint.CallRemoteFunc(_c.id, 1, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 1, req, &resp); err != nil {
 		return err
 	}
 	return resp.Param0_
@@ -172,7 +172,7 @@ func (_c *interfaceTestIRpcClient) rtnNilError() error {
 func (_c *interfaceTestIRpcClient) rtnTwoErrors() (error, error) {
 	var req = _Irpc_interfaceTestrtnTwoErrorsReq{}
 	var resp _Irpc_interfaceTestrtnTwoErrorsResp
-	if err := _c.endpoint.CallRemoteFunc(_c.id, 2, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 2, req, &resp); err != nil {
 		var zero _Irpc_interfaceTestrtnTwoErrorsResp
 		return zero.Param0_, err
 	}
@@ -183,7 +183,7 @@ func (_c *interfaceTestIRpcClient) rtnStringAndError(msg string) (s string, err 
 		Param0_msg: msg,
 	}
 	var resp _Irpc_interfaceTestrtnStringAndErrorResp
-	if err := _c.endpoint.CallRemoteFunc(_c.id, 3, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 3, req, &resp); err != nil {
 		var zero _Irpc_interfaceTestrtnStringAndErrorResp
 		return zero.Param0_s, err
 	}
@@ -194,7 +194,7 @@ func (_c *interfaceTestIRpcClient) passCustomInterfaceAndReturnItModified(ci cus
 		Param0_ci: ci,
 	}
 	var resp _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp
-	if err := _c.endpoint.CallRemoteFunc(_c.id, 4, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 4, req, &resp); err != nil {
 		var zero _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp
 		return zero.Param0_, err
 	}
@@ -207,7 +207,7 @@ type customInterfaceIRpcClient struct {
 }
 
 func newCustomInterfaceIRpcClient(endpoint *irpc.Endpoint) (*customInterfaceIRpcClient, error) {
-	id, err := endpoint.RegisterClient([]byte("customInterfaceIRpcService"))
+	id, err := endpoint.RegisterClient(context.Background(), []byte("customInterfaceIRpcService"))
 	if err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -216,7 +216,7 @@ func newCustomInterfaceIRpcClient(endpoint *irpc.Endpoint) (*customInterfaceIRpc
 func (_c *customInterfaceIRpcClient) IntFunc() int {
 	var req = _Irpc_customInterfaceIntFuncReq{}
 	var resp _Irpc_customInterfaceIntFuncResp
-	if err := _c.endpoint.CallRemoteFunc(_c.id, 0, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
 	return resp.Param0_
@@ -224,7 +224,7 @@ func (_c *customInterfaceIRpcClient) IntFunc() int {
 func (_c *customInterfaceIRpcClient) StringFunc() string {
 	var req = _Irpc_customInterfaceStringFuncReq{}
 	var resp _Irpc_customInterfaceStringFuncResp
-	if err := _c.endpoint.CallRemoteFunc(_c.id, 1, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 1, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
 	return resp.Param0_

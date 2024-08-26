@@ -86,7 +86,7 @@ type sliceTestIRpcClient struct {
 }
 
 func newSliceTestIRpcClient(endpoint *irpc.Endpoint) (*sliceTestIRpcClient, error) {
-	id, err := endpoint.RegisterClient([]byte("sliceTestIRpcService"))
+	id, err := endpoint.RegisterClient(context.Background(), []byte("sliceTestIRpcService"))
 	if err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -97,7 +97,7 @@ func (_c *sliceTestIRpcClient) SliceSum(slice []int) int {
 		Param0_slice: slice,
 	}
 	var resp _Irpc_sliceTestSliceSumResp
-	if err := _c.endpoint.CallRemoteFunc(_c.id, 0, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
 	return resp.Param0_
@@ -108,7 +108,7 @@ func (_c *sliceTestIRpcClient) VectMult(vect []int, s int) []int {
 		Param1_s:    s,
 	}
 	var resp _Irpc_sliceTestVectMultResp
-	if err := _c.endpoint.CallRemoteFunc(_c.id, 1, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 1, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
 	return resp.Param0_
@@ -118,7 +118,7 @@ func (_c *sliceTestIRpcClient) SliceOfFloat64Sum(slice []float64) float64 {
 		Param0_slice: slice,
 	}
 	var resp _Irpc_sliceTestSliceOfFloat64SumResp
-	if err := _c.endpoint.CallRemoteFunc(_c.id, 2, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 2, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
 	return resp.Param0_
@@ -128,7 +128,7 @@ func (_c *sliceTestIRpcClient) SliceOfSlicesSum(slice [][]int) int {
 		Param0_slice: slice,
 	}
 	var resp _Irpc_sliceTestSliceOfSlicesSumResp
-	if err := _c.endpoint.CallRemoteFunc(_c.id, 3, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 3, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
 	return resp.Param0_

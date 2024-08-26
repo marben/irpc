@@ -47,6 +47,20 @@ func (s *TestServiceIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseri
 				return resp
 			}, nil
 		}, nil
+	case 2: // DivCtxErr
+		return func(d *irpc.Decoder) (irpc.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_TestServiceDivCtxErrReq
+			if err := args.Deserialize(d); err != nil {
+				return nil, err
+			}
+			return func(ctx context.Context) irpc.Serializable {
+				// EXECUTE
+				var resp _Irpc_TestServiceDivCtxErrResp
+				resp.Param0_, resp.Param1_ = s.impl.DivCtxErr(ctx, args.Param1_a, args.Param1_b)
+				return resp
+			}, nil
+		}, nil
 	default:
 		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, string(s.Hash()))
 	}
@@ -58,7 +72,7 @@ type TestServiceIRpcClient struct {
 }
 
 func NewTestServiceIRpcClient(endpoint *irpc.Endpoint) (*TestServiceIRpcClient, error) {
-	id, err := endpoint.RegisterClient([]byte("TestServiceIRpcService"))
+	id, err := endpoint.RegisterClient(context.Background(), []byte("TestServiceIRpcService"))
 	if err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -70,7 +84,7 @@ func (_c *TestServiceIRpcClient) Div(a int, b int) int {
 		Param0_b: b,
 	}
 	var resp _Irpc_TestServiceDivResp
-	if err := _c.endpoint.CallRemoteFunc(_c.id, 0, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
 	return resp.Param0_
@@ -81,8 +95,21 @@ func (_c *TestServiceIRpcClient) DivErr(a int, b int) (int, error) {
 		Param0_b: b,
 	}
 	var resp _Irpc_TestServiceDivErrResp
-	if err := _c.endpoint.CallRemoteFunc(_c.id, 1, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 1, req, &resp); err != nil {
 		var zero _Irpc_TestServiceDivErrResp
+		return zero.Param0_, err
+	}
+	return resp.Param0_, resp.Param1_
+}
+func (_c *TestServiceIRpcClient) DivCtxErr(ctx context.Context, a int, b int) (int, error) {
+	var req = _Irpc_TestServiceDivCtxErrReq{
+		// Param0_ctx: ctx,
+		Param1_a: a,
+		Param1_b: b,
+	}
+	var resp _Irpc_TestServiceDivCtxErrResp
+	if err := _c.endpoint.CallRemoteFunc(ctx, _c.id, 2, req, &resp); err != nil {
+		var zero _Irpc_TestServiceDivCtxErrResp
 		return zero.Param0_, err
 	}
 	return resp.Param0_, resp.Param1_
@@ -213,4 +240,85 @@ type _error_TestService_irpcInterfaceImpl struct {
 
 func (i _error_TestService_irpcInterfaceImpl) Error() string {
 	return i._Error_0_
+}
+
+type _Irpc_TestServiceDivCtxErrReq struct {
+	// Param0_ctx context.Context
+	Param1_a int
+	Param1_b int
+}
+
+func (s _Irpc_TestServiceDivCtxErrReq) Serialize(e *irpc.Encoder) error {
+	// no code for context encoding
+	if err := e.Int(s.Param1_a); err != nil {
+		return fmt.Errorf("serialize s.Param1_a of type 'int': %w", err)
+	}
+	if err := e.Int(s.Param1_b); err != nil {
+		return fmt.Errorf("serialize s.Param1_b of type 'int': %w", err)
+	}
+	return nil
+}
+func (s *_Irpc_TestServiceDivCtxErrReq) Deserialize(d *irpc.Decoder) error {
+	// no code for context decoding
+	if err := d.Int(&s.Param1_a); err != nil {
+		return fmt.Errorf("deserialize s.Param1_a of type 'int': %w", err)
+	}
+	if err := d.Int(&s.Param1_b); err != nil {
+		return fmt.Errorf("deserialize s.Param1_b of type 'int': %w", err)
+	}
+	return nil
+}
+
+type _Irpc_TestServiceDivCtxErrResp struct {
+	Param0_ int
+	Param1_ error
+}
+
+func (s _Irpc_TestServiceDivCtxErrResp) Serialize(e *irpc.Encoder) error {
+	if err := e.Int(s.Param0_); err != nil {
+		return fmt.Errorf("serialize s.Param0_ of type 'int': %w", err)
+	}
+	{
+		var isNil bool
+		if s.Param1_ == nil {
+			isNil = true
+		}
+		if err := e.Bool(isNil); err != nil {
+			return fmt.Errorf("serialize isNil of type 'bool': %w", err)
+		}
+
+		if !isNil {
+			{ // Error()
+				_Error_0_ := s.Param1_.Error()
+				if err := e.String(_Error_0_); err != nil {
+					return fmt.Errorf("serialize _Error_0_ of type 'string': %w", err)
+				}
+			}
+		}
+	}
+	return nil
+}
+func (s *_Irpc_TestServiceDivCtxErrResp) Deserialize(d *irpc.Decoder) error {
+	if err := d.Int(&s.Param0_); err != nil {
+		return fmt.Errorf("deserialize s.Param0_ of type 'int': %w", err)
+	}
+	{
+		var isNil bool
+		if err := d.Bool(&isNil); err != nil {
+			return fmt.Errorf("deserialize isNil of type 'bool': %w", err)
+		}
+
+		if isNil {
+			s.Param1_ = nil
+		} else {
+			var impl _error_TestService_irpcInterfaceImpl
+			{ // Error()
+				if err := d.String(&impl._Error_0_); err != nil {
+					return fmt.Errorf("deserialize impl._Error_0_ of type 'string': %w", err)
+				}
+			}
+			s.Param1_ = impl
+		}
+	}
+	return nil
 }

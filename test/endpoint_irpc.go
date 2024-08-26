@@ -44,7 +44,7 @@ type endpointApiIRpcClient struct {
 }
 
 func newEndpointApiIRpcClient(endpoint *irpc.Endpoint) (*endpointApiIRpcClient, error) {
-	id, err := endpoint.RegisterClient([]byte("endpointApiIRpcService"))
+	id, err := endpoint.RegisterClient(context.Background(), []byte("endpointApiIRpcService"))
 	if err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -56,7 +56,7 @@ func (_c *endpointApiIRpcClient) Div(a float64, b float64) (float64, error) {
 		Param0_b: b,
 	}
 	var resp _Irpc_endpointApiDivResp
-	if err := _c.endpoint.CallRemoteFunc(_c.id, 0, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
 		var zero _Irpc_endpointApiDivResp
 		return zero.Param0_, err
 	}

@@ -1,7 +1,9 @@
+- implement endpoint shutdown function
 - get rid of all panic
  - when service is not running on the other end, and our function returns error, return some irpc error
 - figure out error handling and what to do on server side panics
 - test function with zero return vals
+- encoder endianity - rename encoder.Int() to encoder.IntLE() to make it obvious it's little endian and make it possible to cleanly add BE versions if desired
 - slice - consider passing capacity
     - consider capacity's max size (and a limit for all calls for that sake)
     - slices (and other reference types) passed in as value can't be changed. i guess, this cannot be avoided

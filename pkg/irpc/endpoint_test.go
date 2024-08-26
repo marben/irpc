@@ -76,7 +76,7 @@ type MathIRpcClient struct {
 }
 
 func NewMathIrpcClient(ep *irpc.Endpoint) (*MathIRpcClient, error) {
-	id, err := ep.RegisterClient(mathIrpcServiceHash)
+	id, err := ep.RegisterClient(context.Background(), mathIrpcServiceHash)
 	if err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -89,7 +89,7 @@ func (mc *MathIRpcClient) Add(a int, b int) int {
 	var params = addParams{A: a, B: b}
 	var resp addRtnVals
 
-	if err := mc.ep.CallRemoteFunc(mc.id, mathIrpcFuncAddId, params, &resp); err != nil {
+	if err := mc.ep.CallRemoteFunc(context.Background(), mc.id, mathIrpcFuncAddId, params, &resp); err != nil {
 		panic(fmt.Sprintf("callRemoteFunc failed: %v", err))
 	}
 
@@ -146,7 +146,8 @@ func TestEndpointClientRegister(t *testing.T) {
 		t.Fatalf("ep1.Close(): %+v", err)
 	}
 
-	if err := ep2.Close(); err != nil {
+	time.Sleep(5 * time.Millisecond) // wait for the close signal to arrive
+	if err := ep2.Close(); !errors.Is(err, irpc.ErrEndpointClosed) {
 		t.Fatalf("ep2.Close(): %+v", err)
 	}
 }
@@ -369,6 +370,11 @@ func TestMaxWorkersNumber(t *testing.T) {
 	if err != nil {
 		t.Fatalf("create local tcp endpints: %+v", err)
 	}
+	defer func() {
+		if err := serviceEp.Close(); err != nil {
+			t.Fatalf("failed to close service ep: %+v", err)
+		}
+	}()
 
 	service := testtools.NewTestServiceImpl(0)
 
@@ -417,6 +423,260 @@ func TestMaxWorkersNumber(t *testing.T) {
 	close(unlockC)
 	<-resC
 	wg.Wait() // no reason really, just to be sure
+}
+
+// makes sure that context cancelation on clinet's side gets propagated to the service
+func TestContextCancel(t *testing.T) {
+	serviceEp, clientEp, err := testtools.CreateLocalTcpEndpoints()
+	if err != nil {
+		t.Fatalf("create local tcp endpoints: %+v", err)
+	}
+
+	service := testtools.NewTestServiceImpl(0)
+
+	serviceEp.RegisterServices(testtools.NewTestServiceIRpcService(service))
+
+	client, err := testtools.NewTestServiceIRpcClient(clientEp)
+	if err != nil {
+		t.Fatalf("new client: %+v", err)
+	}
+
+	// test normal operation
+	res, err := client.DivCtxErr(context.Background(), 6, 3)
+	if err != nil {
+		t.Fatalf("client.Div.CtxErr: %+v", err)
+	}
+	if res != 6/3 {
+		t.Fatalf("unexpected result: %d", res)
+	}
+
+	// now we will test cancelling context
+	serviceErrC := make(chan error, 1)
+
+	clientCtx, cancelClientCtx := context.WithCancelCause(context.Background())
+
+	// service function implementation
+	// bloack until context is canceled.
+	service.DivCtxErrFunc = func(ctx context.Context, a, b int) (int, error) {
+		// block until ctx is canceled
+		<-ctx.Done()
+		causeErr := context.Cause(ctx)
+		t.Logf("service div func: context canceled with err: '%s' and cause '%s'", ctx.Err(), causeErr)
+		serviceErrC <- causeErr
+		return 777, causeErr // errs out, but still returns val
+	}
+
+	clientErrC := make(chan error)
+	go func() {
+		// block until ctx is canceled
+		res, err = client.DivCtxErr(clientCtx, 8, 2)
+		if res != 777 {
+			log.Fatalf("unexpected div result: %d", res)
+		}
+
+		// log.Printf("client obtained error: %v", err)
+		clientErrC <- err
+	}()
+
+	clientCancelErr := errors.New("canceled from client side")
+
+	// canceling client context should propagate to the service function
+	cancelClientCtx(clientCancelErr)
+
+	select {
+	case <-time.After(2 * time.Second):
+		t.Fatalf("waiting for client to cancel on context timed out")
+	case clientErr := <-clientErrC:
+		if clientErr != clientCancelErr {
+			if clientErr.Error() != clientCancelErr.Error() {
+				t.Fatalf("unexpected client context error: %+v", err)
+			}
+		}
+	}
+
+	// the service side of function should unblock too
+	select {
+	case <-time.After(1 * time.Second):
+		t.Fatalf("waiting for service to cancel context timed out")
+	case err := <-serviceErrC:
+		if err.Error() != clientCancelErr.Error() {
+			t.Fatalf("unexpected service context error: %+v", err)
+		}
+	}
+
+	if err := serviceEp.Close(); err != nil {
+		t.Fatalf("serviceEp.Close(): %+v", err)
+	}
+}
+
+func TestServiceEndpointClosingEndsRunningWorkers(t *testing.T) {
+	serviceEp, clientEp, err := testtools.CreateLocalTcpEndpoints()
+	if err != nil {
+		t.Fatalf("create local tcp endpoints: %+v", err)
+	}
+
+	service := testtools.NewTestServiceImpl(0)
+
+	serviceEp.RegisterServices(testtools.NewTestServiceIRpcService(service))
+
+	client, err := testtools.NewTestServiceIRpcClient(clientEp)
+	if err != nil {
+		t.Fatalf("new client: %+v", err)
+	}
+
+	serviceErrC := make(chan error, 1)
+	serviceFuncStartC := make(chan struct{})
+
+	// clientCtx, cancelClientCtx := context.WithCancelCause(context.Background())
+
+	// service function implementation
+	// bloack until context is canceled.
+	service.DivCtxErrFunc = func(ctx context.Context, a, b int) (int, error) {
+		serviceFuncStartC <- struct{}{}
+		// block until ctx is canceled
+		<-ctx.Done()
+		causeErr := context.Cause(ctx)
+		// t.Logf("service div func: context canceled with err: '%s' and cause '%s'", ctx.Err(), causeErr)
+		serviceErrC <- causeErr
+		return 777, causeErr // errs out, but still returns val
+	}
+
+	workersNumber := irpc.ParallelWorkers
+	clientErrC := make(chan error)
+
+	// all following workers should block
+	for range workersNumber {
+		go func() {
+			// clients context never expires, but remote endpoint should still
+			// cancel the workers on Close() call
+			res, err := client.DivCtxErr(context.Background(), 8, 2)
+			if res != 0 { // we should return the nil value(provided by client) as close dowsn't wait for the work runners to return values
+				log.Fatalf("unexpected div result: %d", res)
+			}
+
+			// log.Printf("client obtained error: %v", err)
+			clientErrC <- err
+		}()
+	}
+
+	// make sure all service workers are running
+	for range workersNumber {
+		<-serviceFuncStartC
+	}
+
+	// trigger remote endpoint to close - should trigger close of everything
+	if err := serviceEp.Close(); err != nil {
+		t.Fatalf("serviceEp.Close(): %+v", err)
+	}
+
+	// client's should err out
+	for range workersNumber {
+		select {
+		case <-time.After(2 * time.Second):
+			t.Fatalf("waiting for client to cancel on context timed out")
+		case clientErr := <-clientErrC:
+			if clientErr != irpc.ErrEndpointClosed {
+				t.Fatalf("unexpected client error: %v", err)
+			}
+		}
+	}
+
+	// the service side of function should unblock too
+	for range workersNumber {
+		select {
+		case <-time.After(1 * time.Second):
+			t.Fatalf("waiting for service to cancel context timed out")
+		case err := <-serviceErrC:
+			if err != irpc.ErrEndpointClosed {
+				t.Fatalf("unexpected service error: %v", err)
+			}
+		}
+	}
+}
+
+func TestClientEndpointClosingEndsRunningWorkers(t *testing.T) {
+	serviceEp, clientEp, err := testtools.CreateLocalTcpEndpoints()
+	if err != nil {
+		t.Fatalf("create local tcp endpoints: %+v", err)
+	}
+
+	service := testtools.NewTestServiceImpl(0)
+
+	serviceEp.RegisterServices(testtools.NewTestServiceIRpcService(service))
+
+	client, err := testtools.NewTestServiceIRpcClient(clientEp)
+	if err != nil {
+		t.Fatalf("new client: %+v", err)
+	}
+
+	serviceErrC := make(chan error, 1)
+	serviceFuncStartC := make(chan struct{})
+
+	// clientCtx, cancelClientCtx := context.WithCancelCause(context.Background())
+
+	// service function implementation
+	// bloack until context is canceled.
+	service.DivCtxErrFunc = func(ctx context.Context, a, b int) (int, error) {
+		serviceFuncStartC <- struct{}{}
+		// block until ctx is canceled
+		<-ctx.Done()
+		causeErr := context.Cause(ctx)
+		// t.Logf("service div func: context canceled with err: '%s' and cause '%s'", ctx.Err(), causeErr)
+		serviceErrC <- causeErr
+		return 777, causeErr // errs out, but still returns val
+	}
+
+	workersNumber := irpc.ParallelWorkers
+	clientErrC := make(chan error)
+
+	// all following workers should block
+	for range workersNumber {
+		go func() {
+			// clients context never expires, but remote endpoint should still
+			// cancel the workers on Close() call
+			res, err := client.DivCtxErr(context.Background(), 8, 2)
+			if res != 0 { // we should return the nil value(provided by client) as close dowsn't wait for the work runners to return values
+				log.Fatalf("unexpected div result: %d", res)
+			}
+
+			// log.Printf("client obtained error: %v", err)
+			clientErrC <- err
+		}()
+	}
+
+	// make sure all service workers are running
+	for range workersNumber {
+		<-serviceFuncStartC
+	}
+
+	// trigger local endpoint to close - should trigger close of everything
+	if err := clientEp.Close(); err != nil {
+		t.Fatalf("clientEp.Close(): %+v", err)
+	}
+
+	// client's should err out
+	for range workersNumber {
+		select {
+		case <-time.After(2 * time.Second):
+			t.Fatalf("waiting for client to cancel on context timed out")
+		case clientErr := <-clientErrC:
+			if clientErr != irpc.ErrEndpointClosed {
+				t.Fatalf("unexpected client error: %v", err)
+			}
+		}
+	}
+
+	// the service side of function should unblock too
+	for range workersNumber {
+		select {
+		case <-time.After(1 * time.Second):
+			t.Fatalf("waiting for service to cancel context timed out")
+		case err := <-serviceErrC:
+			if err != irpc.ErrEndpointClosed {
+				t.Fatalf("unexpected service error: %v", err)
+			}
+		}
+	}
 }
 
 // todo: uncomment

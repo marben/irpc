@@ -44,7 +44,7 @@ type tcpTestApiIRpcClient struct {
 }
 
 func newTcpTestApiIRpcClient(endpoint *irpc.Endpoint) (*tcpTestApiIRpcClient, error) {
-	id, err := endpoint.RegisterClient([]byte("tcpTestApiIRpcService"))
+	id, err := endpoint.RegisterClient(context.Background(), []byte("tcpTestApiIRpcService"))
 	if err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -56,7 +56,7 @@ func (_c *tcpTestApiIRpcClient) Div(a float64, b float64) (float64, error) {
 		Param0_b: b,
 	}
 	var resp _Irpc_tcpTestApiDivResp
-	if err := _c.endpoint.CallRemoteFunc(_c.id, 0, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
 		var zero _Irpc_tcpTestApiDivResp
 		return zero.Param0_, err
 	}

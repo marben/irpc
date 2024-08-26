@@ -52,14 +52,19 @@ func varEncoder(apiName string, t types.Type, q types.Qualifier) (encoder, error
 	case *types.Slice:
 		return newSliceEncoder(apiName, t, q)
 	case *types.Named:
-		name := t.Obj().Name()
-		switch ut := t.Underlying().(type) {
-		case *types.Struct:
-			return newNamedStructEncoder(apiName, ut, q)
-		case *types.Interface:
-			return newInterfaceEncoder(name, apiName, ut, q)
+		switch t.String() {
+		case "context.Context": // we treat context special
+			return contextEncoder{}, nil
 		default:
-			return nil, fmt.Errorf("unsupported named type: %s", ut)
+			name := t.Obj().Name()
+			switch ut := t.Underlying().(type) {
+			case *types.Struct:
+				return newNamedStructEncoder(apiName, ut, q)
+			case *types.Interface:
+				return newInterfaceEncoder(name, apiName, ut, q)
+			default:
+				return nil, fmt.Errorf("unsupported named type: %s", ut)
+			}
 		}
 	default:
 		return nil, fmt.Errorf("unsupported type '%T' of %s ", t, t)
@@ -456,4 +461,31 @@ func (e interfaceEncoder) codeblock() string {
 	}
 
 	return sb.String()
+}
+
+var _ encoder = contextEncoder{}
+
+// contextEncoder is a placeholder for context params
+// we don't actually pass any data. instead implement our own cancelling function
+type contextEncoder struct {
+}
+
+// codeblock implements encoder.
+func (c contextEncoder) codeblock() string {
+	return ""
+}
+
+// decode implements encoder.
+func (c contextEncoder) decode(varId string, existingVars []string) string {
+	return "// no code for context decoding\n"
+}
+
+// encode implements encoder.
+func (c contextEncoder) encode(varId string, existingVars []string) string {
+	return "// no code for context encoding\n"
+}
+
+// imports implements encoder.
+func (c contextEncoder) imports() []string {
+	return []string{contextImport}
 }

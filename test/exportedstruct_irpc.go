@@ -44,7 +44,7 @@ type FileServerIRpcClient struct {
 }
 
 func NewFileServerIRpcClient(endpoint *irpc.Endpoint) (*FileServerIRpcClient, error) {
-	id, err := endpoint.RegisterClient([]byte("FileServerIRpcService"))
+	id, err := endpoint.RegisterClient(context.Background(), []byte("FileServerIRpcService"))
 	if err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -53,7 +53,7 @@ func NewFileServerIRpcClient(endpoint *irpc.Endpoint) (*FileServerIRpcClient, er
 func (_c *FileServerIRpcClient) ListFiles() ([]FileInfo, error) {
 	var req = _Irpc_FileServerListFilesReq{}
 	var resp _Irpc_FileServerListFilesResp
-	if err := _c.endpoint.CallRemoteFunc(_c.id, 0, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
 		var zero _Irpc_FileServerListFilesResp
 		return zero.Param0_, err
 	}

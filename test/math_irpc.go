@@ -44,7 +44,7 @@ type MathIRpcClient struct {
 }
 
 func NewMathIRpcClient(endpoint *irpc.Endpoint) (*MathIRpcClient, error) {
-	id, err := endpoint.RegisterClient([]byte("MathIRpcService"))
+	id, err := endpoint.RegisterClient(context.Background(), []byte("MathIRpcService"))
 	if err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -56,7 +56,7 @@ func (_c *MathIRpcClient) Add(a int, b int) (int, error) {
 		Param0_b: b,
 	}
 	var resp _Irpc_MathAddResp
-	if err := _c.endpoint.CallRemoteFunc(_c.id, 0, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
 		var zero _Irpc_MathAddResp
 		return zero.Param0_, err
 	}

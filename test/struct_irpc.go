@@ -72,7 +72,7 @@ type structAPIIRpcClient struct {
 }
 
 func newStructAPIIRpcClient(endpoint *irpc.Endpoint) (*structAPIIRpcClient, error) {
-	id, err := endpoint.RegisterClient([]byte("structAPIIRpcService"))
+	id, err := endpoint.RegisterClient(context.Background(), []byte("structAPIIRpcService"))
 	if err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -83,7 +83,7 @@ func (_c *structAPIIRpcClient) VectSum(v vect3) int {
 		Param0_v: v,
 	}
 	var resp _Irpc_structAPIVectSumResp
-	if err := _c.endpoint.CallRemoteFunc(_c.id, 0, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
 	return resp.Param0_
@@ -93,7 +93,7 @@ func (_c *structAPIIRpcClient) Vect3x3Sum(v vect3x3) vect3 {
 		Param0_v: v,
 	}
 	var resp _Irpc_structAPIVect3x3SumResp
-	if err := _c.endpoint.CallRemoteFunc(_c.id, 1, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 1, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
 	return resp.Param0_
@@ -103,7 +103,7 @@ func (_c *structAPIIRpcClient) SumSliceStruct(s sliceStruct) int {
 		Param0_s: s,
 	}
 	var resp _Irpc_structAPISumSliceStructResp
-	if err := _c.endpoint.CallRemoteFunc(_c.id, 2, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 2, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
 	return resp.Param0_

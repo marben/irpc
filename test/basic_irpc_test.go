@@ -5,6 +5,7 @@ import (
 	"math"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/marben/irpc/pkg/irpc"
 	"github.com/marben/irpc/test/testtools"
@@ -173,10 +174,11 @@ func TestBasic(t *testing.T) {
 		t.Fatalf("unepected toUpperString result: '%s'", s)
 	}
 
-	// close endpoint
+	// close endpoints
 	if err := serviceEp.Close(); err != nil {
 		t.Fatalf("serviceEp.Close(): %+v", err)
 	}
+	time.Sleep(10 * time.Millisecond) // to make sure the closing notification has arrived
 	if err := clientEp.Close(); err != irpc.ErrEndpointClosed {
 		t.Fatalf("clientEp.Close(): %+v", err)
 	}
