@@ -8,16 +8,17 @@ import (
 	"io"
 	"log"
 	"sync"
-	"sync/atomic"
 
 	"golang.org/x/sync/semaphore"
 )
 
 var ErrServiceAlreadyRegistered = errors.New("service already registered")
 var ErrEndpointClosed = errors.New("endpoint is closed")
+var ErrEndpointClosedByCounterpart = errors.Join(ErrEndpointClosed, errors.New("endpoint closed by counterpart"))
 var ErrServiceNotFound = errors.New("service not found")
 var errProtocolError = errors.New("rpc protocol error")
 var ErrContextWaitTimedOut = errors.New("context wait timed out")
+var errCounterpartClosing = errors.New("counterpart is closing now")
 
 // todo: make one irpc error with err type iota inside
 
@@ -104,12 +105,10 @@ type Endpoint struct {
 	// lock m before accessing
 	serviceWorkers map[ReqNumT]serviceWorker
 
-	// error returned by message read go routine
-	readLoopErrC chan error
+	// closed on read loop end
+	readLoopRunningC chan struct{}
 
 	m sync.Mutex
-
-	closing atomic.Bool // todo: maybe replace with Endpoint.Ctx
 
 	// context ends with the closing of endpoint
 	Ctx       context.Context // todo: this is a test. not sure about the design.
@@ -118,7 +117,7 @@ type Endpoint struct {
 
 func NewEndpoint(conn io.ReadWriteCloser, services ...Service) *Endpoint {
 	bufWriter := bufio.NewWriter(conn)
-	ctx, cancel := context.WithCancelCause(context.Background())
+	globalContext, cancel := context.WithCancelCause(context.Background())
 	ep := &Endpoint{
 		serviceHashes:     make(map[string]RegisteredServiceId),
 		services:          make(map[RegisteredServiceId]Service),
@@ -128,8 +127,8 @@ func NewEndpoint(conn io.ReadWriteCloser, services ...Service) *Endpoint {
 		connCloser:        conn,
 		bufWriter:         bufWriter,
 		enc:               NewEncoder(bufWriter),
-		readLoopErrC:      make(chan error, 1),
-		Ctx:               ctx,
+		readLoopRunningC:  make(chan struct{}, 1),
+		Ctx:               globalContext,
 		ctxCancel:         cancel,
 		serviceWorkersSem: semaphore.NewWeighted(ParallelWorkers),
 	}
@@ -142,64 +141,100 @@ func NewEndpoint(conn io.ReadWriteCloser, services ...Service) *Endpoint {
 
 	// our read loop
 	go func() {
+		defer func() {
+			ep.readLoopRunningC <- struct{}{}
+		}()
+
 		dec := NewDecoder(bufio.NewReader(conn))
-		switch err := ep.readMsgs(dec); err {
-		case ErrEndpointClosed:
-			// panic(err)
-			// todo: we need to call close
-			ep.readLoopErrC <- ErrEndpointClosed // todo: wrong?
+		err := ep.readMsgs(globalContext, dec)
+		switch err {
+		case context.Canceled:
+			// our Close() must have been called
+			return
+		case errCounterpartClosing:
+			// countepart Ep sent us closing packed
+			// we need to close our part
+			go ep.closeOnCounterpartNotification()
 		default:
-			// log.Fatalf("err: %+v", err)
-			// panic(err)
-			// todo: close etc...
-			ep.readLoopErrC <- ErrEndpointClosed // wrong!
-			// panic(fmt.Sprintf("readMsg: %s", err.Error()))	// todo: uncomment and figure out proper closing pattern
+			if ep.closeAlreadyCalled() {
+				// context was canceled (Close probably called), but readMsgs didn't notice it (must have been reading in the time and entounter io error)
+				return
+			}
+
+			// unknown error. we need to set endpoint to close state
+			ep.closeOnUnexpectedError(err)
 		}
 	}()
 
 	return ep
 }
 
-// this is currently just a placeholder for internal err state which should eventually
-// do a clean Close of the endpoint
-func (e *Endpoint) errClose(err error) {
-	log.Printf("internal error close(): %+v", err)
-	panic(err)
+func (e *Endpoint) closeOnUnexpectedError(err error) {
+	log.Printf("%p: closeOnUnexpectedError: %+v", e, err)
+	e.ctxCancel(err)
+}
+
+// when we have been notified about counterpart's imminent closing, we need to do some cleanup
+func (e *Endpoint) closeOnCounterpartNotification() {
+	e.m.Lock() // todo: not needed?
+	defer e.m.Unlock()
+
+	// the endpoint may have been closed while waiting for lock. let's check
+	if e.closeAlreadyCalled() {
+		return
+		// log.Printf("%p: closeOnCounterpartNotification(): closeAlreadyCalled -> returning", e)
+	}
+	// log.Printf("%p: closeOnCounterpartNotification(): counterpart closed. canceling context", e)
+
+	// close the read loop and notify workers
+	e.ctxCancel(ErrEndpointClosedByCounterpart)
+}
+
+// called on internal Endpoint error(connection drop etc)
+// we cannot do it using the normal Close call, because  we don't know what could be failing
+func (e *Endpoint) closeOnReadError(err error) {
+	// switch
+	e.ctxCancel(err)
+	e.connCloser.Close()
+	// log.Printf("internal error close(): %+v", err)
+	// panic(err)
+}
+
+func (e *Endpoint) closeAlreadyCalled() bool {
+	return e.Ctx.Err() != nil
 }
 
 // Close immediately stops serving any requests
 // Close closes the underlying connection
 // Close returns ErrEndpointClosed if the Endpoint was already closed
 func (e *Endpoint) Close() error {
-	if e.closing.Load() {
-		return ErrEndpointClosed
+	e.m.Lock() // todo: this is probably unnecessary. figure out what to do with endpoint's state
+	defer e.m.Unlock()
+
+	// if the context was already canceled, there was already an error or this is second call
+	if e.closeAlreadyCalled() {
+		return ErrEndpointClosedByCounterpart
 	}
 
-	e.m.Lock()
-	defer e.m.Unlock()
+	// closes readMsg loop
+	// notifies all workers to cancel
+	// all new CallRemoteFunc() will err out immediately
+	e.ctxCancel(ErrEndpointClosed)
 
 	// we have mutex. no other writes happening now
 	// sign to our counterpart, that we are about to close connection
 	if err := e.serializePacketToConnLocked(packetHeader{typ: closingNowPacketType}); err != nil {
-		return fmt.Errorf("notify counterpart: %w", err)
+		return fmt.Errorf("sending closingNowPacket: %w", err)
 	}
 
-	// no more conn writing after this
-	e.closing.Store(true)
-	e.ctxCancel(ErrEndpointClosed) // this errs out waiting rpc calls
-
-	// we are the ones closing the underlying connection
-	// this makes read loop err out
+	// close the underlying connection
+	// this errors the read loop in case it didn't notice the context cancelation
 	if err := e.connCloser.Close(); err != nil {
 		return fmt.Errorf("connection.Close(): %w", err)
 	}
-	e.connCloser = nil
 
-	// todo: we need to err out all pending requests
-
-	// conn close triggers reader error
-	// we don't care about the error
-	<-e.readLoopErrC
+	// make sure the read loop has canceled
+	<-e.readLoopRunningC
 
 	return nil
 }
@@ -285,6 +320,11 @@ func (e *Endpoint) sendContextCancelation(req ReqNumT, cause error) error {
 }
 
 func (e *Endpoint) CallRemoteFunc(ctx context.Context, serviceId RegisteredServiceId, funcId FuncId, reqData Serializable, respData Deserializable) error {
+	// check if endpoint was closed
+	if err := e.Ctx.Err(); err != nil {
+		return context.Cause(e.Ctx)
+	}
+
 	pendingReq, err := e.sendRpcRequest(serviceId, funcId, reqData, respData)
 	if err != nil {
 		return err
@@ -297,11 +337,12 @@ func (e *Endpoint) CallRemoteFunc(ctx context.Context, serviceId RegisteredServi
 
 	// global endpoint's context ended
 	case <-e.Ctx.Done():
-
-		return ErrEndpointClosed
+		return context.Cause(e.Ctx)
 
 	// the client provided context expired
 	case <-ctx.Done():
+		// we notify the remote endpoint to speed up the function completion.
+		// otherwise we still just wait for response (or endpoint exit)
 		if err := e.sendContextCancelation(pendingReq.reqNum, context.Cause(ctx)); err != nil {
 			return fmt.Errorf("failed to cancel request %d: %w", e.reqNum, err)
 		}
@@ -310,7 +351,7 @@ func (e *Endpoint) CallRemoteFunc(ctx context.Context, serviceId RegisteredServi
 		case err := <-pendingReq.deserErrC:
 			return err
 		case <-e.Ctx.Done():
-			return ErrEndpointClosed
+			return context.Cause(e.Ctx)
 		}
 	}
 }
@@ -339,9 +380,6 @@ func (e *Endpoint) RegisterServices(services ...Service) error {
 // returns ErrEndpointClosed if endpoint is in closing state
 func (e *Endpoint) serializePacketToConnLocked(data ...Serializable) error {
 	// todo: do the locking here, not in the above function? (that would probably need splitting the mutext)
-	if e.closing.Load() {
-		return ErrEndpointClosed
-	}
 
 	for _, s := range data {
 		if err := s.Serialize(e.enc); err != nil {
@@ -378,15 +416,21 @@ func (e *Endpoint) sendResponse(reqNum ReqNumT, respData Serializable) error {
 
 // readMsgs is the main incoming messages processing loop
 // returns wrapped errProtocolError(todo: actually it doesn't) if the error is on a protocol level	// todo: make sure it does
-// returns ErrEndpointClosed if we received close request packet
-func (e *Endpoint) readMsgs(dec *Decoder) error {
+// returns context.Canceled if context has been canceled
+func (e *Endpoint) readMsgs(ctx context.Context, dec *Decoder) error {
 	for {
+		if ctx.Err() != nil {
+			log.Printf("%p: readMsg: returning because of canceled context", e)
+			return context.Canceled
+		}
+
 		var h packetHeader
 		if err := h.Deserialize(dec); err != nil {
 			return fmt.Errorf("read header: %w", err)
 		}
 
 		switch h.typ {
+		// counterpart requested us to run a function
 		case rpcRequestPacketType:
 			var req requestPacket
 			if err := req.Deserialize(dec); err != nil {
@@ -412,6 +456,7 @@ func (e *Endpoint) readMsgs(dec *Decoder) error {
 				return fmt.Errorf("new worker: %w", err)
 			}
 
+		// response from a function we requested from counterpart
 		case rpcResponsePacketType:
 			var resp responsePacket
 			if err := resp.Deserialize(dec); err != nil {
@@ -424,12 +469,12 @@ func (e *Endpoint) readMsgs(dec *Decoder) error {
 
 			pr.deserErrC <- pr.resp.Deserialize(dec)
 
+		// counterpart is closing
 		case closingNowPacketType:
-			// todo: maybe just return err and let handler close the endpoint?
-			e.closing.Store(true)          // todo: is this used?
-			e.ctxCancel(ErrEndpointClosed) // close waiting functions
-			return ErrEndpointClosed
+			return errCounterpartClosing
 
+		// counterpart informs us that context of some function it requested us to execute, has expired
+		// we cancel corresponting worker's context and hope response gets sent fast
 		case ctxEndPacketType:
 			var cancelRequest ctxEndPacket
 			if err := cancelRequest.Deserialize(dec); err != nil {
@@ -440,7 +485,7 @@ func (e *Endpoint) readMsgs(dec *Decoder) error {
 			e.cancelRequest(cancelRequest.ReqNum, clientErr)
 
 		default:
-			panic(fmt.Sprintf("unexpected packet type: %+v", h.typ)) // todo: remove panic, just return error
+			return fmt.Errorf("unexpected packet type: %+v", h.typ)
 		}
 	}
 }
@@ -492,10 +537,10 @@ func (e *Endpoint) startServiceWorker(reqNum ReqNumT, exe FuncExecutor) error {
 
 		// log.Printf("exec finished. sending response for request %d", reqNum)
 		if err := e.sendResponse(reqNum, resp); err != nil {
-			if errors.Is(err, ErrEndpointClosed) {
-				return
-			}
-			e.errClose(fmt.Errorf("failed to send response for request %d: %v", reqNum, err))
+			// if errors.Is(err, ErrEndpointClosed) {
+			// 	return
+			// }
+			e.closeOnReadError(fmt.Errorf("failed to send response for request %d: %v", reqNum, err))
 		}
 	}()
 

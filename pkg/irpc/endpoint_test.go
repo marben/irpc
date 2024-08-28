@@ -142,12 +142,14 @@ func TestEndpointClientRegister(t *testing.T) {
 		t.Fatalf("wrong result: %d", res)
 	}
 
+	t.Logf("%p: ep1 closing", ep1)
 	if err := ep1.Close(); err != nil {
 		t.Fatalf("ep1.Close(): %+v", err)
 	}
 
-	time.Sleep(5 * time.Millisecond) // wait for the close signal to arrive
-	if err := ep2.Close(); !errors.Is(err, irpc.ErrEndpointClosed) {
+	time.Sleep(100 * time.Millisecond) // wait for the close signal to arrive
+	t.Log("ep2 cosing")
+	if err := ep2.Close(); !errors.Is(err, irpc.ErrEndpointClosedByCounterpart) {
 		t.Fatalf("ep2.Close(): %+v", err)
 	}
 }
@@ -306,7 +308,7 @@ func TestClosingServiceEpWithWaitingFuncCalls(t *testing.T) {
 	}
 
 	// the blocked client.DivErr should now err out
-	if err := <-rtnC; err != irpc.ErrEndpointClosed {
+	if err := <-rtnC; !errors.Is(err, irpc.ErrEndpointClosed) || !errors.Is(err, irpc.ErrEndpointClosedByCounterpart) {
 		t.Fatalf("DivErr(): %+v", err)
 	}
 
@@ -575,8 +577,8 @@ func TestServiceEndpointClosingEndsRunningWorkers(t *testing.T) {
 		case <-time.After(2 * time.Second):
 			t.Fatalf("waiting for client to cancel on context timed out")
 		case clientErr := <-clientErrC:
-			if clientErr != irpc.ErrEndpointClosed {
-				t.Fatalf("unexpected client error: %v", err)
+			if !errors.Is(clientErr, irpc.ErrEndpointClosed) || !errors.Is(clientErr, irpc.ErrEndpointClosedByCounterpart) {
+				t.Fatalf("unexpected client error: %v", clientErr)
 			}
 		}
 	}
@@ -672,7 +674,7 @@ func TestClientEndpointClosingEndsRunningWorkers(t *testing.T) {
 		case <-time.After(1 * time.Second):
 			t.Fatalf("waiting for service to cancel context timed out")
 		case err := <-serviceErrC:
-			if err != irpc.ErrEndpointClosed {
+			if !errors.Is(err, irpc.ErrEndpointClosed) || !errors.Is(err, irpc.ErrEndpointClosedByCounterpart) {
 				t.Fatalf("unexpected service error: %v", err)
 			}
 		}
