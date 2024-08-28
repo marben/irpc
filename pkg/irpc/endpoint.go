@@ -8,8 +8,6 @@ import (
 	"io"
 	"log"
 	"sync"
-
-	"golang.org/x/sync/semaphore"
 )
 
 var ErrServiceAlreadyRegistered = errors.New("service already registered")
@@ -19,8 +17,6 @@ var ErrServiceNotFound = errors.New("service not found")
 var errProtocolError = errors.New("rpc protocol error")
 var ErrContextWaitTimedOut = errors.New("context wait timed out")
 var errCounterpartClosing = errors.New("counterpart is closing now")
-
-// todo: make one irpc error with err type iota inside
 
 type packetType uint8
 
@@ -98,12 +94,10 @@ type Endpoint struct {
 
 	pendingRequests map[ReqNumT]pendingRequest
 
-	// limits the number of active workers
-	serviceWorkersSem *semaphore.Weighted
-
 	// active running workers
 	// lock m before accessing
 	serviceWorkers map[ReqNumT]serviceWorker
+	wrkrQueue      chan struct{}
 
 	// closed on read loop end
 	readLoopRunningC chan struct{}
@@ -119,18 +113,18 @@ func NewEndpoint(conn io.ReadWriteCloser, services ...Service) *Endpoint {
 	bufWriter := bufio.NewWriter(conn)
 	globalContext, cancel := context.WithCancelCause(context.Background())
 	ep := &Endpoint{
-		serviceHashes:     make(map[string]RegisteredServiceId),
-		services:          make(map[RegisteredServiceId]Service),
-		pendingRequests:   make(map[ReqNumT]pendingRequest),
-		serviceWorkers:    make(map[ReqNumT]serviceWorker),
-		nextServiceId:     clientRegistrationServiceId + 1,
-		connCloser:        conn,
-		bufWriter:         bufWriter,
-		enc:               NewEncoder(bufWriter),
-		readLoopRunningC:  make(chan struct{}, 1),
-		Ctx:               globalContext,
-		ctxCancel:         cancel,
-		serviceWorkersSem: semaphore.NewWeighted(ParallelWorkers),
+		serviceHashes:    make(map[string]RegisteredServiceId),
+		services:         make(map[RegisteredServiceId]Service),
+		pendingRequests:  make(map[ReqNumT]pendingRequest),
+		serviceWorkers:   make(map[ReqNumT]serviceWorker),
+		nextServiceId:    clientRegistrationServiceId + 1,
+		connCloser:       conn,
+		bufWriter:        bufWriter,
+		enc:              NewEncoder(bufWriter),
+		readLoopRunningC: make(chan struct{}, 1),
+		wrkrQueue:        make(chan struct{}, ParallelWorkers),
+		Ctx:              globalContext,
+		ctxCancel:        cancel,
 	}
 
 	// default service for registering clients
@@ -451,7 +445,7 @@ func (e *Endpoint) readMsgs(ctx context.Context, dec *Decoder) error {
 			}
 
 			// waits until worker slot is available (blocks here on too many long rpcs)
-			err = e.startServiceWorker(req.ReqNum, funcExec)
+			err = e.startServiceWorker(ctx, req.ReqNum, funcExec)
 			if err != nil {
 				return fmt.Errorf("new worker: %w", err)
 			}
@@ -505,14 +499,16 @@ func (e *Endpoint) cancelRequest(rnum ReqNumT, cancelErr error) {
 }
 
 // blocks until worker slot is available
-func (e *Endpoint) startServiceWorker(reqNum ReqNumT, exe FuncExecutor) error {
+// todo: take context as argument
+func (e *Endpoint) startServiceWorker(ctx context.Context, reqNum ReqNumT, exe FuncExecutor) error {
 	// waits until worker slot is available (blocks here on too many long rpcs)
-	// todo: probably switch to channel based worker pool, which allows to check for context cancellation
-	if err := e.serviceWorkersSem.Acquire(e.Ctx, 1); err != nil {
-		return fmt.Errorf("worker semaphore.Acquire(): %w", err)
+	select {
+	case e.wrkrQueue <- struct{}{}:
+	case <-ctx.Done():
+		return ctx.Err()
 	}
 
-	ctxCancelable, cancel := context.WithCancelCause(e.Ctx)
+	ctxCancelable, cancel := context.WithCancelCause(ctx)
 
 	rw := serviceWorker{
 		cancel: cancel,
@@ -525,13 +521,14 @@ func (e *Endpoint) startServiceWorker(reqNum ReqNumT, exe FuncExecutor) error {
 	e.m.Unlock()
 
 	go func() {
+		// release the worker queue
+		defer func() { <-e.wrkrQueue }()
+
 		defer func() {
 			e.m.Lock()
 			defer e.m.Unlock()
 			delete(e.serviceWorkers, reqNum)
 		}()
-
-		defer e.serviceWorkersSem.Release(1)
 
 		resp := exe(ctxCancelable)
 
