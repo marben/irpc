@@ -25,7 +25,7 @@ type clientRegisterReq struct {
 
 type clientRegisterResp struct {
 	ServiceId RegisteredServiceId
-	Err       string // todo: turn into proper error, once we don't do json serialization
+	Err       string // todo: turn into proper error
 }
 
 // GetFuncCall implements Service.

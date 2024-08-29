@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"sync"
+	"time"
 )
 
 var ErrServiceAlreadyRegistered = errors.New("service already registered")
@@ -29,7 +30,8 @@ const (
 
 // todo: should be configurable for each endpoint
 const (
-	ParallelWorkers = 3
+	ParallelWorkers     = 3
+	ParallelClientCalls = ParallelWorkers + 1
 )
 
 type packetHeader struct {
@@ -90,7 +92,8 @@ type Endpoint struct {
 	bufWriter  *bufio.Writer // buffered Writer of the connection	// only used for flushing. rest of code should use encoder
 	enc        *Encoder      // does encoding on the bufWriter
 
-	reqNum ReqNumT // serial number of our next request	// todo: sort out overflow (and test?)
+	reqNumsC chan ReqNumT
+	writeMux Semaphore
 
 	pendingRequests map[ReqNumT]pendingRequest
 
@@ -105,13 +108,19 @@ type Endpoint struct {
 	m sync.Mutex
 
 	// context ends with the closing of endpoint
-	Ctx       context.Context // todo: this is a test. not sure about the design.
+	Ctx       context.Context // todo: not sure this should be exported
 	ctxCancel context.CancelCauseFunc
 }
 
 func NewEndpoint(conn io.ReadWriteCloser, services ...Service) *Endpoint {
 	bufWriter := bufio.NewWriter(conn)
 	globalContext, cancel := context.WithCancelCause(context.Background())
+
+	reqNumsC := make(chan ReqNumT, ParallelClientCalls)
+	for i := range ParallelClientCalls {
+		reqNumsC <- ReqNumT(i)
+	}
+
 	ep := &Endpoint{
 		serviceHashes:    make(map[string]RegisteredServiceId),
 		services:         make(map[RegisteredServiceId]Service),
@@ -121,8 +130,10 @@ func NewEndpoint(conn io.ReadWriteCloser, services ...Service) *Endpoint {
 		connCloser:       conn,
 		bufWriter:        bufWriter,
 		enc:              NewEncoder(bufWriter),
+		reqNumsC:         reqNumsC,
 		readLoopRunningC: make(chan struct{}, 1),
 		wrkrQueue:        make(chan struct{}, ParallelWorkers),
+		writeMux:         NewContextSemaphore(1),
 		Ctx:              globalContext,
 		ctxCancel:        cancel,
 	}
@@ -198,39 +209,63 @@ func (e *Endpoint) closeAlreadyCalled() bool {
 	return e.Ctx.Err() != nil
 }
 
+func (e *Endpoint) signalOurClosing(ctx context.Context) error {
+	unlock, err := e.writeMux.Lock(ctx)
+	if err != nil {
+		return err
+	}
+	defer unlock()
+
+	if err := e.serializePacketToConnLocked(packetHeader{typ: closingNowPacketType}); err != nil {
+		return fmt.Errorf("sending closingNowPacket: %w", err)
+	}
+
+	return nil
+}
+
 // Close immediately stops serving any requests
 // Close closes the underlying connection
 // Close returns ErrEndpointClosed if the Endpoint was already closed
 func (e *Endpoint) Close() error {
-	e.m.Lock() // todo: this is probably unnecessary. figure out what to do with endpoint's state
-	defer e.m.Unlock()
-
 	// if the context was already canceled, there was already an error or this is second call
 	if e.closeAlreadyCalled() {
 		return ErrEndpointClosedByCounterpart
 	}
 
+	// todo: made up numbers
+	timeout := 300 * time.Millisecond
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	var closeError error
+	// e.m.Lock() // todo: this is probably unnecessary. figure out what to do with endpoint's state
+	// defer e.m.Unlock()
+
 	// closes readMsg loop
 	// notifies all workers to cancel
-	// all new CallRemoteFunc() will err out immediately
+	// all new requests (CallRemoteFunc()) will err out immediately
 	e.ctxCancel(ErrEndpointClosed)
 
 	// we have mutex. no other writes happening now
 	// sign to our counterpart, that we are about to close connection
-	if err := e.serializePacketToConnLocked(packetHeader{typ: closingNowPacketType}); err != nil {
-		return fmt.Errorf("sending closingNowPacket: %w", err)
+	if err := e.signalOurClosing(ctx); err != nil {
+		closeError = errors.Join(closeError, fmt.Errorf("failed to signal our closing: %w", err))
 	}
-
 	// close the underlying connection
 	// this errors the read loop in case it didn't notice the context cancelation
 	if err := e.connCloser.Close(); err != nil {
-		return fmt.Errorf("connection.Close(): %w", err)
+		closeError = errors.Join(closeError, fmt.Errorf("connection.Close(): %w", err))
 	}
 
 	// make sure the read loop has canceled
-	<-e.readLoopRunningC
+	select {
+	case <-e.readLoopRunningC:
+		// ok
+	case <-ctx.Done():
+		closeError = errors.Join(closeError, fmt.Errorf("close timed out after %s", timeout))
+	}
 
-	return nil
+	return closeError
 }
 
 // registers client on remote endpoint
@@ -259,53 +294,61 @@ func (e *Endpoint) getService(id RegisteredServiceId) (Service, error) {
 	return s, nil
 }
 
-func (e *Endpoint) genNewRequestNumberLocked() ReqNumT {
-	reqNum := e.reqNum
-	e.reqNum += 1
-	return reqNum
+func (e *Endpoint) newRequestNumber(ctx context.Context) (ReqNumT, error) {
+	select {
+	case n := <-e.reqNumsC:
+		return n, nil
+	case <-ctx.Done():
+		return 0, ctx.Err()
+	}
 }
 
-func (e *Endpoint) sendRpcRequest(serviceId RegisteredServiceId, funcId FuncId, reqData Serializable, respData Deserializable) (pendingRequest, error) {
-	e.m.Lock()
-	defer e.m.Unlock()
+func (e *Endpoint) sendRpcRequest(ctx context.Context, serviceId RegisteredServiceId, funcId FuncId, reqData Serializable, respData Deserializable) (pendingRequest, error) {
+	unlock, err := e.writeMux.Lock(ctx)
+	if err != nil {
+		return pendingRequest{}, err
+	}
+	defer unlock()
 
-	reqNum := e.genNewRequestNumberLocked()
+	pr, err := e.addPendingRequest(ctx, respData)
+	if err != nil {
+		return pendingRequest{}, fmt.Errorf("addPendingRequest(): %w", err)
+	}
 
 	header := packetHeader{
 		typ: rpcRequestPacketType,
 	}
 
 	requestDef := requestPacket{
-		ReqNum:    reqNum,
+		ReqNum:    pr.reqNum,
 		ServiceId: serviceId,
 		FuncId:    funcId,
 	}
 
 	if err := e.serializePacketToConnLocked(header, requestDef, reqData); err != nil {
+		_, popErr := e.popPendingRequest(pr.reqNum)
+		if popErr != nil {
+			panic(fmt.Errorf("failed to pop a just added pending request: %w", popErr))
+		}
 		return pendingRequest{}, err
 	}
-
-	pr := pendingRequest{
-		reqNum:    reqNum,
-		resp:      respData,
-		deserErrC: make(chan error, 1),
-	}
-
-	e.pendingRequests[reqNum] = pr
 
 	return pr, nil
 }
 
-func (e *Endpoint) sendContextCancelation(req ReqNumT, cause error) error {
-	log.Printf("sending cancel context request with err: %+v", cause)
+func (e *Endpoint) sendRequestContextCancelation(req ReqNumT, cause error) error {
 	header := packetHeader{typ: ctxEndPacketType}
 	ctxEndDef := ctxEndPacket{
 		ReqNum: req,
 		ErrStr: cause.Error(),
 	}
 
-	e.m.Lock()
-	defer e.m.Unlock()
+	unlock, err := e.writeMux.Lock(e.Ctx)
+	if err != nil {
+		return err
+	}
+	defer unlock()
+
 	if err := e.serializePacketToConnLocked(header, ctxEndDef); err != nil {
 		return err
 	}
@@ -314,12 +357,12 @@ func (e *Endpoint) sendContextCancelation(req ReqNumT, cause error) error {
 }
 
 func (e *Endpoint) CallRemoteFunc(ctx context.Context, serviceId RegisteredServiceId, funcId FuncId, reqData Serializable, respData Deserializable) error {
-	// check if endpoint was closed
-	if err := e.Ctx.Err(); err != nil {
+	// check if our endpoint was closed
+	if e.closeAlreadyCalled() {
 		return context.Cause(e.Ctx)
 	}
 
-	pendingReq, err := e.sendRpcRequest(serviceId, funcId, reqData, respData)
+	pendingReq, err := e.sendRpcRequest(ctx, serviceId, funcId, reqData, respData)
 	if err != nil {
 		return err
 	}
@@ -337,8 +380,8 @@ func (e *Endpoint) CallRemoteFunc(ctx context.Context, serviceId RegisteredServi
 	case <-ctx.Done():
 		// we notify the remote endpoint to speed up the function completion.
 		// otherwise we still just wait for response (or endpoint exit)
-		if err := e.sendContextCancelation(pendingReq.reqNum, context.Cause(ctx)); err != nil {
-			return fmt.Errorf("failed to cancel request %d: %w", e.reqNum, err)
+		if err := e.sendRequestContextCancelation(pendingReq.reqNum, context.Cause(ctx)); err != nil {
+			return fmt.Errorf("failed to cancel request %d: %w", pendingReq.reqNum, err)
 		}
 
 		select {
@@ -398,8 +441,11 @@ func (e *Endpoint) sendResponse(reqNum ReqNumT, respData Serializable) error {
 		typ: rpcResponsePacketType,
 	}
 
-	e.m.Lock()
-	defer e.m.Unlock()
+	unlock, err := e.writeMux.Lock(e.Ctx)
+	if err != nil {
+		return err
+	}
+	defer unlock()
 
 	if err := e.serializePacketToConnLocked(header, resp, respData); err != nil {
 		return fmt.Errorf("failed to serialize response to connection: %w", err)
@@ -532,7 +578,6 @@ func (e *Endpoint) startServiceWorker(ctx context.Context, reqNum ReqNumT, exe F
 
 		resp := exe(ctxCancelable)
 
-		// log.Printf("exec finished. sending response for request %d", reqNum)
 		if err := e.sendResponse(reqNum, resp); err != nil {
 			// if errors.Is(err, ErrEndpointClosed) {
 			// 	return
@@ -544,6 +589,23 @@ func (e *Endpoint) startServiceWorker(ctx context.Context, reqNum ReqNumT, exe F
 	return nil
 }
 
+func (e *Endpoint) addPendingRequest(ctx context.Context, resp Deserializable) (pendingRequest, error) {
+	reqNum, err := e.newRequestNumber(ctx)
+	if err != nil {
+		return pendingRequest{}, fmt.Errorf("newRequestNumber: %w", err)
+	}
+	e.m.Lock()
+	defer e.m.Unlock()
+
+	pr := pendingRequest{
+		reqNum:    reqNum,
+		resp:      resp,
+		deserErrC: make(chan error, 1),
+	}
+	e.pendingRequests[reqNum] = pr
+	return pr, nil
+}
+
 func (e *Endpoint) popPendingRequest(reqNum ReqNumT) (pendingRequest, error) {
 	e.m.Lock()
 	defer e.m.Unlock()
@@ -553,6 +615,7 @@ func (e *Endpoint) popPendingRequest(reqNum ReqNumT) (pendingRequest, error) {
 		return pendingRequest{}, fmt.Errorf("pending request %d not found", reqNum)
 	}
 	delete(e.pendingRequests, reqNum)
+	e.reqNumsC <- reqNum
 	return pr, nil
 }
 

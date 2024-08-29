@@ -457,9 +457,12 @@ func TestContextCancel(t *testing.T) {
 
 	clientCtx, cancelClientCtx := context.WithCancelCause(context.Background())
 
+	workerStartedC := make(chan struct{}, 1)
 	// service function implementation
 	// bloack until context is canceled.
 	service.DivCtxErrFunc = func(ctx context.Context, a, b int) (int, error) {
+		workerStartedC <- struct{}{}
+
 		// block until ctx is canceled
 		<-ctx.Done()
 		causeErr := context.Cause(ctx)
@@ -472,7 +475,7 @@ func TestContextCancel(t *testing.T) {
 	go func() {
 		// block until ctx is canceled
 		res, err = client.DivCtxErr(clientCtx, 8, 2)
-		if res != 777 {
+		if res != 777 { // we actually waited for the runner to spin up, so we should get proper result
 			log.Fatalf("unexpected div result: %d", res)
 		}
 
@@ -481,7 +484,7 @@ func TestContextCancel(t *testing.T) {
 	}()
 
 	clientCancelErr := errors.New("canceled from client side")
-
+	<-workerStartedC
 	// canceling client context should propagate to the service function
 	cancelClientCtx(clientCancelErr)
 
@@ -614,8 +617,6 @@ func TestClientEndpointClosingEndsRunningWorkers(t *testing.T) {
 	serviceErrC := make(chan error, 1)
 	serviceFuncStartC := make(chan struct{})
 
-	// clientCtx, cancelClientCtx := context.WithCancelCause(context.Background())
-
 	// service function implementation
 	// bloack until context is canceled.
 	service.DivCtxErrFunc = func(ctx context.Context, a, b int) (int, error) {
@@ -677,6 +678,85 @@ func TestClientEndpointClosingEndsRunningWorkers(t *testing.T) {
 			if !errors.Is(err, irpc.ErrEndpointClosed) || !errors.Is(err, irpc.ErrEndpointClosedByCounterpart) {
 				t.Fatalf("unexpected service error: %v", err)
 			}
+		}
+	}
+}
+
+// blocks available workers and then makes one more call, waiting for mutex to write/read
+// makes sure expiration of client side context actually quits the mutex wait
+func TestWaitingClientCallGetsCanceledOnContextTimeout(t *testing.T) {
+	serviceEp, clientEp, err := testtools.CreateLocalTcpEndpoints()
+	if err != nil {
+		t.Fatalf("create local tcp endpoints: %+v", err)
+	}
+
+	service := testtools.NewTestServiceImpl(0)
+
+	serviceEp.RegisterServices(testtools.NewTestServiceIRpcService(service))
+
+	client, err := testtools.NewTestServiceIRpcClient(clientEp)
+	if err != nil {
+		t.Fatalf("new client: %+v", err)
+	}
+
+	// serviceErrC := make(chan error, 1)
+	// serviceFuncStartC := make(chan struct{})
+
+	serviceUnblockCtx, serviceUnblock := context.WithCancel(context.Background())
+
+	service.DivCtxErrFunc = func(ctx context.Context, a, b int) (int, error) {
+		<-serviceUnblockCtx.Done()
+		return a / b, nil
+	}
+
+	// allocate all available workers
+	// and one more, to block the readMsg loop on service side
+	workersNumber := irpc.ParallelClientCalls + 1
+	clientResC := make(chan int)
+	for range workersNumber {
+		go func() {
+			// clients context never expires, but remote endpoint should still
+			// cancel the workers on Close() call
+			res, err := client.DivCtxErr(context.Background(), 8, 2)
+			if err != nil {
+				log.Fatalf("unexpected error of a properly made div")
+			}
+			if res != 4 {
+				log.Fatalf("unexpected div result: %d", res)
+			}
+
+			// log.Printf("client obtained error: %v", err)
+			clientResC <- res
+		}()
+	}
+	time.Sleep(10 * time.Millisecond) // wait so that all worker are hopefully running
+	// do the one call, that should not get to service and should time out on our side
+	extraCallErr := make(chan struct{})
+	go func() {
+		timeoutCtx, _ := context.WithTimeout(context.Background(), 50*time.Millisecond)
+		_, err := client.DivCtxErr(timeoutCtx, 8, 2)
+		if err != context.DeadlineExceeded {
+			log.Fatalf("unexpected error from blocked function")
+		}
+		extraCallErr <- struct{}{}
+	}()
+	select {
+	case <-time.After(300 * time.Millisecond):
+		t.Fatalf("wait timed out, but context should have canceled the client")
+	case <-extraCallErr:
+		t.Logf("cancelation on client side succeeded")
+	}
+
+	// just a cleanup + check all works as expected
+	serviceUnblock()
+	for range workersNumber {
+		select {
+		case res := <-clientResC:
+			if res != 4 {
+				t.Fatalf("unexpected result: %d", res)
+			}
+		case <-time.After(10 * time.Millisecond):
+			t.Fatalf("wait expired")
 		}
 	}
 }
