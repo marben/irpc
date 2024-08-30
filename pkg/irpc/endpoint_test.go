@@ -761,6 +761,96 @@ func TestWaitingClientCallGetsCanceledOnContextTimeout(t *testing.T) {
 	}
 }
 
+// tests, whether dropped connection correctly closes both endpoints
+func TestOutsideConnectionClose(t *testing.T) {
+	c1, c2, err := testtools.CreateLocalTcpConnPipe()
+	if err != nil {
+		t.Fatalf("failed to create local tcp pipe")
+	}
+	ep1 := irpc.NewEndpoint(c1)
+	ep2 := irpc.NewEndpoint(c2)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
+	defer cancel()
+
+	serviceCallStartedC := make(chan struct{})
+	callBlockC := make(chan struct{})
+
+	t.Log("starting service 1")
+	service1 := testtools.NewTestServiceImpl(1)
+	service1.DivCtxErrFunc = func(ctx context.Context, a, b int) (int, error) {
+		serviceCallStartedC <- struct{}{}
+		<-callBlockC
+		return 0, errors.New("service1 shouldn't have returned")
+	}
+	ep1.RegisterServices(testtools.NewTestServiceIRpcService(service1))
+
+	t.Log("starting service 2")
+	service2 := testtools.NewTestServiceImpl(2)
+	service2.DivCtxErrFunc = func(ctx context.Context, a, b int) (int, error) {
+		serviceCallStartedC <- struct{}{}
+		<-callBlockC
+		return 0, errors.New("service2 shouldn't have returned")
+	}
+	ep2.RegisterServices(testtools.NewTestServiceIRpcService(service2))
+
+	clientErrs := make(chan error)
+
+	t.Log("starting client1")
+	client1, err := testtools.NewTestServiceIRpcClient(ep1)
+	if err != nil {
+		t.Fatalf("new client1: %v", err)
+	}
+	go func() {
+		_, err := client1.DivCtxErr(ctx, 6, 3)
+		clientErrs <- err
+	}()
+
+	t.Log("starting client2")
+	client2, err := testtools.NewTestServiceIRpcClient(ep2)
+	if err != nil {
+		t.Fatalf("new client2: %v", err)
+	}
+	go func() {
+		_, err := client2.DivCtxErr(ctx, 6, 3)
+		clientErrs <- err
+	}()
+
+	t.Log("making sure both workers are running")
+	<-serviceCallStartedC
+	<-serviceCallStartedC
+	t.Log("both workers are running")
+
+	t.Log("closing connection")
+	if err := c1.Close(); err != nil {
+		t.Fatalf("c1.Close(): %+v", err)
+	}
+
+	t.Log("testing client's errors")
+	if err := <-clientErrs; !errors.Is(err, irpc.ErrEndpointClosed) {
+		t.Fatalf("unexpected client error: %v", err)
+	}
+	if err := <-clientErrs; !errors.Is(err, irpc.ErrEndpointClosed) {
+		t.Fatalf("unexpected client error: %v", err)
+	}
+
+	t.Log("trying to close endpoints that were already closed")
+	if err := ep1.Close(); !errors.Is(err, irpc.ErrEndpointClosed) {
+		t.Fatalf("ep1.Close(): %v", err)
+	}
+	if err := ep2.Close(); !errors.Is(err, irpc.ErrEndpointClosed) {
+		t.Fatalf("ep2.Close(): %v", err)
+	}
+
+	t.Log("trying to make a call on client")
+	if _, err := client1.DivCtxErr(ctx, 1, 2); !errors.Is(err, irpc.ErrEndpointClosed) {
+		t.Fatalf("client1.DivCtxErr(): %v", err)
+	}
+	if _, err := client2.DivCtxErr(ctx, 1, 2); !errors.Is(err, irpc.ErrEndpointClosed) {
+		t.Fatalf("client2.DivCtxErr(): %v", err)
+	}
+}
+
 // todo: uncomment
 // func TestRegisterServiceTwice(t *testing.T) {
 // 	ep := irpc.NewEndpoint()

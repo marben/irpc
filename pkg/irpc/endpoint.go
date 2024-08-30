@@ -159,45 +159,22 @@ func NewEndpoint(conn io.ReadWriteCloser, services ...Service) *Endpoint {
 		case errCounterpartClosing:
 			// countepart Ep sent us closing packed
 			// we need to close our part
-			go ep.closeOnCounterpartNotification()
+			ep.ctxCancel(ErrEndpointClosedByCounterpart)
 		default:
-			if ep.closeAlreadyCalled() {
-				// context was canceled (Close probably called), but readMsgs didn't notice it (must have been reading in the time and entounter io error)
-				return
-			}
 
-			// unknown error. we need to set endpoint to close state
-			ep.closeOnUnexpectedError(err)
+			// unknown connection error
+			// close the endpoint
+			ep.ctxCancel(errors.Join(ErrEndpointClosed, err))
 		}
 	}()
 
 	return ep
 }
 
-func (e *Endpoint) closeOnUnexpectedError(err error) {
-	log.Printf("%p: closeOnUnexpectedError: %+v", e, err)
-	e.ctxCancel(err)
-}
-
-// when we have been notified about counterpart's imminent closing, we need to do some cleanup
-func (e *Endpoint) closeOnCounterpartNotification() {
-	e.m.Lock() // todo: not needed?
-	defer e.m.Unlock()
-
-	// the endpoint may have been closed while waiting for lock. let's check
-	if e.closeAlreadyCalled() {
-		return
-		// log.Printf("%p: closeOnCounterpartNotification(): closeAlreadyCalled -> returning", e)
-	}
-	// log.Printf("%p: closeOnCounterpartNotification(): counterpart closed. canceling context", e)
-
-	// close the read loop and notify workers
-	e.ctxCancel(ErrEndpointClosedByCounterpart)
-}
-
 // called on internal Endpoint error(connection drop etc)
 // we cannot do it using the normal Close call, because  we don't know what could be failing
 func (e *Endpoint) closeOnReadError(err error) {
+	log.Println("close on read error!!!")
 	// switch
 	e.ctxCancel(err)
 	e.connCloser.Close()
@@ -229,17 +206,15 @@ func (e *Endpoint) signalOurClosing(ctx context.Context) error {
 func (e *Endpoint) Close() error {
 	// if the context was already canceled, there was already an error or this is second call
 	if e.closeAlreadyCalled() {
-		return ErrEndpointClosedByCounterpart
+		return context.Cause(e.Ctx)
 	}
 
-	// todo: made up numbers
+	// todo: made up number
 	timeout := 300 * time.Millisecond
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
 	var closeError error
-	// e.m.Lock() // todo: this is probably unnecessary. figure out what to do with endpoint's state
-	// defer e.m.Unlock()
 
 	// closes readMsg loop
 	// notifies all workers to cancel
@@ -582,7 +557,7 @@ func (e *Endpoint) startServiceWorker(ctx context.Context, reqNum ReqNumT, exe F
 			// if errors.Is(err, ErrEndpointClosed) {
 			// 	return
 			// }
-			e.closeOnReadError(fmt.Errorf("failed to send response for request %d: %v", reqNum, err))
+			e.closeOnReadError(fmt.Errorf("sendResponse() for request %d: %v", reqNum, err))
 		}
 	}()
 
@@ -594,15 +569,17 @@ func (e *Endpoint) addPendingRequest(ctx context.Context, resp Deserializable) (
 	if err != nil {
 		return pendingRequest{}, fmt.Errorf("newRequestNumber: %w", err)
 	}
-	e.m.Lock()
-	defer e.m.Unlock()
 
 	pr := pendingRequest{
 		reqNum:    reqNum,
 		resp:      resp,
 		deserErrC: make(chan error, 1),
 	}
+
+	e.m.Lock()
+	defer e.m.Unlock()
 	e.pendingRequests[reqNum] = pr
+
 	return pr, nil
 }
 
