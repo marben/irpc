@@ -12,6 +12,125 @@ import (
 	"github.com/marben/irpc/test/testtools"
 )
 
+func TestServeOnMultipleListeners(t *testing.T) {
+	// SERVER
+	skew := 3
+	service := testtools.NewTestServiceIRpcService(testtools.NewTestServiceImpl(skew))
+	server := irpc.NewServer(service)
+
+	l1, err := net.Listen("tcp", ":")
+	if err != nil {
+		t.Fatalf("failed to create server")
+	}
+	t.Logf("opened tcp listener1: %s", l1.Addr())
+	serve1ErrC := make(chan error)
+	t.Logf("running the server")
+	go func() { serve1ErrC <- server.Serve(l1) }()
+
+	l2, err := net.Listen("tcp", ":")
+	if err != nil {
+		t.Fatalf("failed to create server")
+	}
+	t.Logf("opened tcp listener2: %s", l2.Addr())
+	serve2ErrC := make(chan error)
+	t.Logf("running the server")
+	go func() { serve2ErrC <- server.Serve(l2) }()
+
+	// CLIENT 1
+	t.Logf("net.Dial(%s)", l1.Addr())
+	conn1, err := net.Dial("tcp", l1.Addr().String())
+	if err != nil {
+		t.Fatalf("net.Dial(%s): %v", l1.Addr().String(), err)
+	}
+
+	c1Ep := irpc.NewEndpoint(conn1)
+
+	client1, err := testtools.NewTestServiceIRpcClient(c1Ep)
+	if err != nil {
+		t.Fatalf("NewMathIrpcClient(): %v", err)
+	}
+
+	// CLIENT 2
+	t.Logf("net.Dial(%s)", l2.Addr())
+	conn2, err := net.Dial("tcp", l2.Addr().String())
+	if err != nil {
+		t.Fatalf("net.Dial(%s): %v", l1.Addr().String(), err)
+	}
+
+	c2Ep := irpc.NewEndpoint(conn2)
+
+	client2, err := testtools.NewTestServiceIRpcClient(c2Ep)
+	if err != nil {
+		t.Fatalf("NewMathIrpcClient(): %v", err)
+	}
+
+	t.Logf("making client1 call")
+	res1, err := client1.DivCtxErr(context.Background(), 6, 3)
+	if err != nil {
+		t.Fatalf("client1.DivCtxErr(): %+v", err)
+	}
+	if res1 != 6/3+skew {
+		t.Fatalf("unexpected client1 error: %d", res1)
+	}
+
+	t.Logf("making client2 call")
+	res2, err := client2.DivCtxErr(context.Background(), 6, 2)
+	if err != nil {
+		t.Fatalf("client2.DivCtxErr(): %+v", err)
+	}
+	if res2 != 6/2+skew {
+		t.Fatalf("unexpected client1 error: %d", res2)
+	}
+
+	t.Logf("closing listener1")
+	if err := l1.Close(); err != nil {
+		t.Fatalf("l1.Close(): %+v", err)
+	}
+	t.Logf("reading server.Serve(l1) error")
+	if err := <-serve1ErrC; !errors.Is(err, net.ErrClosed) {
+		t.Fatal("server.Serve(l1):", err)
+	}
+
+	t.Logf("trying a clinet1 call on closed listener, but still open connection")
+	res12, err := client1.DivCtxErr(context.Background(), 6, 1)
+	if err != nil {
+		t.Fatalf("client1.DivCtxErr(): %+v", err)
+	}
+	if res12 != 6/1+skew {
+		t.Fatalf("unexpected client1 error: %d", res1)
+	}
+
+	t.Log("closing connection 1")
+	if err := conn1.Close(); err != nil {
+		t.Fatal("conn1.Close():", err)
+	}
+
+	t.Log("trying client call on closed connection")
+	if _, err := client1.DivErr(2, 1); !errors.Is(err, irpc.ErrEndpointClosed) {
+		t.Fatalf("client1.DivErr(): %+v", err)
+	}
+
+	t.Logf("testing client2 call on a still running connection")
+	res22, err := client2.DivErr(8, 4)
+	if err != nil {
+		t.Fatalf("client2.DivErr(): %+v", err)
+	}
+	if res22 != 8/4+skew {
+		t.Fatalf("unexpected res22: %d", res22)
+	}
+
+	t.Logf("closing server")
+	if err := server.Close(); err != nil {
+		t.Fatal("server.Close()", err)
+	}
+
+	t.Log("testing client2 after server.Close()")
+	// time.Sleep(5*time.Millisecond)
+	if _, err := client2.DivErr(8, 4); !errors.Is(err, irpc.ErrEndpointClosed) {
+		t.Fatal("client2.DivErr()", err)
+	}
+}
+
 func TestTcpServerDialClose(t *testing.T) {
 	// SERVER
 	skew := 2
