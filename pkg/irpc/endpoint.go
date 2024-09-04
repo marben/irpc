@@ -202,6 +202,7 @@ func (e *Endpoint) signalOurClosing(ctx context.Context) error {
 
 // Close immediately stops serving any requests
 // Close closes the underlying connection
+// returns nil on successfull closing
 // Close returns ErrEndpointClosed if the Endpoint was already closed
 func (e *Endpoint) Close() error {
 	// if the context was already canceled, there was already an error or this is second call

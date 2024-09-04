@@ -1,61 +1,70 @@
-package irpc_test
+package irpc
 
 import (
 	"net"
 	"testing"
-
-	"github.com/marben/irpc/pkg/irpc"
-	irpctestpkg "github.com/marben/irpc/test"
+	"time"
 )
 
-func TestTcpServerDial(t *testing.T) {
-
-}
-
-func TestIrpcServer(t *testing.T) {
-	server := irpc.NewServer()
+// creates a server and connects a client. checks that the client is removed from
+// internal structures after close
+func TestClientRemovalOnClose(t *testing.T) {
+	// SERVER
+	service := newTestIRpcService(testServiceImpl{skew: 0})
+	t.Logf("starting server")
+	server := NewServer(service)
 
 	l, err := net.Listen("tcp", ":")
 	if err != nil {
-		t.Fatalf("failed to create listener: %v", err)
+		t.Fatalf("failed to create server")
 	}
+	t.Logf("opened tcp listener: %s", l.Addr())
+	serveErrC := make(chan error)
+	t.Logf("running the server")
+	go func() { serveErrC <- server.Serve(l) }()
 
-	skew := 8
-	mathService := irpctestpkg.NewMathIRpcService(irpctestpkg.MathImpl{Skew: skew})
-	server.RegisterService(mathService)
-
-	localAddr := l.Addr().String()
-	clientConn, err := net.Dial("tcp", localAddr)
+	// CLIENT
+	t.Logf("net.Dial(%s)", l.Addr())
+	conn, err := net.Dial("tcp", l.Addr().String())
 	if err != nil {
-		t.Fatalf("net.Dial(%s): %v", localAddr, err)
+		t.Fatalf("net.Dial(%s): %v", l.Addr().String(), err)
 	}
 
-	clientEp := irpc.NewEndpoint(clientConn)
-
-	serveC := make(chan error)
-	go func() { serveC <- server.Serve(l) }()
-
-	client, err := irpctestpkg.NewMathIRpcClient(clientEp)
+	cEp := NewEndpoint(conn)
+	t.Logf("registering client")
+	client, err := NewMathIrpcClient(cEp)
 	if err != nil {
-		t.Fatalf("NewMathIRpcClient(): %+v", err)
+		t.Fatalf("New client: %+v", err)
 	}
-
-	res, err := client.Add(1, 2)
-	if err != nil {
-		t.Fatalf("client.Add(1,2): %+v", err)
-	}
-	if res != 1+2+skew {
+	t.Log("making sure the client works")
+	if res := client.Add(1, 2); res != 1+2 {
 		t.Fatalf("unexpected result: %d", res)
 	}
+	// check the client is added to server's list
+	server.clientsMux.Lock()
+	if l := len(server.clients); l != 1 {
+		t.Fatalf("wrong number of registered clients: %d", l)
+	}
+	server.clientsMux.Unlock()
 
+	// close the endpoint. this should remove it from the list
+	if err := cEp.Close(); err != nil {
+		t.Fatalf("clientEndpoint.Close(): %+v", err)
+	}
+
+	time.Sleep(10 * time.Millisecond)
+	server.clientsMux.Lock()
+	if l := len(server.clients); l != 0 {
+		t.Fatalf("wrong number of registered clients: %d", l)
+	}
+	server.clientsMux.Unlock()
+
+	t.Log("closing server")
 	if err := server.Close(); err != nil {
-		t.Fatalf("Server.Close() returned: %+v", err)
-	}
-	if err := <-serveC; err != irpc.ErrServerClosed {
-		t.Errorf("server.Serve(): %+v", err)
+		t.Fatalf("server.Close(): %+v", err)
 	}
 
-	if err := clientEp.Close(); err != nil {
-		t.Fatalf("clientEp.Close(): %+v", err)
+	if err := <-serveErrC; err != ErrServerClosed {
+		t.Fatalf("server returned: %+v", err)
 	}
 }

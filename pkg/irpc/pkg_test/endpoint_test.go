@@ -2,9 +2,7 @@ package irpc_test
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"sync"
 	"testing"
@@ -14,130 +12,24 @@ import (
 	"github.com/marben/irpc/test/testtools"
 )
 
-// the interface that is base for our rpc
-type Math interface {
-	Add(a, b int) int
-}
-
-// the implementation of our function
-type MathImpl struct {
-	resultSkew int // skew is added to result, to distinguish different versions of math
-}
-
-func (mh MathImpl) Add(a, b int) int {
-	return a + b + mh.resultSkew
-}
-
-var _ Math = MathImpl{}
-var _ irpc.Service = &MathIRpcService{}
-
-type MathIRpcService struct {
-	impl Math
-}
-
-func newMathIRpcService(impl Math) *MathIRpcService { return &MathIRpcService{impl: impl} }
-
-func (ms *MathIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
-	switch funcId {
-	case mathIrpcFuncAddId:
-		return func(d *irpc.Decoder) (irpc.FuncExecutor, error) {
-			// DESERIALIZE
-			var args addParams
-			if err := args.Deserialize(d); err != nil {
-				return nil, err
-			}
-			return func(ctx context.Context) irpc.Serializable {
-				// EXECUTE
-				var resp addRtnVals
-				resp.Res = ms.impl.Add(args.A, args.B)
-				return resp
-			}, nil
-		}, nil
-	default:
-		return nil, fmt.Errorf("function '%v' doesn't exist on service '%s'", funcId, ms.Hash())
-	}
-}
-
-var mathIrpcServiceHash = []byte("MathServiceHash")
-
-func (*MathIRpcService) Hash() []byte {
-	return mathIrpcServiceHash
-}
-
-var _ Math = &MathIRpcClient{}
-
-const (
-	mathIrpcFuncAddId irpc.FuncId = iota
-)
-
-type MathIRpcClient struct {
-	ep *irpc.Endpoint
-	id irpc.RegisteredServiceId
-}
-
-func NewMathIrpcClient(ep *irpc.Endpoint) (*MathIRpcClient, error) {
-	id, err := ep.RegisterClient(context.Background(), mathIrpcServiceHash)
-	if err != nil {
-		return nil, fmt.Errorf("register failed: %w", err)
-	}
-
-	return &MathIRpcClient{ep, id}, nil
-}
-
-// todo: maybe we request error return from rpc functions?
-func (mc *MathIRpcClient) Add(a int, b int) int {
-	var params = addParams{A: a, B: b}
-	var resp addRtnVals
-
-	if err := mc.ep.CallRemoteFunc(context.Background(), mc.id, mathIrpcFuncAddId, params, &resp); err != nil {
-		panic(fmt.Sprintf("callRemoteFunc failed: %v", err))
-	}
-
-	return resp.Res
-}
-
-type addParams struct {
-	A int
-	B int
-}
-
-func (p addParams) Serialize(e *irpc.Encoder) error {
-	return json.NewEncoder(e.W).Encode(p) // todo: remove json
-}
-
-func (p *addParams) Deserialize(d *irpc.Decoder) error {
-	return json.NewDecoder(d.R).Decode(p)
-}
-
-type addRtnVals struct {
-	Res int
-}
-
-func (v addRtnVals) Serialize(e *irpc.Encoder) error {
-	return json.NewEncoder(e.W).Encode(v) // todo: remove json
-}
-
-func (v *addRtnVals) Deserialize(d *irpc.Decoder) error {
-	return json.NewDecoder(d.R).Decode(v)
-}
-
 func TestEndpointClientRegister(t *testing.T) {
 	ep1, ep2, err := testtools.CreateLocalTcpEndpoints()
 	if err != nil {
 		t.Fatalf("create tcp: %v", err)
 	}
 
-	t.Logf("registering math service")
-	if err := ep1.RegisterServices(newMathIRpcService(MathImpl{})); err != nil {
+	t.Logf("registering test service")
+	service := testtools.NewTestServiceIRpcService(testtools.NewTestServiceImpl(0))
+	if err := ep1.RegisterServices(service); err != nil {
 		t.Fatalf("service register: %v", err)
 	}
 
 	t.Logf("creating client")
-	mathClient, err := NewMathIrpcClient(ep2)
+	client, err := testtools.NewTestServiceIRpcClient(ep2)
 	if err != nil {
-		t.Fatalf("failed to create mathirpc client: %+v", err)
+		t.Fatalf("failed to create testservice client: %+v", err)
 	}
-	res := mathClient.Add(1, 2)
+	res := client.Div(6, 2)
 	if res != 3 {
 		t.Fatalf("wrong result: %d", res)
 	}
@@ -162,18 +54,18 @@ func TestEndpointRemoteFunc(t *testing.T) {
 	clientEndpoint := irpc.NewEndpoint(pB)
 
 	skew := 8
-	mathServiceB := newMathIRpcService(MathImpl{resultSkew: skew})
-	if err := serviceEndpoint.RegisterServices(mathServiceB); err != nil {
-		t.Fatalf("failed to register service: %+v", err)
+	service := testtools.NewTestServiceIRpcService(testtools.NewTestServiceImpl(skew))
+	if err := serviceEndpoint.RegisterServices(service); err != nil {
+		t.Fatalf("service register: %v", err)
 	}
 
-	clientA, err := NewMathIrpcClient(clientEndpoint)
+	clientA, err := testtools.NewTestServiceIRpcClient(clientEndpoint)
 	if err != nil {
 		t.Fatalf("failed to register client: %+v", err)
 	}
-	res := clientA.Add(1, 2)
-	if res != 1+2+skew {
-		t.Fatalf("expected result of 3, but got %d", res)
+	res := clientA.Div(4, 2)
+	if res != 4/2+skew {
+		t.Fatalf("expected %d, but got %d", 4/2+skew, res)
 	}
 
 	if err := clientEndpoint.Close(); err != nil {
@@ -191,32 +83,33 @@ func TestEndpointRemoteFunc(t *testing.T) {
 func TestBothSidesRemoteCall(t *testing.T) {
 	pA, pB := testtools.NewDoubleEndedPipe()
 
-	// a is skewed by 1
-	endpointA := irpc.NewEndpoint(pA, newMathIRpcService(MathImpl{resultSkew: 1}))
+	skewA := 1
+	serviceA := testtools.NewTestServiceIRpcService(testtools.NewTestServiceImpl(skewA))
+	endpointA := irpc.NewEndpoint(pA, serviceA)
 
-	// b is skewed by 2
-	endpointB := irpc.NewEndpoint(pB, newMathIRpcService(MathImpl{resultSkew: 2}))
-	// irpc.NewEndpoint(pB, newMathIRpcService(MathImpl{resultSkew: 2}))
+	skewB := 2
+	serviceB := testtools.NewTestServiceIRpcService(testtools.NewTestServiceImpl(skewB))
+	endpointB := irpc.NewEndpoint(pB, serviceB)
 
 	log.Println("creating client a")
-	clientA, err := NewMathIrpcClient(endpointA)
+	clientA, err := testtools.NewTestServiceIRpcClient(endpointA)
 	if err != nil {
 		t.Fatalf("new clientA: %+v", err)
 	}
 
-	clientB, err := NewMathIrpcClient(endpointB)
+	clientB, err := testtools.NewTestServiceIRpcClient(endpointB)
 	if err != nil {
 		t.Fatalf("new clientB: %+v", err)
 	}
 
-	resFromB := clientA.Add(1, 2)
-	if resFromB != 5 {
-		t.Fatalf("service B (skewed by 2) returned %d instead of 5", resFromB)
+	resFromB := clientA.Div(4, 2)
+	if resFromB != 4/2+skewB {
+		t.Fatalf("service B returned %d", resFromB)
 	}
 
-	resFromA := clientB.Add(1, 2)
-	if resFromA != 4 {
-		t.Fatalf("service A (skewed by 1) returned %d instead of 4", resFromA)
+	resFromA := clientB.Div(8, 4)
+	if resFromA != 8/4+skewA {
+		t.Fatalf("service A returned %d", resFromA)
 	}
 	if err := endpointB.Close(); err != nil {
 		t.Fatalf("enpointB.Close(): %+v", err)

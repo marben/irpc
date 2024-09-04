@@ -11,7 +11,7 @@ import (
 var ErrServerClosed error = errors.New("irpc: server closed")
 
 type Server struct {
-	services []Service
+	services []Service // immutable
 
 	clients    map[*Endpoint]struct{}
 	clientsMux sync.Mutex
@@ -22,22 +22,15 @@ type Server struct {
 	listeners    map[net.Listener]struct{} // todo: should we store pointers in a similar fashion std http server does?
 	listenersMux sync.Mutex
 	listenersWg  sync.WaitGroup
-
-	mux sync.Mutex // todo: use for everything?
 }
 
-func NewServer() *Server {
+// todo: pass services in constructor?
+func NewServer(services ...Service) *Server {
 	return &Server{
 		listeners: make(map[net.Listener]struct{}),
 		clients:   make(map[*Endpoint]struct{}),
+		services:  services,
 	}
-}
-
-func (s *Server) RegisterService(services ...Service) {
-	s.mux.Lock()
-	defer s.mux.Unlock()
-
-	s.services = services
 }
 
 func (s *Server) isShuttingDown() bool {
@@ -69,6 +62,7 @@ func (s *Server) rmListener(l net.Listener) {
 
 // Serve always returns a non-nil error. After [Server.Close], the returned error is [ErrServerClosed]
 func (s *Server) Serve(lis net.Listener) error {
+	// log.Printf("irpc server: serving on port %v", lis.Addr())
 	if err := s.addListener(lis); err != nil {
 		return err
 	}
@@ -76,22 +70,26 @@ func (s *Server) Serve(lis net.Listener) error {
 	for {
 		conn, err := lis.Accept()
 		if err != nil {
+			// log.Printf("Server accept err: %v", err)
 			if s.isShuttingDown() {
 				return ErrServerClosed
 			}
 			return fmt.Errorf("listener.Accept(): %w", err)
 		}
+		// log.Println("Accept: ", conn.LocalAddr())
 
 		ep := NewEndpoint(conn, s.services...)
 
 		s.clientsMux.Lock()
-		defer s.clientsMux.Unlock()
 		s.clients[ep] = struct{}{}
+		s.clientsMux.Unlock()
 
 		s.clientsWg.Add(1)
 		go func() {
 			defer s.clientsWg.Done()
 
+			<-ep.Ctx.Done()
+			// log.Printf("endpoint ended with: %v", err)
 			// not sure what to do about errors (serve loop of http.Server doesn't seem to care, so we will follow suit for now)
 			s.clientsMux.Lock()
 			defer s.clientsMux.Unlock()
