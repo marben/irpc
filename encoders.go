@@ -50,6 +50,16 @@ func varEncoder(apiName string, t types.Type, q types.Qualifier) (encoder, error
 			return nil, fmt.Errorf("unsupported basic type '%s'", t.Name())
 		}
 	case *types.Slice:
+		// []byte
+		elemEnc, err := varEncoder(apiName, t.Elem(), q)
+		if err != nil {
+			return nil, fmt.Errorf("couldn't find encoder for type %v", t.Elem())
+		}
+		if elemEnc == uint8Encoder {
+			return byteSliceEncoder, nil
+		}
+
+		// anything else
 		return newSliceEncoder(apiName, t, q)
 	case *types.Named:
 		switch t.String() {
@@ -127,6 +137,10 @@ var (
 	stringEncoder = primitiveTypeEncoder{
 		decFuncName: "String",
 		typeName:    "string",
+	}
+	byteSliceEncoder = primitiveTypeEncoder{
+		decFuncName: "ByteSlice",
+		typeName:    "[]byte",
 	}
 )
 

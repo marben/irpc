@@ -48,4 +48,10 @@ func TestSlice(t *testing.T) {
 	if resS != 1+2+3+4+5 {
 		t.Fatalf("unexpected slice sum: %d", resS)
 	}
+
+	t.Log("slice of bytes")
+	resSB := c.SliceOfBytesSum([]byte{1, 2, 3, 4})
+	if resSB != 1+2+3+4 {
+		t.Fatalf("SliceOfBytesSum(): %d", resSB)
+	}
 }
