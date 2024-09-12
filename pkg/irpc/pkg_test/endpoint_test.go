@@ -91,7 +91,7 @@ func TestBothSidesRemoteCall(t *testing.T) {
 	serviceB := testtools.NewTestServiceIRpcService(testtools.NewTestServiceImpl(skewB))
 	endpointB := irpc.NewEndpoint(pB, serviceB)
 
-	log.Println("creating client a")
+	t.Log("creating client a")
 	clientA, err := testtools.NewTestServiceIRpcClient(endpointA)
 	if err != nil {
 		t.Fatalf("new clientA: %+v", err)
@@ -172,9 +172,9 @@ func TestClosingServiceEpWithWaitingFuncCalls(t *testing.T) {
 		insideDivC <- struct{}{}
 
 		// wait for unlock
-		log.Println("DivErr() waiting for unlock")
+		// log.Println("DivErr() waiting for unlock")
 		<-unlockC
-		log.Println("DivErr() unlocked and returning")
+		// log.Println("DivErr() unlocked and returning")
 		return a / b, nil
 	}
 
@@ -224,9 +224,7 @@ func TestClosingClientEpWithWaitingFuncCalls(t *testing.T) {
 		insideDivC <- struct{}{}
 
 		// wait for unlock
-		log.Println("DivErr() waiting for unlock")
 		<-unlockC
-		log.Println("DivErr() unlocked and returning")
 		return a / b, nil
 	}
 

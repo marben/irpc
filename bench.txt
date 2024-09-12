@@ -4,30 +4,17 @@ goos: linux
 goarch: amd64
 pkg: github.com/marben/irpc/pkg/irpc
 cpu: Intel(R) Core(TM) i7-8665U CPU @ 1.90GHz
-BenchmarkPacketHeaderSerialization-8     	57656800	        20.55 ns/op	         1.000 Byte_len	       8 B/op	       1 allocs/op
-BenchmarkPacketHeaderDeSerialization-8   	19611487	        57.64 ns/op	      56 B/op	       2 allocs/op
+BenchmarkPacketHeaderSerialization-8     	50029173	        20.20 ns/op	         1.000 Byte_len	       8 B/op	       1 allocs/op
+BenchmarkPacketHeaderDeSerialization-8   	20558630	        60.80 ns/op	      56 B/op	       2 allocs/op
 PASS
-ok  	github.com/marben/irpc/pkg/irpc	3.402s
-2024/09/12 10:52:34 creating client a
-2024/09/12 10:52:34 DivErr() waiting for unlock
-2024/09/12 10:52:34 DivErr() unlocked and returning
-2024/09/12 10:52:34 close on read error!!!
-2024/09/12 10:52:34 DivErr() waiting for unlock
-2024/09/12 10:52:34 DivErr() unlocked and returning
-2024/09/12 10:52:34 close on read error!!!
-2024/09/12 10:52:34 service: context for req 2 has been cancelled with "canceled from client side"
-2024/09/12 10:52:34 close on read error!!!
-2024/09/12 10:52:34 close on read error!!!
-2024/09/12 10:52:34 close on read error!!!
-2024/09/12 10:52:34 close on read error!!!
-2024/09/12 10:52:34 close on read error!!!
+ok  	github.com/marben/irpc/pkg/irpc	2.817s
 PASS
 ok  	github.com/marben/irpc/pkg/irpc/pkg_test	0.290s
 goos: linux
 goarch: amd64
 pkg: github.com/marben/irpc/test
 cpu: Intel(R) Core(TM) i7-8665U CPU @ 1.90GHz
-BenchmarkAddInt64-8   	   42189	     24896 ns/op	        11.00 rBytes/rpc	        23.00 wBytes/rpc	     456 B/op	      13 allocs/op
+BenchmarkAddInt64-8   	   51318	     23350 ns/op	        11.00 rBytes/rpc	        23.00 wBytes/rpc	     446 B/op	      13 allocs/op
 PASS
-ok  	github.com/marben/irpc/test	1.390s
+ok  	github.com/marben/irpc/test	2.330s
 ?   	github.com/marben/irpc/test/testtools	[no test files]

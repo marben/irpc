@@ -174,7 +174,7 @@ func NewEndpoint(conn io.ReadWriteCloser, services ...Service) *Endpoint {
 // called on internal Endpoint error(connection drop etc)
 // we cannot do it using the normal Close call, because  we don't know what could be failing
 func (e *Endpoint) closeOnReadError(err error) {
-	log.Println("close on read error!!!")
+	// log.Println("close on read error!!!")
 	// switch
 	e.ctxCancel(err)
 	e.connCloser.Close()
@@ -496,7 +496,6 @@ func (e *Endpoint) readMsgs(ctx context.Context, dec *Decoder) error {
 			if err := cancelRequest.Deserialize(dec); err != nil {
 				return fmt.Errorf("failed to deserialize context cancelation request: %w", err)
 			}
-			log.Printf("service: context for req %d has been cancelled with %q", cancelRequest.ReqNum, cancelRequest.ErrStr)
 			clientErr := errors.New(cancelRequest.ErrStr)
 			e.cancelRequest(cancelRequest.ReqNum, clientErr)
 
