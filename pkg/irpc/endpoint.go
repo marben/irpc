@@ -1,7 +1,6 @@
 package irpc
 
 import (
-	"bufio"
 	"context"
 	"errors"
 	"fmt"
@@ -88,9 +87,8 @@ type Endpoint struct {
 	services      map[RegisteredServiceId]Service
 	nextServiceId RegisteredServiceId
 
-	connCloser io.Closer     // close the connection
-	bufWriter  *bufio.Writer // buffered Writer of the connection	// only used for flushing. rest of code should use encoder
-	enc        *Encoder      // does encoding on the bufWriter
+	connCloser io.Closer // close the connection
+	enc        *Encoder  // does encoding on the bufWriter
 
 	reqNumsC chan ReqNumT
 	writeMux Semaphore
@@ -113,7 +111,7 @@ type Endpoint struct {
 }
 
 func NewEndpoint(conn io.ReadWriteCloser, services ...Service) *Endpoint {
-	bufWriter := bufio.NewWriter(conn)
+	// bufWriter := bufio.NewWriter(conn)
 	globalContext, cancel := context.WithCancelCause(context.Background())
 
 	reqNumsC := make(chan ReqNumT, ParallelClientCalls)
@@ -128,8 +126,7 @@ func NewEndpoint(conn io.ReadWriteCloser, services ...Service) *Endpoint {
 		serviceWorkers:   make(map[ReqNumT]serviceWorker),
 		nextServiceId:    clientRegistrationServiceId + 1,
 		connCloser:       conn,
-		bufWriter:        bufWriter,
-		enc:              NewEncoder(bufWriter),
+		enc:              NewEncoder(conn),
 		reqNumsC:         reqNumsC,
 		readLoopRunningC: make(chan struct{}, 1),
 		wrkrQueue:        make(chan struct{}, ParallelWorkers),
@@ -150,7 +147,7 @@ func NewEndpoint(conn io.ReadWriteCloser, services ...Service) *Endpoint {
 			ep.readLoopRunningC <- struct{}{}
 		}()
 
-		dec := NewDecoder(bufio.NewReader(conn))
+		dec := NewDecoder(conn)
 		err := ep.readMsgs(globalContext, dec)
 		switch err {
 		case context.Canceled:
@@ -179,7 +176,6 @@ func (e *Endpoint) closeOnReadError(err error) {
 	e.ctxCancel(err)
 	e.connCloser.Close()
 	// log.Printf("internal error close(): %+v", err)
-	// panic(err)
 }
 
 func (e *Endpoint) closeAlreadyCalled() bool {
@@ -400,8 +396,8 @@ func (e *Endpoint) serializePacketToConnLocked(data ...Serializable) error {
 		}
 	}
 
-	if err := e.bufWriter.Flush(); err != nil {
-		return fmt.Errorf("bufWriter.Flush(): %w", err)
+	if err := e.enc.flush(); err != nil {
+		return fmt.Errorf("encoder.Flush(): %w", err)
 	}
 
 	return nil
