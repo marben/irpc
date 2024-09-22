@@ -18,8 +18,6 @@ var errProtocolError = errors.New("rpc protocol error")
 var ErrContextWaitTimedOut = errors.New("context wait timed out")
 var errCounterpartClosing = errors.New("counterpart is closing now")
 
-type packetType uint8
-
 const (
 	rpcRequestPacketType packetType = iota + 1
 	rpcResponsePacketType
@@ -32,30 +30,6 @@ const (
 	ParallelWorkers     = 3
 	ParallelClientCalls = ParallelWorkers + 1
 )
-
-type packetHeader struct {
-	typ packetType
-}
-
-type requestPacket struct {
-	ReqNum    ReqNumT
-	ServiceId RegisteredServiceId
-	FuncId    FuncId
-}
-
-type responsePacket struct {
-	ReqNum ReqNumT // request number that initiated this response
-}
-
-type ctxEndPacket struct {
-	ReqNum ReqNumT
-	ErrStr string
-}
-
-// client registers to a service (by hash). upon registration, service is given 'RegisteredServiceId'
-type RegisteredServiceId uint16
-type FuncId uint16
-type ReqNumT uint16
 
 const (
 	// clientRegistrationServiceId is used to register other services (and give them their ids)
@@ -111,7 +85,6 @@ type Endpoint struct {
 }
 
 func NewEndpoint(conn io.ReadWriteCloser, services ...Service) *Endpoint {
-	// bufWriter := bufio.NewWriter(conn)
 	globalContext, cancel := context.WithCancelCause(context.Background())
 
 	reqNumsC := make(chan ReqNumT, ParallelClientCalls)

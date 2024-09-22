@@ -23,7 +23,7 @@ type Decoder struct {
 func NewEncoder(w io.Writer) *Encoder {
 	return &Encoder{
 		w:      bufio.NewWriter(w),
-		buf:    make([]byte, 8),
+		buf:    make([]byte, 10), // varuint is max 10 bytes
 		endian: binary.LittleEndian,
 	}
 }
@@ -41,23 +41,21 @@ func (e *Encoder) flush() error {
 }
 
 func (e *Encoder) Bool(v bool) error {
+	var b byte
 	if v {
-		e.buf[0] = 1
-	} else {
-		e.buf[0] = 0
+		b = 1
 	}
-	if _, err := e.w.Write(e.buf[:1]); err != nil {
+	if err := e.w.WriteByte(b); err != nil {
 		return err
 	}
-
 	return nil
 }
 
 func (d *Decoder) Bool(dst *bool) error {
-	if _, err := io.ReadFull(d.r, d.buf[:1]); err != nil {
+	val, err := d.r.ReadByte()
+	if err != nil {
 		return err
 	}
-	val := d.buf[0]
 	if val == 0 {
 		*dst = false
 	} else if val == 1 {
@@ -215,22 +213,21 @@ func (d *Decoder) Uint64(dst *uint64) error {
 }
 
 func (e *Encoder) UvarInt64(v uint64) error {
-	binary.PutUvarint(e.buf, v)
-	if _, err := e.w.Write(e.buf[:8]); err != nil {
+	n := binary.PutUvarint(e.buf, v)
+	if _, err := e.w.Write(e.buf[:n]); err != nil {
 		return err
 	}
 	return nil
 }
 
-// func (d *Decoder) UvarInt64(dst *uint64) error {
-// 	// if _, err := io.ReadFull(d.R, d.buf[:8]); err != nil {
-// 	// 	return err
-// 	// }
-// 	binary.ReadUvarint(d.R)
-
-// 	*dst = uint64(d.endian.Uint64(d.buf[:8]))
-// 	return nil
-// }
+func (d *Decoder) UvarInt64(dst *uint64) error {
+	val, err := binary.ReadUvarint(d.r)
+	if err != nil {
+		return err
+	}
+	*dst = val
+	return nil
+}
 
 func (e *Encoder) Float32(v float32) error {
 	return e.Uint32(math.Float32bits(v))

@@ -80,7 +80,7 @@ func (rp *clientRegisterReq) Deserialize(d *Decoder) error {
 }
 
 func (rp clientRegisterResp) Serialize(e *Encoder) error {
-	if err := e.Uint16(uint16(rp.ServiceId)); err != nil {
+	if err := rp.ServiceId.Serialize(e); err != nil {
 		return err
 	}
 	if err := e.String(rp.Err); err != nil {
@@ -90,7 +90,7 @@ func (rp clientRegisterResp) Serialize(e *Encoder) error {
 }
 
 func (rp *clientRegisterResp) Deserialize(d *Decoder) error {
-	if err := d.Uint16((*uint16)(&rp.ServiceId)); err != nil {
+	if err := rp.ServiceId.Deserialize(d); err != nil {
 		return err
 	}
 	if err := d.String(&rp.Err); err != nil {
