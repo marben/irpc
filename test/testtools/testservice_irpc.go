@@ -121,19 +121,19 @@ type _Irpc_TestServiceDivReq struct {
 }
 
 func (s _Irpc_TestServiceDivReq) Serialize(e *irpc.Encoder) error {
-	if err := e.Int(s.Param0_a); err != nil {
+	if err := e.VarInt(s.Param0_a); err != nil {
 		return fmt.Errorf("serialize s.Param0_a of type 'int': %w", err)
 	}
-	if err := e.Int(s.Param0_b); err != nil {
+	if err := e.VarInt(s.Param0_b); err != nil {
 		return fmt.Errorf("serialize s.Param0_b of type 'int': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_TestServiceDivReq) Deserialize(d *irpc.Decoder) error {
-	if err := d.Int(&s.Param0_a); err != nil {
+	if err := d.VarInt(&s.Param0_a); err != nil {
 		return fmt.Errorf("deserialize s.Param0_a of type 'int': %w", err)
 	}
-	if err := d.Int(&s.Param0_b); err != nil {
+	if err := d.VarInt(&s.Param0_b); err != nil {
 		return fmt.Errorf("deserialize s.Param0_b of type 'int': %w", err)
 	}
 	return nil
@@ -144,13 +144,13 @@ type _Irpc_TestServiceDivResp struct {
 }
 
 func (s _Irpc_TestServiceDivResp) Serialize(e *irpc.Encoder) error {
-	if err := e.Int(s.Param0_); err != nil {
+	if err := e.VarInt(s.Param0_); err != nil {
 		return fmt.Errorf("serialize s.Param0_ of type 'int': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_TestServiceDivResp) Deserialize(d *irpc.Decoder) error {
-	if err := d.Int(&s.Param0_); err != nil {
+	if err := d.VarInt(&s.Param0_); err != nil {
 		return fmt.Errorf("deserialize s.Param0_ of type 'int': %w", err)
 	}
 	return nil
@@ -162,19 +162,19 @@ type _Irpc_TestServiceDivErrReq struct {
 }
 
 func (s _Irpc_TestServiceDivErrReq) Serialize(e *irpc.Encoder) error {
-	if err := e.Int(s.Param0_a); err != nil {
+	if err := e.VarInt(s.Param0_a); err != nil {
 		return fmt.Errorf("serialize s.Param0_a of type 'int': %w", err)
 	}
-	if err := e.Int(s.Param0_b); err != nil {
+	if err := e.VarInt(s.Param0_b); err != nil {
 		return fmt.Errorf("serialize s.Param0_b of type 'int': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_TestServiceDivErrReq) Deserialize(d *irpc.Decoder) error {
-	if err := d.Int(&s.Param0_a); err != nil {
+	if err := d.VarInt(&s.Param0_a); err != nil {
 		return fmt.Errorf("deserialize s.Param0_a of type 'int': %w", err)
 	}
-	if err := d.Int(&s.Param0_b); err != nil {
+	if err := d.VarInt(&s.Param0_b); err != nil {
 		return fmt.Errorf("deserialize s.Param0_b of type 'int': %w", err)
 	}
 	return nil
@@ -186,7 +186,7 @@ type _Irpc_TestServiceDivErrResp struct {
 }
 
 func (s _Irpc_TestServiceDivErrResp) Serialize(e *irpc.Encoder) error {
-	if err := e.Int(s.Param0_); err != nil {
+	if err := e.VarInt(s.Param0_); err != nil {
 		return fmt.Errorf("serialize s.Param0_ of type 'int': %w", err)
 	}
 	{
@@ -210,7 +210,7 @@ func (s _Irpc_TestServiceDivErrResp) Serialize(e *irpc.Encoder) error {
 	return nil
 }
 func (s *_Irpc_TestServiceDivErrResp) Deserialize(d *irpc.Decoder) error {
-	if err := d.Int(&s.Param0_); err != nil {
+	if err := d.VarInt(&s.Param0_); err != nil {
 		return fmt.Errorf("deserialize s.Param0_ of type 'int': %w", err)
 	}
 	{
@@ -250,20 +250,20 @@ type _Irpc_TestServiceDivCtxErrReq struct {
 
 func (s _Irpc_TestServiceDivCtxErrReq) Serialize(e *irpc.Encoder) error {
 	// no code for context encoding
-	if err := e.Int(s.Param1_a); err != nil {
+	if err := e.VarInt(s.Param1_a); err != nil {
 		return fmt.Errorf("serialize s.Param1_a of type 'int': %w", err)
 	}
-	if err := e.Int(s.Param1_b); err != nil {
+	if err := e.VarInt(s.Param1_b); err != nil {
 		return fmt.Errorf("serialize s.Param1_b of type 'int': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_TestServiceDivCtxErrReq) Deserialize(d *irpc.Decoder) error {
 	// no code for context decoding
-	if err := d.Int(&s.Param1_a); err != nil {
+	if err := d.VarInt(&s.Param1_a); err != nil {
 		return fmt.Errorf("deserialize s.Param1_a of type 'int': %w", err)
 	}
-	if err := d.Int(&s.Param1_b); err != nil {
+	if err := d.VarInt(&s.Param1_b); err != nil {
 		return fmt.Errorf("deserialize s.Param1_b of type 'int': %w", err)
 	}
 	return nil
@@ -275,7 +275,7 @@ type _Irpc_TestServiceDivCtxErrResp struct {
 }
 
 func (s _Irpc_TestServiceDivCtxErrResp) Serialize(e *irpc.Encoder) error {
-	if err := e.Int(s.Param0_); err != nil {
+	if err := e.VarInt(s.Param0_); err != nil {
 		return fmt.Errorf("serialize s.Param0_ of type 'int': %w", err)
 	}
 	{
@@ -299,7 +299,7 @@ func (s _Irpc_TestServiceDivCtxErrResp) Serialize(e *irpc.Encoder) error {
 	return nil
 }
 func (s *_Irpc_TestServiceDivCtxErrResp) Deserialize(d *irpc.Decoder) error {
-	if err := d.Int(&s.Param0_); err != nil {
+	if err := d.VarInt(&s.Param0_); err != nil {
 		return fmt.Errorf("deserialize s.Param0_ of type 'int': %w", err)
 	}
 	{

@@ -87,11 +87,11 @@ var (
 		typeName:    "bool",
 	}
 	intEncoder = primitiveTypeEncoder{
-		decFuncName: "Int",
+		decFuncName: "VarInt",
 		typeName:    "int",
 	}
 	uintEncoder = primitiveTypeEncoder{
-		decFuncName: "Uint",
+		decFuncName: "UvarInt",
 		typeName:    "uint",
 	}
 	int8Encoder = primitiveTypeEncoder{
@@ -103,35 +103,35 @@ var (
 		typeName:    "uint8",
 	}
 	int16Encoder = primitiveTypeEncoder{
-		decFuncName: "Int16",
+		decFuncName: "VarInt16",
 		typeName:    "int16",
 	}
 	uint16Encoder = primitiveTypeEncoder{
-		decFuncName: "Uint16",
+		decFuncName: "UvarInt16",
 		typeName:    "uint16",
 	}
 	int32Encoder = primitiveTypeEncoder{
-		decFuncName: "Int32",
+		decFuncName: "VarInt32",
 		typeName:    "int32",
 	}
 	uint32Encoder = primitiveTypeEncoder{
-		decFuncName: "Uint32",
+		decFuncName: "UvarInt32",
 		typeName:    "uint32",
 	}
 	int64Encoder = primitiveTypeEncoder{
-		decFuncName: "Int64",
+		decFuncName: "VarInt64",
 		typeName:    "int64",
 	}
 	uint64Encoder = primitiveTypeEncoder{
-		decFuncName: "Uint64",
+		decFuncName: "UvarInt64",
 		typeName:    "uint64",
 	}
 	float32Encoder = primitiveTypeEncoder{
-		decFuncName: "Float32",
+		decFuncName: "Float32le",
 		typeName:    "float32",
 	}
 	float64Encoder = primitiveTypeEncoder{
-		decFuncName: "Float64",
+		decFuncName: "Float64le",
 		typeName:    "float64",
 	}
 	stringEncoder = primitiveTypeEncoder{

@@ -69,19 +69,19 @@ type _Irpc_tcpTestApiDivReq struct {
 }
 
 func (s _Irpc_tcpTestApiDivReq) Serialize(e *irpc.Encoder) error {
-	if err := e.Float64(s.Param0_a); err != nil {
+	if err := e.Float64le(s.Param0_a); err != nil {
 		return fmt.Errorf("serialize s.Param0_a of type 'float64': %w", err)
 	}
-	if err := e.Float64(s.Param0_b); err != nil {
+	if err := e.Float64le(s.Param0_b); err != nil {
 		return fmt.Errorf("serialize s.Param0_b of type 'float64': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_tcpTestApiDivReq) Deserialize(d *irpc.Decoder) error {
-	if err := d.Float64(&s.Param0_a); err != nil {
+	if err := d.Float64le(&s.Param0_a); err != nil {
 		return fmt.Errorf("deserialize s.Param0_a of type 'float64': %w", err)
 	}
-	if err := d.Float64(&s.Param0_b); err != nil {
+	if err := d.Float64le(&s.Param0_b); err != nil {
 		return fmt.Errorf("deserialize s.Param0_b of type 'float64': %w", err)
 	}
 	return nil
@@ -93,7 +93,7 @@ type _Irpc_tcpTestApiDivResp struct {
 }
 
 func (s _Irpc_tcpTestApiDivResp) Serialize(e *irpc.Encoder) error {
-	if err := e.Float64(s.Param0_); err != nil {
+	if err := e.Float64le(s.Param0_); err != nil {
 		return fmt.Errorf("serialize s.Param0_ of type 'float64': %w", err)
 	}
 	{
@@ -117,7 +117,7 @@ func (s _Irpc_tcpTestApiDivResp) Serialize(e *irpc.Encoder) error {
 	return nil
 }
 func (s *_Irpc_tcpTestApiDivResp) Deserialize(d *irpc.Decoder) error {
-	if err := d.Float64(&s.Param0_); err != nil {
+	if err := d.Float64le(&s.Param0_); err != nil {
 		return fmt.Errorf("deserialize s.Param0_ of type 'float64': %w", err)
 	}
 	{

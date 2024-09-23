@@ -4,19 +4,18 @@ goos: linux
 goarch: amd64
 pkg: github.com/marben/irpc/pkg/irpc
 cpu: Intel(R) Core(TM) i7-8665U CPU @ 1.90GHz
-BenchmarkUint64Enc-8                     	141423034	         8.193 ns/op	       0 B/op	       0 allocs/op
-BenchmarkVarUint64Enc-8                  	151983490	         7.840 ns/op	       0 B/op	       0 allocs/op
-BenchmarkPacketHeaderSerialization-8     	157065301	         7.675 ns/op	         1.000 Byte_len	       0 B/op	       0 allocs/op
-BenchmarkPacketHeaderDeSerialization-8   	22714713	        52.45 ns/op	      48 B/op	       1 allocs/op
+BenchmarkVarUint64Enc-8                  	146863755	         7.919 ns/op	       0 B/op	       0 allocs/op
+BenchmarkPacketHeaderSerialization-8     	159622090	         7.512 ns/op	         1.000 Byte_len	       0 B/op	       0 allocs/op
+BenchmarkPacketHeaderDeSerialization-8   	23103837	        55.63 ns/op	      48 B/op	       1 allocs/op
 PASS
-ok  	github.com/marben/irpc/pkg/irpc	7.615s
+ok  	github.com/marben/irpc/pkg/irpc	5.303s
 PASS
-ok  	github.com/marben/irpc/pkg/irpc/pkg_test	0.288s
+ok  	github.com/marben/irpc/pkg/irpc/pkg_test	0.286s
 goos: linux
 goarch: amd64
 pkg: github.com/marben/irpc/test
 cpu: Intel(R) Core(TM) i7-8665U CPU @ 1.90GHz
-BenchmarkAddInt64-8   	   49632	     23736 ns/op	        10.00 rBytes/rpc	        20.00 wBytes/rpc	     464 B/op	      13 allocs/op
+BenchmarkAddInt64-8   	   53220	     22814 ns/op	         3.000 rBytes/rpc	         6.000 wBytes/rpc	     461 B/op	      13 allocs/op
 PASS
-ok  	github.com/marben/irpc/test	1.467s
+ok  	github.com/marben/irpc/test	2.533s
 ?   	github.com/marben/irpc/test/testtools	[no test files]

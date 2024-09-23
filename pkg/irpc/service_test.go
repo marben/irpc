@@ -114,20 +114,20 @@ type addParams struct {
 }
 
 func (p addParams) Serialize(e *Encoder) error {
-	if err := e.Int(p.A); err != nil {
+	if err := e.VarInt(p.A); err != nil {
 		return err
 	}
-	if err := e.Int(p.B); err != nil {
+	if err := e.VarInt(p.B); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (p *addParams) Deserialize(d *Decoder) error {
-	if err := d.Int(&p.A); err != nil {
+	if err := d.VarInt(&p.A); err != nil {
 		return err
 	}
-	if err := d.Int(&p.B); err != nil {
+	if err := d.VarInt(&p.B); err != nil {
 		return err
 	}
 	return nil
@@ -138,9 +138,9 @@ type addRtnVals struct {
 }
 
 func (v addRtnVals) Serialize(e *Encoder) error {
-	return e.Int(v.Res)
+	return e.VarInt(v.Res)
 }
 
 func (v *addRtnVals) Deserialize(d *Decoder) error {
-	return d.Int(&v.Res)
+	return d.VarInt(&v.Res)
 }

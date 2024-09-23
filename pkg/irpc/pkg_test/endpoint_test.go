@@ -12,6 +12,10 @@ import (
 	"github.com/marben/irpc/test/testtools"
 )
 
+func init() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+}
+
 func TestEndpointClientRegister(t *testing.T) {
 	ep1, ep2, err := testtools.CreateLocalTcpEndpoints()
 	if err != nil {

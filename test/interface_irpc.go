@@ -541,7 +541,7 @@ func (s _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedReq) Serialize(
 		if !isNil {
 			{ // IntFunc()
 				_IntFunc_0_ := s.Param0_ci.IntFunc()
-				if err := e.Int(_IntFunc_0_); err != nil {
+				if err := e.VarInt(_IntFunc_0_); err != nil {
 					return fmt.Errorf("serialize _IntFunc_0_ of type 'int': %w", err)
 				}
 			}
@@ -567,7 +567,7 @@ func (s *_Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedReq) Deseriali
 		} else {
 			var impl _customInterface_interfaceTest_irpcInterfaceImpl
 			{ // IntFunc()
-				if err := d.Int(&impl._IntFunc_0_); err != nil {
+				if err := d.VarInt(&impl._IntFunc_0_); err != nil {
 					return fmt.Errorf("deserialize impl._IntFunc_0_ of type 'int': %w", err)
 				}
 			}
@@ -612,7 +612,7 @@ func (s _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp) Serialize
 		if !isNil {
 			{ // IntFunc()
 				_IntFunc_0_ := s.Param0_.IntFunc()
-				if err := e.Int(_IntFunc_0_); err != nil {
+				if err := e.VarInt(_IntFunc_0_); err != nil {
 					return fmt.Errorf("serialize _IntFunc_0_ of type 'int': %w", err)
 				}
 			}
@@ -656,7 +656,7 @@ func (s *_Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp) Deserial
 		} else {
 			var impl _customInterface_interfaceTest_irpcInterfaceImpl
 			{ // IntFunc()
-				if err := d.Int(&impl._IntFunc_0_); err != nil {
+				if err := d.VarInt(&impl._IntFunc_0_); err != nil {
 					return fmt.Errorf("deserialize impl._IntFunc_0_ of type 'int': %w", err)
 				}
 			}
@@ -704,13 +704,13 @@ type _Irpc_customInterfaceIntFuncResp struct {
 }
 
 func (s _Irpc_customInterfaceIntFuncResp) Serialize(e *irpc.Encoder) error {
-	if err := e.Int(s.Param0_); err != nil {
+	if err := e.VarInt(s.Param0_); err != nil {
 		return fmt.Errorf("serialize s.Param0_ of type 'int': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_customInterfaceIntFuncResp) Deserialize(d *irpc.Decoder) error {
-	if err := d.Int(&s.Param0_); err != nil {
+	if err := d.VarInt(&s.Param0_); err != nil {
 		return fmt.Errorf("deserialize s.Param0_ of type 'int': %w", err)
 	}
 	return nil
