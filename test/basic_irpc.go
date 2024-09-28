@@ -14,8 +14,8 @@ type basicAPIIRpcService struct {
 func newBasicAPIIRpcService(impl basicAPI) *basicAPIIRpcService {
 	return &basicAPIIRpcService{impl: impl}
 }
-func (basicAPIIRpcService) Hash() []byte {
-	return []byte("basicAPIIRpcService")
+func (basicAPIIRpcService) Id() string {
+	return "basicAPIIRpcService"
 }
 func (s *basicAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
@@ -258,7 +258,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 			}, nil
 		}, nil
 	default:
-		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, string(s.Hash()))
+		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, s.Id())
 	}
 }
 
@@ -269,13 +269,13 @@ type emptyAPIIRpcService struct {
 func newEmptyAPIIRpcService(impl emptyAPI) *emptyAPIIRpcService {
 	return &emptyAPIIRpcService{impl: impl}
 }
-func (emptyAPIIRpcService) Hash() []byte {
-	return []byte("emptyAPIIRpcService")
+func (emptyAPIIRpcService) Id() string {
+	return "emptyAPIIRpcService"
 }
 func (s *emptyAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
 	default:
-		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, string(s.Hash()))
+		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, s.Id())
 	}
 }
 

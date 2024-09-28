@@ -14,8 +14,8 @@ type FileServerIRpcService struct {
 func NewFileServerIRpcService(impl FileServer) *FileServerIRpcService {
 	return &FileServerIRpcService{impl: impl}
 }
-func (FileServerIRpcService) Hash() []byte {
-	return []byte("FileServerIRpcService")
+func (FileServerIRpcService) Id() string {
+	return "FileServerIRpcService"
 }
 func (s *FileServerIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
@@ -34,7 +34,7 @@ func (s *FileServerIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseria
 			}, nil
 		}, nil
 	default:
-		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, string(s.Hash()))
+		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, s.Id())
 	}
 }
 

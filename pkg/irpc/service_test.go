@@ -66,14 +66,14 @@ func (ms *testIRpcService) GetFuncCall(funcId FuncId) (ArgDeserializer, error) {
 			}, nil
 		}, nil
 	default:
-		return nil, fmt.Errorf("function '%v' doesn't exist on service '%s'", funcId, ms.Hash())
+		return nil, fmt.Errorf("function '%v' doesn't exist on service '%s'", funcId, ms.Id())
 	}
 }
 
-var mathIrpcServiceHash = []byte("MathServiceHash")
+var mathIrpcServiceId = "MathServiceHash"
 
-func (*testIRpcService) Hash() []byte {
-	return mathIrpcServiceHash
+func (*testIRpcService) Id() string {
+	return mathIrpcServiceId
 }
 
 var _ testServiceIface = &MathIRpcClient{}
@@ -87,7 +87,7 @@ type MathIRpcClient struct {
 }
 
 func NewMathIrpcClient(ep *Endpoint) (*MathIRpcClient, error) {
-	if err := ep.RegisterClient(string(mathIrpcServiceHash)); err != nil {
+	if err := ep.RegisterClient(mathIrpcServiceId); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
 
@@ -99,7 +99,7 @@ func (mc *MathIRpcClient) Add(a int, b int) int {
 	var params = addParams{A: a, B: b}
 	var resp addRtnVals
 
-	if err := mc.ep.CallRemoteFunc(context.Background(), string(mathIrpcServiceHash), mathIrpcFuncAddId, params, &resp); err != nil {
+	if err := mc.ep.CallRemoteFunc(context.Background(), mathIrpcServiceId, mathIrpcFuncAddId, params, &resp); err != nil {
 		panic(fmt.Sprintf("callRemoteFunc failed: %v", err))
 	}
 

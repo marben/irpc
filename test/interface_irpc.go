@@ -14,8 +14,8 @@ type interfaceTestIRpcService struct {
 func newInterfaceTestIRpcService(impl interfaceTest) *interfaceTestIRpcService {
 	return &interfaceTestIRpcService{impl: impl}
 }
-func (interfaceTestIRpcService) Hash() []byte {
-	return []byte("interfaceTestIRpcService")
+func (interfaceTestIRpcService) Id() string {
+	return "interfaceTestIRpcService"
 }
 func (s *interfaceTestIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
@@ -90,7 +90,7 @@ func (s *interfaceTestIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDese
 			}, nil
 		}, nil
 	default:
-		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, string(s.Hash()))
+		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, s.Id())
 	}
 }
 
@@ -101,8 +101,8 @@ type customInterfaceIRpcService struct {
 func newCustomInterfaceIRpcService(impl customInterface) *customInterfaceIRpcService {
 	return &customInterfaceIRpcService{impl: impl}
 }
-func (customInterfaceIRpcService) Hash() []byte {
-	return []byte("customInterfaceIRpcService")
+func (customInterfaceIRpcService) Id() string {
+	return "customInterfaceIRpcService"
 }
 func (s *customInterfaceIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
@@ -135,7 +135,7 @@ func (s *customInterfaceIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDe
 			}, nil
 		}, nil
 	default:
-		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, string(s.Hash()))
+		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, s.Id())
 	}
 }
 

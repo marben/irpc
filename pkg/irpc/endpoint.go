@@ -31,7 +31,7 @@ const (
 )
 
 type Service interface {
-	Hash() []byte // unique hash of the service
+	Id() string // unique id of the service
 	GetFuncCall(funcId FuncId) (ArgDeserializer, error)
 }
 
@@ -325,7 +325,7 @@ func (e *Endpoint) RegisterServices(services ...Service) error {
 	defer e.m.Unlock()
 
 	for _, s := range services {
-		e.services[string(s.Hash())] = s
+		e.services[string(s.Id())] = s
 	}
 
 	return nil

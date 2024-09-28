@@ -14,8 +14,8 @@ type tcpTestApiIRpcService struct {
 func newTcpTestApiIRpcService(impl tcpTestApi) *tcpTestApiIRpcService {
 	return &tcpTestApiIRpcService{impl: impl}
 }
-func (tcpTestApiIRpcService) Hash() []byte {
-	return []byte("tcpTestApiIRpcService")
+func (tcpTestApiIRpcService) Id() string {
+	return "tcpTestApiIRpcService"
 }
 func (s *tcpTestApiIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
@@ -34,7 +34,7 @@ func (s *tcpTestApiIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseria
 			}, nil
 		}, nil
 	default:
-		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, string(s.Hash()))
+		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, s.Id())
 	}
 }
 

@@ -14,8 +14,8 @@ type TestServiceIRpcService struct {
 func NewTestServiceIRpcService(impl TestService) *TestServiceIRpcService {
 	return &TestServiceIRpcService{impl: impl}
 }
-func (TestServiceIRpcService) Hash() []byte {
-	return []byte("TestServiceIRpcService")
+func (TestServiceIRpcService) Id() string {
+	return "TestServiceIRpcService"
 }
 func (s *TestServiceIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
@@ -62,7 +62,7 @@ func (s *TestServiceIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseri
 			}, nil
 		}, nil
 	default:
-		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, string(s.Hash()))
+		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, s.Id())
 	}
 }
 

@@ -14,8 +14,8 @@ type sliceTestIRpcService struct {
 func newSliceTestIRpcService(impl sliceTest) *sliceTestIRpcService {
 	return &sliceTestIRpcService{impl: impl}
 }
-func (sliceTestIRpcService) Hash() []byte {
-	return []byte("sliceTestIRpcService")
+func (sliceTestIRpcService) Id() string {
+	return "sliceTestIRpcService"
 }
 func (s *sliceTestIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
@@ -90,7 +90,7 @@ func (s *sliceTestIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserial
 			}, nil
 		}, nil
 	default:
-		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, string(s.Hash()))
+		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, s.Id())
 	}
 }
 

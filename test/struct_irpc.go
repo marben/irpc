@@ -14,8 +14,8 @@ type structAPIIRpcService struct {
 func newStructAPIIRpcService(impl structAPI) *structAPIIRpcService {
 	return &structAPIIRpcService{impl: impl}
 }
-func (structAPIIRpcService) Hash() []byte {
-	return []byte("structAPIIRpcService")
+func (structAPIIRpcService) Id() string {
+	return "structAPIIRpcService"
 }
 func (s *structAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
@@ -62,7 +62,7 @@ func (s *structAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserial
 			}, nil
 		}, nil
 	default:
-		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, string(s.Hash()))
+		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, s.Id())
 	}
 }
 

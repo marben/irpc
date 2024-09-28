@@ -14,8 +14,8 @@ type endpointApiIRpcService struct {
 func newEndpointApiIRpcService(impl endpointApi) *endpointApiIRpcService {
 	return &endpointApiIRpcService{impl: impl}
 }
-func (endpointApiIRpcService) Hash() []byte {
-	return []byte("endpointApiIRpcService")
+func (endpointApiIRpcService) Id() string {
+	return "endpointApiIRpcService"
 }
 func (s *endpointApiIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
@@ -34,7 +34,7 @@ func (s *endpointApiIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseri
 			}, nil
 		}, nil
 	default:
-		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, string(s.Hash()))
+		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, s.Id())
 	}
 }
 

@@ -383,8 +383,8 @@ func (sg serviceGenerator) code() string {
 	`, generateStructConstructorName(sg.serviceTypeName), sg.ifaceName, sg.serviceTypeName)
 
 	// Id() func
-	fmt.Fprintf(sb, `func (%s) Hash() []byte {
-		return []byte("%s")
+	fmt.Fprintf(sb, `func (%s) Id() string {
+		return "%s"
 	}
 	`, sg.serviceTypeName, sg.serviceId)
 
@@ -406,7 +406,7 @@ func (sg serviceGenerator) code() string {
 		 `, m.req.typeName, m.executorFuncCode())
 	}
 	fmt.Fprintf(sb, `default:
-			return nil, fmt.Errorf("function '%%d' doesn't exist on service '%%s'", funcId, string(s.Hash()))
+			return nil, fmt.Errorf("function '%%d' doesn't exist on service '%%s'", funcId, s.Id())
 		}
 	}
 	`)
