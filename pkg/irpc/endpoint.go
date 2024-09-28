@@ -129,11 +129,8 @@ func NewEndpoint(conn io.ReadWriteCloser, services ...Service) *Endpoint {
 // called on internal Endpoint error(connection drop etc)
 // we cannot do it using the normal Close call, because  we don't know what could be failing
 func (e *Endpoint) closeOnReadError(err error) {
-	// log.Println("close on read error!!!")
-	// switch
 	e.ctxCancel(err)
 	e.connCloser.Close()
-	// log.Printf("internal error close(): %+v", err)
 }
 
 func (e *Endpoint) closeAlreadyCalled() bool {
@@ -183,9 +180,9 @@ func (e *Endpoint) Close() error {
 	}
 	// close the underlying connection
 	// this errors the read loop in case it didn't notice the context cancelation
-	if err := e.connCloser.Close(); err != nil {
-		closeError = errors.Join(closeError, fmt.Errorf("connection.Close(): %w", err))
-	}
+	// counterpart may have closed the connection after our signaling, but before we got to this line
+	// therefore we ignore error from Close()  (it was actually sometimes erroring in tests)
+	e.connCloser.Close()
 
 	// make sure the read loop has canceled
 	select {
