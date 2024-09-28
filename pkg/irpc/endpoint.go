@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"sync"
 	"time"
 )
@@ -31,12 +30,6 @@ const (
 	ParallelClientCalls = ParallelWorkers + 1
 )
 
-const (
-	// clientRegistrationServiceId is used to register other services (and give them their ids)
-	// 0 is not used, so that uninitialized clients (with service id = 0), errors out
-	clientRegistrationServiceId RegisteredServiceId = iota + 1
-)
-
 type Service interface {
 	Hash() []byte // unique hash of the service
 	GetFuncCall(funcId FuncId) (ArgDeserializer, error)
@@ -56,10 +49,8 @@ type Deserializable interface {
 // Endpoint represents one side of a connection
 // there needs to be a serving endpoint on both sides of connection for communication to work
 type Endpoint struct {
-	// maps registered service's hash to it's given id
-	serviceHashes map[string]RegisteredServiceId
-	services      map[RegisteredServiceId]Service
-	nextServiceId RegisteredServiceId
+	// maps serviceId to service
+	services map[string]Service
 
 	connCloser io.Closer // close the connection
 	enc        *Encoder  // does encoding on the bufWriter
@@ -93,11 +84,9 @@ func NewEndpoint(conn io.ReadWriteCloser, services ...Service) *Endpoint {
 	}
 
 	ep := &Endpoint{
-		serviceHashes:    make(map[string]RegisteredServiceId),
-		services:         make(map[RegisteredServiceId]Service),
+		services:         make(map[string]Service),
 		pendingRequests:  make(map[ReqNumT]pendingRequest),
 		serviceWorkers:   make(map[ReqNumT]serviceWorker),
-		nextServiceId:    clientRegistrationServiceId + 1,
 		connCloser:       conn,
 		enc:              NewEncoder(conn),
 		reqNumsC:         reqNumsC,
@@ -107,10 +96,6 @@ func NewEndpoint(conn io.ReadWriteCloser, services ...Service) *Endpoint {
 		Ctx:              globalContext,
 		ctxCancel:        cancel,
 	}
-
-	// default service for registering clients
-	regService := &clientRegisterService{ep: ep}
-	ep.services[clientRegistrationServiceId] = regService
 
 	ep.RegisterServices(services...)
 
@@ -215,24 +200,20 @@ func (e *Endpoint) Close() error {
 
 // registers client on remote endpoint
 // if there is no corresponding service registered on remote node, returns error
-// todo: rename to RegisterRemoteClient
-func (e *Endpoint) RegisterClient(ctx context.Context, serviceHash []byte) (RegisteredServiceId, error) {
-	req := clientRegisterReq{ServiceHash: serviceHash}
-	resp := clientRegisterResp{}
-	if err := e.CallRemoteFunc(ctx, clientRegistrationServiceId, 0 /* currently there is just one function */, req, &resp); err != nil {
-		return 0, fmt.Errorf("failed to register client %q: %w", serviceHash, err)
-	}
-
-	return resp.ServiceId, nil
+func (e *Endpoint) RegisterClient(serviceId string) error {
+	// currently a no-op
+	// we could use this call to negotiate shortcut for serviceId to reduce further service data
+	// we could also use this to make sure service is registered on remote ep. this would increase initial latency, so perhaps make it configurable?
+	return nil
 }
 
 // getService returns ErrServiceNotFound if id was not found,
 // nil otherwise
-func (e *Endpoint) getService(id RegisteredServiceId) (Service, error) {
+func (e *Endpoint) getService(serviceHash string) (Service, error) {
 	e.m.Lock()
 	defer e.m.Unlock()
 
-	s, found := e.services[id]
+	s, found := e.services[serviceHash]
 	if !found {
 		return nil, ErrServiceNotFound
 	}
@@ -248,7 +229,7 @@ func (e *Endpoint) newRequestNumber(ctx context.Context) (ReqNumT, error) {
 	}
 }
 
-func (e *Endpoint) sendRpcRequest(ctx context.Context, serviceId RegisteredServiceId, funcId FuncId, reqData Serializable, respData Deserializable) (pendingRequest, error) {
+func (e *Endpoint) sendRpcRequest(ctx context.Context, serviceId string, funcId FuncId, reqData Serializable, respData Deserializable) (pendingRequest, error) {
 	unlock, err := e.writeMux.Lock(ctx)
 	if err != nil {
 		return pendingRequest{}, err
@@ -301,7 +282,7 @@ func (e *Endpoint) sendRequestContextCancelation(req ReqNumT, cause error) error
 	return nil
 }
 
-func (e *Endpoint) CallRemoteFunc(ctx context.Context, serviceId RegisteredServiceId, funcId FuncId, reqData Serializable, respData Deserializable) error {
+func (e *Endpoint) CallRemoteFunc(ctx context.Context, serviceId string, funcId FuncId, reqData Serializable, respData Deserializable) error {
 	// check if our endpoint was closed
 	if e.closeAlreadyCalled() {
 		return context.Cause(e.Ctx)
@@ -343,16 +324,8 @@ func (e *Endpoint) RegisterServices(services ...Service) error {
 	e.m.Lock()
 	defer e.m.Unlock()
 
-	for _, service := range services {
-		if _, found := e.serviceHashes[string(service.Hash())]; found {
-			return fmt.Errorf("%s: %w", service.Hash(), ErrServiceAlreadyRegistered)
-		}
-
-		id := e.nextServiceId
-		e.nextServiceId++
-
-		e.serviceHashes[string(service.Hash())] = id
-		e.services[id] = service
+	for _, s := range services {
+		e.services[string(s.Hash())] = s
 	}
 
 	return nil
@@ -405,7 +378,6 @@ func (e *Endpoint) sendResponse(reqNum ReqNumT, respData Serializable) error {
 func (e *Endpoint) readMsgs(ctx context.Context, dec *Decoder) error {
 	for {
 		if ctx.Err() != nil {
-			log.Printf("%p: readMsg: returning because of canceled context", e)
 			return context.Canceled
 		}
 

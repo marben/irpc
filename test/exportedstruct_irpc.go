@@ -40,12 +40,12 @@ func (s *FileServerIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseria
 
 type FileServerIRpcClient struct {
 	endpoint *irpc.Endpoint
-	id       irpc.RegisteredServiceId
+	id       string
 }
 
 func NewFileServerIRpcClient(endpoint *irpc.Endpoint) (*FileServerIRpcClient, error) {
-	id, err := endpoint.RegisterClient(context.Background(), []byte("FileServerIRpcService"))
-	if err != nil {
+	id := "FileServerIRpcService"
+	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
 	return &FileServerIRpcClient{endpoint: endpoint, id: id}, nil

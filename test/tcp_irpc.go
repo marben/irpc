@@ -40,12 +40,12 @@ func (s *tcpTestApiIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseria
 
 type tcpTestApiIRpcClient struct {
 	endpoint *irpc.Endpoint
-	id       irpc.RegisteredServiceId
+	id       string
 }
 
 func newTcpTestApiIRpcClient(endpoint *irpc.Endpoint) (*tcpTestApiIRpcClient, error) {
-	id, err := endpoint.RegisterClient(context.Background(), []byte("tcpTestApiIRpcService"))
-	if err != nil {
+	id := "tcpTestApiIRpcService"
+	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
 	return &tcpTestApiIRpcClient{endpoint: endpoint, id: id}, nil

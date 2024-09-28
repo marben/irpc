@@ -281,12 +281,12 @@ func (s *emptyAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 
 type basicAPIIRpcClient struct {
 	endpoint *irpc.Endpoint
-	id       irpc.RegisteredServiceId
+	id       string
 }
 
 func newBasicAPIIRpcClient(endpoint *irpc.Endpoint) (*basicAPIIRpcClient, error) {
-	id, err := endpoint.RegisterClient(context.Background(), []byte("basicAPIIRpcService"))
-	if err != nil {
+	id := "basicAPIIRpcService"
+	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
 	return &basicAPIIRpcClient{endpoint: endpoint, id: id}, nil
@@ -478,12 +478,12 @@ func (_c *basicAPIIRpcClient) negBool(ok bool) bool {
 
 type emptyAPIIRpcClient struct {
 	endpoint *irpc.Endpoint
-	id       irpc.RegisteredServiceId
+	id       string
 }
 
 func newEmptyAPIIRpcClient(endpoint *irpc.Endpoint) (*emptyAPIIRpcClient, error) {
-	id, err := endpoint.RegisterClient(context.Background(), []byte("emptyAPIIRpcService"))
-	if err != nil {
+	id := "emptyAPIIRpcService"
+	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
 	return &emptyAPIIRpcClient{endpoint: endpoint, id: id}, nil

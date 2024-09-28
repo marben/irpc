@@ -4,18 +4,22 @@ goos: linux
 goarch: amd64
 pkg: github.com/marben/irpc/pkg/irpc
 cpu: Intel(R) Core(TM) i7-8665U CPU @ 1.90GHz
-BenchmarkVarUint64Enc-8                  	146863755	         7.919 ns/op	       0 B/op	       0 allocs/op
-BenchmarkPacketHeaderSerialization-8     	159622090	         7.512 ns/op	         1.000 Byte_len	       0 B/op	       0 allocs/op
-BenchmarkPacketHeaderDeSerialization-8   	23103837	        55.63 ns/op	      48 B/op	       1 allocs/op
+BenchmarkVarUint64Enc-8                  	131121924	         7.945 ns/op	       0 B/op	       0 allocs/op
+BenchmarkPacketHeaderSerialization-8     	159130026	         7.625 ns/op	         1.000 Byte_len	       0 B/op	       0 allocs/op
+BenchmarkPacketHeaderDeSerialization-8   	22625821	        54.65 ns/op	      48 B/op	       1 allocs/op
 PASS
-ok  	github.com/marben/irpc/pkg/irpc	5.303s
-PASS
-ok  	github.com/marben/irpc/pkg/irpc/pkg_test	0.286s
+ok  	github.com/marben/irpc/pkg/irpc	4.663s
+--- FAIL: TestServiceEndpointClosingEndsRunningWorkers (0.00s)
+    endpoint_test.go:469: serviceEp.Close(): connection.Close(): close tcp [::1]:43555->[::1]:49972: use of closed network connection
+FAIL
+exit status 1
+FAIL	github.com/marben/irpc/pkg/irpc/pkg_test	0.285s
 goos: linux
 goarch: amd64
 pkg: github.com/marben/irpc/test
 cpu: Intel(R) Core(TM) i7-8665U CPU @ 1.90GHz
-BenchmarkAddInt64-8   	   53220	     22814 ns/op	         3.000 rBytes/rpc	         6.000 wBytes/rpc	     461 B/op	      13 allocs/op
+BenchmarkAddInt64-8   	   50308	     22928 ns/op	         3.000 rBytes/rpc	        25.00 wBytes/rpc	     544 B/op	      16 allocs/op
 PASS
-ok  	github.com/marben/irpc/test	2.533s
+ok  	github.com/marben/irpc/test	2.391s
 ?   	github.com/marben/irpc/test/testtools	[no test files]
+FAIL

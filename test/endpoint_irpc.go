@@ -40,12 +40,12 @@ func (s *endpointApiIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseri
 
 type endpointApiIRpcClient struct {
 	endpoint *irpc.Endpoint
-	id       irpc.RegisteredServiceId
+	id       string
 }
 
 func newEndpointApiIRpcClient(endpoint *irpc.Endpoint) (*endpointApiIRpcClient, error) {
-	id, err := endpoint.RegisterClient(context.Background(), []byte("endpointApiIRpcService"))
-	if err != nil {
+	id := "endpointApiIRpcService"
+	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
 	return &endpointApiIRpcClient{endpoint: endpoint, id: id}, nil

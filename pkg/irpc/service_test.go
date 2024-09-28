@@ -84,16 +84,14 @@ const (
 
 type MathIRpcClient struct {
 	ep *Endpoint
-	id RegisteredServiceId
 }
 
 func NewMathIrpcClient(ep *Endpoint) (*MathIRpcClient, error) {
-	id, err := ep.RegisterClient(context.Background(), mathIrpcServiceHash)
-	if err != nil {
+	if err := ep.RegisterClient(string(mathIrpcServiceHash)); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
 
-	return &MathIRpcClient{ep, id}, nil
+	return &MathIRpcClient{ep}, nil
 }
 
 // todo: maybe we request error return from rpc functions?
@@ -101,7 +99,7 @@ func (mc *MathIRpcClient) Add(a int, b int) int {
 	var params = addParams{A: a, B: b}
 	var resp addRtnVals
 
-	if err := mc.ep.CallRemoteFunc(context.Background(), mc.id, mathIrpcFuncAddId, params, &resp); err != nil {
+	if err := mc.ep.CallRemoteFunc(context.Background(), string(mathIrpcServiceHash), mathIrpcFuncAddId, params, &resp); err != nil {
 		panic(fmt.Sprintf("callRemoteFunc failed: %v", err))
 	}
 

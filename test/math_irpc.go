@@ -40,12 +40,12 @@ func (s *MathIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer,
 
 type MathIRpcClient struct {
 	endpoint *irpc.Endpoint
-	id       irpc.RegisteredServiceId
+	id       string
 }
 
 func NewMathIRpcClient(endpoint *irpc.Endpoint) (*MathIRpcClient, error) {
-	id, err := endpoint.RegisterClient(context.Background(), []byte("MathIRpcService"))
-	if err != nil {
+	id := "MathIRpcService"
+	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
 	return &MathIRpcClient{endpoint: endpoint, id: id}, nil

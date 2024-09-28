@@ -439,12 +439,12 @@ func (cg clientGenerator) code() string {
 	fmt.Fprintf(b, `
 	type %[1]s struct {
 		endpoint *irpc.Endpoint
-		id irpc.RegisteredServiceId
+		id string
 	}
 
 	func %[2]s(endpoint *irpc.Endpoint) (*%[1]s, error) {
-		id, err := endpoint.RegisterClient(context.Background(),[]byte("%[3]s"))
-		if err != nil {
+		id := "%[3]s"
+		if err := endpoint.RegisterClient(id); err != nil {
 			return nil, fmt.Errorf("register failed: %%w", err)
 		}
 		return &%[1]s{endpoint: endpoint, id: id}, nil

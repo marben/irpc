@@ -96,12 +96,12 @@ func (s *sliceTestIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserial
 
 type sliceTestIRpcClient struct {
 	endpoint *irpc.Endpoint
-	id       irpc.RegisteredServiceId
+	id       string
 }
 
 func newSliceTestIRpcClient(endpoint *irpc.Endpoint) (*sliceTestIRpcClient, error) {
-	id, err := endpoint.RegisterClient(context.Background(), []byte("sliceTestIRpcService"))
-	if err != nil {
+	id := "sliceTestIRpcService"
+	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
 	return &sliceTestIRpcClient{endpoint: endpoint, id: id}, nil

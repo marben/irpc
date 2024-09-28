@@ -1,6 +1,6 @@
 package irpc
 
-// todo: serialization/deserialization code should be generated
+// todo: serialization/deserialization code should be generated, not hand written
 
 type packetType uint64
 
@@ -25,12 +25,6 @@ func (ph *packetHeader) Deserialize(d *Decoder) error {
 	return nil
 }
 
-// client registers to a service (by hash). upon registration, service is given 'RegisteredServiceId'
-type RegisteredServiceId uint64
-
-func (sid RegisteredServiceId) Serialize(e *Encoder) error    { return e.UvarInt64(uint64(sid)) }
-func (sid *RegisteredServiceId) Deserialize(d *Decoder) error { return d.UvarInt64((*uint64)(sid)) }
-
 type FuncId uint64
 
 func (fid FuncId) Serialize(e *Encoder) error    { return e.UvarInt64(uint64(fid)) }
@@ -43,7 +37,7 @@ func (rn *ReqNumT) Deserialize(d *Decoder) error { return d.UvarInt64((*uint64)(
 
 type requestPacket struct {
 	ReqNum    ReqNumT
-	ServiceId RegisteredServiceId
+	ServiceId string
 	FuncId    FuncId
 }
 
@@ -51,7 +45,7 @@ func (rp requestPacket) Serialize(e *Encoder) error {
 	if err := rp.ReqNum.Serialize(e); err != nil {
 		return err
 	}
-	if err := rp.ServiceId.Serialize(e); err != nil {
+	if err := e.String(rp.ServiceId); err != nil {
 		return err
 	}
 	if err := rp.FuncId.Serialize(e); err != nil {
@@ -64,7 +58,7 @@ func (rp *requestPacket) Deserialize(d *Decoder) error {
 	if err := rp.ReqNum.Deserialize(d); err != nil {
 		return err
 	}
-	if err := rp.ServiceId.Deserialize(d); err != nil {
+	if err := d.String(&rp.ServiceId); err != nil {
 		return err
 	}
 	if err := rp.FuncId.Deserialize(d); err != nil {

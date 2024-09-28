@@ -141,12 +141,12 @@ func (s *customInterfaceIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDe
 
 type interfaceTestIRpcClient struct {
 	endpoint *irpc.Endpoint
-	id       irpc.RegisteredServiceId
+	id       string
 }
 
 func newInterfaceTestIRpcClient(endpoint *irpc.Endpoint) (*interfaceTestIRpcClient, error) {
-	id, err := endpoint.RegisterClient(context.Background(), []byte("interfaceTestIRpcService"))
-	if err != nil {
+	id := "interfaceTestIRpcService"
+	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
 	return &interfaceTestIRpcClient{endpoint: endpoint, id: id}, nil
@@ -203,12 +203,12 @@ func (_c *interfaceTestIRpcClient) passCustomInterfaceAndReturnItModified(ci cus
 
 type customInterfaceIRpcClient struct {
 	endpoint *irpc.Endpoint
-	id       irpc.RegisteredServiceId
+	id       string
 }
 
 func newCustomInterfaceIRpcClient(endpoint *irpc.Endpoint) (*customInterfaceIRpcClient, error) {
-	id, err := endpoint.RegisterClient(context.Background(), []byte("customInterfaceIRpcService"))
-	if err != nil {
+	id := "customInterfaceIRpcService"
+	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
 	return &customInterfaceIRpcClient{endpoint: endpoint, id: id}, nil
