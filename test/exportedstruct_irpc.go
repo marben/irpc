@@ -9,13 +9,17 @@ import (
 
 type FileServerIRpcService struct {
 	impl FileServer
+	id   []byte
 }
 
 func NewFileServerIRpcService(impl FileServer) *FileServerIRpcService {
-	return &FileServerIRpcService{impl: impl}
+	return &FileServerIRpcService{
+		impl: impl,
+		id:   []byte{81, 74, 227, 236},
+	}
 }
-func (FileServerIRpcService) Id() string {
-	return "FileServerIRpcService"
+func (s *FileServerIRpcService) Id() []byte {
+	return s.id
 }
 func (s *FileServerIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
@@ -40,11 +44,11 @@ func (s *FileServerIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseria
 
 type FileServerIRpcClient struct {
 	endpoint *irpc.Endpoint
-	id       string
+	id       []byte
 }
 
 func NewFileServerIRpcClient(endpoint *irpc.Endpoint) (*FileServerIRpcClient, error) {
-	id := "FileServerIRpcService"
+	id := []byte{81, 74, 227, 236}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}

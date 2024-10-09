@@ -37,7 +37,7 @@ func (rn *ReqNumT) Deserialize(d *Decoder) error { return d.UvarInt64((*uint64)(
 
 type requestPacket struct {
 	ReqNum    ReqNumT
-	ServiceId string
+	ServiceId []byte
 	FuncId    FuncId
 }
 
@@ -45,7 +45,7 @@ func (rp requestPacket) Serialize(e *Encoder) error {
 	if err := rp.ReqNum.Serialize(e); err != nil {
 		return err
 	}
-	if err := e.String(rp.ServiceId); err != nil {
+	if err := e.ByteSlice(rp.ServiceId); err != nil {
 		return err
 	}
 	if err := rp.FuncId.Serialize(e); err != nil {
@@ -58,7 +58,7 @@ func (rp *requestPacket) Deserialize(d *Decoder) error {
 	if err := rp.ReqNum.Deserialize(d); err != nil {
 		return err
 	}
-	if err := d.String(&rp.ServiceId); err != nil {
+	if err := d.ByteSlice(&rp.ServiceId); err != nil {
 		return err
 	}
 	if err := rp.FuncId.Deserialize(d); err != nil {

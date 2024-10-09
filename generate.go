@@ -1,7 +1,10 @@
 package main
 
 import (
+	"crypto/sha256"
+	"fmt"
 	"slices"
+	"strings"
 	"unicode"
 )
 
@@ -14,6 +17,13 @@ const (
 	mathImport    = "math"
 	contextImport = "context"
 )
+
+// generates unique service hash based on generated code's hash (without the hash;) and service name
+func generateServiceIdHash(fileHash []byte, serviceName string, len int) []byte {
+	input := append(fileHash, []byte(serviceName)...)
+	hsh := sha256.Sum256(input)
+	return hsh[:len]
+}
 
 // generates the 'NewSomething(){}' function name
 func generateStructConstructorName(structName string) string {
@@ -60,4 +70,16 @@ func generateSliceIteratorName(existingVars []string) string {
 			possibleNames[i] = n + "_"
 		}
 	}
+}
+
+// returns byte slice definition ex: "[]byte{127, 3, 255}"
+func byteSliceLiteral(in []byte) string {
+	sb := strings.Builder{}
+	for i, b := range in {
+		sb.WriteString(fmt.Sprintf("%d", b))
+		if i != len(in)-1 {
+			sb.WriteString(", ")
+		}
+	}
+	return fmt.Sprintf("[]byte{%s}", sb.String())
 }

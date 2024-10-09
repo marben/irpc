@@ -9,13 +9,17 @@ import (
 
 type interfaceTestIRpcService struct {
 	impl interfaceTest
+	id   []byte
 }
 
 func newInterfaceTestIRpcService(impl interfaceTest) *interfaceTestIRpcService {
-	return &interfaceTestIRpcService{impl: impl}
+	return &interfaceTestIRpcService{
+		impl: impl,
+		id:   []byte{111, 12, 85, 215},
+	}
 }
-func (interfaceTestIRpcService) Id() string {
-	return "interfaceTestIRpcService"
+func (s *interfaceTestIRpcService) Id() []byte {
+	return s.id
 }
 func (s *interfaceTestIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
@@ -96,13 +100,17 @@ func (s *interfaceTestIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDese
 
 type customInterfaceIRpcService struct {
 	impl customInterface
+	id   []byte
 }
 
 func newCustomInterfaceIRpcService(impl customInterface) *customInterfaceIRpcService {
-	return &customInterfaceIRpcService{impl: impl}
+	return &customInterfaceIRpcService{
+		impl: impl,
+		id:   []byte{214, 20, 163, 16},
+	}
 }
-func (customInterfaceIRpcService) Id() string {
-	return "customInterfaceIRpcService"
+func (s *customInterfaceIRpcService) Id() []byte {
+	return s.id
 }
 func (s *customInterfaceIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
@@ -141,11 +149,11 @@ func (s *customInterfaceIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDe
 
 type interfaceTestIRpcClient struct {
 	endpoint *irpc.Endpoint
-	id       string
+	id       []byte
 }
 
 func newInterfaceTestIRpcClient(endpoint *irpc.Endpoint) (*interfaceTestIRpcClient, error) {
-	id := "interfaceTestIRpcService"
+	id := []byte{111, 12, 85, 215}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -203,11 +211,11 @@ func (_c *interfaceTestIRpcClient) passCustomInterfaceAndReturnItModified(ci cus
 
 type customInterfaceIRpcClient struct {
 	endpoint *irpc.Endpoint
-	id       string
+	id       []byte
 }
 
 func newCustomInterfaceIRpcClient(endpoint *irpc.Endpoint) (*customInterfaceIRpcClient, error) {
-	id := "customInterfaceIRpcService"
+	id := []byte{214, 20, 163, 16}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}

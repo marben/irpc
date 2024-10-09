@@ -70,9 +70,9 @@ func (ms *testIRpcService) GetFuncCall(funcId FuncId) (ArgDeserializer, error) {
 	}
 }
 
-var mathIrpcServiceId = "MathServiceHash"
+var mathIrpcServiceId = []byte("MathServiceHash")
 
-func (*testIRpcService) Id() string {
+func (*testIRpcService) Id() []byte {
 	return mathIrpcServiceId
 }
 

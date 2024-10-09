@@ -9,13 +9,17 @@ import (
 
 type basicAPIIRpcService struct {
 	impl basicAPI
+	id   []byte
 }
 
 func newBasicAPIIRpcService(impl basicAPI) *basicAPIIRpcService {
-	return &basicAPIIRpcService{impl: impl}
+	return &basicAPIIRpcService{
+		impl: impl,
+		id:   []byte{159, 241, 14, 95},
+	}
 }
-func (basicAPIIRpcService) Id() string {
-	return "basicAPIIRpcService"
+func (s *basicAPIIRpcService) Id() []byte {
+	return s.id
 }
 func (s *basicAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
@@ -264,13 +268,17 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 
 type emptyAPIIRpcService struct {
 	impl emptyAPI
+	id   []byte
 }
 
 func newEmptyAPIIRpcService(impl emptyAPI) *emptyAPIIRpcService {
-	return &emptyAPIIRpcService{impl: impl}
+	return &emptyAPIIRpcService{
+		impl: impl,
+		id:   []byte{96, 195, 58, 243},
+	}
 }
-func (emptyAPIIRpcService) Id() string {
-	return "emptyAPIIRpcService"
+func (s *emptyAPIIRpcService) Id() []byte {
+	return s.id
 }
 func (s *emptyAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
@@ -281,11 +289,11 @@ func (s *emptyAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseriali
 
 type basicAPIIRpcClient struct {
 	endpoint *irpc.Endpoint
-	id       string
+	id       []byte
 }
 
 func newBasicAPIIRpcClient(endpoint *irpc.Endpoint) (*basicAPIIRpcClient, error) {
-	id := "basicAPIIRpcService"
+	id := []byte{159, 241, 14, 95}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -478,11 +486,11 @@ func (_c *basicAPIIRpcClient) negBool(ok bool) bool {
 
 type emptyAPIIRpcClient struct {
 	endpoint *irpc.Endpoint
-	id       string
+	id       []byte
 }
 
 func newEmptyAPIIRpcClient(endpoint *irpc.Endpoint) (*emptyAPIIRpcClient, error) {
-	id := "emptyAPIIRpcService"
+	id := []byte{96, 195, 58, 243}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}

@@ -9,13 +9,17 @@ import (
 
 type sliceTestIRpcService struct {
 	impl sliceTest
+	id   []byte
 }
 
 func newSliceTestIRpcService(impl sliceTest) *sliceTestIRpcService {
-	return &sliceTestIRpcService{impl: impl}
+	return &sliceTestIRpcService{
+		impl: impl,
+		id:   []byte{78, 110, 166, 10},
+	}
 }
-func (sliceTestIRpcService) Id() string {
-	return "sliceTestIRpcService"
+func (s *sliceTestIRpcService) Id() []byte {
+	return s.id
 }
 func (s *sliceTestIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
@@ -96,11 +100,11 @@ func (s *sliceTestIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserial
 
 type sliceTestIRpcClient struct {
 	endpoint *irpc.Endpoint
-	id       string
+	id       []byte
 }
 
 func newSliceTestIRpcClient(endpoint *irpc.Endpoint) (*sliceTestIRpcClient, error) {
-	id := "sliceTestIRpcService"
+	id := []byte{78, 110, 166, 10}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}

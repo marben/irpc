@@ -24,6 +24,8 @@ const (
 	ctxEndPacketType     // informs service runner that the provided function context expired
 )
 
+const ServiceHashLen = 4
+
 // todo: should be configurable for each endpoint
 const (
 	ParallelWorkers     = 3
@@ -31,7 +33,7 @@ const (
 )
 
 type Service interface {
-	Id() string // unique id of the service
+	Id() []byte // unique id of the service
 	GetFuncCall(funcId FuncId) (ArgDeserializer, error)
 }
 
@@ -50,7 +52,7 @@ type Deserializable interface {
 // there needs to be a serving endpoint on both sides of connection for communication to work
 type Endpoint struct {
 	// maps serviceId to service
-	services map[string]Service
+	services map[[ServiceHashLen]byte]Service
 
 	connCloser io.Closer // close the connection
 	enc        *Encoder  // does encoding on the bufWriter
@@ -84,7 +86,7 @@ func NewEndpoint(conn io.ReadWriteCloser, services ...Service) *Endpoint {
 	}
 
 	ep := &Endpoint{
-		services:         make(map[string]Service),
+		services:         make(map[[ServiceHashLen]byte]Service),
 		pendingRequests:  make(map[ReqNumT]pendingRequest),
 		serviceWorkers:   make(map[ReqNumT]serviceWorker),
 		connCloser:       conn,
@@ -107,19 +109,25 @@ func NewEndpoint(conn io.ReadWriteCloser, services ...Service) *Endpoint {
 
 		dec := NewDecoder(conn)
 		err := ep.readMsgs(globalContext, dec)
-		switch err {
-		case context.Canceled:
+		switch {
+		case errors.Is(err, context.Canceled):
 			// our Close() must have been called
 			return
-		case errCounterpartClosing:
+		case errors.Is(err, errCounterpartClosing):
 			// countepart Ep sent us closing packed
 			// we need to close our part
 			ep.ctxCancel(ErrEndpointClosedByCounterpart)
+		case errors.Is(err, ErrServiceNotFound):
+			// todo: propagate correct error instead
+			ctx, _ := context.WithTimeout(ep.Ctx, 2*time.Second)
+			if err := ep.signalOurClosing(ctx); err != nil {
+				ep.closeOnError(fmt.Errorf("failed to signal our closing on service not found: %w", err))
+			}
+			ep.closeOnError(err)
 		default:
-
 			// unknown connection error
 			// close the endpoint
-			ep.ctxCancel(errors.Join(ErrEndpointClosed, err))
+			ep.closeOnError(errors.Join(ErrEndpointClosed, err))
 		}
 	}()
 
@@ -128,7 +136,7 @@ func NewEndpoint(conn io.ReadWriteCloser, services ...Service) *Endpoint {
 
 // called on internal Endpoint error(connection drop etc)
 // we cannot do it using the normal Close call, because  we don't know what could be failing
-func (e *Endpoint) closeOnReadError(err error) {
+func (e *Endpoint) closeOnError(err error) {
 	e.ctxCancel(err)
 	e.connCloser.Close()
 }
@@ -137,6 +145,7 @@ func (e *Endpoint) closeAlreadyCalled() bool {
 	return e.Ctx.Err() != nil
 }
 
+// todo: add some reason
 func (e *Endpoint) signalOurClosing(ctx context.Context) error {
 	unlock, err := e.writeMux.Lock(ctx)
 	if err != nil {
@@ -197,7 +206,7 @@ func (e *Endpoint) Close() error {
 
 // registers client on remote endpoint
 // if there is no corresponding service registered on remote node, returns error
-func (e *Endpoint) RegisterClient(serviceId string) error {
+func (e *Endpoint) RegisterClient(serviceId []byte) error {
 	// currently a no-op
 	// we could use this call to negotiate shortcut for serviceId to reduce further service data
 	// we could also use this to make sure service is registered on remote ep. this would increase initial latency, so perhaps make it configurable?
@@ -206,11 +215,13 @@ func (e *Endpoint) RegisterClient(serviceId string) error {
 
 // getService returns ErrServiceNotFound if id was not found,
 // nil otherwise
-func (e *Endpoint) getService(serviceHash string) (Service, error) {
+func (e *Endpoint) getService(serviceHash []byte) (Service, error) {
 	e.m.Lock()
 	defer e.m.Unlock()
 
-	s, found := e.services[serviceHash]
+	hashArray := [ServiceHashLen]byte{}
+	copy(hashArray[:], serviceHash)
+	s, found := e.services[hashArray]
 	if !found {
 		return nil, ErrServiceNotFound
 	}
@@ -226,7 +237,7 @@ func (e *Endpoint) newRequestNumber(ctx context.Context) (ReqNumT, error) {
 	}
 }
 
-func (e *Endpoint) sendRpcRequest(ctx context.Context, serviceId string, funcId FuncId, reqData Serializable, respData Deserializable) (pendingRequest, error) {
+func (e *Endpoint) sendRpcRequest(ctx context.Context, serviceId []byte, funcId FuncId, reqData Serializable, respData Deserializable) (pendingRequest, error) {
 	unlock, err := e.writeMux.Lock(ctx)
 	if err != nil {
 		return pendingRequest{}, err
@@ -279,7 +290,7 @@ func (e *Endpoint) sendRequestContextCancelation(req ReqNumT, cause error) error
 	return nil
 }
 
-func (e *Endpoint) CallRemoteFunc(ctx context.Context, serviceId string, funcId FuncId, reqData Serializable, respData Deserializable) error {
+func (e *Endpoint) CallRemoteFunc(ctx context.Context, serviceId []byte, funcId FuncId, reqData Serializable, respData Deserializable) error {
 	// check if our endpoint was closed
 	if e.closeAlreadyCalled() {
 		return context.Cause(e.Ctx)
@@ -322,7 +333,9 @@ func (e *Endpoint) RegisterServices(services ...Service) error {
 	defer e.m.Unlock()
 
 	for _, s := range services {
-		e.services[string(s.Id())] = s
+		hashArray := [ServiceHashLen]byte{}
+		copy(hashArray[:], s.Id())
+		e.services[hashArray] = s
 	}
 
 	return nil
@@ -395,6 +408,7 @@ func (e *Endpoint) readMsgs(ctx context.Context, dec *Decoder) error {
 			if err != nil {
 				return errors.Join(errProtocolError, fmt.Errorf("getService() %v: %w", req, err))
 			}
+
 			argDeser, err := service.GetFuncCall(req.FuncId)
 			if err != nil {
 				return fmt.Errorf("GetFuncCall() %v: %w", req, err)
@@ -492,10 +506,7 @@ func (e *Endpoint) startServiceWorker(ctx context.Context, reqNum ReqNumT, exe F
 		resp := exe(ctxCancelable)
 
 		if err := e.sendResponse(reqNum, resp); err != nil {
-			// if errors.Is(err, ErrEndpointClosed) {
-			// 	return
-			// }
-			e.closeOnReadError(fmt.Errorf("sendResponse() for request %d: %v", reqNum, err))
+			e.closeOnError(fmt.Errorf("sendResponse() for request %d: %w", reqNum, err))
 		}
 	}()
 

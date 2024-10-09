@@ -9,13 +9,17 @@ import (
 
 type endpointApiIRpcService struct {
 	impl endpointApi
+	id   []byte
 }
 
 func newEndpointApiIRpcService(impl endpointApi) *endpointApiIRpcService {
-	return &endpointApiIRpcService{impl: impl}
+	return &endpointApiIRpcService{
+		impl: impl,
+		id:   []byte{141, 42, 210, 9},
+	}
 }
-func (endpointApiIRpcService) Id() string {
-	return "endpointApiIRpcService"
+func (s *endpointApiIRpcService) Id() []byte {
+	return s.id
 }
 func (s *endpointApiIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
@@ -40,11 +44,11 @@ func (s *endpointApiIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseri
 
 type endpointApiIRpcClient struct {
 	endpoint *irpc.Endpoint
-	id       string
+	id       []byte
 }
 
 func newEndpointApiIRpcClient(endpoint *irpc.Endpoint) (*endpointApiIRpcClient, error) {
-	id := "endpointApiIRpcService"
+	id := []byte{141, 42, 210, 9}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}

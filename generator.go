@@ -7,6 +7,8 @@ import (
 	"io"
 	"log"
 	"strings"
+
+	"github.com/marben/irpc/pkg/irpc"
 )
 
 type generator struct {
@@ -17,7 +19,7 @@ type generator struct {
 	params   []paramStructGenerator
 }
 
-func newGenerator(fd rpcFileDesc, q types.Qualifier) (generator, error) {
+func newGenerator(fd rpcFileDesc, q types.Qualifier, fileHash []byte) (generator, error) {
 	imports := newOrderedSet[string]()
 	services := []serviceGenerator{}
 	clients := []clientGenerator{}
@@ -34,15 +36,14 @@ func newGenerator(fd rpcFileDesc, q types.Qualifier) (generator, error) {
 			paramStructs = append(paramStructs, mg.req, mg.resp)
 		}
 
-		serviceId := iface.name() + "IRpcService"
-
-		sg, err := newServiceGenerator(iface.name()+"IRpcService", iface.name(), serviceId, methods)
+		serviceId := generateServiceIdHash(fileHash, iface.name(), irpc.ServiceHashLen)
+		sg, err := newServiceGenerator(iface.name()+"IRpcService", iface.name(), methods, serviceId)
 		if err != nil {
 			return generator{}, fmt.Errorf("service generator for iface: %s: %w", iface.name(), err)
 		}
 		services = append(services, sg)
 
-		cg, err := newClientGenerator(iface.name()+"IRpcClient", serviceId, methods)
+		cg, err := newClientGenerator(iface.name()+"IRpcClient", iface.name(), methods, serviceId)
 		if err != nil {
 			return generator{}, fmt.Errorf("client generator for iface: %s: %w", iface.name(), err)
 		}
@@ -351,19 +352,19 @@ type serviceGenerator struct {
 	imports         []string
 	ifaceName       string
 	serviceTypeName string
-	serviceId       string
 	methods         []methodGenerator
+	serviceId       []byte
 }
 
-func newServiceGenerator(serviceTypeName, ifaceTypeName, serviceId string, methods []methodGenerator) (serviceGenerator, error) {
+func newServiceGenerator(serviceTypeName, ifaceTypeName string, methods []methodGenerator, serviceId []byte) (serviceGenerator, error) {
 	imports := []string{fmtImport, contextImport}
 
 	return serviceGenerator{
 		ifaceName:       ifaceTypeName,
 		serviceTypeName: serviceTypeName,
-		serviceId:       serviceId,
 		methods:         methods,
 		imports:         imports,
+		serviceId:       serviceId,
 	}, nil
 }
 
@@ -373,20 +374,24 @@ func (sg serviceGenerator) code() string {
 	// type definition
 	fmt.Fprintf(sb, `type %s struct{
 		impl %s
+		id []byte
 	}
 	`, sg.serviceTypeName, sg.ifaceName)
 
 	// constructor
 	fmt.Fprintf(sb, `func %s (impl %s) *%[3]s {
-		return &%[3]s{impl:impl}
+		return &%[3]s{
+			impl:impl,
+			id: %s,
+		}
 	}
-	`, generateStructConstructorName(sg.serviceTypeName), sg.ifaceName, sg.serviceTypeName)
+	`, generateStructConstructorName(sg.serviceTypeName), sg.ifaceName, sg.serviceTypeName, byteSliceLiteral(sg.serviceId))
 
 	// Id() func
-	fmt.Fprintf(sb, `func (%s) Id() string {
-		return "%s"
+	fmt.Fprintf(sb, `func (s *%s) Id() []byte {
+		return s.id
 	}
-	`, sg.serviceTypeName, sg.serviceId)
+	`, sg.serviceTypeName)
 
 	// Call func call swith
 	fmt.Fprintf(sb, `func (s *%s) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error){
@@ -416,20 +421,22 @@ func (sg serviceGenerator) code() string {
 
 type clientGenerator struct {
 	typeName        string
-	serviceId       string
+	ifaceName       string
 	methods         []methodGenerator
 	imports         []string
 	fncReceiverName string
+	serviceId       []byte
 }
 
-func newClientGenerator(clientTypeName string, serviceId string, methods []methodGenerator) (clientGenerator, error) {
+func newClientGenerator(clientTypeName string, ifaceTypeName string, methods []methodGenerator, serviceId []byte) (clientGenerator, error) {
 	imports := []string{irpcImport}
 	return clientGenerator{
 		typeName:        clientTypeName,
-		serviceId:       serviceId,
+		ifaceName:       ifaceTypeName,
 		methods:         methods,
 		imports:         imports,
 		fncReceiverName: "_c", // todo: must not collide with any of fnc variable names
+		serviceId:       serviceId,
 	}, nil
 }
 
@@ -439,17 +446,17 @@ func (cg clientGenerator) code() string {
 	fmt.Fprintf(b, `
 	type %[1]s struct {
 		endpoint *irpc.Endpoint
-		id string
+		id []byte
 	}
 
 	func %[2]s(endpoint *irpc.Endpoint) (*%[1]s, error) {
-		id := "%[3]s"
+		id := %[3]s
 		if err := endpoint.RegisterClient(id); err != nil {
 			return nil, fmt.Errorf("register failed: %%w", err)
 		}
 		return &%[1]s{endpoint: endpoint, id: id}, nil
 	}
-	`, cg.typeName, generateStructConstructorName(cg.typeName), cg.serviceId)
+	`, cg.typeName, generateStructConstructorName(cg.typeName), byteSliceLiteral(cg.serviceId))
 
 	// func calls
 	for _, m := range cg.methods {

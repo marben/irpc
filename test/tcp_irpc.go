@@ -9,13 +9,17 @@ import (
 
 type tcpTestApiIRpcService struct {
 	impl tcpTestApi
+	id   []byte
 }
 
 func newTcpTestApiIRpcService(impl tcpTestApi) *tcpTestApiIRpcService {
-	return &tcpTestApiIRpcService{impl: impl}
+	return &tcpTestApiIRpcService{
+		impl: impl,
+		id:   []byte{7, 45, 101, 59},
+	}
 }
-func (tcpTestApiIRpcService) Id() string {
-	return "tcpTestApiIRpcService"
+func (s *tcpTestApiIRpcService) Id() []byte {
+	return s.id
 }
 func (s *tcpTestApiIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
 	switch funcId {
@@ -40,11 +44,11 @@ func (s *tcpTestApiIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeseria
 
 type tcpTestApiIRpcClient struct {
 	endpoint *irpc.Endpoint
-	id       string
+	id       []byte
 }
 
 func newTcpTestApiIRpcClient(endpoint *irpc.Endpoint) (*tcpTestApiIRpcClient, error) {
-	id := "tcpTestApiIRpcService"
+	id := []byte{7, 45, 101, 59}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}

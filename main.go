@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/sha256"
 	"flag"
 	"fmt"
 	"go/types"
@@ -49,9 +50,17 @@ func processInputFile(inputFile string) error {
 
 	qualifier := types.RelativeTo(fd.pkg.Types)
 
-	g, err := newGenerator(fd, qualifier)
+	noHashGen, err := newGenerator(fd, qualifier, nil)
 	if err != nil {
 		return fmt.Errorf("newGenerator for file '%s': %w", inputFile, err)
+	}
+
+	fileHash := sha256.New()
+	noHashGen.write(fileHash)
+
+	hashGen, err := newGenerator(fd, qualifier, fileHash.Sum(nil))
+	if err != nil {
+		return fmt.Errorf("hashed enerator for file %q: %w", inputFile, err)
 	}
 
 	// OUTPUT FILE
@@ -66,7 +75,7 @@ func processInputFile(inputFile string) error {
 	}
 	defer outFile.Close()
 
-	if err := g.write(outFile); err != nil {
+	if err := hashGen.write(outFile); err != nil {
 		return fmt.Errorf("generator write to '%s': %w", genFileName, err)
 	}
 
