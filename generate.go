@@ -57,7 +57,7 @@ loop:
 	return varName
 }
 
-// encoding/decoding of slices of slices requires unique iterator names
+// encoding/decoding of slices requires unique iterator names
 // we generate them from variable name, but we need to remove some characters
 // replaces '[' ']' '.' with underscore
 func generateSliceIteratorName(existingVars []string) string {

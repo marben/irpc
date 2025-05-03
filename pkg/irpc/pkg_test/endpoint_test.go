@@ -34,6 +34,7 @@ func TestEndpointClientRegister(t *testing.T) {
 		t.Fatalf("failed to create testservice client: %+v", err)
 	}
 
+	t.Logf("calling client func")
 	res := client.Div(6, 2)
 	if res != 3 {
 		t.Fatalf("wrong result: %d", res)

@@ -205,7 +205,6 @@ func (e *Endpoint) Close() error {
 }
 
 // registers client on remote endpoint
-// if there is no corresponding service registered on remote node, returns error
 func (e *Endpoint) RegisterClient(serviceId []byte) error {
 	// currently a no-op
 	// we could use this call to negotiate shortcut for serviceId to reduce further service data
