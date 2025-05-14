@@ -13,5 +13,5 @@ type Greeter interface {
 and turns it into client and server code, that can be used just as the interface, but over a network
 
 # installation
-- binary: `go install github.com/marben/irpc@latest`
+- binary: `go install github.com/marben/cmd/irpc@latest`
 - import into project: `go get github.com/marben/irpc/pkg/irpc`
