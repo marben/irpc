@@ -1,9 +1,8 @@
 package irpctestpkg
 
 import (
+	"github.com/marben/irpc/cmd/irpc/test/testtools"
 	"testing"
-
-	"github.com/marben/irpc/test/testtools"
 )
 
 func TestTcpClientServer(t *testing.T) {

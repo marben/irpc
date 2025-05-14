@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	irpcImport    = "github.com/marben/irpc/pkg/irpc"
+	irpcImport    = "github.com/marben/irpc"
 	binaryImport  = "encoding/binary"
 	fmtImport     = "fmt"
 	ioImport      = "io"

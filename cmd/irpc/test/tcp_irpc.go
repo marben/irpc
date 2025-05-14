@@ -4,7 +4,7 @@ package irpctestpkg
 import (
 	"context"
 	"fmt"
-	"github.com/marben/irpc/pkg/irpc"
+	"github.com/marben/irpc"
 )
 
 type tcpTestApiIRpcService struct {
@@ -15,7 +15,7 @@ type tcpTestApiIRpcService struct {
 func newTcpTestApiIRpcService(impl tcpTestApi) *tcpTestApiIRpcService {
 	return &tcpTestApiIRpcService{
 		impl: impl,
-		id:   []byte{7, 45, 101, 59},
+		id:   []byte{133, 129, 34, 195},
 	}
 }
 func (s *tcpTestApiIRpcService) Id() []byte {
@@ -48,7 +48,7 @@ type tcpTestApiIRpcClient struct {
 }
 
 func newTcpTestApiIRpcClient(endpoint *irpc.Endpoint) (*tcpTestApiIRpcClient, error) {
-	id := []byte{7, 45, 101, 59}
+	id := []byte{133, 129, 34, 195}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}

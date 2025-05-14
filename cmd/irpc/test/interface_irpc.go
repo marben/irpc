@@ -4,7 +4,7 @@ package irpctestpkg
 import (
 	"context"
 	"fmt"
-	"github.com/marben/irpc/pkg/irpc"
+	"github.com/marben/irpc"
 )
 
 type interfaceTestIRpcService struct {
@@ -15,7 +15,7 @@ type interfaceTestIRpcService struct {
 func newInterfaceTestIRpcService(impl interfaceTest) *interfaceTestIRpcService {
 	return &interfaceTestIRpcService{
 		impl: impl,
-		id:   []byte{111, 12, 85, 215},
+		id:   []byte{141, 2, 130, 70},
 	}
 }
 func (s *interfaceTestIRpcService) Id() []byte {
@@ -106,7 +106,7 @@ type customInterfaceIRpcService struct {
 func newCustomInterfaceIRpcService(impl customInterface) *customInterfaceIRpcService {
 	return &customInterfaceIRpcService{
 		impl: impl,
-		id:   []byte{214, 20, 163, 16},
+		id:   []byte{74, 33, 230, 75},
 	}
 }
 func (s *customInterfaceIRpcService) Id() []byte {
@@ -153,7 +153,7 @@ type interfaceTestIRpcClient struct {
 }
 
 func newInterfaceTestIRpcClient(endpoint *irpc.Endpoint) (*interfaceTestIRpcClient, error) {
-	id := []byte{111, 12, 85, 215}
+	id := []byte{141, 2, 130, 70}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -215,7 +215,7 @@ type customInterfaceIRpcClient struct {
 }
 
 func newCustomInterfaceIRpcClient(endpoint *irpc.Endpoint) (*customInterfaceIRpcClient, error) {
-	id := []byte{214, 20, 163, 16}
+	id := []byte{74, 33, 230, 75}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}

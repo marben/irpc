@@ -2,9 +2,8 @@ package testtools
 
 import (
 	"fmt"
+	"github.com/marben/irpc"
 	"net"
-
-	"github.com/marben/irpc/pkg/irpc"
 )
 
 func CreateLocalTcpConnPipe() (net.Conn, net.Conn, error) {

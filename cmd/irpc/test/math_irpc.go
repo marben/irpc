@@ -4,7 +4,7 @@ package irpctestpkg
 import (
 	"context"
 	"fmt"
-	"github.com/marben/irpc/pkg/irpc"
+	"github.com/marben/irpc"
 )
 
 type MathIRpcService struct {
@@ -15,7 +15,7 @@ type MathIRpcService struct {
 func NewMathIRpcService(impl Math) *MathIRpcService {
 	return &MathIRpcService{
 		impl: impl,
-		id:   []byte{57, 216, 53, 222},
+		id:   []byte{204, 209, 92, 58},
 	}
 }
 func (s *MathIRpcService) Id() []byte {
@@ -48,7 +48,7 @@ type MathIRpcClient struct {
 }
 
 func NewMathIRpcClient(endpoint *irpc.Endpoint) (*MathIRpcClient, error) {
-	id := []byte{57, 216, 53, 222}
+	id := []byte{204, 209, 92, 58}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}

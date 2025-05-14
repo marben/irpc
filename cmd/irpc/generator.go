@@ -3,12 +3,11 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/marben/irpc"
 	"go/types"
 	"io"
 	"log"
 	"strings"
-
-	"github.com/marben/irpc/pkg/irpc"
 )
 
 type generator struct {

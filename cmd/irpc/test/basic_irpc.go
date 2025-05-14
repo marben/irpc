@@ -4,7 +4,7 @@ package irpctestpkg
 import (
 	"context"
 	"fmt"
-	"github.com/marben/irpc/pkg/irpc"
+	"github.com/marben/irpc"
 )
 
 type basicAPIIRpcService struct {
@@ -15,7 +15,7 @@ type basicAPIIRpcService struct {
 func newBasicAPIIRpcService(impl basicAPI) *basicAPIIRpcService {
 	return &basicAPIIRpcService{
 		impl: impl,
-		id:   []byte{159, 241, 14, 95},
+		id:   []byte{217, 100, 209, 84},
 	}
 }
 func (s *basicAPIIRpcService) Id() []byte {
@@ -274,7 +274,7 @@ type emptyAPIIRpcService struct {
 func newEmptyAPIIRpcService(impl emptyAPI) *emptyAPIIRpcService {
 	return &emptyAPIIRpcService{
 		impl: impl,
-		id:   []byte{96, 195, 58, 243},
+		id:   []byte{77, 18, 203, 119},
 	}
 }
 func (s *emptyAPIIRpcService) Id() []byte {
@@ -293,7 +293,7 @@ type basicAPIIRpcClient struct {
 }
 
 func newBasicAPIIRpcClient(endpoint *irpc.Endpoint) (*basicAPIIRpcClient, error) {
-	id := []byte{159, 241, 14, 95}
+	id := []byte{217, 100, 209, 84}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -490,7 +490,7 @@ type emptyAPIIRpcClient struct {
 }
 
 func newEmptyAPIIRpcClient(endpoint *irpc.Endpoint) (*emptyAPIIRpcClient, error) {
-	id := []byte{96, 195, 58, 243}
+	id := []byte{77, 18, 203, 119}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}

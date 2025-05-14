@@ -3,13 +3,12 @@ package irpc_test
 import (
 	"context"
 	"errors"
+	"github.com/marben/irpc"
+	"github.com/marben/irpc/cmd/irpc/test"
+	"github.com/marben/irpc/cmd/irpc/test/testtools"
 	"net"
 	"testing"
 	"time"
-
-	"github.com/marben/irpc/pkg/irpc"
-	irpctestpkg "github.com/marben/irpc/test"
-	"github.com/marben/irpc/test/testtools"
 )
 
 func TestServeOnMultipleListeners(t *testing.T) {

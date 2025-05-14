@@ -3,13 +3,12 @@ package irpc_test
 import (
 	"context"
 	"errors"
+	"github.com/marben/irpc"
+	"github.com/marben/irpc/cmd/irpc/test/testtools"
 	"log"
 	"sync"
 	"testing"
 	"time"
-
-	"github.com/marben/irpc/pkg/irpc"
-	"github.com/marben/irpc/test/testtools"
 )
 
 func init() {

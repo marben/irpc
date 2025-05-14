@@ -4,7 +4,7 @@ package testtools
 import (
 	"context"
 	"fmt"
-	"github.com/marben/irpc/pkg/irpc"
+	"github.com/marben/irpc"
 )
 
 type TestServiceIRpcService struct {

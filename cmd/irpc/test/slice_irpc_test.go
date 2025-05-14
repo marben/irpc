@@ -1,10 +1,9 @@
 package irpctestpkg
 
 import (
+	"github.com/marben/irpc/cmd/irpc/test/testtools"
 	"slices"
 	"testing"
-
-	"github.com/marben/irpc/test/testtools"
 )
 
 func TestSlice(t *testing.T) {

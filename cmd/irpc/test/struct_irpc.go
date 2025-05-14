@@ -4,7 +4,7 @@ package irpctestpkg
 import (
 	"context"
 	"fmt"
-	"github.com/marben/irpc/pkg/irpc"
+	"github.com/marben/irpc"
 )
 
 type structAPIIRpcService struct {
@@ -15,7 +15,7 @@ type structAPIIRpcService struct {
 func newStructAPIIRpcService(impl structAPI) *structAPIIRpcService {
 	return &structAPIIRpcService{
 		impl: impl,
-		id:   []byte{69, 131, 174, 96},
+		id:   []byte{201, 37, 192, 165},
 	}
 }
 func (s *structAPIIRpcService) Id() []byte {
@@ -76,7 +76,7 @@ type structAPIIRpcClient struct {
 }
 
 func newStructAPIIRpcClient(endpoint *irpc.Endpoint) (*structAPIIRpcClient, error) {
-	id := []byte{69, 131, 174, 96}
+	id := []byte{201, 37, 192, 165}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
