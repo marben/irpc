@@ -2,19 +2,21 @@
 
 IRPC is a library and a code generator that generates network code based on your go interface definition.
 
-IRPC takes your interface definition and turns it into network client/server code, that implements/uses your interface. Allowing for seamless use of generated network client code in place of the defining interface.
+It aims to make the network code as invisible as possible, allowing you to treat the generated client code as any other implementation of your interface. No wrappers needed.
 
-### example network api definition:
+IRPC is very efficient as it doesn't transfer metadata. Payload layout is defined in the generated code, which is used by both client and server. Layout definition/api version is verified upon network handshake.
+
+### Example network api definition:
 ```go
-// definition inside math.go
+// api definition inside math.go
 type Math interface {
     Add(a, b int) (int, error)
 }
 ```
 
-Running IRPC command tool`$ irpc math.go` generates `math_irpc.go` with client/service definition.
+Running IRPC command tool`irpc math.go` generates file `math_irpc.go` with client/service definition.
 
-### generated client
+### Generated client
 returns a working client, that implements Math interface, meaning we can directly call Add(1,2) on it
 ```go
 func NewMathIRpcClient(endpoint *irpc.Endpoint) (*MathIRpcClient, error) {...}
@@ -25,7 +27,7 @@ result, err := client.Add(1,2) // a network call
 fmt.Println(result)    // "3"  (presuming our implementation did a simple addition)
 ```
 
-### generated service
+### Generated service
 returns service, that takes `Math` interface implementation and forward incoming network requests to it, returning the results back over network
 ```go
 // generated service inside math_irpc.go
@@ -48,3 +50,7 @@ func main() {
 	srvr, err := irpc.NewServer(...)
 }
 ```
+
+# Working example
+Have a look to see, how easy it is:  
+[github.com/marben/irpc_tcp_example](https://github.com/marben/irpc_tcp_example) - easy to read example code
