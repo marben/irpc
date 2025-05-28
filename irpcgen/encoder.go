@@ -1,4 +1,4 @@
-package irpc
+package irpcgen
 
 import (
 	"bufio"
@@ -8,21 +8,21 @@ import (
 	"math"
 )
 
+// Encoder serializes given data type to byte stream.
+// Encoder is meant to be used by generated code, not directly by the user.
 type Encoder struct {
-	w      *bufio.Writer
-	buf    []byte
-	endian binary.ByteOrder //todo: remove
+	w   *bufio.Writer
+	buf []byte
 }
 
 func NewEncoder(w io.Writer) *Encoder {
 	return &Encoder{
-		w:      bufio.NewWriter(w),
-		buf:    make([]byte, binary.MaxVarintLen64),
-		endian: binary.LittleEndian,
+		w:   bufio.NewWriter(w),
+		buf: make([]byte, binary.MaxVarintLen64),
 	}
 }
 
-func (e *Encoder) flush() error {
+func (e *Encoder) Flush() error {
 	return e.w.Flush()
 }
 

@@ -225,7 +225,7 @@ func loadRpcInterfaces(fileAst *ast.File, tInfo *types.Info) ([]rpcInterface, er
 	return ifaces, nil
 }
 
-func (fd rpcFileDesc) print(q types.Qualifier) string {
+func (fd *rpcFileDesc) print(q types.Qualifier) string {
 	s := fmt.Sprintf("%s:\n", fd.filename)
 	for _, i := range fd.ifaces {
 		s += i.print(q, "\t")

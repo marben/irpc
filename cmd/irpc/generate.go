@@ -10,6 +10,7 @@ import (
 
 const (
 	irpcImport    = "github.com/marben/irpc"
+	irpcGenImport = "github.com/marben/irpc/irpcgen"
 	binaryImport  = "encoding/binary"
 	fmtImport     = "fmt"
 	ioImport      = "io"

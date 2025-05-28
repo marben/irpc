@@ -139,7 +139,7 @@ func (sg paramStructGenerator) code() string {
 
 func (sg paramStructGenerator) serializeFunc() string {
 	sb := &strings.Builder{}
-	fmt.Fprintf(sb, "func (s %s)Serialize(e *irpc.Encoder) error {\n", sg.typeName)
+	fmt.Fprintf(sb, "func (s %s)Serialize(e *irpcgen.Encoder) error {\n", sg.typeName)
 	if len(sg.params) > 0 {
 		for _, p := range sg.params {
 			sb.WriteString(p.enc.encode("s."+p.structFieldName(), nil))
@@ -152,7 +152,7 @@ func (sg paramStructGenerator) serializeFunc() string {
 
 func (sg paramStructGenerator) deserializeFunc() string {
 	sb := &strings.Builder{}
-	fmt.Fprintf(sb, "func (s *%s)Deserialize(d *irpc.Decoder) error {\n", sg.typeName)
+	fmt.Fprintf(sb, "func (s *%s)Deserialize(d *irpcgen.Decoder) error {\n", sg.typeName)
 	if len(sg.params) > 0 {
 		for _, p := range sg.params {
 			sb.WriteString(p.enc.decode("s."+p.structFieldName(), nil))
@@ -322,7 +322,7 @@ func newMethodGenerator(ifaceName string, index int, m rpcMethod, q types.Qualif
 }
 
 func (mg methodGenerator) executorFuncCode() string {
-	return fmt.Sprintf(`func(ctx context.Context) irpc.Serializable {
+	return fmt.Sprintf(`func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
 				var resp %[1]s
 				%[2]s = s.impl.%[3]s(%[4]s)
@@ -393,13 +393,13 @@ func (sg serviceGenerator) code() string {
 	`, sg.serviceTypeName)
 
 	// Call func call swith
-	fmt.Fprintf(sb, `func (s *%s) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error){
+	fmt.Fprintf(sb, `func (s *%s) GetFuncCall(funcId irpc.FuncId) (irpcgen.ArgDeserializer, error){
 		switch funcId {
 			`, sg.serviceTypeName)
 
 	for _, m := range sg.methods {
 		fmt.Fprintf(sb, "case %d: // %s\n", m.index, m.name)
-		fmt.Fprintf(sb, `return func(d *irpc.Decoder) (irpc.FuncExecutor, error) {
+		fmt.Fprintf(sb, `return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			// DESERIALIZE
 		 	var args %s
 		 	if err := args.Deserialize(d); err != nil {

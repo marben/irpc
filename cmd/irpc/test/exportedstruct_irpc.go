@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/marben/irpc"
+	"github.com/marben/irpc/irpcgen"
 )
 
 type FileServerIRpcService struct {
@@ -15,22 +16,22 @@ type FileServerIRpcService struct {
 func NewFileServerIRpcService(impl FileServer) *FileServerIRpcService {
 	return &FileServerIRpcService{
 		impl: impl,
-		id:   []byte{78, 104, 190, 236},
+		id:   []byte{220, 239, 247, 180},
 	}
 }
 func (s *FileServerIRpcService) Id() []byte {
 	return s.id
 }
-func (s *FileServerIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
+func (s *FileServerIRpcService) GetFuncCall(funcId irpc.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // ListFiles
-		return func(d *irpc.Decoder) (irpc.FuncExecutor, error) {
+		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_FileServerListFilesReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func(ctx context.Context) irpc.Serializable {
+			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
 				var resp _Irpc_FileServerListFilesResp
 				resp.Param0_, resp.Param1_ = s.impl.ListFiles()
@@ -48,7 +49,7 @@ type FileServerIRpcClient struct {
 }
 
 func NewFileServerIRpcClient(endpoint *irpc.Endpoint) (*FileServerIRpcClient, error) {
-	id := []byte{78, 104, 190, 236}
+	id := []byte{220, 239, 247, 180}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -67,10 +68,10 @@ func (_c *FileServerIRpcClient) ListFiles() ([]FileInfo, error) {
 type _Irpc_FileServerListFilesReq struct {
 }
 
-func (s _Irpc_FileServerListFilesReq) Serialize(e *irpc.Encoder) error {
+func (s _Irpc_FileServerListFilesReq) Serialize(e *irpcgen.Encoder) error {
 	return nil
 }
-func (s *_Irpc_FileServerListFilesReq) Deserialize(d *irpc.Decoder) error {
+func (s *_Irpc_FileServerListFilesReq) Deserialize(d *irpcgen.Decoder) error {
 	return nil
 }
 
@@ -79,7 +80,7 @@ type _Irpc_FileServerListFilesResp struct {
 	Param1_ error
 }
 
-func (s _Irpc_FileServerListFilesResp) Serialize(e *irpc.Encoder) error {
+func (s _Irpc_FileServerListFilesResp) Serialize(e *irpcgen.Encoder) error {
 	{ // s.Param0_
 		var l int = len(s.Param0_)
 		if err := e.VarInt(l); err != nil {
@@ -113,7 +114,7 @@ func (s _Irpc_FileServerListFilesResp) Serialize(e *irpc.Encoder) error {
 	}
 	return nil
 }
-func (s *_Irpc_FileServerListFilesResp) Deserialize(d *irpc.Decoder) error {
+func (s *_Irpc_FileServerListFilesResp) Deserialize(d *irpcgen.Decoder) error {
 	{ // s.Param0_
 		var l int
 		if err := d.VarInt(&l); err != nil {

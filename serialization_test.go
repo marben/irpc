@@ -2,6 +2,7 @@ package irpc
 
 import (
 	"bytes"
+	"github.com/marben/irpc/irpcgen"
 	"testing"
 )
 
@@ -10,16 +11,16 @@ func TestPacketHeaderSerializeDeserialize(t *testing.T) {
 		typ: rpcRequestPacketType,
 	}
 	buf := bytes.NewBuffer(nil)
-	enc := NewEncoder(buf)
+	enc := irpcgen.NewEncoder(buf)
 	if err := phIn.Serialize(enc); err != nil {
 		t.Fatalf("serialize(): %v", err)
 	}
-	if err := enc.flush(); err != nil {
+	if err := enc.Flush(); err != nil {
 		t.Fatalf("enc.flush(): %v", err)
 	}
 
 	var phOut packetHeader
-	dec := NewDecoder(buf)
+	dec := irpcgen.NewDecoder(buf)
 	if err := phOut.Deserialize(dec); err != nil {
 		t.Fatalf("deserialize(): %v", err)
 	}
@@ -29,13 +30,14 @@ func TestPacketHeaderSerializeDeserialize(t *testing.T) {
 	}
 }
 
+/*
 func BenchmarkPacketHeaderSerialization(b *testing.B) {
 	ph := packetHeader{
 		typ: rpcRequestPacketType,
 	}
 	var length int
 	buf := bytes.NewBuffer(make([]byte, 100))
-	enc := NewEncoder(buf)
+	enc := irpcgen.NewEncoder(buf)
 	b.ResetTimer()
 	for range b.N {
 		if err := ph.Serialize(enc); err != nil {
@@ -47,20 +49,22 @@ func BenchmarkPacketHeaderSerialization(b *testing.B) {
 	}
 	b.ReportMetric(float64(length), "Byte_len")
 }
+*/
 
+/*
 func BenchmarkPacketHeaderDeSerialization(b *testing.B) {
 	phInit := packetHeader{
 		typ: rpcRequestPacketType,
 	}
 	buf := bytes.NewBuffer(nil)
-	enc := NewEncoder(buf)
+	enc := irpcgen.NewEncoder(buf)
 	if err := phInit.Serialize(enc); err != nil {
 		b.Fatal("failed to serialize test packet")
 	}
-	enc.flush()
+	enc.Flush()
 	data := buf.Bytes()
 
-	dec := NewDecoder(bytes.NewReader(data))
+	dec := irpcgen.NewDecoder(bytes.NewReader(data))
 	b.ResetTimer()
 	for range b.N {
 		var phOut packetHeader
@@ -74,3 +78,4 @@ func BenchmarkPacketHeaderDeSerialization(b *testing.B) {
 		dec.r.Reset(bytes.NewReader(data))
 	}
 }
+*/

@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/marben/irpc"
+	"github.com/marben/irpc/irpcgen"
 )
 
 type tcpTestApiIRpcService struct {
@@ -15,22 +16,22 @@ type tcpTestApiIRpcService struct {
 func newTcpTestApiIRpcService(impl tcpTestApi) *tcpTestApiIRpcService {
 	return &tcpTestApiIRpcService{
 		impl: impl,
-		id:   []byte{133, 129, 34, 195},
+		id:   []byte{113, 74, 55, 179},
 	}
 }
 func (s *tcpTestApiIRpcService) Id() []byte {
 	return s.id
 }
-func (s *tcpTestApiIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
+func (s *tcpTestApiIRpcService) GetFuncCall(funcId irpc.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // Div
-		return func(d *irpc.Decoder) (irpc.FuncExecutor, error) {
+		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_tcpTestApiDivReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func(ctx context.Context) irpc.Serializable {
+			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
 				var resp _Irpc_tcpTestApiDivResp
 				resp.Param0_, resp.Param1_ = s.impl.Div(args.Param0_a, args.Param0_b)
@@ -48,7 +49,7 @@ type tcpTestApiIRpcClient struct {
 }
 
 func newTcpTestApiIRpcClient(endpoint *irpc.Endpoint) (*tcpTestApiIRpcClient, error) {
-	id := []byte{133, 129, 34, 195}
+	id := []byte{113, 74, 55, 179}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -72,7 +73,7 @@ type _Irpc_tcpTestApiDivReq struct {
 	Param0_b float64
 }
 
-func (s _Irpc_tcpTestApiDivReq) Serialize(e *irpc.Encoder) error {
+func (s _Irpc_tcpTestApiDivReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.Float64le(s.Param0_a); err != nil {
 		return fmt.Errorf("serialize s.Param0_a of type 'float64': %w", err)
 	}
@@ -81,7 +82,7 @@ func (s _Irpc_tcpTestApiDivReq) Serialize(e *irpc.Encoder) error {
 	}
 	return nil
 }
-func (s *_Irpc_tcpTestApiDivReq) Deserialize(d *irpc.Decoder) error {
+func (s *_Irpc_tcpTestApiDivReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.Float64le(&s.Param0_a); err != nil {
 		return fmt.Errorf("deserialize s.Param0_a of type 'float64': %w", err)
 	}
@@ -96,7 +97,7 @@ type _Irpc_tcpTestApiDivResp struct {
 	Param1_ error
 }
 
-func (s _Irpc_tcpTestApiDivResp) Serialize(e *irpc.Encoder) error {
+func (s _Irpc_tcpTestApiDivResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.Float64le(s.Param0_); err != nil {
 		return fmt.Errorf("serialize s.Param0_ of type 'float64': %w", err)
 	}
@@ -120,7 +121,7 @@ func (s _Irpc_tcpTestApiDivResp) Serialize(e *irpc.Encoder) error {
 	}
 	return nil
 }
-func (s *_Irpc_tcpTestApiDivResp) Deserialize(d *irpc.Decoder) error {
+func (s *_Irpc_tcpTestApiDivResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.Float64le(&s.Param0_); err != nil {
 		return fmt.Errorf("deserialize s.Param0_ of type 'float64': %w", err)
 	}

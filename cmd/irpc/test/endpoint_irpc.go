@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/marben/irpc"
+	"github.com/marben/irpc/irpcgen"
 )
 
 type endpointApiIRpcService struct {
@@ -15,22 +16,22 @@ type endpointApiIRpcService struct {
 func newEndpointApiIRpcService(impl endpointApi) *endpointApiIRpcService {
 	return &endpointApiIRpcService{
 		impl: impl,
-		id:   []byte{253, 181, 26, 114},
+		id:   []byte{147, 87, 95, 202},
 	}
 }
 func (s *endpointApiIRpcService) Id() []byte {
 	return s.id
 }
-func (s *endpointApiIRpcService) GetFuncCall(funcId irpc.FuncId) (irpc.ArgDeserializer, error) {
+func (s *endpointApiIRpcService) GetFuncCall(funcId irpc.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // Div
-		return func(d *irpc.Decoder) (irpc.FuncExecutor, error) {
+		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			// DESERIALIZE
 			var args _Irpc_endpointApiDivReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func(ctx context.Context) irpc.Serializable {
+			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
 				var resp _Irpc_endpointApiDivResp
 				resp.Param0_, resp.Param1_ = s.impl.Div(args.Param0_a, args.Param0_b)
@@ -48,7 +49,7 @@ type endpointApiIRpcClient struct {
 }
 
 func newEndpointApiIRpcClient(endpoint *irpc.Endpoint) (*endpointApiIRpcClient, error) {
-	id := []byte{253, 181, 26, 114}
+	id := []byte{147, 87, 95, 202}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -72,7 +73,7 @@ type _Irpc_endpointApiDivReq struct {
 	Param0_b float64
 }
 
-func (s _Irpc_endpointApiDivReq) Serialize(e *irpc.Encoder) error {
+func (s _Irpc_endpointApiDivReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.Float64le(s.Param0_a); err != nil {
 		return fmt.Errorf("serialize s.Param0_a of type 'float64': %w", err)
 	}
@@ -81,7 +82,7 @@ func (s _Irpc_endpointApiDivReq) Serialize(e *irpc.Encoder) error {
 	}
 	return nil
 }
-func (s *_Irpc_endpointApiDivReq) Deserialize(d *irpc.Decoder) error {
+func (s *_Irpc_endpointApiDivReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.Float64le(&s.Param0_a); err != nil {
 		return fmt.Errorf("deserialize s.Param0_a of type 'float64': %w", err)
 	}
@@ -96,7 +97,7 @@ type _Irpc_endpointApiDivResp struct {
 	Param1_ error
 }
 
-func (s _Irpc_endpointApiDivResp) Serialize(e *irpc.Encoder) error {
+func (s _Irpc_endpointApiDivResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.Float64le(s.Param0_); err != nil {
 		return fmt.Errorf("serialize s.Param0_ of type 'float64': %w", err)
 	}
@@ -120,7 +121,7 @@ func (s _Irpc_endpointApiDivResp) Serialize(e *irpc.Encoder) error {
 	}
 	return nil
 }
-func (s *_Irpc_endpointApiDivResp) Deserialize(d *irpc.Decoder) error {
+func (s *_Irpc_endpointApiDivResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.Float64le(&s.Param0_); err != nil {
 		return fmt.Errorf("deserialize s.Param0_ of type 'float64': %w", err)
 	}

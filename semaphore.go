@@ -23,6 +23,6 @@ func (cm Semaphore) Lock(ctx context.Context) (unlock func(), err error) {
 }
 
 func (cm Semaphore) unlock() {
-	// todo: mabe make idempotent? (that would probably require allocation)
+	// todo: maybe make idempotent? (that would probably require allocation)
 	<-cm.c
 }

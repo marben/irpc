@@ -1,4 +1,4 @@
-package irpc
+package irpcgen
 
 import (
 	"bytes"

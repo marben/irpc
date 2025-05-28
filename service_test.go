@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/marben/irpc/irpcgen"
 )
 
 // this file contains a testing service
@@ -49,16 +50,16 @@ type testIRpcService struct {
 
 func newTestIRpcService(impl testServiceIface) *testIRpcService { return &testIRpcService{impl: impl} }
 
-func (ms *testIRpcService) GetFuncCall(funcId FuncId) (ArgDeserializer, error) {
+func (ms *testIRpcService) GetFuncCall(funcId FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case mathIrpcFuncAddId:
-		return func(d *Decoder) (FuncExecutor, error) {
+		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			// DESERIALIZE
 			var args addParams
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
-			return func(ctx context.Context) Serializable {
+			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
 				var resp addRtnVals
 				resp.Res = ms.impl.Add(args.A, args.B)
@@ -111,7 +112,7 @@ type addParams struct {
 	B int
 }
 
-func (p addParams) Serialize(e *Encoder) error {
+func (p addParams) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(p.A); err != nil {
 		return err
 	}
@@ -121,7 +122,7 @@ func (p addParams) Serialize(e *Encoder) error {
 	return nil
 }
 
-func (p *addParams) Deserialize(d *Decoder) error {
+func (p *addParams) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&p.A); err != nil {
 		return err
 	}
@@ -135,10 +136,10 @@ type addRtnVals struct {
 	Res int
 }
 
-func (v addRtnVals) Serialize(e *Encoder) error {
+func (v addRtnVals) Serialize(e *irpcgen.Encoder) error {
 	return e.VarInt(v.Res)
 }
 
-func (v *addRtnVals) Deserialize(d *Decoder) error {
+func (v *addRtnVals) Deserialize(d *irpcgen.Decoder) error {
 	return d.VarInt(&v.Res)
 }

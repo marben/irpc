@@ -1,4 +1,4 @@
-package irpc
+package irpcgen
 
 import (
 	"bufio"
@@ -8,6 +8,9 @@ import (
 	"math"
 )
 
+// Decoder is a binary decoder that reads various data types from an io.Reader.
+//
+// It is meant to be used by generated code to decode messages in the IRPC protocol.
 type Decoder struct {
 	r      *bufio.Reader
 	buf    []byte
@@ -169,7 +172,6 @@ func (d *Decoder) Float64le(dst *float64) error {
 	return nil
 }
 
-// we don't do generic slices as it generally adds time and allocations
 func (d *Decoder) ByteSlice(dst *[]byte) error {
 	var l int64
 	if err := d.VarInt64(&l); err != nil {

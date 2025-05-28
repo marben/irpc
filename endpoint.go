@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/marben/irpc/irpcgen"
 	"io"
 	"sync"
 	"time"
@@ -34,18 +35,7 @@ const (
 
 type Service interface {
 	Id() []byte // unique id of the service
-	GetFuncCall(funcId FuncId) (ArgDeserializer, error)
-}
-
-type ArgDeserializer func(d *Decoder) (FuncExecutor, error)
-type FuncExecutor func(ctx context.Context) Serializable
-
-// our generated code function calls' arguments implements Serializable/Deserializble
-type Serializable interface {
-	Serialize(e *Encoder) error
-}
-type Deserializable interface {
-	Deserialize(d *Decoder) error
+	GetFuncCall(funcId FuncId) (irpcgen.ArgDeserializer, error)
 }
 
 // Endpoint represents one side of a connection
@@ -54,8 +44,8 @@ type Endpoint struct {
 	// maps serviceId to service
 	services map[[ServiceHashLen]byte]Service
 
-	connCloser io.Closer // close the connection
-	enc        *Encoder  // does encoding on the bufWriter
+	connCloser io.Closer        // close the connection
+	enc        *irpcgen.Encoder // does encoding on the bufWriter
 
 	reqNumsC chan ReqNumT
 	writeMux Semaphore
@@ -90,7 +80,7 @@ func NewEndpoint(conn io.ReadWriteCloser, services ...Service) *Endpoint {
 		pendingRequests:  make(map[ReqNumT]pendingRequest),
 		serviceWorkers:   make(map[ReqNumT]serviceWorker),
 		connCloser:       conn,
-		enc:              NewEncoder(conn),
+		enc:              irpcgen.NewEncoder(conn),
 		reqNumsC:         reqNumsC,
 		readLoopRunningC: make(chan struct{}, 1),
 		wrkrQueue:        make(chan struct{}, ParallelWorkers),
@@ -107,7 +97,7 @@ func NewEndpoint(conn io.ReadWriteCloser, services ...Service) *Endpoint {
 			ep.readLoopRunningC <- struct{}{}
 		}()
 
-		dec := NewDecoder(conn)
+		dec := irpcgen.NewDecoder(conn)
 		err := ep.readMsgs(globalContext, dec)
 		switch {
 		case errors.Is(err, context.Canceled):
@@ -236,7 +226,7 @@ func (e *Endpoint) newRequestNumber(ctx context.Context) (ReqNumT, error) {
 	}
 }
 
-func (e *Endpoint) sendRpcRequest(ctx context.Context, serviceId []byte, funcId FuncId, reqData Serializable, respData Deserializable) (pendingRequest, error) {
+func (e *Endpoint) sendRpcRequest(ctx context.Context, serviceId []byte, funcId FuncId, reqData irpcgen.Serializable, respData irpcgen.Deserializable) (pendingRequest, error) {
 	unlock, err := e.writeMux.Lock(ctx)
 	if err != nil {
 		return pendingRequest{}, err
@@ -289,7 +279,7 @@ func (e *Endpoint) sendRequestContextCancelation(req ReqNumT, cause error) error
 	return nil
 }
 
-func (e *Endpoint) CallRemoteFunc(ctx context.Context, serviceId []byte, funcId FuncId, reqData Serializable, respData Deserializable) error {
+func (e *Endpoint) CallRemoteFunc(ctx context.Context, serviceId []byte, funcId FuncId, reqData irpcgen.Serializable, respData irpcgen.Deserializable) error {
 	// check if our endpoint was closed
 	if e.closeAlreadyCalled() {
 		return context.Cause(e.Ctx)
@@ -342,7 +332,7 @@ func (e *Endpoint) RegisterServices(services ...Service) error {
 
 // expects the mutex to be locked
 // returns ErrEndpointClosed if endpoint is in closing state
-func (e *Endpoint) serializePacketToConnLocked(data ...Serializable) error {
+func (e *Endpoint) serializePacketToConnLocked(data ...irpcgen.Serializable) error {
 	// todo: do the locking here, not in the above function? (that would probably need splitting the mutext)
 
 	for _, s := range data {
@@ -351,7 +341,7 @@ func (e *Endpoint) serializePacketToConnLocked(data ...Serializable) error {
 		}
 	}
 
-	if err := e.enc.flush(); err != nil {
+	if err := e.enc.Flush(); err != nil {
 		return fmt.Errorf("encoder.Flush(): %w", err)
 	}
 
@@ -359,7 +349,7 @@ func (e *Endpoint) serializePacketToConnLocked(data ...Serializable) error {
 }
 
 // respData is the actual serialized return data from the function
-func (e *Endpoint) sendResponse(reqNum ReqNumT, respData Serializable) error {
+func (e *Endpoint) sendResponse(reqNum ReqNumT, respData irpcgen.Serializable) error {
 	resp := responsePacket{
 		ReqNum: reqNum,
 	}
@@ -384,7 +374,7 @@ func (e *Endpoint) sendResponse(reqNum ReqNumT, respData Serializable) error {
 // readMsgs is the main incoming messages processing loop
 // returns wrapped errProtocolError(todo: actually it doesn't) if the error is on a protocol level	// todo: make sure it does
 // returns context.Canceled if context has been canceled
-func (e *Endpoint) readMsgs(ctx context.Context, dec *Decoder) error {
+func (e *Endpoint) readMsgs(ctx context.Context, dec *irpcgen.Decoder) error {
 	for {
 		if ctx.Err() != nil {
 			return context.Canceled
@@ -472,7 +462,7 @@ func (e *Endpoint) cancelRequest(rnum ReqNumT, cancelErr error) {
 
 // blocks until worker slot is available
 // todo: take context as argument
-func (e *Endpoint) startServiceWorker(ctx context.Context, reqNum ReqNumT, exe FuncExecutor) error {
+func (e *Endpoint) startServiceWorker(ctx context.Context, reqNum ReqNumT, exe irpcgen.FuncExecutor) error {
 	// waits until worker slot is available (blocks here on too many long rpcs)
 	select {
 	case e.wrkrQueue <- struct{}{}:
@@ -512,7 +502,7 @@ func (e *Endpoint) startServiceWorker(ctx context.Context, reqNum ReqNumT, exe F
 	return nil
 }
 
-func (e *Endpoint) addPendingRequest(ctx context.Context, resp Deserializable) (pendingRequest, error) {
+func (e *Endpoint) addPendingRequest(ctx context.Context, resp irpcgen.Deserializable) (pendingRequest, error) {
 	reqNum, err := e.newRequestNumber(ctx)
 	if err != nil {
 		return pendingRequest{}, fmt.Errorf("newRequestNumber: %w", err)
@@ -547,7 +537,7 @@ func (e *Endpoint) popPendingRequest(reqNum ReqNumT) (pendingRequest, error) {
 // represents a pending request that is being executed on the opposing endpoint
 type pendingRequest struct {
 	reqNum    ReqNumT
-	resp      Deserializable
+	resp      irpcgen.Deserializable
 	deserErrC chan error
 }
 

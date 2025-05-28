@@ -169,7 +169,7 @@ func (e primitiveTypeEncoder) decode(varId string, existingVars []string) string
 }
 
 func (e primitiveTypeEncoder) imports() []string {
-	return []string{irpcImport, fmtImport}
+	return []string{irpcImport, irpcGenImport, fmtImport}
 }
 
 func (e primitiveTypeEncoder) codeblock() string {
