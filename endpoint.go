@@ -91,37 +91,41 @@ func NewEndpoint(conn io.ReadWriteCloser, services ...Service) *Endpoint {
 
 	ep.RegisterServices(services...)
 
-	// our read loop
-	go func() {
-		defer func() {
-			ep.readLoopRunningC <- struct{}{}
-		}()
-
-		dec := irpcgen.NewDecoder(conn)
-		err := ep.readMsgs(globalContext, dec)
-		switch {
-		case errors.Is(err, context.Canceled):
-			// our Close() must have been called
-			return
-		case errors.Is(err, errCounterpartClosing):
-			// countepart Ep sent us closing packed
-			// we need to close our part
-			ep.ctxCancel(ErrEndpointClosedByCounterpart)
-		case errors.Is(err, ErrServiceNotFound):
-			// todo: propagate correct error instead
-			ctx, _ := context.WithTimeout(ep.Ctx, 2*time.Second)
-			if err := ep.signalOurClosing(ctx); err != nil {
-				ep.closeOnError(fmt.Errorf("failed to signal our closing on service not found: %w", err))
-			}
-			ep.closeOnError(err)
-		default:
-			// unknown connection error
-			// close the endpoint
-			ep.closeOnError(errors.Join(ErrEndpointClosed, err))
-		}
-	}()
+	go ep.serve(globalContext, conn)
 
 	return ep
+}
+
+func (e *Endpoint) serve(ctx context.Context, conn io.ReadWriteCloser) error {
+	// our read loop
+	defer func() {
+		e.readLoopRunningC <- struct{}{}
+	}()
+
+	dec := irpcgen.NewDecoder(conn)
+	err := e.readMsgs(ctx, dec)
+	switch {
+	case errors.Is(err, context.Canceled):
+		// our Close() must have been called
+		return err
+	case errors.Is(err, errCounterpartClosing):
+		// countepart Ep sent us closing packed
+		// we need to close our part
+		e.ctxCancel(ErrEndpointClosedByCounterpart)
+	case errors.Is(err, ErrServiceNotFound):
+		// todo: propagate correct error instead
+		ctx, _ := context.WithTimeout(e.Ctx, 2*time.Second)
+		if err := e.signalOurClosing(ctx); err != nil {
+			e.closeOnError(fmt.Errorf("failed to signal our closing on service not found: %w", err))
+		}
+		e.closeOnError(err)
+	default:
+		// unknown connection error
+		// close the endpoint
+		e.closeOnError(errors.Join(ErrEndpointClosed, err))
+	}
+
+	return nil // todo: we can actually return error now, so let's do it
 }
 
 // called on internal Endpoint error(connection drop etc)
