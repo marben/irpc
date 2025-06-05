@@ -17,7 +17,7 @@ import (
 		}
 
 		serverErrC := make(chan error, 1)
-		go func() { serverErrC <- server.Serve(sl) }()
+		go func() { serverErrC <- server.serve(sl) }()
 
 		// // CLIENT
 		// clientConn, err := net.Dial("tcp", sl.Addr().String())
@@ -26,7 +26,7 @@ import (
 		// }
 		// clientEp := irpc.NewEndpoint()
 		// clientErrC := make(chan error)
-		// go func() { clientErrC <- clientEp.Serve(clientConn) }()
+		// go func() { clientErrC <- clientEp.serve(clientConn) }()
 
 		skew := 2
 		service := newBasicAPIIRpcService(basicApiImpl{skew: skew})

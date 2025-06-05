@@ -11,9 +11,7 @@ func TestError(t *testing.T) {
 		t.Fatalf("create endpoints: %v", err)
 	}
 
-	if err := remoteEp.RegisterServices(newInterfaceTestIRpcService(interfaceTestImpl{})); err != nil {
-		t.Fatalf("service create: %+v", err)
-	}
+	remoteEp.RegisterServices(newInterfaceTestIRpcService(interfaceTestImpl{}))
 
 	c, err := newInterfaceTestIRpcClient(localEp)
 	if err != nil {

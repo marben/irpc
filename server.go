@@ -3,6 +3,7 @@ package irpc
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net"
 	"sync"
 	"sync/atomic"
@@ -114,7 +115,10 @@ func (s *Server) Close() error {
 
 	s.clientsMux.Lock()
 	for c := range s.clients {
-		c.Close()
+		//c.Close()
+		if err := c.Close(); err != nil {
+			log.Fatalf("c.Close(): %+v", err)
+		}
 	}
 	s.clientsMux.Unlock()
 

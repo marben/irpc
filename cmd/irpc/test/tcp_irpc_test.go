@@ -44,14 +44,14 @@ func TestTcpClientServer(t *testing.T) {
 
 // 	// errC1 := make(chan error)
 // 	// errC2 := make(chan error)
-// 	// go func() { errC1 <- ep1.Serve(c1) }()
-// 	// go func() { errC2 <- ep2.Serve(c2) }()
+// 	// go func() { errC1 <- ep1.serve(c1) }()
+// 	// go func() { errC2 <- ep2.serve(c2) }()
 
 // 	if err := c1.Close(); err != nil {
 // 		t.Fatalf("failed to close connection c1: %v", err)
 // 	}
 
-// 	// both endpoint.Serve() errors out
+// 	// both endpoint.serve() errors out
 // 	err1 := <-errC1
 // 	err2 := <-errC2
 // 	t.Logf("err1: %v", err1)
@@ -69,14 +69,14 @@ func TestClosingConnection2(t *testing.T) {
 
 	errC1 := make(chan error)
 	errC2 := make(chan error)
-	go func() { errC1 <- ep1.Serve(c1) }()
-	go func() { errC2 <- ep2.Serve(c2) }()
+	go func() { errC1 <- ep1.serve(c1) }()
+	go func() { errC2 <- ep2.serve(c2) }()
 
 	if err := c2.Close(); err != nil {
 		t.Fatalf("failed to close connection c2: %v", err)
 	}
 
-	// both endpoint.Serve() errors out
+	// both endpoint.serve() errors out
 	err1 := <-errC1
 	err2 := <-errC2
 	t.Logf("err1: %v", err1)

@@ -14,9 +14,7 @@ func TestSlice(t *testing.T) {
 
 	// service
 	skew := 5
-	if err := remoteEp.RegisterServices(newSliceTestIRpcService(sliceTestImpl{skew: skew})); err != nil {
-		t.Fatalf("failed to register slice service to remote endpoint: %+v", err)
-	}
+	remoteEp.RegisterServices(newSliceTestIRpcService(sliceTestImpl{skew: skew}))
 
 	// client
 	c, err := newSliceTestIRpcClient(localEp)
