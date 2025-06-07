@@ -21,11 +21,10 @@ func (s *serializer) serializePacket(data ...irpcgen.Serializable) error {
 	s.m.Lock()
 	defer s.m.Unlock()
 
-	// todo: really?
-	//if ctx.Err() != nil {
-	//	return ctx.Err()
-	//}
+	return s.serializePacketLocked(data...)
+}
 
+func (s *serializer) serializePacketLocked(data ...irpcgen.Serializable) error {
 	for _, d := range data {
 		if err := d.Serialize(s.enc); err != nil {
 			return fmt.Errorf("data.Serialize(): %w", err)

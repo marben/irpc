@@ -179,7 +179,7 @@ func TestBasic(t *testing.T) {
 		t.Fatalf("serviceEp.Close(): %+v", err)
 	}
 	time.Sleep(10 * time.Millisecond) // to make sure the closing notification has arrived
-	if err := clientEp.Close(); !errors.Is(err, irpc.ErrEndpointClosed) {
+	if err := clientEp.Close(); !errors.Is(err, irpc.ErrEndpointClosedByCounterpart) {
 		t.Fatalf("clientEp.Close(): %+v", err)
 	}
 }

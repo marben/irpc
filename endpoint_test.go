@@ -758,8 +758,12 @@ func TestCallingUnregisteredService(t *testing.T) {
 	}
 
 	_, err = client.DivErr(1, 2)
-	// todo: following comparison is not cool. figure out a better way
-	if err.Error() != errors.Join(irpc.ErrEndpointClosedByCounterpart, irpc.ErrEndpointClosed).Error() {
+	if !errors.Is(err, irpc.ErrEndpointClosed) || !errors.Is(err, irpc.ErrEndpointClosedByCounterpart) {
+		t.Fatalf("unexpected client error: %q", err)
+	}
+
+	_, err = client.DivErr(1, 2)
+	if !errors.Is(err, irpc.ErrEndpointClosed) || !errors.Is(err, irpc.ErrEndpointClosedByCounterpart) {
 		t.Fatalf("unexpected client error: %q", err)
 	}
 
@@ -776,17 +780,3 @@ func TestCallingUnregisteredService(t *testing.T) {
 	//	t.Fatalf("clientEp.Close(): %+v", err)
 	//}
 }
-
-// todo: uncomment
-// func TestRegisterServiceTwice(t *testing.T) {
-// 	ep := irpc.NewEndpoint()
-
-// 	if err := ep.RegisterServices(newMathIRpcService(nil)); err != nil {
-// 		t.Fatalf("registration of first service failed")
-// 	}
-
-// 	err := ep.RegisterServices(newMathIRpcService(nil))
-// 	if !errors.Is(err, irpc.ErrServiceAlreadyRegistered) {
-// 		t.Fatalf("expected error %v, but got: %v", irpc.ErrServiceAlreadyRegistered, err)
-// 	}
-// }

@@ -11,6 +11,8 @@ import (
 type executor struct {
 	wrkrQueue chan struct{}
 
+	ctx context.Context // all workers derive their context from this context
+
 	// active running workers
 	// lock m before accessing
 	serviceWorkers map[ReqNumT]serviceWorker
@@ -18,11 +20,12 @@ type executor struct {
 	errC           chan error
 }
 
-func newExecutor() *executor {
+func newExecutor(ctx context.Context) *executor {
 	return &executor{
 		wrkrQueue:      make(chan struct{}, ParallelWorkers),
 		serviceWorkers: make(map[ReqNumT]serviceWorker),
 		errC:           make(chan error, ParallelWorkers), // maybe 1? maybe parallel workers -1?
+		ctx:            ctx,
 	}
 }
 
@@ -37,17 +40,17 @@ func (e *executor) cancelAllWorkers(err error) {
 }
 
 // todo: rename to 'execute' or something like that
-func (e *executor) startServiceWorker(ctx context.Context, reqNum ReqNumT, rpcExecutor irpcgen.FuncExecutor, serialize *serializer) error {
+func (e *executor) startServiceWorker(reqNum ReqNumT, rpcExecutor irpcgen.FuncExecutor, serialize *serializer) error {
 	// waits until worker slot is available (blocks here on too many long rpcs)
 	select {
 	case e.wrkrQueue <- struct{}{}:
-	case <-ctx.Done():
-		return ctx.Err()
+	case <-e.ctx.Done():
+		return e.ctx.Err()
 	}
 
 	// workerCtx is passed to the service's actual implementation
 	// cancelling it doesn't mean end of executor
-	workerCtx, cancelWorker := context.WithCancelCause(ctx)
+	workerCtx, cancelWorker := context.WithCancelCause(e.ctx)
 
 	rw := serviceWorker{
 		cancel: cancelWorker,
@@ -72,15 +75,12 @@ func (e *executor) startServiceWorker(ctx context.Context, reqNum ReqNumT, rpcEx
 		resp := rpcExecutor(workerCtx)
 
 		// if executor's context was canceled, we don't even bother with sending response
-		if ctx.Err() != nil {
+		if e.ctx.Err() != nil {
 			return
 		}
 
 		if err := serialize.sendResponse(reqNum, resp); err != nil {
 			e.errC <- fmt.Errorf("failed to serialize response %d to connection: %w", reqNum, err)
-			//log.Fatalf("failed to send response. should shutdown the endpoint")
-			//e.endpointContextCancel(fmt.Errorf("sendResponse() for request %d: %w", reqNum, err))
-			//e.closeOnError(fmt.Errorf("sendResponse() for request %d: %w", reqNum, err))
 		}
 	}()
 
