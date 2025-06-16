@@ -3,12 +3,13 @@ package irpc_test
 import (
 	"context"
 	"errors"
-	"github.com/marben/irpc"
-	"github.com/marben/irpc/cmd/irpc/test/testtools"
 	"log"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/marben/irpc"
+	"github.com/marben/irpc/cmd/irpc/test/testtools"
 )
 
 func init() {
@@ -23,7 +24,7 @@ func TestEndpointClientRegister(t *testing.T) {
 
 	t.Logf("registering test service")
 	service := testtools.NewTestServiceIRpcService(testtools.NewTestServiceImpl(0))
-	ep1.RegisterServices(service)
+	ep1.RegisterService(service)
 
 	t.Logf("creating client")
 	client, err := testtools.NewTestServiceIRpcClient(ep2)
@@ -58,7 +59,7 @@ func TestEndpointRemoteFunc(t *testing.T) {
 
 	skew := 8
 	service := testtools.NewTestServiceIRpcService(testtools.NewTestServiceImpl(skew))
-	serviceEndpoint.RegisterServices(service)
+	serviceEndpoint.RegisterService(service)
 
 	clientA, err := testtools.NewTestServiceIRpcClient(clientEndpoint)
 	if err != nil {
@@ -86,11 +87,11 @@ func TestBothSidesRemoteCall(t *testing.T) {
 
 	skewA := 1
 	serviceA := testtools.NewTestServiceIRpcService(testtools.NewTestServiceImpl(skewA))
-	endpointA := irpc.NewEndpoint(pA, serviceA)
+	endpointA := irpc.NewEndpoint(pA, irpc.WithService(serviceA))
 
 	skewB := 2
 	serviceB := testtools.NewTestServiceIRpcService(testtools.NewTestServiceImpl(skewB))
-	endpointB := irpc.NewEndpoint(pB, serviceB)
+	endpointB := irpc.NewEndpoint(pB, irpc.WithService(serviceB))
 
 	t.Log("creating client a")
 	clientA, err := testtools.NewTestServiceIRpcClient(endpointA)
@@ -126,7 +127,7 @@ func TestLocalEndpointClose(t *testing.T) {
 
 	serviceImpl := testtools.NewTestServiceImpl(99)
 	serviceBackend := testtools.NewTestServiceIRpcService(serviceImpl)
-	epService := irpc.NewEndpoint(conn1, serviceBackend)
+	epService := irpc.NewEndpoint(conn1, irpc.WithService(serviceBackend))
 	defer epService.Close()
 
 	epClient := irpc.NewEndpoint(conn2)
@@ -179,7 +180,7 @@ func TestClosingServiceEpWithWaitingFuncCalls(t *testing.T) {
 		return a / b, nil
 	}
 
-	serviceEp.RegisterServices(testtools.NewTestServiceIRpcService(service))
+	serviceEp.RegisterService(testtools.NewTestServiceIRpcService(service))
 
 	client, err := testtools.NewTestServiceIRpcClient(clientEp)
 	if err != nil {
@@ -229,7 +230,7 @@ func TestClosingClientEpWithWaitingFuncCalls(t *testing.T) {
 		return a / b, nil
 	}
 
-	serviceEp.RegisterServices(testtools.NewTestServiceIRpcService(service))
+	serviceEp.RegisterService(testtools.NewTestServiceIRpcService(service))
 
 	client, err := testtools.NewTestServiceIRpcClient(clientEp)
 	if err != nil {
@@ -280,7 +281,7 @@ func TestMaxWorkersNumber(t *testing.T) {
 		return a + b
 	}
 
-	serviceEp.RegisterServices(testtools.NewTestServiceIRpcService(service))
+	serviceEp.RegisterService(testtools.NewTestServiceIRpcService(service))
 
 	client, err := testtools.NewTestServiceIRpcClient(clientEp)
 	if err != nil {
@@ -289,7 +290,7 @@ func TestMaxWorkersNumber(t *testing.T) {
 
 	// start max parrallel workers + 1 calls in parallel goroutines
 	wg := sync.WaitGroup{}
-	for i := range irpc.ParallelWorkers + 1 {
+	for i := range irpc.DefaultParallelWorkers + 1 {
 		wg.Add(1)
 		go func() {
 			if res := client.Div(i, 3); res != i+3 {
@@ -300,7 +301,7 @@ func TestMaxWorkersNumber(t *testing.T) {
 	}
 
 	// only max parallel workers should get started and send to resC
-	for range irpc.ParallelWorkers {
+	for range irpc.DefaultParallelWorkers {
 		<-resC
 	}
 
@@ -328,7 +329,7 @@ func TestContextCancel(t *testing.T) {
 
 	service := testtools.NewTestServiceImpl(0)
 
-	serviceEp.RegisterServices(testtools.NewTestServiceIRpcService(service))
+	serviceEp.RegisterService(testtools.NewTestServiceIRpcService(service))
 
 	client, err := testtools.NewTestServiceIRpcClient(clientEp)
 	if err != nil {
@@ -414,7 +415,7 @@ func TestServiceEndpointClosingEndsRunningWorkers(t *testing.T) {
 
 	service := testtools.NewTestServiceImpl(0)
 
-	serviceEp.RegisterServices(testtools.NewTestServiceIRpcService(service))
+	serviceEp.RegisterService(testtools.NewTestServiceIRpcService(service))
 
 	client, err := testtools.NewTestServiceIRpcClient(clientEp)
 	if err != nil {
@@ -438,7 +439,7 @@ func TestServiceEndpointClosingEndsRunningWorkers(t *testing.T) {
 		return 777, causeErr // errs out, but still returns val
 	}
 
-	workersNumber := irpc.ParallelWorkers
+	workersNumber := irpc.DefaultParallelWorkers
 	clientErrC := make(chan error)
 
 	// all following workers should block
@@ -499,7 +500,7 @@ func TestClientEndpointClosingEndsRunningWorkers(t *testing.T) {
 
 	service := testtools.NewTestServiceImpl(0)
 
-	serviceEp.RegisterServices(testtools.NewTestServiceIRpcService(service))
+	serviceEp.RegisterService(testtools.NewTestServiceIRpcService(service))
 
 	client, err := testtools.NewTestServiceIRpcClient(clientEp)
 	if err != nil {
@@ -521,7 +522,7 @@ func TestClientEndpointClosingEndsRunningWorkers(t *testing.T) {
 		return 777, causeErr // errs out, but still returns val
 	}
 
-	workersNumber := irpc.ParallelWorkers
+	workersNumber := irpc.DefaultParallelWorkers
 	clientErrC := make(chan error)
 
 	// all following workers should block
@@ -584,7 +585,7 @@ func TestWaitingClientCallGetsCanceledOnContextTimeout(t *testing.T) {
 
 	service := testtools.NewTestServiceImpl(0)
 
-	serviceEp.RegisterServices(testtools.NewTestServiceIRpcService(service))
+	serviceEp.RegisterService(testtools.NewTestServiceIRpcService(service))
 
 	client, err := testtools.NewTestServiceIRpcClient(clientEp)
 	if err != nil {
@@ -603,7 +604,7 @@ func TestWaitingClientCallGetsCanceledOnContextTimeout(t *testing.T) {
 
 	// allocate all available workers
 	// and one more, to block the readMsg loop on service side
-	workersNumber := irpc.ParallelClientCalls + 1
+	workersNumber := irpc.DefaultParallelClientCalls + 1
 	clientResC := make(chan int)
 	for range workersNumber {
 		go func() {
@@ -675,7 +676,7 @@ func TestOutsideConnectionClose(t *testing.T) {
 		<-callBlockC
 		return 0, errors.New("service1 shouldn't have returned")
 	}
-	ep1.RegisterServices(testtools.NewTestServiceIRpcService(service1))
+	ep1.RegisterService(testtools.NewTestServiceIRpcService(service1))
 
 	t.Log("starting service 2")
 	service2 := testtools.NewTestServiceImpl(2)
@@ -684,7 +685,7 @@ func TestOutsideConnectionClose(t *testing.T) {
 		<-callBlockC
 		return 0, errors.New("service2 shouldn't have returned")
 	}
-	ep2.RegisterServices(testtools.NewTestServiceIRpcService(service2))
+	ep2.RegisterService(testtools.NewTestServiceIRpcService(service2))
 
 	clientErrs := make(chan error)
 

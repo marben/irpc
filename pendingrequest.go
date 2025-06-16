@@ -3,8 +3,9 @@ package irpc
 import (
 	"context"
 	"fmt"
-	"github.com/marben/irpc/irpcgen"
 	"sync"
+
+	"github.com/marben/irpc/irpcgen"
 )
 
 // ourPendingRequest represents a pending request that is being executed on the opposing endpoint
@@ -20,8 +21,8 @@ type ourPendingRequestsLog struct {
 }
 
 func newOurPendingRequestsLog() *ourPendingRequestsLog {
-	reqNumsC := make(chan ReqNumT, ParallelClientCalls)
-	for i := range ParallelClientCalls {
+	reqNumsC := make(chan ReqNumT, DefaultParallelClientCalls)
+	for i := range DefaultParallelClientCalls {
 		reqNumsC <- ReqNumT(i)
 	}
 	return &ourPendingRequestsLog{

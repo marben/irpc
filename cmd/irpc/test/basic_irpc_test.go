@@ -2,13 +2,14 @@ package irpctestpkg
 
 import (
 	"errors"
-	"github.com/marben/irpc"
-	"github.com/marben/irpc/cmd/irpc/test/testtools"
 	"io"
 	"math"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/marben/irpc"
+	"github.com/marben/irpc/cmd/irpc/test/testtools"
 )
 
 func TestBasic(t *testing.T) {
@@ -19,7 +20,7 @@ func TestBasic(t *testing.T) {
 
 	skew := 2
 	service := newBasicAPIIRpcService(basicApiImpl{skew: skew})
-	serviceEp.RegisterServices(service)
+	serviceEp.RegisterService(service)
 
 	c, err := newBasicAPIIRpcClient(clientEp)
 	if err != nil {

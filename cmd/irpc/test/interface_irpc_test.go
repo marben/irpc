@@ -1,8 +1,9 @@
 package irpctestpkg
 
 import (
-	"github.com/marben/irpc/cmd/irpc/test/testtools"
 	"testing"
+
+	"github.com/marben/irpc/cmd/irpc/test/testtools"
 )
 
 func TestError(t *testing.T) {
@@ -11,7 +12,7 @@ func TestError(t *testing.T) {
 		t.Fatalf("create endpoints: %v", err)
 	}
 
-	remoteEp.RegisterServices(newInterfaceTestIRpcService(interfaceTestImpl{}))
+	remoteEp.RegisterService(newInterfaceTestIRpcService(interfaceTestImpl{}))
 
 	c, err := newInterfaceTestIRpcClient(localEp)
 	if err != nil {

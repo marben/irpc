@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/marben/irpc/irpcgen"
 	"io"
 	"sync"
+
+	"github.com/marben/irpc/irpcgen"
 )
 
 var ErrEndpointClosed = errors.New("endpoint is closed")
@@ -17,9 +18,10 @@ var errProtocolError = errors.New("protocol error")
 const ServiceHashLen = 4
 
 // todo: should be configurable for each endpoint
-const (
-	ParallelWorkers     = 3
-	ParallelClientCalls = ParallelWorkers + 1
+var (
+	// DefaultParallelWorkers is the default number of parallel workers servicing our counterpart's requests
+	DefaultParallelWorkers     = 3
+	DefaultParallelClientCalls = DefaultParallelWorkers + 1 // DefaultParallelClientCalls is the number of parallel calls we allow to our counterpart at the same time
 )
 
 type Service interface {
@@ -34,8 +36,11 @@ type Endpoint struct {
 	services map[[ServiceHashLen]byte]Service
 
 	serialize *serializer
+	dec       *irpcgen.Decoder // decoder for reading messages from the connection
 
 	ourPendingRequests *ourPendingRequestsLog
+
+	connCloser io.Closer // closes our connection
 
 	// closed on read loop end
 	readLoopRunningC chan struct{}
@@ -47,22 +52,28 @@ type Endpoint struct {
 	ctxCancel context.CancelCauseFunc
 }
 
-func NewEndpoint(conn io.ReadWriteCloser, services ...Service) *Endpoint {
+// NewEndpoint creates and runs a new Endpoint with the given connection and services
+// services can be nil, for client only endpoint, or added later with RegisterServices(), if desired
+func NewEndpoint(conn io.ReadWriteCloser, opts ...Option) *Endpoint {
 	epCtx, endpointContextCancel := context.WithCancelCause(context.Background())
 
 	ep := &Endpoint{
 		services:           make(map[[ServiceHashLen]byte]Service),
 		ourPendingRequests: newOurPendingRequestsLog(),
 		serialize:          newSerializer(conn),
+		dec:                irpcgen.NewDecoder(conn),
+		connCloser:         conn,
 		readLoopRunningC:   make(chan struct{}, 1),
 		Ctx:                epCtx,
 		ctxCancel:          endpointContextCancel,
 	}
 
-	ep.RegisterServices(services...)
+	for _, opt := range opts {
+		opt(ep)
+	}
 
 	go func() {
-		ep.serve(epCtx, conn)
+		ep.serve(epCtx)
 	}()
 
 	return ep
@@ -78,7 +89,7 @@ func (e *Endpoint) Err() error {
 	return context.Cause(e.Ctx)
 }
 
-func (e *Endpoint) serve(ctx context.Context, conn io.ReadWriteCloser) {
+func (e *Endpoint) serve(ctx context.Context) {
 	// our read loop
 	defer func() {
 		e.readLoopRunningC <- struct{}{}
@@ -88,7 +99,7 @@ func (e *Endpoint) serve(ctx context.Context, conn io.ReadWriteCloser) {
 
 	readC := make(chan error, 1)
 	go func() {
-		readC <- e.readMsgs(conn, exec)
+		readC <- e.readMsgs(exec)
 	}()
 
 	var err error
@@ -100,24 +111,21 @@ func (e *Endpoint) serve(ctx context.Context, conn io.ReadWriteCloser) {
 	case err = <-exec.errC:
 		e.ctxCancel(errors.Join(ErrEndpointClosed, err))
 	}
-	e.signalOurClosingAndCloseConn(conn)
+	e.signalOurClosingAndCloseConn()
 }
 
-func (e *Endpoint) closeAlreadyCalled() bool {
-	return e.Ctx.Err() != nil
-}
-
-func (e *Endpoint) signalOurClosingAndCloseConn(closer io.ReadCloser) {
+func (e *Endpoint) signalOurClosingAndCloseConn() {
+	// todo: the locking here seems wrong
 	e.m.Lock()
 	defer e.m.Unlock()
 
-	// following calls may fail for various reasons, but we want to be sure, they were made
+	// following 2 calls may fail for various reasons, but we want to be sure, they were made
 	e.serialize.serializePacketLocked(packetHeader{typ: closingNowPacketType})
-	closer.Close()
+	e.connCloser.Close()
 }
 
-// Close immediately stops serving any requests
-// Close closes the underlying connection
+// Close immediately stops serving any requests,
+// signals closing of our endpoint, closes the underlying connection
 // returns nil on successfull closing
 // Close returns ErrEndpointClosed if the Endpoint was already closed
 func (e *Endpoint) Close() error {
@@ -226,7 +234,7 @@ func (e *Endpoint) CallRemoteFunc(ctx context.Context, serviceId []byte, funcId 
 	}
 }
 
-func (e *Endpoint) RegisterServices(services ...Service) {
+func (e *Endpoint) RegisterService(services ...Service) {
 	e.m.Lock()
 	defer e.m.Unlock()
 
@@ -268,25 +276,25 @@ func (e *Endpoint) processRequest(dec *irpcgen.Decoder, exec *executor) error {
 
 // readMsgs is the main incoming messages processing loop
 // returns context.Canceled if context has been canceled
-func (e *Endpoint) readMsgs(conn io.ReadWriteCloser, exec *executor) error {
-	dec := irpcgen.NewDecoder(conn)
+func (e *Endpoint) readMsgs(exec *executor) error {
+	// dec := irpcgen.NewDecoder(conn)
 	for {
 		var h packetHeader
-		if err := h.Deserialize(dec); err != nil {
+		if err := h.Deserialize(e.dec); err != nil {
 			return fmt.Errorf("read header: %w", err)
 		}
 
 		switch h.typ {
 		// counterpart requested us to run a function
 		case rpcRequestPacketType:
-			if err := e.processRequest(dec, exec); err != nil {
+			if err := e.processRequest(e.dec, exec); err != nil {
 				return fmt.Errorf("processRequest: %w", err)
 			}
 
 		// response from a function we requested from counterpart
 		case rpcResponsePacketType:
 			var resp responsePacket
-			if err := resp.Deserialize(dec); err != nil {
+			if err := resp.Deserialize(e.dec); err != nil {
 				return fmt.Errorf("failed to read response data:%w", err)
 			}
 			pr, err := e.ourPendingRequests.popPendingRequest(resp.ReqNum)
@@ -294,7 +302,7 @@ func (e *Endpoint) readMsgs(conn io.ReadWriteCloser, exec *executor) error {
 				return fmt.Errorf("request not found: %w", err)
 			}
 
-			pr.deserErrC <- pr.resp.Deserialize(dec)
+			pr.deserErrC <- pr.resp.Deserialize(e.dec)
 
 		// counterpart is closing
 		case closingNowPacketType:
@@ -304,7 +312,7 @@ func (e *Endpoint) readMsgs(conn io.ReadWriteCloser, exec *executor) error {
 		// we cancel corresponting worker's context and hope response gets sent fast
 		case ctxEndPacketType:
 			var cancelRequest ctxEndPacket
-			if err := cancelRequest.Deserialize(dec); err != nil {
+			if err := cancelRequest.Deserialize(e.dec); err != nil {
 				return fmt.Errorf("failed to deserialize context cancelation request: %w", err)
 			}
 			clientErr := errors.New(cancelRequest.ErrStr)
@@ -313,5 +321,13 @@ func (e *Endpoint) readMsgs(conn io.ReadWriteCloser, exec *executor) error {
 		default:
 			return fmt.Errorf("unexpected packet type: %+v", h.typ)
 		}
+	}
+}
+
+type Option func(*Endpoint)
+
+func WithService(s ...Service) Option {
+	return func(ep *Endpoint) {
+		ep.RegisterService(s...)
 	}
 }

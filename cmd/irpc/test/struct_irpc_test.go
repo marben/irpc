@@ -1,8 +1,9 @@
 package irpctestpkg
 
 import (
-	"github.com/marben/irpc/cmd/irpc/test/testtools"
 	"testing"
+
+	"github.com/marben/irpc/cmd/irpc/test/testtools"
 )
 
 func TestStructParam(t *testing.T) {
@@ -13,7 +14,7 @@ func TestStructParam(t *testing.T) {
 
 	skew := 8
 	service := newStructAPIIRpcService(structImpl{skew: skew})
-	remoteEp.RegisterServices(service)
+	remoteEp.RegisterService(service)
 
 	c, err := newStructAPIIRpcClient(localEp)
 	if err != nil {

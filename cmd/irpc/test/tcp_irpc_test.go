@@ -1,8 +1,9 @@
 package irpctestpkg
 
 import (
-	"github.com/marben/irpc/cmd/irpc/test/testtools"
 	"testing"
+
+	"github.com/marben/irpc/cmd/irpc/test/testtools"
 )
 
 func TestTcpClientServer(t *testing.T) {
@@ -12,7 +13,7 @@ func TestTcpClientServer(t *testing.T) {
 	}
 
 	service := newTcpTestApiIRpcService(tcpTestApiImpl{})
-	ep1.RegisterServices(service)
+	ep1.RegisterService(service)
 
 	client, err := newTcpTestApiIRpcClient(ep2)
 	if err != nil {

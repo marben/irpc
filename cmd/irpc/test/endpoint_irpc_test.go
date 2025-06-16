@@ -2,10 +2,11 @@ package irpctestpkg
 
 import (
 	"errors"
-	"github.com/marben/irpc"
-	"github.com/marben/irpc/cmd/irpc/test/testtools"
 	"testing"
 	"time"
+
+	"github.com/marben/irpc"
+	"github.com/marben/irpc/cmd/irpc/test/testtools"
 )
 
 func TestEndpointClose(t *testing.T) {

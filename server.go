@@ -79,7 +79,7 @@ func (s *Server) Serve(lis net.Listener) error {
 		}
 		// log.Println("Accept: ", conn.LocalAddr())
 
-		ep := NewEndpoint(conn, s.services...)
+		ep := NewEndpoint(conn, WithService(s.services...))
 
 		s.clientsMux.Lock()
 		s.clients[ep] = struct{}{}

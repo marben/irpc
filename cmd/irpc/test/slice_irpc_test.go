@@ -1,9 +1,10 @@
 package irpctestpkg
 
 import (
-	"github.com/marben/irpc/cmd/irpc/test/testtools"
 	"slices"
 	"testing"
+
+	"github.com/marben/irpc/cmd/irpc/test/testtools"
 )
 
 func TestSlice(t *testing.T) {
@@ -14,7 +15,7 @@ func TestSlice(t *testing.T) {
 
 	// service
 	skew := 5
-	remoteEp.RegisterServices(newSliceTestIRpcService(sliceTestImpl{skew: skew}))
+	remoteEp.RegisterService(newSliceTestIRpcService(sliceTestImpl{skew: skew}))
 
 	// client
 	c, err := newSliceTestIRpcClient(localEp)

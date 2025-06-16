@@ -3,8 +3,9 @@ package irpc
 import (
 	"context"
 	"fmt"
-	"github.com/marben/irpc/irpcgen"
 	"sync"
+
+	"github.com/marben/irpc/irpcgen"
 )
 
 // executor executes procedure calls requested from our counterpart
@@ -22,9 +23,9 @@ type executor struct {
 
 func newExecutor(ctx context.Context) *executor {
 	return &executor{
-		wrkrQueue:      make(chan struct{}, ParallelWorkers),
+		wrkrQueue:      make(chan struct{}, DefaultParallelWorkers),
 		serviceWorkers: make(map[ReqNumT]serviceWorker),
-		errC:           make(chan error, ParallelWorkers), // maybe 1? maybe parallel workers -1?
+		errC:           make(chan error, DefaultParallelWorkers), // maybe 1? maybe parallel workers -1?
 		ctx:            ctx,
 	}
 }

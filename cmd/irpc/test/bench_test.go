@@ -1,9 +1,10 @@
 package irpctestpkg
 
 import (
+	"testing"
+
 	"github.com/marben/irpc"
 	"github.com/marben/irpc/cmd/irpc/test/testtools"
-	"testing"
 )
 
 /*
@@ -129,7 +130,7 @@ func BenchmarkAddInt64(b *testing.B) {
 
 	skew := 2
 	service := newBasicAPIIRpcService(basicApiImpl{skew: skew})
-	serviceEp.RegisterServices(service)
+	serviceEp.RegisterService(service)
 
 	c, err := newBasicAPIIRpcClient(clientEp)
 	if err != nil {
