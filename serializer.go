@@ -2,9 +2,10 @@ package irpc
 
 import (
 	"fmt"
-	"github.com/marben/irpc/irpcgen"
 	"io"
 	"sync"
+
+	"github.com/marben/irpc/irpcgen"
 )
 
 type serializer struct {

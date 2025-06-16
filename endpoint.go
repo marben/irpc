@@ -37,7 +37,8 @@ type Service interface {
 // There needs to be a serving endpoint on both sides of connection for communication to work.
 type Endpoint struct {
 	// maps serviceId to service
-	services map[[ServiceHashLen]byte]Service
+	services    map[[ServiceHashLen]byte]Service
+	servicesMux sync.Mutex
 
 	serialize *serializer
 	dec       *irpcgen.Decoder // decoder for reading messages from the connection
@@ -45,11 +46,6 @@ type Endpoint struct {
 	ourPendingRequests *ourPendingRequestsLog
 
 	connCloser io.Closer // closes our connection
-
-	// closed on read loop end
-	readLoopRunningC chan struct{}
-
-	m sync.Mutex
 
 	// context is Done() after the endpoint is closed
 	Ctx       context.Context
@@ -71,7 +67,6 @@ func NewEndpoint(conn io.ReadWriteCloser, opts ...Option) *Endpoint {
 		serialize:           newSerializer(conn),
 		dec:                 irpcgen.NewDecoder(conn),
 		connCloser:          conn,
-		readLoopRunningC:    make(chan struct{}, 1),
 		Ctx:                 epCtx,
 		ctxCancel:           endpointContextCancel,
 		parallelWorkers:     DefaultParallelWorkers,
@@ -102,13 +97,7 @@ func (e *Endpoint) Err() error {
 }
 
 func (e *Endpoint) serve(ctx context.Context) {
-	// our read loop
-	defer func() {
-		e.readLoopRunningC <- struct{}{}
-	}()
-
 	exec := newExecutor(ctx, e.parallelWorkers)
-
 	readC := make(chan error, 1)
 	go func() {
 		readC <- e.readMsgs(exec)
@@ -123,16 +112,9 @@ func (e *Endpoint) serve(ctx context.Context) {
 	case err = <-exec.errC:
 		e.ctxCancel(errors.Join(ErrEndpointClosed, err))
 	}
-	e.signalOurClosingAndCloseConn()
-}
-
-func (e *Endpoint) signalOurClosingAndCloseConn() {
-	// todo: the locking here seems wrong
-	e.m.Lock()
-	defer e.m.Unlock()
 
 	// following 2 calls may fail for various reasons, but we want to be sure, they were made
-	e.serialize.serializePacketLocked(packetHeader{typ: closingNowPacketType})
+	e.serialize.serializePacket(packetHeader{typ: closingNowPacketType})
 	e.connCloser.Close()
 }
 
@@ -160,8 +142,8 @@ func (e *Endpoint) RegisterClient(serviceId []byte) error {
 
 // getService returns false if id was not found,
 func (e *Endpoint) getService(serviceHash []byte) (s Service, found bool) {
-	e.m.Lock()
-	defer e.m.Unlock()
+	e.servicesMux.Lock()
+	defer e.servicesMux.Unlock()
 
 	hashArray := [ServiceHashLen]byte{}
 	copy(hashArray[:], serviceHash)
@@ -247,8 +229,8 @@ func (e *Endpoint) CallRemoteFunc(ctx context.Context, serviceId []byte, funcId 
 }
 
 func (e *Endpoint) RegisterService(services ...Service) {
-	e.m.Lock()
-	defer e.m.Unlock()
+	e.servicesMux.Lock()
+	defer e.servicesMux.Unlock()
 
 	for _, s := range services {
 		hashArray := [ServiceHashLen]byte{}

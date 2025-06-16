@@ -30,16 +30,6 @@ func newExecutor(ctx context.Context, parallelWorkers int) *executor {
 	}
 }
 
-// cancels context of all workers
-func (e *executor) cancelAllWorkers(err error) {
-	e.m.Lock()
-	defer e.m.Unlock()
-
-	for _, w := range e.serviceWorkers {
-		w.cancel(err)
-	}
-}
-
 // todo: rename to 'execute' or something like that
 func (e *executor) startServiceWorker(reqNum ReqNumT, rpcExecutor irpcgen.FuncExecutor, serialize *serializer) error {
 	// waits until worker slot is available (blocks here on too many long rpcs)
