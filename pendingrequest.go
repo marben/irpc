@@ -20,9 +20,9 @@ type ourPendingRequestsLog struct {
 	pendingRequests map[ReqNumT]ourPendingRequest
 }
 
-func newOurPendingRequestsLog() *ourPendingRequestsLog {
-	reqNumsC := make(chan ReqNumT, DefaultParallelClientCalls)
-	for i := range DefaultParallelClientCalls {
+func newOurPendingRequestsLog(parallelClientCalls int) *ourPendingRequestsLog {
+	reqNumsC := make(chan ReqNumT, parallelClientCalls)
+	for i := range parallelClientCalls {
 		reqNumsC <- ReqNumT(i)
 	}
 	return &ourPendingRequestsLog{

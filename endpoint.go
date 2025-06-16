@@ -10,18 +10,22 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-var ErrEndpointClosed = errors.New("endpoint is closed")
-var ErrEndpointClosedByCounterpart = errors.Join(ErrEndpointClosed, errors.New("endpoint closed by counterpart"))
-var ErrServiceNotFound = errors.New("service not found")
-var errProtocolError = errors.New("protocol error")
-
 const ServiceHashLen = 4
 
-// todo: should be configurable for each endpoint
+// DefaultParallelWorkers is the default number of parallel workers servicing our counterpart's requests
+// It can be overridden for each endpoint with [WithParallelWorkers] option
+var DefaultParallelWorkers = 3
+
+// DefaultParallelClientCalls is the number of parallel calls we allow to our counterpart at the same time.
+// It can be overridden for each endpoint with [WithParallelClientCalls] option
+var DefaultParallelClientCalls = DefaultParallelWorkers + 1
+
+// Endpoint related errors
 var (
-	// DefaultParallelWorkers is the default number of parallel workers servicing our counterpart's requests
-	DefaultParallelWorkers     = 3
-	DefaultParallelClientCalls = DefaultParallelWorkers + 1 // DefaultParallelClientCalls is the number of parallel calls we allow to our counterpart at the same time
+	ErrEndpointClosed              = errors.New("endpoint is closed")
+	ErrEndpointClosedByCounterpart = errors.Join(ErrEndpointClosed, errors.New("endpoint closed by counterpart"))
+	ErrServiceNotFound             = errors.New("service not found")
+	errProtocolError               = errors.New("protocol error")
 )
 
 type Service interface {
@@ -29,8 +33,8 @@ type Service interface {
 	GetFuncCall(funcId FuncId) (irpcgen.ArgDeserializer, error)
 }
 
-// Endpoint represents one side of a connection
-// there needs to be a serving endpoint on both sides of connection for communication to work
+// Endpoint represents one side of a connection.
+// There needs to be a serving endpoint on both sides of connection for communication to work.
 type Endpoint struct {
 	// maps serviceId to service
 	services map[[ServiceHashLen]byte]Service
@@ -47,30 +51,38 @@ type Endpoint struct {
 
 	m sync.Mutex
 
-	// context is Done() with the closing of endpoint
+	// context is Done() after the endpoint is closed
 	Ctx       context.Context
 	ctxCancel context.CancelCauseFunc
+
+	// some options - possibly move to a separate struct?
+	parallelWorkers     int // number of parallel workers servicing counterpart's requests
+	parallelClientCalls int // number of parallel calls we allow to our counterpart at the same time
 }
 
-// NewEndpoint creates and runs a new Endpoint with the given connection and services
-// services can be nil, for client only endpoint, or added later with RegisterServices(), if desired
+// NewEndpoint creates and runs a new Endpoint with the given connection and options.
+// It immeditely starts a go routine servicing the communication.
+// Services provided by this enpoint can be added as with [WithService] oprtion, or can be registered later with [Endpoint.RegisterService] call
 func NewEndpoint(conn io.ReadWriteCloser, opts ...Option) *Endpoint {
 	epCtx, endpointContextCancel := context.WithCancelCause(context.Background())
 
 	ep := &Endpoint{
-		services:           make(map[[ServiceHashLen]byte]Service),
-		ourPendingRequests: newOurPendingRequestsLog(),
-		serialize:          newSerializer(conn),
-		dec:                irpcgen.NewDecoder(conn),
-		connCloser:         conn,
-		readLoopRunningC:   make(chan struct{}, 1),
-		Ctx:                epCtx,
-		ctxCancel:          endpointContextCancel,
+		services:            make(map[[ServiceHashLen]byte]Service),
+		serialize:           newSerializer(conn),
+		dec:                 irpcgen.NewDecoder(conn),
+		connCloser:          conn,
+		readLoopRunningC:    make(chan struct{}, 1),
+		Ctx:                 epCtx,
+		ctxCancel:           endpointContextCancel,
+		parallelWorkers:     DefaultParallelWorkers,
+		parallelClientCalls: DefaultParallelClientCalls,
 	}
 
 	for _, opt := range opts {
 		opt(ep)
 	}
+
+	ep.ourPendingRequests = newOurPendingRequestsLog(ep.parallelClientCalls)
 
 	go func() {
 		ep.serve(epCtx)
@@ -95,7 +107,7 @@ func (e *Endpoint) serve(ctx context.Context) {
 		e.readLoopRunningC <- struct{}{}
 	}()
 
-	exec := newExecutor(ctx)
+	exec := newExecutor(ctx, e.parallelWorkers)
 
 	readC := make(chan error, 1)
 	go func() {
@@ -275,9 +287,7 @@ func (e *Endpoint) processRequest(dec *irpcgen.Decoder, exec *executor) error {
 }
 
 // readMsgs is the main incoming messages processing loop
-// returns context.Canceled if context has been canceled
 func (e *Endpoint) readMsgs(exec *executor) error {
-	// dec := irpcgen.NewDecoder(conn)
 	for {
 		var h packetHeader
 		if err := h.Deserialize(e.dec); err != nil {
@@ -308,8 +318,10 @@ func (e *Endpoint) readMsgs(exec *executor) error {
 		case closingNowPacketType:
 			return ErrEndpointClosedByCounterpart
 
-		// counterpart informs us that context of some function it requested us to execute, has expired
-		// we cancel corresponting worker's context and hope response gets sent fast
+		// counterpart informed us that context of some function it requested us to execute, has expired
+		// we cancel corresponting worker's context
+		// this doesn't mean the work will stop immediately. we don't have such power over goroutines.
+		// goroutine needs to notice the context cancelation and stop itself
 		case ctxEndPacketType:
 			var cancelRequest ctxEndPacket
 			if err := cancelRequest.Deserialize(e.dec); err != nil {
@@ -329,5 +341,16 @@ type Option func(*Endpoint)
 func WithService(s ...Service) Option {
 	return func(ep *Endpoint) {
 		ep.RegisterService(s...)
+	}
+}
+
+func WithParallelWorkers(parallelWorkers int) Option {
+	return func(ep *Endpoint) {
+		ep.parallelWorkers = parallelWorkers
+	}
+}
+func WithParallelClientCalls(parallelClientCalls int) Option {
+	return func(ep *Endpoint) {
+		ep.parallelClientCalls = parallelClientCalls
 	}
 }

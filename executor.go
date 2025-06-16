@@ -21,11 +21,11 @@ type executor struct {
 	errC           chan error
 }
 
-func newExecutor(ctx context.Context) *executor {
+func newExecutor(ctx context.Context, parallelWorkers int) *executor {
 	return &executor{
-		wrkrQueue:      make(chan struct{}, DefaultParallelWorkers),
+		wrkrQueue:      make(chan struct{}, parallelWorkers),
 		serviceWorkers: make(map[ReqNumT]serviceWorker),
-		errC:           make(chan error, DefaultParallelWorkers), // maybe 1? maybe parallel workers -1?
+		errC:           make(chan error, parallelWorkers), // maybe 1? maybe parallel workers -1?
 		ctx:            ctx,
 	}
 }

@@ -261,7 +261,8 @@ func TestClosingClientEpWithWaitingFuncCalls(t *testing.T) {
 }
 
 func TestMaxWorkersNumber(t *testing.T) {
-	serviceEp, clientEp, err := testtools.CreateLocalTcpEndpoints()
+	parallelWorkers := 7
+	serviceEp, clientEp, err := testtools.CreateLocalTcpEndpoints(irpc.WithParallelWorkers(parallelWorkers), irpc.WithParallelClientCalls(parallelWorkers+1))
 	if err != nil {
 		t.Fatalf("create local tcp endpints: %+v", err)
 	}
@@ -290,7 +291,7 @@ func TestMaxWorkersNumber(t *testing.T) {
 
 	// start max parrallel workers + 1 calls in parallel goroutines
 	wg := sync.WaitGroup{}
-	for i := range irpc.DefaultParallelWorkers + 1 {
+	for i := range parallelWorkers + 1 {
 		wg.Add(1)
 		go func() {
 			if res := client.Div(i, 3); res != i+3 {
@@ -301,7 +302,7 @@ func TestMaxWorkersNumber(t *testing.T) {
 	}
 
 	// only max parallel workers should get started and send to resC
-	for range irpc.DefaultParallelWorkers {
+	for range parallelWorkers {
 		<-resC
 	}
 
@@ -578,7 +579,8 @@ func TestClientEndpointClosingEndsRunningWorkers(t *testing.T) {
 // blocks available workers and then makes one more call, waiting for mutex to write/read
 // makes sure expiration of client side context actually quits the mutex wait
 func TestWaitingClientCallGetsCanceledOnContextTimeout(t *testing.T) {
-	serviceEp, clientEp, err := testtools.CreateLocalTcpEndpoints()
+	parallelClientCalls := 12
+	serviceEp, clientEp, err := testtools.CreateLocalTcpEndpoints(irpc.WithParallelClientCalls(parallelClientCalls))
 	if err != nil {
 		t.Fatalf("create local tcp endpoints: %+v", err)
 	}
@@ -592,9 +594,6 @@ func TestWaitingClientCallGetsCanceledOnContextTimeout(t *testing.T) {
 		t.Fatalf("new client: %+v", err)
 	}
 
-	// serviceErrC := make(chan error, 1)
-	// serviceFuncStartC := make(chan struct{})
-
 	serviceUnblockCtx, serviceUnblock := context.WithCancel(context.Background())
 
 	service.DivCtxErrFunc = func(ctx context.Context, a, b int) (int, error) {
@@ -604,7 +603,7 @@ func TestWaitingClientCallGetsCanceledOnContextTimeout(t *testing.T) {
 
 	// allocate all available workers
 	// and one more, to block the readMsg loop on service side
-	workersNumber := irpc.DefaultParallelClientCalls + 1
+	workersNumber := parallelClientCalls + 1
 	clientResC := make(chan int)
 	for range workersNumber {
 		go func() {
