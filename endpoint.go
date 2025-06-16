@@ -40,8 +40,10 @@ type Endpoint struct {
 	services    map[[ServiceHashLen]byte]Service
 	servicesMux sync.Mutex
 
-	serialize *serializer
-	dec       *irpcgen.Decoder // decoder for reading messages from the connection
+	enc    *irpcgen.Encoder // encoder for writing messages to the connection
+	encMux sync.Mutex
+
+	dec *irpcgen.Decoder // decoder for reading messages from the connection
 
 	ourPendingRequests *ourPendingRequestsLog
 
@@ -64,7 +66,7 @@ func NewEndpoint(conn io.ReadWriteCloser, opts ...Option) *Endpoint {
 
 	ep := &Endpoint{
 		services:            make(map[[ServiceHashLen]byte]Service),
-		serialize:           newSerializer(conn),
+		enc:                 irpcgen.NewEncoder(conn),
 		dec:                 irpcgen.NewDecoder(conn),
 		connCloser:          conn,
 		Ctx:                 epCtx,
@@ -114,7 +116,7 @@ func (e *Endpoint) serve(ctx context.Context) {
 	}
 
 	// following 2 calls may fail for various reasons, but we want to be sure, they were made
-	e.serialize.serializePacket(packetHeader{typ: closingNowPacketType})
+	e.serializePacket(packetHeader{typ: closingNowPacketType})
 	e.connCloser.Close()
 }
 
@@ -167,7 +169,7 @@ func (e *Endpoint) sendRpcRequest(ctx context.Context, serviceId []byte, funcId 
 		FuncId:    funcId,
 	}
 
-	if err := e.serialize.serializePacket(header, requestDef, reqData); err != nil {
+	if err := e.serializePacket(header, requestDef, reqData); err != nil {
 		_, popErr := e.ourPendingRequests.popPendingRequest(pr.reqNum)
 		if popErr != nil {
 			panic(fmt.Errorf("failed to pop a just added pending request: %w", popErr))
@@ -185,8 +187,41 @@ func (e *Endpoint) sendRequestContextCancelation(req ReqNumT, cause error) error
 		ErrStr: cause.Error(),
 	}
 
-	if err := e.serialize.serializePacket(header, ctxEndDef); err != nil {
+	if err := e.serializePacket(header, ctxEndDef); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (e *Endpoint) sendResponse(reqNum ReqNumT, respData irpcgen.Serializable) error {
+	resp := responsePacket{
+		ReqNum: reqNum,
+	}
+
+	header := packetHeader{
+		typ: rpcResponsePacketType,
+	}
+
+	if err := e.serializePacket(header, resp, respData); err != nil {
+		return fmt.Errorf("failed to serialize response to connection: %w", err)
+	}
+
+	return nil
+}
+
+func (e *Endpoint) serializePacket(data ...irpcgen.Serializable) error {
+	e.encMux.Lock()
+	defer e.encMux.Unlock()
+
+	for _, d := range data {
+		if err := d.Serialize(e.enc); err != nil {
+			return fmt.Errorf("data.Serialize(): %w", err)
+		}
+	}
+
+	if err := e.enc.Flush(); err != nil {
+		return fmt.Errorf("encoder.Flush(): %w", err)
 	}
 
 	return nil
@@ -260,7 +295,7 @@ func (e *Endpoint) processRequest(dec *irpcgen.Decoder, exec *executor) error {
 	}
 
 	// waits until worker slot is available (blocks here on too many long rpcs)
-	err = exec.startServiceWorker(req.ReqNum, funcExec, e.serialize)
+	err = exec.startServiceWorker(req.ReqNum, funcExec, e.sendResponse)
 	if err != nil {
 		return fmt.Errorf("new worker: %w", err)
 	}

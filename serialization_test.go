@@ -2,8 +2,9 @@ package irpc
 
 import (
 	"bytes"
-	"github.com/marben/irpc/irpcgen"
 	"testing"
+
+	"github.com/marben/irpc/irpcgen"
 )
 
 func TestPacketHeaderSerializeDeserialize(t *testing.T) {

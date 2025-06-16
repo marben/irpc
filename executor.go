@@ -31,7 +31,7 @@ func newExecutor(ctx context.Context, parallelWorkers int) *executor {
 }
 
 // todo: rename to 'execute' or something like that
-func (e *executor) startServiceWorker(reqNum ReqNumT, rpcExecutor irpcgen.FuncExecutor, serialize *serializer) error {
+func (e *executor) startServiceWorker(reqNum ReqNumT, rpcExecutor irpcgen.FuncExecutor, sendResponseF func(reqNum ReqNumT, respData irpcgen.Serializable) error) error {
 	// waits until worker slot is available (blocks here on too many long rpcs)
 	select {
 	case e.wrkrQueue <- struct{}{}:
@@ -70,7 +70,7 @@ func (e *executor) startServiceWorker(reqNum ReqNumT, rpcExecutor irpcgen.FuncEx
 			return
 		}
 
-		if err := serialize.sendResponse(reqNum, resp); err != nil {
+		if err := sendResponseF(reqNum, resp); err != nil {
 			e.errC <- fmt.Errorf("failed to serialize response %d to connection: %w", reqNum, err)
 		}
 	}()
