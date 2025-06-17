@@ -4,7 +4,6 @@ package irpctestpkg
 import (
 	"context"
 	"fmt"
-	"github.com/marben/irpc"
 	"github.com/marben/irpc/irpcgen"
 )
 
@@ -16,7 +15,7 @@ type tcpTestApiIRpcService struct {
 func newTcpTestApiIRpcService(impl tcpTestApi) *tcpTestApiIRpcService {
 	return &tcpTestApiIRpcService{
 		impl: impl,
-		id:   []byte{163, 32, 136, 65},
+		id:   []byte{90, 123, 50, 123},
 	}
 }
 func (s *tcpTestApiIRpcService) Id() []byte {
@@ -44,12 +43,12 @@ func (s *tcpTestApiIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgD
 }
 
 type tcpTestApiIRpcClient struct {
-	endpoint *irpc.Endpoint
+	endpoint irpcgen.Endpoint
 	id       []byte
 }
 
-func newTcpTestApiIRpcClient(endpoint *irpc.Endpoint) (*tcpTestApiIRpcClient, error) {
-	id := []byte{163, 32, 136, 65}
+func newTcpTestApiIRpcClient(endpoint irpcgen.Endpoint) (*tcpTestApiIRpcClient, error) {
+	id := []byte{90, 123, 50, 123}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}

@@ -429,7 +429,7 @@ type clientGenerator struct {
 }
 
 func newClientGenerator(clientTypeName string, ifaceTypeName string, methods []methodGenerator, serviceId []byte) (clientGenerator, error) {
-	imports := []string{irpcImport}
+	imports := []string{irpcGenImport}
 	return clientGenerator{
 		typeName:        clientTypeName,
 		ifaceName:       ifaceTypeName,
@@ -445,11 +445,11 @@ func (cg clientGenerator) code() string {
 	// type definition
 	fmt.Fprintf(b, `
 	type %[1]s struct {
-		endpoint *irpc.Endpoint
+		endpoint irpcgen.Endpoint
 		id []byte
 	}
 
-	func %[2]s(endpoint *irpc.Endpoint) (*%[1]s, error) {
+	func %[2]s(endpoint irpcgen.Endpoint) (*%[1]s, error) {
 		id := %[3]s
 		if err := endpoint.RegisterClient(id); err != nil {
 			return nil, fmt.Errorf("register failed: %%w", err)

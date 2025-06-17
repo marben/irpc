@@ -4,7 +4,6 @@ package irpctestpkg
 import (
 	"context"
 	"fmt"
-	"github.com/marben/irpc"
 	"github.com/marben/irpc/irpcgen"
 )
 
@@ -16,7 +15,7 @@ type sliceTestIRpcService struct {
 func newSliceTestIRpcService(impl sliceTest) *sliceTestIRpcService {
 	return &sliceTestIRpcService{
 		impl: impl,
-		id:   []byte{84, 198, 255, 44},
+		id:   []byte{190, 33, 195, 116},
 	}
 }
 func (s *sliceTestIRpcService) Id() []byte {
@@ -100,12 +99,12 @@ func (s *sliceTestIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 }
 
 type sliceTestIRpcClient struct {
-	endpoint *irpc.Endpoint
+	endpoint irpcgen.Endpoint
 	id       []byte
 }
 
-func newSliceTestIRpcClient(endpoint *irpc.Endpoint) (*sliceTestIRpcClient, error) {
-	id := []byte{84, 198, 255, 44}
+func newSliceTestIRpcClient(endpoint irpcgen.Endpoint) (*sliceTestIRpcClient, error) {
+	id := []byte{190, 33, 195, 116}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}

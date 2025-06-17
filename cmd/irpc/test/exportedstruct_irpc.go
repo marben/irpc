@@ -4,7 +4,6 @@ package irpctestpkg
 import (
 	"context"
 	"fmt"
-	"github.com/marben/irpc"
 	"github.com/marben/irpc/irpcgen"
 )
 
@@ -16,7 +15,7 @@ type FileServerIRpcService struct {
 func NewFileServerIRpcService(impl FileServer) *FileServerIRpcService {
 	return &FileServerIRpcService{
 		impl: impl,
-		id:   []byte{224, 163, 128, 174},
+		id:   []byte{134, 98, 203, 158},
 	}
 }
 func (s *FileServerIRpcService) Id() []byte {
@@ -44,12 +43,12 @@ func (s *FileServerIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgD
 }
 
 type FileServerIRpcClient struct {
-	endpoint *irpc.Endpoint
+	endpoint irpcgen.Endpoint
 	id       []byte
 }
 
-func NewFileServerIRpcClient(endpoint *irpc.Endpoint) (*FileServerIRpcClient, error) {
-	id := []byte{224, 163, 128, 174}
+func NewFileServerIRpcClient(endpoint irpcgen.Endpoint) (*FileServerIRpcClient, error) {
+	id := []byte{134, 98, 203, 158}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}

@@ -4,7 +4,6 @@ package testtools
 import (
 	"context"
 	"fmt"
-	"github.com/marben/irpc"
 	"github.com/marben/irpc/irpcgen"
 )
 
@@ -16,7 +15,7 @@ type TestServiceIRpcService struct {
 func NewTestServiceIRpcService(impl TestService) *TestServiceIRpcService {
 	return &TestServiceIRpcService{
 		impl: impl,
-		id:   []byte{27, 40, 190, 164},
+		id:   []byte{229, 65, 55, 122},
 	}
 }
 func (s *TestServiceIRpcService) Id() []byte {
@@ -72,12 +71,12 @@ func (s *TestServiceIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.Arg
 }
 
 type TestServiceIRpcClient struct {
-	endpoint *irpc.Endpoint
+	endpoint irpcgen.Endpoint
 	id       []byte
 }
 
-func NewTestServiceIRpcClient(endpoint *irpc.Endpoint) (*TestServiceIRpcClient, error) {
-	id := []byte{27, 40, 190, 164}
+func NewTestServiceIRpcClient(endpoint irpcgen.Endpoint) (*TestServiceIRpcClient, error) {
+	id := []byte{229, 65, 55, 122}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
