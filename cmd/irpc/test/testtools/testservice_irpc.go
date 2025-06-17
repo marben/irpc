@@ -16,13 +16,13 @@ type TestServiceIRpcService struct {
 func NewTestServiceIRpcService(impl TestService) *TestServiceIRpcService {
 	return &TestServiceIRpcService{
 		impl: impl,
-		id:   []byte{134, 17, 31, 194},
+		id:   []byte{27, 40, 190, 164},
 	}
 }
 func (s *TestServiceIRpcService) Id() []byte {
 	return s.id
 }
-func (s *TestServiceIRpcService) GetFuncCall(funcId irpc.FuncId) (irpcgen.ArgDeserializer, error) {
+func (s *TestServiceIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // Div
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
@@ -77,7 +77,7 @@ type TestServiceIRpcClient struct {
 }
 
 func NewTestServiceIRpcClient(endpoint *irpc.Endpoint) (*TestServiceIRpcClient, error) {
-	id := []byte{134, 17, 31, 194}
+	id := []byte{27, 40, 190, 164}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}

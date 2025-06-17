@@ -35,7 +35,7 @@ func (ph *packetHeader) Deserialize(d *irpcgen.Decoder) error {
 	return nil
 }
 
-type FuncId uint64
+type FuncId irpcgen.FuncId
 
 func (fid FuncId) Serialize(e *irpcgen.Encoder) error    { return e.UvarInt64(uint64(fid)) }
 func (fid *FuncId) Deserialize(d *irpcgen.Decoder) error { return d.UvarInt64((*uint64)(fid)) }

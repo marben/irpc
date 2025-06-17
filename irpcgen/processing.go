@@ -2,6 +2,13 @@ package irpcgen
 
 import "context"
 
+type FuncId uint64
+
+type Service interface {
+	Id() []byte // unique id of the service
+	GetFuncCall(funcId FuncId) (ArgDeserializer, error)
+}
+
 type Serializable interface {
 	Serialize(e *Encoder) error
 }

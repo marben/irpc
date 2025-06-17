@@ -3,11 +3,12 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/marben/irpc"
 	"go/types"
 	"io"
 	"log"
 	"strings"
+
+	"github.com/marben/irpc"
 )
 
 type generator struct {
@@ -393,7 +394,7 @@ func (sg serviceGenerator) code() string {
 	`, sg.serviceTypeName)
 
 	// Call func call swith
-	fmt.Fprintf(sb, `func (s *%s) GetFuncCall(funcId irpc.FuncId) (irpcgen.ArgDeserializer, error){
+	fmt.Fprintf(sb, `func (s *%s) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error){
 		switch funcId {
 			`, sg.serviceTypeName)
 

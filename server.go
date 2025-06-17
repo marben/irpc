@@ -7,12 +7,14 @@ import (
 	"net"
 	"sync"
 	"sync/atomic"
+
+	"github.com/marben/irpc/irpcgen"
 )
 
 var ErrServerClosed error = errors.New("irpc: server closed")
 
 type Server struct {
-	services []Service // immutable
+	services []irpcgen.Service // immutable
 
 	clients    map[*Endpoint]struct{}
 	clientsMux sync.Mutex
@@ -26,7 +28,7 @@ type Server struct {
 }
 
 // todo: pass services in constructor?
-func NewServer(services ...Service) *Server {
+func NewServer(services ...irpcgen.Service) *Server {
 	return &Server{
 		listeners: make(map[net.Listener]struct{}),
 		clients:   make(map[*Endpoint]struct{}),

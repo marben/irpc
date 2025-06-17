@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/marben/irpc/irpcgen"
 )
 
@@ -42,7 +43,7 @@ func (mh testServiceImpl) DivErr(a int, b int) (int, error) {
 }
 
 var _ testServiceIface = testServiceImpl{}
-var _ Service = &testIRpcService{}
+var _ irpcgen.Service = &testIRpcService{}
 
 type testIRpcService struct {
 	impl testServiceIface
@@ -50,7 +51,7 @@ type testIRpcService struct {
 
 func newTestIRpcService(impl testServiceIface) *testIRpcService { return &testIRpcService{impl: impl} }
 
-func (ms *testIRpcService) GetFuncCall(funcId FuncId) (irpcgen.ArgDeserializer, error) {
+func (ms *testIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case mathIrpcFuncAddId:
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
@@ -80,7 +81,7 @@ func (*testIRpcService) Id() []byte {
 var _ testServiceIface = &MathIRpcClient{}
 
 const (
-	mathIrpcFuncAddId FuncId = iota
+	mathIrpcFuncAddId irpcgen.FuncId = iota
 )
 
 type MathIRpcClient struct {

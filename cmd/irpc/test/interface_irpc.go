@@ -16,13 +16,13 @@ type interfaceTestIRpcService struct {
 func newInterfaceTestIRpcService(impl interfaceTest) *interfaceTestIRpcService {
 	return &interfaceTestIRpcService{
 		impl: impl,
-		id:   []byte{94, 42, 115, 173},
+		id:   []byte{129, 157, 60, 198},
 	}
 }
 func (s *interfaceTestIRpcService) Id() []byte {
 	return s.id
 }
-func (s *interfaceTestIRpcService) GetFuncCall(funcId irpc.FuncId) (irpcgen.ArgDeserializer, error) {
+func (s *interfaceTestIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // rtnErrorWithMessage
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
@@ -107,13 +107,13 @@ type customInterfaceIRpcService struct {
 func newCustomInterfaceIRpcService(impl customInterface) *customInterfaceIRpcService {
 	return &customInterfaceIRpcService{
 		impl: impl,
-		id:   []byte{30, 26, 150, 161},
+		id:   []byte{163, 131, 110, 2},
 	}
 }
 func (s *customInterfaceIRpcService) Id() []byte {
 	return s.id
 }
-func (s *customInterfaceIRpcService) GetFuncCall(funcId irpc.FuncId) (irpcgen.ArgDeserializer, error) {
+func (s *customInterfaceIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // IntFunc
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
@@ -154,7 +154,7 @@ type interfaceTestIRpcClient struct {
 }
 
 func newInterfaceTestIRpcClient(endpoint *irpc.Endpoint) (*interfaceTestIRpcClient, error) {
-	id := []byte{94, 42, 115, 173}
+	id := []byte{129, 157, 60, 198}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -216,7 +216,7 @@ type customInterfaceIRpcClient struct {
 }
 
 func newCustomInterfaceIRpcClient(endpoint *irpc.Endpoint) (*customInterfaceIRpcClient, error) {
-	id := []byte{30, 26, 150, 161}
+	id := []byte{163, 131, 110, 2}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}

@@ -16,13 +16,13 @@ type sliceTestIRpcService struct {
 func newSliceTestIRpcService(impl sliceTest) *sliceTestIRpcService {
 	return &sliceTestIRpcService{
 		impl: impl,
-		id:   []byte{189, 36, 97, 229},
+		id:   []byte{84, 198, 255, 44},
 	}
 }
 func (s *sliceTestIRpcService) Id() []byte {
 	return s.id
 }
-func (s *sliceTestIRpcService) GetFuncCall(funcId irpc.FuncId) (irpcgen.ArgDeserializer, error) {
+func (s *sliceTestIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // SliceSum
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
@@ -105,7 +105,7 @@ type sliceTestIRpcClient struct {
 }
 
 func newSliceTestIRpcClient(endpoint *irpc.Endpoint) (*sliceTestIRpcClient, error) {
-	id := []byte{189, 36, 97, 229}
+	id := []byte{84, 198, 255, 44}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}

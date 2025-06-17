@@ -16,13 +16,13 @@ type basicAPIIRpcService struct {
 func newBasicAPIIRpcService(impl basicAPI) *basicAPIIRpcService {
 	return &basicAPIIRpcService{
 		impl: impl,
-		id:   []byte{228, 206, 152, 168},
+		id:   []byte{6, 64, 134, 177},
 	}
 }
 func (s *basicAPIIRpcService) Id() []byte {
 	return s.id
 }
-func (s *basicAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpcgen.ArgDeserializer, error) {
+func (s *basicAPIIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // addByte
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
@@ -275,13 +275,13 @@ type emptyAPIIRpcService struct {
 func newEmptyAPIIRpcService(impl emptyAPI) *emptyAPIIRpcService {
 	return &emptyAPIIRpcService{
 		impl: impl,
-		id:   []byte{34, 208, 131, 26},
+		id:   []byte{40, 132, 202, 54},
 	}
 }
 func (s *emptyAPIIRpcService) Id() []byte {
 	return s.id
 }
-func (s *emptyAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpcgen.ArgDeserializer, error) {
+func (s *emptyAPIIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	default:
 		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, s.Id())
@@ -294,7 +294,7 @@ type basicAPIIRpcClient struct {
 }
 
 func newBasicAPIIRpcClient(endpoint *irpc.Endpoint) (*basicAPIIRpcClient, error) {
-	id := []byte{228, 206, 152, 168}
+	id := []byte{6, 64, 134, 177}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -491,7 +491,7 @@ type emptyAPIIRpcClient struct {
 }
 
 func newEmptyAPIIRpcClient(endpoint *irpc.Endpoint) (*emptyAPIIRpcClient, error) {
-	id := []byte{34, 208, 131, 26}
+	id := []byte{40, 132, 202, 54}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}

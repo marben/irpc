@@ -28,16 +28,11 @@ var (
 	errProtocolError               = errors.New("protocol error")
 )
 
-type Service interface {
-	Id() []byte // unique id of the service
-	GetFuncCall(funcId FuncId) (irpcgen.ArgDeserializer, error)
-}
-
 // Endpoint represents one side of a connection.
 // There needs to be a serving endpoint on both sides of connection for communication to work.
 type Endpoint struct {
 	// maps serviceId to service
-	services    map[[ServiceHashLen]byte]Service
+	services    map[[ServiceHashLen]byte]irpcgen.Service
 	servicesMux sync.Mutex
 
 	enc    *irpcgen.Encoder // encoder for writing messages to the connection
@@ -65,7 +60,7 @@ func NewEndpoint(conn io.ReadWriteCloser, opts ...Option) *Endpoint {
 	epCtx, endpointContextCancel := context.WithCancelCause(context.Background())
 
 	ep := &Endpoint{
-		services:            make(map[[ServiceHashLen]byte]Service),
+		services:            make(map[[ServiceHashLen]byte]irpcgen.Service),
 		enc:                 irpcgen.NewEncoder(conn),
 		dec:                 irpcgen.NewDecoder(conn),
 		connCloser:          conn,
@@ -143,7 +138,7 @@ func (e *Endpoint) RegisterClient(serviceId []byte) error {
 }
 
 // getService returns false if id was not found,
-func (e *Endpoint) getService(serviceHash []byte) (s Service, found bool) {
+func (e *Endpoint) getService(serviceHash []byte) (s irpcgen.Service, found bool) {
 	e.servicesMux.Lock()
 	defer e.servicesMux.Unlock()
 
@@ -227,8 +222,8 @@ func (e *Endpoint) serializePacket(data ...irpcgen.Serializable) error {
 	return nil
 }
 
-func (e *Endpoint) CallRemoteFunc(ctx context.Context, serviceId []byte, funcId FuncId, reqData irpcgen.Serializable, respData irpcgen.Deserializable) error {
-	pendingReq, err := e.sendRpcRequest(ctx, serviceId, funcId, reqData, respData)
+func (e *Endpoint) CallRemoteFunc(ctx context.Context, serviceId []byte, funcId irpcgen.FuncId, reqData irpcgen.Serializable, respData irpcgen.Deserializable) error {
+	pendingReq, err := e.sendRpcRequest(ctx, serviceId, FuncId(funcId), reqData, respData)
 	if err != nil {
 		// check if endpoint was closed
 		if e.Err() != nil {
@@ -263,7 +258,7 @@ func (e *Endpoint) CallRemoteFunc(ctx context.Context, serviceId []byte, funcId 
 	}
 }
 
-func (e *Endpoint) RegisterService(services ...Service) {
+func (e *Endpoint) RegisterService(services ...irpcgen.Service) {
 	e.servicesMux.Lock()
 	defer e.servicesMux.Unlock()
 
@@ -285,7 +280,7 @@ func (e *Endpoint) processRequest(dec *irpcgen.Decoder, exec *executor) error {
 		return errors.Join(errProtocolError, fmt.Errorf("getService(): %w", ErrServiceNotFound))
 	}
 
-	argDeser, err := service.GetFuncCall(req.FuncId)
+	argDeser, err := service.GetFuncCall(irpcgen.FuncId(req.FuncId))
 	if err != nil {
 		return errors.Join(errProtocolError, fmt.Errorf("GetFuncCall() %v: %w", req, err))
 	}
@@ -355,7 +350,7 @@ func (e *Endpoint) readMsgs(exec *executor) error {
 
 type Option func(*Endpoint)
 
-func WithService(s ...Service) Option {
+func WithService(s ...irpcgen.Service) Option {
 	return func(ep *Endpoint) {
 		ep.RegisterService(s...)
 	}

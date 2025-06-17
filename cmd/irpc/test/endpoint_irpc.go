@@ -16,13 +16,13 @@ type endpointApiIRpcService struct {
 func newEndpointApiIRpcService(impl endpointApi) *endpointApiIRpcService {
 	return &endpointApiIRpcService{
 		impl: impl,
-		id:   []byte{147, 87, 95, 202},
+		id:   []byte{94, 145, 203, 9},
 	}
 }
 func (s *endpointApiIRpcService) Id() []byte {
 	return s.id
 }
-func (s *endpointApiIRpcService) GetFuncCall(funcId irpc.FuncId) (irpcgen.ArgDeserializer, error) {
+func (s *endpointApiIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // Div
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
@@ -49,7 +49,7 @@ type endpointApiIRpcClient struct {
 }
 
 func newEndpointApiIRpcClient(endpoint *irpc.Endpoint) (*endpointApiIRpcClient, error) {
-	id := []byte{147, 87, 95, 202}
+	id := []byte{94, 145, 203, 9}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}

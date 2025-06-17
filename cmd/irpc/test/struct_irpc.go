@@ -16,13 +16,13 @@ type structAPIIRpcService struct {
 func newStructAPIIRpcService(impl structAPI) *structAPIIRpcService {
 	return &structAPIIRpcService{
 		impl: impl,
-		id:   []byte{191, 190, 14, 243},
+		id:   []byte{225, 241, 75, 221},
 	}
 }
 func (s *structAPIIRpcService) Id() []byte {
 	return s.id
 }
-func (s *structAPIIRpcService) GetFuncCall(funcId irpc.FuncId) (irpcgen.ArgDeserializer, error) {
+func (s *structAPIIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // VectSum
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
@@ -77,7 +77,7 @@ type structAPIIRpcClient struct {
 }
 
 func newStructAPIIRpcClient(endpoint *irpc.Endpoint) (*structAPIIRpcClient, error) {
-	id := []byte{191, 190, 14, 243}
+	id := []byte{225, 241, 75, 221}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
