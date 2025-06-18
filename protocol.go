@@ -35,13 +35,15 @@ func (ph *packetHeader) Deserialize(d *irpcgen.Decoder) error {
 	return nil
 }
 
-type ReqNumT uint64
+// reqNumT is used to identify requests and responses.
+// request numbers are re-used. generally, we only need as big enough number as is the number of parallel workers (DefaultParallelClientCalls)
+type reqNumT uint16
 
-func (rn ReqNumT) Serialize(e *irpcgen.Encoder) error    { return e.UvarInt64(uint64(rn)) }
-func (rn *ReqNumT) Deserialize(d *irpcgen.Decoder) error { return d.UvarInt64((*uint64)(rn)) }
+func (rn reqNumT) Serialize(e *irpcgen.Encoder) error    { return e.UvarInt16(uint16(rn)) }
+func (rn *reqNumT) Deserialize(d *irpcgen.Decoder) error { return d.UvarInt16((*uint16)(rn)) }
 
 type requestPacket struct {
-	ReqNum    ReqNumT
+	ReqNum    reqNumT
 	ServiceId []byte
 	FuncId    irpcgen.FuncId
 }
@@ -73,7 +75,7 @@ func (rp *requestPacket) Deserialize(d *irpcgen.Decoder) error {
 }
 
 type responsePacket struct {
-	ReqNum ReqNumT // request number that initiated this response
+	ReqNum reqNumT // request number that initiated this response
 }
 
 func (rp responsePacket) Serialize(e *irpcgen.Encoder) error {
@@ -91,7 +93,7 @@ func (rp *responsePacket) Deserialize(d *irpcgen.Decoder) error {
 }
 
 type ctxEndPacket struct {
-	ReqNum ReqNumT
+	ReqNum reqNumT
 	ErrStr string
 }
 

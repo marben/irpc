@@ -16,7 +16,7 @@ type executor struct {
 
 	// active running workers
 	// lock m before accessing
-	serviceWorkers map[ReqNumT]serviceWorker
+	serviceWorkers map[reqNumT]serviceWorker
 	m              sync.Mutex // todo: clear up usage
 	errC           chan error
 }
@@ -24,14 +24,14 @@ type executor struct {
 func newExecutor(ctx context.Context, parallelWorkers int) *executor {
 	return &executor{
 		wrkrQueue:      make(chan struct{}, parallelWorkers),
-		serviceWorkers: make(map[ReqNumT]serviceWorker),
+		serviceWorkers: make(map[reqNumT]serviceWorker),
 		errC:           make(chan error, parallelWorkers), // maybe 1? maybe parallel workers -1?
 		ctx:            ctx,
 	}
 }
 
 // todo: rename to 'execute' or something like that
-func (e *executor) startServiceWorker(reqNum ReqNumT, rpcExecutor irpcgen.FuncExecutor, sendResponseF func(reqNum ReqNumT, respData irpcgen.Serializable) error) error {
+func (e *executor) startServiceWorker(reqNum reqNumT, rpcExecutor irpcgen.FuncExecutor, sendResponseF func(reqNum reqNumT, respData irpcgen.Serializable) error) error {
 	// waits until worker slot is available (blocks here on too many long rpcs)
 	select {
 	case e.wrkrQueue <- struct{}{}:
@@ -78,7 +78,7 @@ func (e *executor) startServiceWorker(reqNum ReqNumT, rpcExecutor irpcgen.FuncEx
 	return nil
 }
 
-func (e *executor) cancelRequest(rnum ReqNumT, cancelErr error) {
+func (e *executor) cancelRequest(rnum reqNumT, cancelErr error) {
 	e.m.Lock()
 	defer e.m.Unlock()
 

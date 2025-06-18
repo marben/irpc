@@ -10,28 +10,28 @@ import (
 
 // ourPendingRequest represents a pending request that is being executed on the opposing endpoint
 type ourPendingRequest struct {
-	reqNum    ReqNumT
+	reqNum    reqNumT
 	resp      irpcgen.Deserializable
 	deserErrC chan error
 }
 type ourPendingRequestsLog struct {
-	reqNumsC        chan ReqNumT
+	reqNumsC        chan reqNumT
 	m               sync.Mutex
-	pendingRequests map[ReqNumT]ourPendingRequest
+	pendingRequests map[reqNumT]ourPendingRequest
 }
 
 func newOurPendingRequestsLog(parallelClientCalls int) *ourPendingRequestsLog {
-	reqNumsC := make(chan ReqNumT, parallelClientCalls)
+	reqNumsC := make(chan reqNumT, parallelClientCalls)
 	for i := range parallelClientCalls {
-		reqNumsC <- ReqNumT(i)
+		reqNumsC <- reqNumT(i)
 	}
 	return &ourPendingRequestsLog{
 		reqNumsC:        reqNumsC,
-		pendingRequests: make(map[ReqNumT]ourPendingRequest),
+		pendingRequests: make(map[reqNumT]ourPendingRequest),
 	}
 }
 
-func (l *ourPendingRequestsLog) newRequestNumber(ctx context.Context) (ReqNumT, error) {
+func (l *ourPendingRequestsLog) newRequestNumber(ctx context.Context) (reqNumT, error) {
 	select {
 	case n := <-l.reqNumsC:
 		return n, nil
@@ -59,7 +59,7 @@ func (l *ourPendingRequestsLog) addPendingRequest(ctx context.Context, resp irpc
 	return pr, nil
 }
 
-func (l *ourPendingRequestsLog) popPendingRequest(reqNum ReqNumT) (ourPendingRequest, error) {
+func (l *ourPendingRequestsLog) popPendingRequest(reqNum reqNumT) (ourPendingRequest, error) {
 	l.m.Lock()
 	defer l.m.Unlock()
 

@@ -181,7 +181,7 @@ func (e *Endpoint) sendRpcRequest(ctx context.Context, serviceId []byte, funcId 
 	return pr, nil
 }
 
-func (e *Endpoint) sendRequestContextCancelation(req ReqNumT, cause error) error {
+func (e *Endpoint) sendRequestContextCancelation(req reqNumT, cause error) error {
 	header := packetHeader{typ: ctxEndPacketType}
 	ctxEndDef := ctxEndPacket{
 		ReqNum: req,
@@ -195,7 +195,7 @@ func (e *Endpoint) sendRequestContextCancelation(req ReqNumT, cause error) error
 	return nil
 }
 
-func (e *Endpoint) sendResponse(reqNum ReqNumT, respData irpcgen.Serializable) error {
+func (e *Endpoint) sendResponse(reqNum reqNumT, respData irpcgen.Serializable) error {
 	resp := responsePacket{
 		ReqNum: reqNum,
 	}
