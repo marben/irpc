@@ -10,7 +10,9 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-const ServiceHashLen = 4
+// serviceHashLen is the length of the service hash used to identify services in the Endpoint.
+// services have longer ids, but we just us the first n bytes of it
+const serviceHashLen = 4
 
 // DefaultParallelWorkers is the default number of parallel workers servicing our counterpart's requests
 // It can be overridden for each endpoint with [WithParallelWorkers] option
@@ -31,8 +33,8 @@ var (
 // Endpoint represents one side of a connection.
 // There needs to be a serving endpoint on both sides of connection for communication to work.
 type Endpoint struct {
-	// maps serviceId to service
-	services    map[[ServiceHashLen]byte]irpcgen.Service
+	// maps serviceId to service. uses array, because slices are not comparable in maps
+	services    map[[serviceHashLen]byte]irpcgen.Service
 	servicesMux sync.Mutex
 
 	enc    *irpcgen.Encoder // encoder for writing messages to the connection
@@ -60,7 +62,7 @@ func NewEndpoint(conn io.ReadWriteCloser, opts ...Option) *Endpoint {
 	epCtx, endpointContextCancel := context.WithCancelCause(context.Background())
 
 	ep := &Endpoint{
-		services:            make(map[[ServiceHashLen]byte]irpcgen.Service),
+		services:            make(map[[serviceHashLen]byte]irpcgen.Service),
 		enc:                 irpcgen.NewEncoder(conn),
 		dec:                 irpcgen.NewDecoder(conn),
 		connCloser:          conn,
@@ -139,10 +141,14 @@ func (e *Endpoint) RegisterClient(serviceId []byte) error {
 
 // getService returns false if id was not found,
 func (e *Endpoint) getService(serviceHash []byte) (s irpcgen.Service, found bool) {
+	if len(serviceHash) != serviceHashLen {
+		return nil, false
+	}
+
 	e.servicesMux.Lock()
 	defer e.servicesMux.Unlock()
 
-	hashArray := [ServiceHashLen]byte{}
+	hashArray := [serviceHashLen]byte{}
 	copy(hashArray[:], serviceHash)
 	s, found = e.services[hashArray]
 	return s, found
@@ -223,7 +229,7 @@ func (e *Endpoint) serializePacket(data ...irpcgen.Serializable) error {
 }
 
 func (e *Endpoint) CallRemoteFunc(ctx context.Context, serviceId []byte, funcId irpcgen.FuncId, reqData irpcgen.Serializable, respData irpcgen.Deserializable) error {
-	pendingReq, err := e.sendRpcRequest(ctx, serviceId, FuncId(funcId), reqData, respData)
+	pendingReq, err := e.sendRpcRequest(ctx, serviceId[:serviceHashLen], FuncId(funcId), reqData, respData)
 	if err != nil {
 		// check if endpoint was closed
 		if e.Err() != nil {
@@ -263,7 +269,7 @@ func (e *Endpoint) RegisterService(services ...irpcgen.Service) {
 	defer e.servicesMux.Unlock()
 
 	for _, s := range services {
-		hashArray := [ServiceHashLen]byte{}
+		hashArray := [serviceHashLen]byte{}
 		copy(hashArray[:], s.Id())
 		e.services[hashArray] = s
 	}

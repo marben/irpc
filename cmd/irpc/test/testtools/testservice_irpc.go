@@ -15,7 +15,7 @@ type TestServiceIRpcService struct {
 func NewTestServiceIRpcService(impl TestService) *TestServiceIRpcService {
 	return &TestServiceIRpcService{
 		impl: impl,
-		id:   []byte{229, 65, 55, 122},
+		id:   []byte{69, 194, 156, 237, 124, 221, 112, 80, 181, 230, 224, 54, 161, 101, 255, 70, 163, 67, 74, 110, 242, 47, 133, 179, 5, 204, 122, 69, 114, 54, 248, 124},
 	}
 }
 func (s *TestServiceIRpcService) Id() []byte {
@@ -76,7 +76,7 @@ type TestServiceIRpcClient struct {
 }
 
 func NewTestServiceIRpcClient(endpoint irpcgen.Endpoint) (*TestServiceIRpcClient, error) {
-	id := []byte{229, 65, 55, 122}
+	id := []byte{69, 194, 156, 237, 124, 221, 112, 80, 181, 230, 224, 54, 161, 101, 255, 70, 163, 67, 74, 110, 242, 47, 133, 179, 5, 204, 122, 69, 114, 54, 248, 124}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}

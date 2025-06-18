@@ -15,7 +15,7 @@ type basicAPIIRpcService struct {
 func newBasicAPIIRpcService(impl basicAPI) *basicAPIIRpcService {
 	return &basicAPIIRpcService{
 		impl: impl,
-		id:   []byte{85, 11, 230, 2},
+		id:   []byte{211, 105, 100, 47, 203, 69, 198, 139, 155, 89, 57, 129, 20, 50, 247, 149, 207, 73, 16, 40, 150, 7, 239, 115, 114, 11, 65, 218, 137, 212, 172, 114},
 	}
 }
 func (s *basicAPIIRpcService) Id() []byte {
@@ -274,7 +274,7 @@ type emptyAPIIRpcService struct {
 func newEmptyAPIIRpcService(impl emptyAPI) *emptyAPIIRpcService {
 	return &emptyAPIIRpcService{
 		impl: impl,
-		id:   []byte{248, 140, 114, 40},
+		id:   []byte{35, 106, 178, 30, 86, 149, 16, 80, 59, 181, 47, 123, 20, 147, 254, 10, 36, 186, 151, 11, 14, 215, 98, 38, 189, 14, 252, 102, 162, 211, 42, 137},
 	}
 }
 func (s *emptyAPIIRpcService) Id() []byte {
@@ -293,7 +293,7 @@ type basicAPIIRpcClient struct {
 }
 
 func newBasicAPIIRpcClient(endpoint irpcgen.Endpoint) (*basicAPIIRpcClient, error) {
-	id := []byte{85, 11, 230, 2}
+	id := []byte{211, 105, 100, 47, 203, 69, 198, 139, 155, 89, 57, 129, 20, 50, 247, 149, 207, 73, 16, 40, 150, 7, 239, 115, 114, 11, 65, 218, 137, 212, 172, 114}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -490,7 +490,7 @@ type emptyAPIIRpcClient struct {
 }
 
 func newEmptyAPIIRpcClient(endpoint irpcgen.Endpoint) (*emptyAPIIRpcClient, error) {
-	id := []byte{248, 140, 114, 40}
+	id := []byte{35, 106, 178, 30, 86, 149, 16, 80, 59, 181, 47, 123, 20, 147, 254, 10, 36, 186, 151, 11, 14, 215, 98, 38, 189, 14, 252, 102, 162, 211, 42, 137}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}

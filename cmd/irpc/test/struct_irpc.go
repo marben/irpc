@@ -15,7 +15,7 @@ type structAPIIRpcService struct {
 func newStructAPIIRpcService(impl structAPI) *structAPIIRpcService {
 	return &structAPIIRpcService{
 		impl: impl,
-		id:   []byte{133, 67, 176, 246},
+		id:   []byte{106, 159, 241, 109, 151, 225, 58, 212, 230, 250, 27, 101, 48, 72, 196, 49, 158, 92, 99, 231, 112, 214, 133, 26, 243, 31, 249, 156, 147, 83, 187, 178},
 	}
 }
 func (s *structAPIIRpcService) Id() []byte {
@@ -76,7 +76,7 @@ type structAPIIRpcClient struct {
 }
 
 func newStructAPIIRpcClient(endpoint irpcgen.Endpoint) (*structAPIIRpcClient, error) {
-	id := []byte{133, 67, 176, 246}
+	id := []byte{106, 159, 241, 109, 151, 225, 58, 212, 230, 250, 27, 101, 48, 72, 196, 49, 158, 92, 99, 231, 112, 214, 133, 26, 243, 31, 249, 156, 147, 83, 187, 178}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}

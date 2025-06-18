@@ -15,7 +15,7 @@ type interfaceTestIRpcService struct {
 func newInterfaceTestIRpcService(impl interfaceTest) *interfaceTestIRpcService {
 	return &interfaceTestIRpcService{
 		impl: impl,
-		id:   []byte{195, 243, 227, 167},
+		id:   []byte{133, 203, 97, 90, 246, 227, 125, 93, 9, 225, 240, 183, 176, 242, 41, 149, 228, 79, 209, 231, 80, 217, 237, 90, 31, 92, 241, 66, 223, 49, 81, 127},
 	}
 }
 func (s *interfaceTestIRpcService) Id() []byte {
@@ -106,7 +106,7 @@ type customInterfaceIRpcService struct {
 func newCustomInterfaceIRpcService(impl customInterface) *customInterfaceIRpcService {
 	return &customInterfaceIRpcService{
 		impl: impl,
-		id:   []byte{228, 143, 187, 133},
+		id:   []byte{98, 136, 69, 78, 105, 159, 188, 191, 64, 206, 42, 107, 235, 67, 109, 92, 233, 123, 118, 239, 216, 115, 207, 112, 7, 111, 20, 162, 158, 63, 219, 56},
 	}
 }
 func (s *customInterfaceIRpcService) Id() []byte {
@@ -153,7 +153,7 @@ type interfaceTestIRpcClient struct {
 }
 
 func newInterfaceTestIRpcClient(endpoint irpcgen.Endpoint) (*interfaceTestIRpcClient, error) {
-	id := []byte{195, 243, 227, 167}
+	id := []byte{133, 203, 97, 90, 246, 227, 125, 93, 9, 225, 240, 183, 176, 242, 41, 149, 228, 79, 209, 231, 80, 217, 237, 90, 31, 92, 241, 66, 223, 49, 81, 127}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -215,7 +215,7 @@ type customInterfaceIRpcClient struct {
 }
 
 func newCustomInterfaceIRpcClient(endpoint irpcgen.Endpoint) (*customInterfaceIRpcClient, error) {
-	id := []byte{228, 143, 187, 133}
+	id := []byte{98, 136, 69, 78, 105, 159, 188, 191, 64, 206, 42, 107, 235, 67, 109, 92, 233, 123, 118, 239, 216, 115, 207, 112, 7, 111, 20, 162, 158, 63, 219, 56}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}

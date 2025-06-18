@@ -15,7 +15,7 @@ type sliceTestIRpcService struct {
 func newSliceTestIRpcService(impl sliceTest) *sliceTestIRpcService {
 	return &sliceTestIRpcService{
 		impl: impl,
-		id:   []byte{190, 33, 195, 116},
+		id:   []byte{69, 254, 185, 252, 237, 198, 107, 151, 134, 70, 158, 69, 209, 213, 178, 186, 35, 209, 102, 36, 75, 44, 158, 72, 5, 239, 65, 211, 238, 67, 5, 188},
 	}
 }
 func (s *sliceTestIRpcService) Id() []byte {
@@ -104,7 +104,7 @@ type sliceTestIRpcClient struct {
 }
 
 func newSliceTestIRpcClient(endpoint irpcgen.Endpoint) (*sliceTestIRpcClient, error) {
-	id := []byte{190, 33, 195, 116}
+	id := []byte{69, 254, 185, 252, 237, 198, 107, 151, 134, 70, 158, 69, 209, 213, 178, 186, 35, 209, 102, 36, 75, 44, 158, 72, 5, 239, 65, 211, 238, 67, 5, 188}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}

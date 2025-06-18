@@ -20,10 +20,11 @@ const (
 )
 
 // generates unique service hash based on generated code's hash (without the hash;) and service name
-func generateServiceIdHash(fileHash []byte, serviceName string, len int) []byte {
+func generateServiceIdHash(fileHash []byte, serviceName string, maxLen int) []byte {
 	input := append(fileHash, []byte(serviceName)...)
 	hsh := sha256.Sum256(input)
-	return hsh[:len]
+	l := min(maxLen, len(hsh))
+	return hsh[:l]
 }
 
 // generates the 'NewSomething(){}' function name

@@ -15,7 +15,7 @@ type FileServerIRpcService struct {
 func NewFileServerIRpcService(impl FileServer) *FileServerIRpcService {
 	return &FileServerIRpcService{
 		impl: impl,
-		id:   []byte{134, 98, 203, 158},
+		id:   []byte{96, 72, 26, 80, 98, 148, 83, 25, 163, 152, 72, 44, 202, 97, 250, 126, 57, 140, 149, 102, 211, 114, 76, 122, 178, 124, 250, 39, 67, 186, 8, 20},
 	}
 }
 func (s *FileServerIRpcService) Id() []byte {
@@ -48,7 +48,7 @@ type FileServerIRpcClient struct {
 }
 
 func NewFileServerIRpcClient(endpoint irpcgen.Endpoint) (*FileServerIRpcClient, error) {
-	id := []byte{134, 98, 203, 158}
+	id := []byte{96, 72, 26, 80, 98, 148, 83, 25, 163, 152, 72, 44, 202, 97, 250, 126, 57, 140, 149, 102, 211, 114, 76, 122, 178, 124, 250, 39, 67, 186, 8, 20}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}

@@ -15,7 +15,7 @@ type MathIRpcService struct {
 func NewMathIRpcService(impl Math) *MathIRpcService {
 	return &MathIRpcService{
 		impl: impl,
-		id:   []byte{91, 198, 107, 156},
+		id:   []byte{164, 12, 58, 7, 29, 185, 99, 91, 161, 186, 86, 237, 177, 188, 139, 176, 208, 122, 194, 157, 130, 245, 186, 198, 155, 89, 8, 124, 70, 244, 35, 216},
 	}
 }
 func (s *MathIRpcService) Id() []byte {
@@ -48,7 +48,7 @@ type MathIRpcClient struct {
 }
 
 func NewMathIRpcClient(endpoint irpcgen.Endpoint) (*MathIRpcClient, error) {
-	id := []byte{91, 198, 107, 156}
+	id := []byte{164, 12, 58, 7, 29, 185, 99, 91, 161, 186, 86, 237, 177, 188, 139, 176, 208, 122, 194, 157, 130, 245, 186, 198, 155, 89, 8, 124, 70, 244, 35, 216}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}

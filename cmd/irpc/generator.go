@@ -7,9 +7,11 @@ import (
 	"io"
 	"log"
 	"strings"
-
-	"github.com/marben/irpc"
 )
+
+// id len specifies how long our service id's will be. currently the max is 32 bytes as we are using sha256 to generate them
+// actual id to negotiate between endpoints desn't have to be full lenght (atm it's only 4 bytes)
+const idLen = 32
 
 type generator struct {
 	fd       rpcFileDesc
@@ -19,6 +21,7 @@ type generator struct {
 	params   []paramStructGenerator
 }
 
+// if fileHash is nil, we generate service id with empty hash - this is only used during dry run (first run of generator)
 func newGenerator(fd rpcFileDesc, q types.Qualifier, fileHash []byte) (generator, error) {
 	imports := newOrderedSet[string]()
 	services := []serviceGenerator{}
@@ -36,7 +39,13 @@ func newGenerator(fd rpcFileDesc, q types.Qualifier, fileHash []byte) (generator
 			paramStructs = append(paramStructs, mg.req, mg.resp)
 		}
 
-		serviceId := generateServiceIdHash(fileHash, iface.name(), irpc.ServiceHashLen)
+		// we use empty hash when file hash was not provided - during the dry run
+		// this allows us to change idLen while keeping the common part of hash the same - not really useful but nice to have
+		serviceId := []byte{}
+		if fileHash != nil {
+			serviceId = generateServiceIdHash(fileHash, iface.name(), idLen)
+		}
+
 		sg, err := newServiceGenerator(iface.name()+"IRpcService", iface.name(), methods, serviceId)
 		if err != nil {
 			return generator{}, fmt.Errorf("service generator for iface: %s: %w", iface.name(), err)
