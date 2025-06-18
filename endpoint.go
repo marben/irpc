@@ -30,7 +30,7 @@ var (
 	errProtocolError               = errors.New("protocol error")
 )
 
-// Endpoint represents one side of a connection.
+// Endpoint represents one side of a socket connection.
 // There needs to be a serving endpoint on both sides of connection for communication to work.
 type Endpoint struct {
 	// maps serviceId to service. uses array, because slices are not comparable in maps
@@ -154,7 +154,7 @@ func (e *Endpoint) getService(serviceHash []byte) (s irpcgen.Service, found bool
 	return s, found
 }
 
-func (e *Endpoint) sendRpcRequest(ctx context.Context, serviceId []byte, funcId FuncId, reqData irpcgen.Serializable, respData irpcgen.Deserializable) (ourPendingRequest, error) {
+func (e *Endpoint) sendRpcRequest(ctx context.Context, serviceId []byte, funcId irpcgen.FuncId, reqData irpcgen.Serializable, respData irpcgen.Deserializable) (ourPendingRequest, error) {
 	pr, err := e.ourPendingRequests.addPendingRequest(ctx, respData)
 	if err != nil {
 		return ourPendingRequest{}, fmt.Errorf("addPendingRequest(): %w", err)
@@ -229,7 +229,7 @@ func (e *Endpoint) serializePacket(data ...irpcgen.Serializable) error {
 }
 
 func (e *Endpoint) CallRemoteFunc(ctx context.Context, serviceId []byte, funcId irpcgen.FuncId, reqData irpcgen.Serializable, respData irpcgen.Deserializable) error {
-	pendingReq, err := e.sendRpcRequest(ctx, serviceId[:serviceHashLen], FuncId(funcId), reqData, respData)
+	pendingReq, err := e.sendRpcRequest(ctx, serviceId[:serviceHashLen], funcId, reqData, respData)
 	if err != nil {
 		// check if endpoint was closed
 		if e.Err() != nil {

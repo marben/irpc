@@ -35,11 +35,6 @@ func (ph *packetHeader) Deserialize(d *irpcgen.Decoder) error {
 	return nil
 }
 
-type FuncId irpcgen.FuncId
-
-func (fid FuncId) Serialize(e *irpcgen.Encoder) error    { return e.UvarInt64(uint64(fid)) }
-func (fid *FuncId) Deserialize(d *irpcgen.Decoder) error { return d.UvarInt64((*uint64)(fid)) }
-
 type ReqNumT uint64
 
 func (rn ReqNumT) Serialize(e *irpcgen.Encoder) error    { return e.UvarInt64(uint64(rn)) }
@@ -48,7 +43,7 @@ func (rn *ReqNumT) Deserialize(d *irpcgen.Decoder) error { return d.UvarInt64((*
 type requestPacket struct {
 	ReqNum    ReqNumT
 	ServiceId []byte
-	FuncId    FuncId
+	FuncId    irpcgen.FuncId
 }
 
 func (rp requestPacket) Serialize(e *irpcgen.Encoder) error {
@@ -58,7 +53,7 @@ func (rp requestPacket) Serialize(e *irpcgen.Encoder) error {
 	if err := e.ByteSlice(rp.ServiceId); err != nil {
 		return err
 	}
-	if err := rp.FuncId.Serialize(e); err != nil {
+	if err := e.UvarInt64(uint64(rp.FuncId)); err != nil {
 		return err
 	}
 	return nil
@@ -71,7 +66,7 @@ func (rp *requestPacket) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.ByteSlice(&rp.ServiceId); err != nil {
 		return err
 	}
-	if err := rp.FuncId.Deserialize(d); err != nil {
+	if err := d.UvarInt64((*uint64)(&rp.FuncId)); err != nil {
 		return err
 	}
 	return nil
