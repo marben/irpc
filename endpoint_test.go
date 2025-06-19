@@ -745,7 +745,7 @@ func TestOutsideConnectionClose(t *testing.T) {
 
 func TestCallingUnregisteredService(t *testing.T) {
 	// currently, unsuccessful call closes the service Ep, which in turn closes ours
-	// todo: figure out errors and report ErrServiceNotFound error
+	// todo: figure out network errors and report ErrServiceNotFound error over network?
 
 	serviceEp, clientEp, err := testtools.CreateLocalTcpEndpoints()
 	if err != nil {
@@ -772,11 +772,4 @@ func TestCallingUnregisteredService(t *testing.T) {
 	if !errors.Is(serviceEp.Err(), irpc.ErrServiceNotFound) {
 		t.Fatalf("unexpected service endpoint cause: %v", serviceEp.Err())
 	}
-
-	//if err := serviceEp.Close(); err != nil {
-	//	t.Fatalf("serviceEp.Close(): %+v", err)
-	//}
-	//if err := clientEp.Close(); err != nil {
-	//	t.Fatalf("clientEp.Close(): %+v", err)
-	//}
 }
