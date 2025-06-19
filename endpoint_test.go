@@ -43,7 +43,7 @@ func TestEndpointClientRegister(t *testing.T) {
 		t.Fatalf("ep1.Close(): %+v", err)
 	}
 
-	time.Sleep(100 * time.Millisecond) // wait for the close signal to arrive
+	<-ep2.Done() // wait for the close signal to arrive
 	t.Log("ep2 closing")
 	if err := ep2.Close(); !errors.Is(err, irpc.ErrEndpointClosedByCounterpart) {
 		t.Fatalf("ep2.Close(): %+v", err)
@@ -321,7 +321,7 @@ func TestMaxWorkersNumber(t *testing.T) {
 	wg.Wait() // no reason really, just to be sure
 }
 
-// makes sure that context cancelation on clinet's side gets propagated to the service
+// makes sure that context cancelation on client's side gets propagated to the service
 func TestContextCancel(t *testing.T) {
 	serviceEp, clientEp, err := testtools.CreateLocalTcpEndpoints()
 	if err != nil {
