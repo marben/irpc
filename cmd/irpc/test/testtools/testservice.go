@@ -12,6 +12,12 @@ type TestService interface {
 	DivCtxErr(ctx context.Context, a, b int) (int, error)
 }
 
+func TestServiceId() []byte {
+	impl := NewTestServiceImpl(0)
+	service := NewTestServiceIRpcService(impl)
+	return service.id
+}
+
 var _ TestService = NewTestServiceImpl(0)
 
 var ErrDivByZero = errors.New("cannot divide by zero")

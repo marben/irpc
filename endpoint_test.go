@@ -44,7 +44,7 @@ func TestEndpointClientRegister(t *testing.T) {
 	}
 
 	time.Sleep(100 * time.Millisecond) // wait for the close signal to arrive
-	t.Log("ep2 cosing")
+	t.Log("ep2 closing")
 	if err := ep2.Close(); !errors.Is(err, irpc.ErrEndpointClosedByCounterpart) {
 		t.Fatalf("ep2.Close(): %+v", err)
 	}
@@ -771,5 +771,34 @@ func TestCallingUnregisteredService(t *testing.T) {
 	log.Println("serviceEp done. err:", serviceEp.Err())
 	if !errors.Is(serviceEp.Err(), irpc.ErrServiceNotFound) {
 		t.Fatalf("unexpected service endpoint cause: %v", serviceEp.Err())
+	}
+}
+
+func TestCallingNonexistentFunction(t *testing.T) {
+	serviceEp, clientEp, err := testtools.CreateLocalTcpEndpoints()
+	if err != nil {
+		t.Fatalf("failed to create local tcp endpoints: %+v", err)
+	}
+
+	t.Logf("registering test service")
+	service := testtools.NewTestServiceIRpcService(testtools.NewTestServiceImpl(0))
+	serviceEp.RegisterService(service)
+
+	t.Logf("creating client")
+	client, err := testtools.NewTestServiceIRpcClient(clientEp)
+	if err != nil {
+		t.Fatalf("failed to create client: %+v", err)
+	}
+
+	t.Logf("testing valid client call")
+	res := client.Div(6, 3)
+	if res != 2 {
+		t.Fatalf("unexpected result: %d", res)
+	}
+
+	t.Logf("testing non-existent function call")
+	err = clientEp.CallRemoteFunc(context.Background(), testtools.TestServiceId(), 666, testtools.DummySerializable{}, testtools.DummyDeserializable{})
+	if !errors.Is(err, irpc.ErrEndpointClosed) {
+		t.Fatalf("err: %+v", err)
 	}
 }

@@ -7,7 +7,6 @@ import (
 	"github.com/marben/irpc"
 )
 
-// todo: unexport and only use CreateLocalTcpEnpoints?
 func CreateLocalTcpConnPipe() (net.Conn, net.Conn, error) {
 	l, err := net.Listen("tcp", ":")
 	if err != nil {
