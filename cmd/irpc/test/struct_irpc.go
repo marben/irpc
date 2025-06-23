@@ -15,7 +15,7 @@ type structAPIIRpcService struct {
 func newStructAPIIRpcService(impl structAPI) *structAPIIRpcService {
 	return &structAPIIRpcService{
 		impl: impl,
-		id:   []byte{106, 159, 241, 109, 151, 225, 58, 212, 230, 250, 27, 101, 48, 72, 196, 49, 158, 92, 99, 231, 112, 214, 133, 26, 243, 31, 249, 156, 147, 83, 187, 178},
+		id:   []byte{135, 248, 191, 132, 123, 219, 141, 161, 255, 108, 168, 173, 142, 129, 59, 76, 198, 197, 167, 46, 6, 147, 189, 52, 200, 13, 190, 27, 92, 240, 144, 247},
 	}
 }
 func (s *structAPIIRpcService) Id() []byte {
@@ -76,7 +76,7 @@ type structAPIIRpcClient struct {
 }
 
 func newStructAPIIRpcClient(endpoint irpcgen.Endpoint) (*structAPIIRpcClient, error) {
-	id := []byte{106, 159, 241, 109, 151, 225, 58, 212, 230, 250, 27, 101, 48, 72, 196, 49, 158, 92, 99, 231, 112, 214, 133, 26, 243, 31, 249, 156, 147, 83, 187, 178}
+	id := []byte{135, 248, 191, 132, 123, 219, 141, 161, 255, 108, 168, 173, 142, 129, 59, 76, 198, 197, 167, 46, 6, 147, 189, 52, 200, 13, 190, 27, 92, 240, 144, 247}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -258,61 +258,55 @@ type _Irpc_structAPISumSliceStructReq struct {
 }
 
 func (s _Irpc_structAPISumSliceStructReq) Serialize(e *irpcgen.Encoder) error {
-	{ // s.Param0_s.s1
+	{ // s.Param0_s.s1 []int
 		var l int = len(s.Param0_s.s1)
-		if err := e.VarInt(l); err != nil {
-			return fmt.Errorf("serialize l of type 'int': %w", err)
+		if err := e.UvarInt64(uint64(l)); err != nil {
+			return fmt.Errorf("serialize uint64(l) of type 'uint64': %w", err)
 		}
-
-		for i := 0; i < l; i++ {
-			if err := e.VarInt(s.Param0_s.s1[i]); err != nil {
-				return fmt.Errorf("serialize s.Param0_s.s1[i] of type 'int': %w", err)
+		for _, v := range s.Param0_s.s1 {
+			if err := e.VarInt(v); err != nil {
+				return fmt.Errorf("serialize v of type 'int': %w", err)
 			}
-
 		}
 	}
-	{ // s.Param0_s.s2
+	{ // s.Param0_s.s2 []int
 		var l int = len(s.Param0_s.s2)
-		if err := e.VarInt(l); err != nil {
-			return fmt.Errorf("serialize l of type 'int': %w", err)
+		if err := e.UvarInt64(uint64(l)); err != nil {
+			return fmt.Errorf("serialize uint64(l) of type 'uint64': %w", err)
 		}
-
-		for i := 0; i < l; i++ {
-			if err := e.VarInt(s.Param0_s.s2[i]); err != nil {
-				return fmt.Errorf("serialize s.Param0_s.s2[i] of type 'int': %w", err)
+		for _, v := range s.Param0_s.s2 {
+			if err := e.VarInt(v); err != nil {
+				return fmt.Errorf("serialize v of type 'int': %w", err)
 			}
-
 		}
 	}
 	return nil
 }
 func (s *_Irpc_structAPISumSliceStructReq) Deserialize(d *irpcgen.Decoder) error {
-	{ // s.Param0_s.s1
-		var l int
-		if err := d.VarInt(&l); err != nil {
-			return fmt.Errorf("deserialize l of type 'int': %w", err)
+	{ // s.Param0_s.s1 []int
+		var ul uint64
+		if err := d.UvarInt64(&ul); err != nil {
+			return fmt.Errorf("deserialize ul of type 'uint64': %w", err)
 		}
-
+		var l int = int(ul)
 		s.Param0_s.s1 = make([]int, l)
-		for i := 0; i < l; i++ {
+		for i := range l {
 			if err := d.VarInt(&s.Param0_s.s1[i]); err != nil {
 				return fmt.Errorf("deserialize s.Param0_s.s1[i] of type 'int': %w", err)
 			}
-
 		}
 	}
-	{ // s.Param0_s.s2
-		var l int
-		if err := d.VarInt(&l); err != nil {
-			return fmt.Errorf("deserialize l of type 'int': %w", err)
+	{ // s.Param0_s.s2 []int
+		var ul uint64
+		if err := d.UvarInt64(&ul); err != nil {
+			return fmt.Errorf("deserialize ul of type 'uint64': %w", err)
 		}
-
+		var l int = int(ul)
 		s.Param0_s.s2 = make([]int, l)
-		for i := 0; i < l; i++ {
+		for i := range l {
 			if err := d.VarInt(&s.Param0_s.s2[i]); err != nil {
 				return fmt.Errorf("deserialize s.Param0_s.s2[i] of type 'int': %w", err)
 			}
-
 		}
 	}
 	return nil

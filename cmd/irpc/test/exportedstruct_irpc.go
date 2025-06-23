@@ -15,7 +15,7 @@ type FileServerIRpcService struct {
 func NewFileServerIRpcService(impl FileServer) *FileServerIRpcService {
 	return &FileServerIRpcService{
 		impl: impl,
-		id:   []byte{96, 72, 26, 80, 98, 148, 83, 25, 163, 152, 72, 44, 202, 97, 250, 126, 57, 140, 149, 102, 211, 114, 76, 122, 178, 124, 250, 39, 67, 186, 8, 20},
+		id:   []byte{142, 124, 165, 172, 57, 220, 191, 132, 17, 164, 226, 196, 241, 231, 184, 229, 251, 159, 191, 181, 197, 72, 152, 36, 104, 135, 136, 226, 9, 178, 109, 201},
 	}
 }
 func (s *FileServerIRpcService) Id() []byte {
@@ -48,7 +48,7 @@ type FileServerIRpcClient struct {
 }
 
 func NewFileServerIRpcClient(endpoint irpcgen.Endpoint) (*FileServerIRpcClient, error) {
-	id := []byte{96, 72, 26, 80, 98, 148, 83, 25, 163, 152, 72, 44, 202, 97, 250, 126, 57, 140, 149, 102, 211, 114, 76, 122, 178, 124, 250, 39, 67, 186, 8, 20}
+	id := []byte{142, 124, 165, 172, 57, 220, 191, 132, 17, 164, 226, 196, 241, 231, 184, 229, 251, 159, 191, 181, 197, 72, 152, 36, 104, 135, 136, 226, 9, 178, 109, 201}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -80,17 +80,15 @@ type _Irpc_FileServerListFilesResp struct {
 }
 
 func (s _Irpc_FileServerListFilesResp) Serialize(e *irpcgen.Encoder) error {
-	{ // s.Param0_
+	{ // s.Param0_ []FileInfo
 		var l int = len(s.Param0_)
-		if err := e.VarInt(l); err != nil {
-			return fmt.Errorf("serialize l of type 'int': %w", err)
+		if err := e.UvarInt64(uint64(l)); err != nil {
+			return fmt.Errorf("serialize uint64(l) of type 'uint64': %w", err)
 		}
-
-		for i := 0; i < l; i++ {
-			if err := e.UvarInt64(s.Param0_[i].FileSize); err != nil {
-				return fmt.Errorf("serialize s.Param0_[i].FileSize of type 'uint64': %w", err)
+		for _, v := range s.Param0_ {
+			if err := e.UvarInt64(v.FileSize); err != nil {
+				return fmt.Errorf("serialize v.FileSize of type 'uint64': %w", err)
 			}
-
 		}
 	}
 	{
@@ -114,18 +112,17 @@ func (s _Irpc_FileServerListFilesResp) Serialize(e *irpcgen.Encoder) error {
 	return nil
 }
 func (s *_Irpc_FileServerListFilesResp) Deserialize(d *irpcgen.Decoder) error {
-	{ // s.Param0_
-		var l int
-		if err := d.VarInt(&l); err != nil {
-			return fmt.Errorf("deserialize l of type 'int': %w", err)
+	{ // s.Param0_ []FileInfo
+		var ul uint64
+		if err := d.UvarInt64(&ul); err != nil {
+			return fmt.Errorf("deserialize ul of type 'uint64': %w", err)
 		}
-
+		var l int = int(ul)
 		s.Param0_ = make([]FileInfo, l)
-		for i := 0; i < l; i++ {
+		for i := range l {
 			if err := d.UvarInt64(&s.Param0_[i].FileSize); err != nil {
 				return fmt.Errorf("deserialize s.Param0_[i].FileSize of type 'uint64': %w", err)
 			}
-
 		}
 	}
 	{

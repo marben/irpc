@@ -1,5 +1,7 @@
 - test function with zero return vals
-- allow serialization/deserialization of types implementing encoding.BinaryMarshaller. this is supporte by time.Time
+- support "enums", aliases etc...
+- get rid of .codeblock() in encoders, since almost none use it - we can make a separate interface for it
+- allow serialization/deserialization of types implementing encoding.BinaryMarshaller and AppendingMarshaller. this is supported by time.Time and few others
     - see other peoples solution for time.Time (embedded pointers etc...)
 - implement bitpacking writer. first for slice of bool, eventually perhaps
     for everything? (could use some benchmarking before that though)

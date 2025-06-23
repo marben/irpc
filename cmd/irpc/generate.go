@@ -62,7 +62,7 @@ loop:
 // encoding/decoding of slices requires unique iterator names
 // we generate them from variable name, but we need to remove some characters
 // replaces '[' ']' '.' with underscore
-func generateSliceIteratorName(existingVars []string) string {
+func generateIteratorName(existingVars []string) string {
 	possibleNames := []string{"i", "j", "k", "l", "m", "n"}
 	for {
 		for i, n := range possibleNames {
@@ -70,6 +70,23 @@ func generateSliceIteratorName(existingVars []string) string {
 				return n
 			}
 			possibleNames[i] = n + "_"
+		}
+	}
+}
+
+func generateKeyValueIteratorNames(existingVars []string) (kIt, vIt string) {
+	// start with k, v ; if those are taken, continue to k2, v2; k3, v3 etc
+
+	if !slices.Contains(existingVars, "k") && !slices.Contains(existingVars, "v") {
+		return "k", "v"
+	}
+
+	// we start adding numbers starting with 2
+	for i := 2; ; i++ {
+		k := fmt.Sprintf("k%d", i)
+		v := fmt.Sprintf("v%d", i)
+		if !slices.Contains(existingVars, k) && !slices.Contains(existingVars, v) {
+			return k, v
 		}
 	}
 }

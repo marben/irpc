@@ -61,6 +61,8 @@ func varEncoder(apiName string, t types.Type, q types.Qualifier) (encoder, error
 
 		// anything else
 		return newSliceEncoder(apiName, t, q)
+	case *types.Map:
+		return newMapEncoder(apiName, t.Key(), t.Elem(), q)
 	case *types.Named:
 		switch t.String() {
 		case "context.Context": // we treat context special
@@ -179,10 +181,9 @@ func (e primitiveTypeEncoder) codeblock() string {
 // slice encoder doesn't use generic slice function for performance reasons
 // unrolling the code in place reduces time and allocs
 type sliceEncoder struct {
-	elemEnc  encoder
-	lenEnc   encoder
-	elemType types.Type
-	q        types.Qualifier
+	elemEnc     encoder
+	elemTypeStr string
+	lenEnc      encoder
 }
 
 func newSliceEncoder(apiName string, t *types.Slice, q types.Qualifier) (sliceEncoder, error) {
@@ -192,10 +193,9 @@ func newSliceEncoder(apiName string, t *types.Slice, q types.Qualifier) (sliceEn
 	}
 
 	return sliceEncoder{
-		elemEnc:  elemEnc,
-		lenEnc:   intEncoder,
-		elemType: t.Elem(),
-		q:        q,
+		elemEnc:     elemEnc,
+		elemTypeStr: types.TypeString(t.Elem(), q),
+		lenEnc:      uint64Encoder,
 	}, nil
 }
 
@@ -203,18 +203,16 @@ func (e sliceEncoder) encode(varId string, existingVars []string) string {
 	sb := &strings.Builder{}
 
 	// length
-	fmt.Fprintf(sb, "{ // %s\n", varId)
+	fmt.Fprintf(sb, "{ // %s []%s\n", varId, e.elemTypeStr)
 	fmt.Fprintf(sb, "var l int = len(%s)\n", varId)
-	sb.WriteString(e.lenEnc.encode("l", existingVars))
+	sb.WriteString(e.lenEnc.encode("uint64(l)", existingVars))
 	existingVars = append(existingVars, "l")
 
 	// for loop
-	itName := generateSliceIteratorName(existingVars)
-	fmt.Fprintf(sb, `
-	for %[1]s := 0; %[1]s < l; %[1]s++ {
-		%s
-	}
-	`, itName, e.elemEnc.encode(varId+"["+itName+"]", append(existingVars, itName)))
+	existingVars = append(existingVars, "v")
+	fmt.Fprintf(sb, "for _, v := range %s {\n", varId)
+	sb.WriteString(e.elemEnc.encode("v", existingVars))
+	sb.WriteString("}")
 	sb.WriteString("}\n")
 
 	return sb.String()
@@ -224,19 +222,19 @@ func (e sliceEncoder) decode(varId string, existingVars []string) string {
 	sb := &strings.Builder{}
 
 	// length
-	fmt.Fprintf(sb, "{ // %s\n", varId)
-	sb.WriteString("var l int\n")
-	sb.WriteString(e.lenEnc.decode("l", existingVars))
-	existingVars = append(existingVars, "l")
+	fmt.Fprintf(sb, "{ // %s []%s\n", varId, e.elemTypeStr)
+	sb.WriteString("var ul uint64\n")
+	sb.WriteString(e.lenEnc.decode("ul", existingVars))
+	sb.WriteString("var l int = int(ul)\n")
+	existingVars = append(existingVars, "l", "ul")
 
 	// for loop
-	itName := generateSliceIteratorName(existingVars)
-	fmt.Fprintf(sb, `
-	%s = make([]%s, l)
-	for %[3]s := 0; %[3]s < l; %[3]s++ {
-		%s
-	}
-	`, varId, types.TypeString(e.elemType, e.q), itName, e.elemEnc.decode(varId+"["+itName+"]", append(existingVars, itName)))
+	itName := generateIteratorName(existingVars)
+	existingVars = append(existingVars, itName)
+	fmt.Fprintf(sb, "%s = make([]%s, l)\n", varId, e.elemTypeStr)
+	fmt.Fprintf(sb, "for %s := range l {", itName)
+	sb.WriteString(e.elemEnc.decode(varId+"["+itName+"]", existingVars))
+	sb.WriteString("}\n")
 	sb.WriteString("}\n")
 
 	return sb.String()
@@ -247,6 +245,93 @@ func (e sliceEncoder) imports() []string {
 }
 
 func (e sliceEncoder) codeblock() string {
+	return ""
+}
+
+type mapEncoder struct {
+	keyEnc     encoder
+	keyTypeStr string
+
+	valEnc     encoder
+	valTypeStr string
+
+	lenEnc encoder
+}
+
+func newMapEncoder(apiName string, keyType, valType types.Type, q types.Qualifier) (mapEncoder, error) {
+	keyEnc, err := varEncoder(apiName, keyType, q)
+	if err != nil {
+		return mapEncoder{}, fmt.Errorf("unsupported map key type %s: %w", keyType, err)
+	}
+
+	valEnc, err := varEncoder(apiName, valType, q)
+	if err != nil {
+		return mapEncoder{}, fmt.Errorf("unsupported map value type %s: %w", valType, err)
+	}
+	return mapEncoder{
+		keyEnc:     keyEnc,
+		keyTypeStr: types.TypeString(keyType, q),
+		valEnc:     valEnc,
+		valTypeStr: types.TypeString(valType, q),
+		lenEnc:     uint64Encoder,
+	}, nil
+}
+
+func (e mapEncoder) encode(varId string, existingVars []string) string {
+	sb := &strings.Builder{}
+
+	// length
+	fmt.Fprintf(sb, "{ // %s map[%s]%s\n", varId, e.keyTypeStr, e.valTypeStr)
+	fmt.Fprintf(sb, "var l int = len(%s)\n", varId)
+	sb.WriteString(e.lenEnc.encode("uint64(l)", existingVars))
+	existingVars = append(existingVars, "l")
+
+	keyIt, valIt := generateKeyValueIteratorNames(existingVars)
+	existingVars = append(existingVars, keyIt, valIt)
+
+	// for loop
+	fmt.Fprintf(sb, "for %s, %s := range %s {", keyIt, valIt, varId)
+	sb.WriteString(e.keyEnc.encode(keyIt, existingVars))
+	sb.WriteString(e.valEnc.encode(valIt, existingVars))
+	sb.WriteString("}\n") // end of for loop
+
+	sb.WriteString("}\n") // end of block
+
+	return sb.String()
+}
+
+func (e mapEncoder) decode(varId string, existingVars []string) string {
+	sb := &strings.Builder{}
+
+	// length
+	fmt.Fprintf(sb, "{ // %s\n", varId)
+	sb.WriteString("var ul uint64\n")
+	sb.WriteString(e.lenEnc.decode("ul", existingVars))
+	sb.WriteString("var l int = int(ul)\n")
+	existingVars = append(existingVars, "ul", "l")
+
+	fmt.Fprintf(sb, "%s = make(map[%s]%s, l)\n", varId, e.keyTypeStr, e.valTypeStr)
+	sb.WriteString("for range l {\n")
+
+	fmt.Fprintf(sb, "var k %s\n", e.keyTypeStr)
+	existingVars = append(existingVars, "k")
+	fmt.Fprintf(sb, "%s\n", e.keyEnc.decode("k", existingVars))
+
+	fmt.Fprintf(sb, "var v %s\n", e.valTypeStr)
+	existingVars = append(existingVars, "v")
+	fmt.Fprintf(sb, "%s\n", e.valEnc.decode("v", existingVars))
+
+	fmt.Fprintf(sb, "%s[k] = v", varId)
+	sb.WriteString("}\n")
+	sb.WriteString("}\n") // end of block
+	return sb.String()
+}
+
+func (e mapEncoder) imports() []string {
+	return append(e.keyEnc.imports(), e.valEnc.imports()...)
+}
+
+func (e mapEncoder) codeblock() string {
 	return ""
 }
 
