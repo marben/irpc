@@ -1,5 +1,6 @@
 - test function with zero return vals
-- support "enums", aliases etc...
+- write named maps and other types. perhaps there is a common pattern and we can just have named encoder pattern?
+- support aliases
 - get rid of .codeblock() in encoders, since almost none use it - we can make a separate interface for it
 - allow serialization/deserialization of types implementing encoding.BinaryMarshaller and AppendingMarshaller. this is supported by time.Time and few others
     - see other peoples solution for time.Time (embedded pointers etc...)

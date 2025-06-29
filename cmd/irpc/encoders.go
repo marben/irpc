@@ -17,52 +17,13 @@ type encoder interface {
 func varEncoder(apiName string, t types.Type, q types.Qualifier) (encoder, error) {
 	switch t := t.(type) {
 	case *types.Basic:
-		switch t.Kind() {
-		case types.Bool:
-			return boolEncoder, nil
-		case types.Int:
-			return intEncoder, nil
-		case types.Uint:
-			return uintEncoder, nil
-		case types.Int8:
-			return int8Encoder, nil
-		case types.Uint8: // serves 'types.Byte' as well
-			return uint8Encoder, nil
-		case types.Int16:
-			return int16Encoder, nil
-		case types.Uint16:
-			return uint16Encoder, nil
-		case types.Int32: // serves 'types.Rune' as well
-			return int32Encoder, nil
-		case types.Uint32:
-			return uint32Encoder, nil
-		case types.Int64:
-			return int64Encoder, nil
-		case types.Uint64:
-			return uint64Encoder, nil
-		case types.Float32:
-			return float32Encoder, nil
-		case types.Float64:
-			return float64Encoder, nil
-		case types.String:
-			return stringEncoder, nil
-		default:
-			return nil, fmt.Errorf("unsupported basic type '%s'", t.Name())
-		}
+		return newBasicTypeEncoder(t)
 	case *types.Slice:
-		// []byte
-		elemEnc, err := varEncoder(apiName, t.Elem(), q)
-		if err != nil {
-			return nil, fmt.Errorf("couldn't find encoder for type %v", t.Elem())
-		}
-		if elemEnc == uint8Encoder {
-			return byteSliceEncoder, nil
-		}
+		return newSliceEncoder(apiName, t, q, "")
 
-		// anything else
-		return newSliceEncoder(apiName, t, q)
 	case *types.Map:
 		return newMapEncoder(apiName, t.Key(), t.Elem(), q)
+
 	case *types.Named:
 		switch t.String() {
 		case "context.Context": // we treat context special
@@ -70,12 +31,17 @@ func varEncoder(apiName string, t types.Type, q types.Qualifier) (encoder, error
 		default:
 			name := t.Obj().Name()
 			switch ut := t.Underlying().(type) {
+			case *types.Basic:
+				return newNamedBasicTypeEncoder(ut, name)
 			case *types.Struct:
 				return newNamedStructEncoder(apiName, ut, q)
 			case *types.Interface:
 				return newInterfaceEncoder(name, apiName, ut, q)
+			case *types.Slice:
+				return newSliceEncoder(apiName, ut, q, name)
+
 			default:
-				return nil, fmt.Errorf("unsupported named type: %s", ut)
+				return nil, fmt.Errorf("unsupported named type: %T", ut)
 			}
 		}
 	default:
@@ -83,90 +49,145 @@ func varEncoder(apiName string, t types.Type, q types.Qualifier) (encoder, error
 	}
 }
 
+func newBasicTypeEncoder(t *types.Basic) (primitiveTypeEncoder, error) {
+	switch t.Kind() {
+	case types.Bool:
+		return boolEncoder, nil
+	case types.Int:
+		return intEncoder, nil
+	case types.Uint:
+		return uintEncoder, nil
+	case types.Int8:
+		return int8Encoder, nil
+	case types.Uint8: // serves 'types.Byte' as well
+		return uint8Encoder, nil
+	case types.Int16:
+		return int16Encoder, nil
+	case types.Uint16:
+		return uint16Encoder, nil
+	case types.Int32: // serves 'types.Rune' as well
+		return int32Encoder, nil
+	case types.Uint32:
+		return uint32Encoder, nil
+	case types.Int64:
+		return int64Encoder, nil
+	case types.Uint64:
+		return uint64Encoder, nil
+	case types.Float32:
+		return float32Encoder, nil
+	case types.Float64:
+		return float64Encoder, nil
+	case types.String:
+		return stringEncoder, nil
+	default:
+		return primitiveTypeEncoder{}, fmt.Errorf("unsupported basic type '%s'", t.Name())
+	}
+}
+
+func newNamedBasicTypeEncoder(t *types.Basic, name string) (primitiveTypeEncoder, error) {
+	basicEnc, err := newBasicTypeEncoder(t)
+	if err != nil {
+		return primitiveTypeEncoder{}, fmt.Errorf("get basic type encoder for named type %s: %w", name, err)
+	}
+	basicEnc.typeName = name
+	return basicEnc, nil
+}
+
 var (
 	boolEncoder = primitiveTypeEncoder{ // todo: could use bitpacking instead of one bool per byte
-		decFuncName: "Bool",
-		typeName:    "bool",
+		decFuncName:        "Bool",
+		underlyingTypeName: "bool",
 	}
 	intEncoder = primitiveTypeEncoder{
-		decFuncName: "VarInt",
-		typeName:    "int",
+		decFuncName:        "VarInt",
+		underlyingTypeName: "int",
 	}
 	uintEncoder = primitiveTypeEncoder{
-		decFuncName: "UvarInt",
-		typeName:    "uint",
+		decFuncName:        "UvarInt",
+		underlyingTypeName: "uint",
 	}
 	int8Encoder = primitiveTypeEncoder{
-		decFuncName: "Int8",
-		typeName:    "int8",
+		decFuncName:        "Int8",
+		underlyingTypeName: "int8",
 	}
 	uint8Encoder = primitiveTypeEncoder{
-		decFuncName: "Uint8",
-		typeName:    "uint8",
+		decFuncName:        "Uint8",
+		underlyingTypeName: "uint8",
 	}
 	int16Encoder = primitiveTypeEncoder{
-		decFuncName: "VarInt16",
-		typeName:    "int16",
+		decFuncName:        "VarInt16",
+		underlyingTypeName: "int16",
 	}
 	uint16Encoder = primitiveTypeEncoder{
-		decFuncName: "UvarInt16",
-		typeName:    "uint16",
+		decFuncName:        "UvarInt16",
+		underlyingTypeName: "uint16",
 	}
 	int32Encoder = primitiveTypeEncoder{
-		decFuncName: "VarInt32",
-		typeName:    "int32",
+		decFuncName:        "VarInt32",
+		underlyingTypeName: "int32",
 	}
 	uint32Encoder = primitiveTypeEncoder{
-		decFuncName: "UvarInt32",
-		typeName:    "uint32",
+		decFuncName:        "UvarInt32",
+		underlyingTypeName: "uint32",
 	}
 	int64Encoder = primitiveTypeEncoder{
-		decFuncName: "VarInt64",
-		typeName:    "int64",
+		decFuncName:        "VarInt64",
+		underlyingTypeName: "int64",
 	}
 	uint64Encoder = primitiveTypeEncoder{
-		decFuncName: "UvarInt64",
-		typeName:    "uint64",
+		decFuncName:        "UvarInt64",
+		underlyingTypeName: "uint64",
 	}
 	float32Encoder = primitiveTypeEncoder{
-		decFuncName: "Float32le",
-		typeName:    "float32",
+		decFuncName:        "Float32le",
+		underlyingTypeName: "float32",
 	}
 	float64Encoder = primitiveTypeEncoder{
-		decFuncName: "Float64le",
-		typeName:    "float64",
+		decFuncName:        "Float64le",
+		underlyingTypeName: "float64",
 	}
 	stringEncoder = primitiveTypeEncoder{
-		decFuncName: "String",
-		typeName:    "string",
+		decFuncName:        "String",
+		underlyingTypeName: "string",
 	}
 	byteSliceEncoder = primitiveTypeEncoder{
-		decFuncName: "ByteSlice",
-		typeName:    "[]byte",
+		decFuncName:        "ByteSlice",
+		underlyingTypeName: "[]byte",
 	}
 )
 
 type primitiveTypeEncoder struct {
-	decFuncName string
-	typeName    string
+	decFuncName        string
+	underlyingTypeName string
+	typeName           string // if named, otherwise ""
 }
 
 func (e primitiveTypeEncoder) encode(varId string, existingVars []string) string {
-	sb := &strings.Builder{}
-	fmt.Fprintf(sb, `if err := e.%s(%s); err != nil {
+	var varParam string
+	if e.typeName == "" {
+		varParam = varId
+	} else {
+		varParam = fmt.Sprintf("%s(%s)", e.underlyingTypeName, varId)
+	}
+
+	return fmt.Sprintf(`if err := e.%s(%s); err != nil {
 		return fmt.Errorf("serialize %s of type '%s': %%w", err)
 	}
-	`, e.decFuncName, varId, varId, e.typeName)
-
-	return sb.String()
+	`, e.decFuncName, varParam, varId, e.underlyingTypeName)
 }
 
 func (e primitiveTypeEncoder) decode(varId string, existingVars []string) string {
+	var varParam string
+	if e.typeName == "" {
+		varParam = "&" + varId
+	} else {
+		varParam = fmt.Sprintf("(*%s)(&%s)", e.underlyingTypeName, varId)
+	}
 	sb := &strings.Builder{}
-	fmt.Fprintf(sb, `if err := d.%s(&%s); err != nil{
+	fmt.Fprintf(sb, `if err := d.%s(%s); err != nil{
 		return fmt.Errorf("deserialize %s of type '%s': %%w",err)
 	}
-	`, e.decFuncName, varId, varId, e.typeName)
+	`, e.decFuncName, varParam, varId, e.underlyingTypeName)
 	return sb.String()
 }
 
@@ -186,7 +207,14 @@ type sliceEncoder struct {
 	lenEnc      encoder
 }
 
-func newSliceEncoder(apiName string, t *types.Slice, q types.Qualifier) (sliceEncoder, error) {
+// name can be "", in which case no type conversion will happen
+func newSliceEncoder(apiName string, t *types.Slice, q types.Qualifier, name string) (encoder, error) {
+	if t.Elem().String() == "byte" {
+		bs := byteSliceEncoder
+		bs.typeName = name
+		return bs, nil
+	}
+
 	elemEnc, err := varEncoder(apiName, t.Elem(), q)
 	if err != nil {
 		return sliceEncoder{}, fmt.Errorf("unsupported slice underlying type %s: %w", t.Elem(), err)
