@@ -1,4 +1,3 @@
-- instead of generating empty req/resp structs, use irpcgen.EmptySerializable/EmptyDeserializable
 - test inline structs (if avail, try even as param)
 - write named maps and other types. perhaps there is a common pattern and we can just have named encoder pattern?
 - support aliases

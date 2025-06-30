@@ -5,7 +5,7 @@ type emptyAPI interface{}
 //go:generate go run ../
 type edgeCases interface {
 	noReturn(i int)
-	naParams() int
+	noParams() int
 	nothingAtAll()
 }
 
@@ -23,7 +23,7 @@ func (e edgeCasesImpl) noReturn(i int) {
 	}
 }
 
-func (e edgeCasesImpl) naParams() int {
+func (e edgeCasesImpl) noParams() int {
 	if e.noParamsFunc != nil {
 		return e.noParamsFunc()
 	}

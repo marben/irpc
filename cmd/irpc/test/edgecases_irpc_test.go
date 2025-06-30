@@ -6,7 +6,7 @@ import (
 	"github.com/marben/irpc/cmd/irpc/test/testtools"
 )
 
-func TestEdgecaseNoReturn(t *testing.T) {
+func TestEdgecases(t *testing.T) {
 	localEp, remoteEp, err := testtools.CreateLocalTcpEndpoints()
 	if err != nil {
 		t.Fatalf("create enpoints: %v", err)
@@ -33,7 +33,7 @@ func TestEdgecaseNoReturn(t *testing.T) {
 		t.Fatalf("noReturn(5): %d", noRtnRtn)
 	}
 
-	noParamsRes := c.naParams()
+	noParamsRes := c.noParams()
 	if noParamsRes != 9 {
 		t.Fatalf("noParams(): %d", noParamsRes)
 	}

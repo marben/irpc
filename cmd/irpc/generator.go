@@ -86,9 +86,13 @@ func (g generator) write(w io.Writer) error {
 
 	// PARAM STRUCTS
 	for _, p := range g.params {
-		genF.addUniqueBlock(p.code())
-		for _, e := range p.encoders() {
-			genF.addUniqueBlock(e.codeblock())
+		// we don't generate empty types (even though the generator is capable of generating them)
+		// we use irpcgen.Empty(Ser/Deser) instead
+		if !p.isEmpty() {
+			genF.addUniqueBlock(p.code())
+			for _, e := range p.encoders() {
+				genF.addUniqueBlock(e.codeblock())
+			}
 		}
 	}
 
@@ -421,15 +425,21 @@ func (sg serviceGenerator) code() string {
 
 	for _, m := range sg.methods {
 		fmt.Fprintf(sb, "case %d: // %s\n", m.index, m.name)
-		fmt.Fprintf(sb, `return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
+		fmt.Fprintf(sb, "return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {\n")
+
+		// deserialize, if not empty
+		if !m.req.isEmpty() {
+			fmt.Fprintf(sb, `// DESERIALIZE
 		 	var args %s
 		 	if err := args.Deserialize(d); err != nil {
 		 		return nil, err
 		 	}
-			return %s, nil
+			`, m.req.typeName)
+		}
+
+		fmt.Fprintf(sb, `return %s, nil
 		}, nil
-		 `, m.req.typeName, m.executorFuncCode())
+		 `, m.executorFuncCode())
 	}
 	fmt.Fprintf(sb, `default:
 			return nil, fmt.Errorf("function '%%d' doesn't exist on service '%%s'", funcId, s.Id())
@@ -485,21 +495,33 @@ func (cg clientGenerator) code() string {
 		fmt.Fprintf(b, "func(%s *%s)%s(%s)(%s){\n", cg.fncReceiverName, cg.typeName, m.name, m.req.funcCallParams(), m.resp.funcCallParams())
 
 		allVars := append(m.req.params, m.resp.params...)
-		reqVarName := generateUniqueVarname("req", allVars)
-		respVarName := generateUniqueVarname("resp", allVars)
-		// request construction
-		fmt.Fprintf(b, "var %s = %s {\n", reqVarName, m.req.typeName)
-		for _, p := range m.req.params {
-			if p.isContext() {
-				// we skip contexts, as they are treated special
-				b.WriteString("// ")
+
+		// request
+		var reqVarName string
+		if m.req.isEmpty() {
+			reqVarName = "irpcgen.EmptySerializable{}"
+		} else {
+			reqVarName = generateUniqueVarname("req", allVars)
+			// request construction
+			fmt.Fprintf(b, "var %s = %s {\n", reqVarName, m.req.typeName)
+			for _, p := range m.req.params {
+				if p.isContext() {
+					// we skip contexts, as they are treated special
+					b.WriteString("// ")
+				}
+				fmt.Fprintf(b, "%s: %s,\n", p.structFieldName(), p.name())
 			}
-			fmt.Fprintf(b, "%s: %s,\n", p.structFieldName(), p.name())
+			fmt.Fprintf(b, "}\n") // end struct assignment
 		}
-		fmt.Fprintf(b, "}\n") // end struct assignment
 
 		// response
-		fmt.Fprintf(b, "var %s %s\n", respVarName, m.resp.typeName)
+		var respVarName string
+		if m.resp.isEmpty() {
+			respVarName = "irpcgen.EmptyDeserializable{}"
+		} else {
+			respVarName = generateUniqueVarname("resp", allVars)
+			fmt.Fprintf(b, "var %s %s\n", respVarName, m.resp.typeName)
+		}
 
 		// func call
 		fmt.Fprintf(b, "if err := %s.endpoint.CallRemoteFunc(%s,%[1]s.id, %[3]d, %s, &%s); err != nil {\n", cg.fncReceiverName, m.ctxVar, m.index, reqVarName, respVarName)
