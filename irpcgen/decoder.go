@@ -12,16 +12,14 @@ import (
 //
 // It is meant to be used by generated code to decode messages in the IRPC protocol.
 type Decoder struct {
-	r      *bufio.Reader
-	buf    []byte
-	endian binary.ByteOrder // todo: should not be needed
+	r   *bufio.Reader
+	buf []byte
 }
 
 func NewDecoder(r io.Reader) *Decoder {
 	return &Decoder{
-		r:      bufio.NewReader(r),
-		buf:    make([]byte, binary.MaxVarintLen64),
-		endian: binary.LittleEndian,
+		r:   bufio.NewReader(r),
+		buf: make([]byte, binary.MaxVarintLen64),
 	}
 }
 
@@ -159,7 +157,7 @@ func (d *Decoder) Float32le(dst *float32) error {
 	if _, err := io.ReadFull(d.r, d.buf[:4]); err != nil {
 		return err
 	}
-	*dst = math.Float32frombits(d.endian.Uint32(d.buf[:4]))
+	*dst = math.Float32frombits(binary.LittleEndian.Uint32(d.buf[:4]))
 
 	return nil
 }
@@ -168,7 +166,7 @@ func (d *Decoder) Float64le(dst *float64) error {
 	if _, err := io.ReadFull(d.r, d.buf[:8]); err != nil {
 		return err
 	}
-	*dst = math.Float64frombits(d.endian.Uint64(d.buf[:8]))
+	*dst = math.Float64frombits(binary.LittleEndian.Uint64(d.buf[:8]))
 
 	return nil
 }
