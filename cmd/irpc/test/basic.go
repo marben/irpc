@@ -26,8 +26,7 @@ type basicAPI interface {
 	negBool(ok bool) bool
 }
 
-type emptyAPI interface {
-}
+var _ basicAPI = basicApiImpl{}
 
 type basicApiImpl struct {
 	skew int

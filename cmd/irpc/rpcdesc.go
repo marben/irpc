@@ -75,10 +75,17 @@ func newRpcMethod(typesInfo *types.Info, astField *ast.Field) (rpcMethod, error)
 	if err != nil {
 		return rpcMethod{}, fmt.Errorf("params list load for %s: %w", methodName, err)
 	}
-	results, err := loadRpcParamList(typesInfo, astFuncType.Results.List)
-	if err != nil {
-		return rpcMethod{}, fmt.Errorf("results list load for %s: %w", methodName, err)
+
+	var results []rpcParam
+	if astFuncType.Results != nil {
+		results, err = loadRpcParamList(typesInfo, astFuncType.Results.List)
+		if err != nil {
+			return rpcMethod{}, fmt.Errorf("results list load for %s: %w", methodName, err)
+		}
 	}
+	// if err != nil {
+	// 	return rpcMethod{}, fmt.Errorf("results list load for %s: %w", methodName, err)
+	// }
 	return rpcMethod{name: methodName, astField: astField, params: params, results: results}, nil
 }
 

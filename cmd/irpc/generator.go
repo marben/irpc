@@ -147,6 +147,10 @@ func (sg paramStructGenerator) code() string {
 	return sb.String()
 }
 
+func (sg paramStructGenerator) isEmpty() bool {
+	return len(sg.params) == 0
+}
+
 func (sg paramStructGenerator) serializeFunc() string {
 	sb := &strings.Builder{}
 	fmt.Fprintf(sb, "func (s %s)Serialize(e *irpcgen.Encoder) error {\n", sg.typeName)
@@ -332,6 +336,14 @@ func newMethodGenerator(ifaceName string, index int, m rpcMethod, q types.Qualif
 }
 
 func (mg methodGenerator) executorFuncCode() string {
+	if mg.resp.isEmpty() {
+		return fmt.Sprintf(`func(ctx context.Context) irpcgen.Serializable {
+				// EXECUTE
+				s.impl.%[2]s(%[3]s)
+				return irpcgen.EmptySerializable{}
+			}`, mg.resp.typeName, mg.name, mg.requestParamsListPrefixed("args.", "ctx"))
+	}
+
 	return fmt.Sprintf(`func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
 				var resp %[1]s

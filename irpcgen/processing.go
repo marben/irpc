@@ -20,3 +20,11 @@ type Deserializable interface {
 type FuncExecutor func(ctx context.Context) Serializable
 
 type ArgDeserializer func(d *Decoder) (FuncExecutor, error)
+
+type EmptySerializable struct{}
+
+func (EmptySerializable) Serialize(e *Encoder) error { return nil }
+
+type EmptyDeserializable struct{}
+
+func (EmptyDeserializable) Deserialize(d *Decoder) error { return nil }

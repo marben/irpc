@@ -15,7 +15,7 @@ type basicAPIIRpcService struct {
 func newBasicAPIIRpcService(impl basicAPI) *basicAPIIRpcService {
 	return &basicAPIIRpcService{
 		impl: impl,
-		id:   []byte{211, 105, 100, 47, 203, 69, 198, 139, 155, 89, 57, 129, 20, 50, 247, 149, 207, 73, 16, 40, 150, 7, 239, 115, 114, 11, 65, 218, 137, 212, 172, 114},
+		id:   []byte{12, 195, 255, 62, 39, 223, 131, 163, 27, 186, 180, 131, 16, 120, 5, 22, 191, 101, 103, 139, 53, 4, 59, 90, 67, 235, 81, 222, 21, 171, 8, 229},
 	}
 }
 func (s *basicAPIIRpcService) Id() []byte {
@@ -266,34 +266,13 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 	}
 }
 
-type emptyAPIIRpcService struct {
-	impl emptyAPI
-	id   []byte
-}
-
-func newEmptyAPIIRpcService(impl emptyAPI) *emptyAPIIRpcService {
-	return &emptyAPIIRpcService{
-		impl: impl,
-		id:   []byte{35, 106, 178, 30, 86, 149, 16, 80, 59, 181, 47, 123, 20, 147, 254, 10, 36, 186, 151, 11, 14, 215, 98, 38, 189, 14, 252, 102, 162, 211, 42, 137},
-	}
-}
-func (s *emptyAPIIRpcService) Id() []byte {
-	return s.id
-}
-func (s *emptyAPIIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
-	switch funcId {
-	default:
-		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, s.Id())
-	}
-}
-
 type basicAPIIRpcClient struct {
 	endpoint irpcgen.Endpoint
 	id       []byte
 }
 
 func newBasicAPIIRpcClient(endpoint irpcgen.Endpoint) (*basicAPIIRpcClient, error) {
-	id := []byte{211, 105, 100, 47, 203, 69, 198, 139, 155, 89, 57, 129, 20, 50, 247, 149, 207, 73, 16, 40, 150, 7, 239, 115, 114, 11, 65, 218, 137, 212, 172, 114}
+	id := []byte{12, 195, 255, 62, 39, 223, 131, 163, 27, 186, 180, 131, 16, 120, 5, 22, 191, 101, 103, 139, 53, 4, 59, 90, 67, 235, 81, 222, 21, 171, 8, 229}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -482,19 +461,6 @@ func (_c *basicAPIIRpcClient) negBool(ok bool) bool {
 		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
 	return resp.Param0_
-}
-
-type emptyAPIIRpcClient struct {
-	endpoint irpcgen.Endpoint
-	id       []byte
-}
-
-func newEmptyAPIIRpcClient(endpoint irpcgen.Endpoint) (*emptyAPIIRpcClient, error) {
-	id := []byte{35, 106, 178, 30, 86, 149, 16, 80, 59, 181, 47, 123, 20, 147, 254, 10, 36, 186, 151, 11, 14, 215, 98, 38, 189, 14, 252, 102, 162, 211, 42, 137}
-	if err := endpoint.RegisterClient(id); err != nil {
-		return nil, fmt.Errorf("register failed: %w", err)
-	}
-	return &emptyAPIIRpcClient{endpoint: endpoint, id: id}, nil
 }
 
 type _Irpc_basicAPIaddByteReq struct {

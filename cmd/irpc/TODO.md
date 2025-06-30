@@ -1,4 +1,5 @@
-- test function with zero return vals
+- instead of generating empty req/resp structs, use irpcgen.EmptySerializable/EmptyDeserializable
+- test inline structs (if avail, try even as param)
 - write named maps and other types. perhaps there is a common pattern and we can just have named encoder pattern?
 - support aliases
 - get rid of .codeblock() in encoders, since almost none use it - we can make a separate interface for it

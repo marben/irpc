@@ -30,11 +30,12 @@ func (d *Decoder) Bool(dst *bool) error {
 	if err != nil {
 		return err
 	}
-	if val == 0 {
+	switch val {
+	case 0:
 		*dst = false
-	} else if val == 1 {
+	case 1:
 		*dst = true
-	} else {
+	default:
 		return fmt.Errorf("unexpected bool value: %d", val)
 	}
 
