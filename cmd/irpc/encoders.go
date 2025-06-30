@@ -20,10 +20,10 @@ func varEncoder(apiName string, t types.Type, q types.Qualifier) (encoder, error
 		return newBasicTypeEncoder(t)
 	case *types.Slice:
 		return newSliceEncoder(apiName, t, q, "")
-
 	case *types.Map:
 		return newMapEncoder(apiName, t.Key(), t.Elem(), q)
-
+	case *types.Struct:
+		return newStructEncoder(apiName, t, q)
 	case *types.Named:
 		switch t.String() {
 		case "context.Context": // we treat context special
@@ -34,7 +34,7 @@ func varEncoder(apiName string, t types.Type, q types.Qualifier) (encoder, error
 			case *types.Basic:
 				return newNamedBasicTypeEncoder(ut, name)
 			case *types.Struct:
-				return newNamedStructEncoder(apiName, ut, q)
+				return newStructEncoder(apiName, ut, q)
 			case *types.Interface:
 				return newInterfaceEncoder(name, apiName, ut, q)
 			case *types.Slice:
@@ -44,6 +44,7 @@ func varEncoder(apiName string, t types.Type, q types.Qualifier) (encoder, error
 				return nil, fmt.Errorf("unsupported named type: %T", ut)
 			}
 		}
+
 	default:
 		return nil, fmt.Errorf("unsupported type '%T' of %s ", t, t)
 	}
@@ -368,29 +369,29 @@ type structField struct {
 	enc  encoder
 }
 
-type namedStructEncoder struct {
+type structEncoder struct {
 	fields []structField
 }
 
-func newNamedStructEncoder(apiName string, s *types.Struct, q types.Qualifier) (namedStructEncoder, error) {
+func newStructEncoder(apiName string, s *types.Struct, q types.Qualifier) (structEncoder, error) {
 	structFields := []structField{}
 	for i := 0; i < s.NumFields(); i++ {
 		f := s.Field(i)
 		enc, err := varEncoder(apiName, f.Type(), q)
 		if err != nil {
-			return namedStructEncoder{}, fmt.Errorf("cannot encode structs field '%s' of type '%s': %w", f.Name(), f.Type(), err)
+			return structEncoder{}, fmt.Errorf("cannot encode structs field '%s' of type '%s': %w", f.Name(), f.Type(), err)
 		}
 		structFields = append(structFields, structField{
 			name: f.Name(),
 			enc:  enc,
 		})
 	}
-	return namedStructEncoder{
+	return structEncoder{
 		fields: structFields,
 	}, nil
 }
 
-func (e namedStructEncoder) encode(varId string, existingVars []string) string {
+func (e structEncoder) encode(varId string, existingVars []string) string {
 	sb := strings.Builder{}
 	for _, f := range e.fields {
 		sb.WriteString(f.enc.encode(varId+"."+f.name, existingVars))
@@ -398,7 +399,7 @@ func (e namedStructEncoder) encode(varId string, existingVars []string) string {
 	return sb.String()
 }
 
-func (e namedStructEncoder) decode(varId string, existingVars []string) string {
+func (e structEncoder) decode(varId string, existingVars []string) string {
 	sb := &strings.Builder{}
 	for _, f := range e.fields {
 		sb.WriteString(f.enc.decode(varId+"."+f.name, existingVars))
@@ -406,7 +407,7 @@ func (e namedStructEncoder) decode(varId string, existingVars []string) string {
 	return sb.String()
 }
 
-func (e namedStructEncoder) imports() []string {
+func (e structEncoder) imports() []string {
 	imps := newOrderedSet[string]()
 	for _, f := range e.fields {
 		imps.add(f.enc.imports()...)
@@ -414,7 +415,7 @@ func (e namedStructEncoder) imports() []string {
 	return imps.ordered
 }
 
-func (e namedStructEncoder) codeblock() string {
+func (e structEncoder) codeblock() string {
 	return ""
 }
 

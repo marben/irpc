@@ -15,7 +15,7 @@ type structAPIIRpcService struct {
 func newStructAPIIRpcService(impl structAPI) *structAPIIRpcService {
 	return &structAPIIRpcService{
 		impl: impl,
-		id:   []byte{135, 248, 191, 132, 123, 219, 141, 161, 255, 108, 168, 173, 142, 129, 59, 76, 198, 197, 167, 46, 6, 147, 189, 52, 200, 13, 190, 27, 92, 240, 144, 247},
+		id:   []byte{121, 81, 90, 65, 230, 25, 146, 89, 95, 207, 140, 13, 221, 67, 121, 100, 50, 52, 178, 81, 168, 69, 160, 64, 32, 74, 174, 159, 47, 62, 186, 54},
 	}
 }
 func (s *structAPIIRpcService) Id() []byte {
@@ -65,6 +65,48 @@ func (s *structAPIIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 				return resp
 			}, nil
 		}, nil
+	case 3: // InlineParams
+		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_structAPIInlineParamsReq
+			if err := args.Deserialize(d); err != nil {
+				return nil, err
+			}
+			return func(ctx context.Context) irpcgen.Serializable {
+				// EXECUTE
+				var resp _Irpc_structAPIInlineParamsResp
+				resp.Param0_ = s.impl.InlineParams(args.Param0_s)
+				return resp
+			}, nil
+		}, nil
+	case 4: // InlineInlineParams
+		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_structAPIInlineInlineParamsReq
+			if err := args.Deserialize(d); err != nil {
+				return nil, err
+			}
+			return func(ctx context.Context) irpcgen.Serializable {
+				// EXECUTE
+				var resp _Irpc_structAPIInlineInlineParamsResp
+				resp.Param0_ = s.impl.InlineInlineParams(args.Param0_s)
+				return resp
+			}, nil
+		}, nil
+	case 5: // InlineReturn
+		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_structAPIInlineReturnReq
+			if err := args.Deserialize(d); err != nil {
+				return nil, err
+			}
+			return func(ctx context.Context) irpcgen.Serializable {
+				// EXECUTE
+				var resp _Irpc_structAPIInlineReturnResp
+				resp.Param0_ = s.impl.InlineReturn(args.Param0_a)
+				return resp
+			}, nil
+		}, nil
 	default:
 		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, s.Id())
 	}
@@ -76,7 +118,7 @@ type structAPIIRpcClient struct {
 }
 
 func newStructAPIIRpcClient(endpoint irpcgen.Endpoint) (*structAPIIRpcClient, error) {
-	id := []byte{135, 248, 191, 132, 123, 219, 141, 161, 255, 108, 168, 173, 142, 129, 59, 76, 198, 197, 167, 46, 6, 147, 189, 52, 200, 13, 190, 27, 92, 240, 144, 247}
+	id := []byte{121, 81, 90, 65, 230, 25, 146, 89, 95, 207, 140, 13, 221, 67, 121, 100, 50, 52, 178, 81, 168, 69, 160, 64, 32, 74, 174, 159, 47, 62, 186, 54}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -108,6 +150,36 @@ func (_c *structAPIIRpcClient) SumSliceStruct(s sliceStruct) int {
 	}
 	var resp _Irpc_structAPISumSliceStructResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 2, req, &resp); err != nil {
+		panic(err) // to avoid panic, make your func return error and regenerate the code
+	}
+	return resp.Param0_
+}
+func (_c *structAPIIRpcClient) InlineParams(s struct{ a int }) int {
+	var req = _Irpc_structAPIInlineParamsReq{
+		Param0_s: s,
+	}
+	var resp _Irpc_structAPIInlineParamsResp
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 3, req, &resp); err != nil {
+		panic(err) // to avoid panic, make your func return error and regenerate the code
+	}
+	return resp.Param0_
+}
+func (_c *structAPIIRpcClient) InlineInlineParams(s struct{ a struct{ b int } }) int {
+	var req = _Irpc_structAPIInlineInlineParamsReq{
+		Param0_s: s,
+	}
+	var resp _Irpc_structAPIInlineInlineParamsResp
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 4, req, &resp); err != nil {
+		panic(err) // to avoid panic, make your func return error and regenerate the code
+	}
+	return resp.Param0_
+}
+func (_c *structAPIIRpcClient) InlineReturn(a int) struct{ b int } {
+	var req = _Irpc_structAPIInlineReturnReq{
+		Param0_a: a,
+	}
+	var resp _Irpc_structAPIInlineReturnResp
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 5, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
 	return resp.Param0_
@@ -325,6 +397,108 @@ func (s _Irpc_structAPISumSliceStructResp) Serialize(e *irpcgen.Encoder) error {
 func (s *_Irpc_structAPISumSliceStructResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0_); err != nil {
 		return fmt.Errorf("deserialize s.Param0_ of type 'int': %w", err)
+	}
+	return nil
+}
+
+type _Irpc_structAPIInlineParamsReq struct {
+	Param0_s struct{ a int }
+}
+
+func (s _Irpc_structAPIInlineParamsReq) Serialize(e *irpcgen.Encoder) error {
+	if err := e.VarInt(s.Param0_s.a); err != nil {
+		return fmt.Errorf("serialize s.Param0_s.a of type 'int': %w", err)
+	}
+	return nil
+}
+func (s *_Irpc_structAPIInlineParamsReq) Deserialize(d *irpcgen.Decoder) error {
+	if err := d.VarInt(&s.Param0_s.a); err != nil {
+		return fmt.Errorf("deserialize s.Param0_s.a of type 'int': %w", err)
+	}
+	return nil
+}
+
+type _Irpc_structAPIInlineParamsResp struct {
+	Param0_ int
+}
+
+func (s _Irpc_structAPIInlineParamsResp) Serialize(e *irpcgen.Encoder) error {
+	if err := e.VarInt(s.Param0_); err != nil {
+		return fmt.Errorf("serialize s.Param0_ of type 'int': %w", err)
+	}
+	return nil
+}
+func (s *_Irpc_structAPIInlineParamsResp) Deserialize(d *irpcgen.Decoder) error {
+	if err := d.VarInt(&s.Param0_); err != nil {
+		return fmt.Errorf("deserialize s.Param0_ of type 'int': %w", err)
+	}
+	return nil
+}
+
+type _Irpc_structAPIInlineInlineParamsReq struct {
+	Param0_s struct{ a struct{ b int } }
+}
+
+func (s _Irpc_structAPIInlineInlineParamsReq) Serialize(e *irpcgen.Encoder) error {
+	if err := e.VarInt(s.Param0_s.a.b); err != nil {
+		return fmt.Errorf("serialize s.Param0_s.a.b of type 'int': %w", err)
+	}
+	return nil
+}
+func (s *_Irpc_structAPIInlineInlineParamsReq) Deserialize(d *irpcgen.Decoder) error {
+	if err := d.VarInt(&s.Param0_s.a.b); err != nil {
+		return fmt.Errorf("deserialize s.Param0_s.a.b of type 'int': %w", err)
+	}
+	return nil
+}
+
+type _Irpc_structAPIInlineInlineParamsResp struct {
+	Param0_ int
+}
+
+func (s _Irpc_structAPIInlineInlineParamsResp) Serialize(e *irpcgen.Encoder) error {
+	if err := e.VarInt(s.Param0_); err != nil {
+		return fmt.Errorf("serialize s.Param0_ of type 'int': %w", err)
+	}
+	return nil
+}
+func (s *_Irpc_structAPIInlineInlineParamsResp) Deserialize(d *irpcgen.Decoder) error {
+	if err := d.VarInt(&s.Param0_); err != nil {
+		return fmt.Errorf("deserialize s.Param0_ of type 'int': %w", err)
+	}
+	return nil
+}
+
+type _Irpc_structAPIInlineReturnReq struct {
+	Param0_a int
+}
+
+func (s _Irpc_structAPIInlineReturnReq) Serialize(e *irpcgen.Encoder) error {
+	if err := e.VarInt(s.Param0_a); err != nil {
+		return fmt.Errorf("serialize s.Param0_a of type 'int': %w", err)
+	}
+	return nil
+}
+func (s *_Irpc_structAPIInlineReturnReq) Deserialize(d *irpcgen.Decoder) error {
+	if err := d.VarInt(&s.Param0_a); err != nil {
+		return fmt.Errorf("deserialize s.Param0_a of type 'int': %w", err)
+	}
+	return nil
+}
+
+type _Irpc_structAPIInlineReturnResp struct {
+	Param0_ struct{ b int }
+}
+
+func (s _Irpc_structAPIInlineReturnResp) Serialize(e *irpcgen.Encoder) error {
+	if err := e.VarInt(s.Param0_.b); err != nil {
+		return fmt.Errorf("serialize s.Param0_.b of type 'int': %w", err)
+	}
+	return nil
+}
+func (s *_Irpc_structAPIInlineReturnResp) Deserialize(d *irpcgen.Decoder) error {
+	if err := d.VarInt(&s.Param0_.b); err != nil {
+		return fmt.Errorf("deserialize s.Param0_.b of type 'int': %w", err)
 	}
 	return nil
 }

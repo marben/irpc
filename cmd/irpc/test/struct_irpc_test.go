@@ -11,6 +11,8 @@ func TestStructParam(t *testing.T) {
 	if err != nil {
 		t.Fatalf("create endpoints: %v", err)
 	}
+	defer localEp.Close()
+	defer remoteEp.Close()
 
 	skew := 8
 	service := newStructAPIIRpcService(structImpl{skew: skew})
@@ -46,5 +48,20 @@ func TestStructParam(t *testing.T) {
 	exp3 := 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + skew
 	if res3 != exp3 {
 		t.Fatalf("unexpected res3: %v", res2)
+	}
+
+	res4 := c.InlineParams(struct{ a int }{4})
+	if res4 != 4+skew {
+		t.Fatalf("res4: %d", res4)
+	}
+
+	res5 := c.InlineInlineParams(struct{ a struct{ b int } }{a: struct{ b int }{b: 3}})
+	if res5 != 3+skew {
+		t.Fatalf("res5: %d", res5)
+	}
+
+	res6 := c.InlineReturn(-11)
+	if res6.b != -11+skew {
+		t.Fatalf("res6: %d", res6)
 	}
 }

@@ -19,12 +19,30 @@ type structAPI interface {
 	VectSum(v vect3) int
 	Vect3x3Sum(v vect3x3) vect3
 	SumSliceStruct(s sliceStruct) int
+	InlineParams(s struct{ a int }) int
+	InlineInlineParams(s struct{ a struct{ b int } }) int
+	InlineReturn(a int) struct{ b int }
 }
 
 var _ structAPI = structImpl{}
 
 type structImpl struct {
 	skew int
+}
+
+// InlineReturn implements structAPI.
+func (i structImpl) InlineReturn(a int) struct{ b int } {
+	return struct{ b int }{a + i.skew}
+}
+
+// InlineInlineParams implements structAPI.
+func (i structImpl) InlineInlineParams(s struct{ a struct{ b int } }) int {
+	return s.a.b + i.skew
+}
+
+// InlineParams implements structAPI.
+func (i structImpl) InlineParams(s struct{ a int }) int {
+	return s.a + i.skew
 }
 
 // Vect3x3Sum implements structAPI.
