@@ -7,7 +7,8 @@ type edgeCases interface {
 	noReturn(i int)
 	noParams() int
 	nothingAtAll()
-	// unnamedIntParam(int) // todo: uncomment and test!
+	unnamedIntParam(int)
+	mixedParamIds(_ int, p0 uint8, _ struct{ a int }) // todo: should work too
 }
 
 var _ edgeCases = edgeCasesImpl{}
@@ -17,9 +18,17 @@ type edgeCasesImpl struct {
 	noParamsFunc        func() int
 	nothingAtAllFunc    func()
 	unnamedIntParamFunc func(int)
+	mixedParamIdsFunc   func(int)
 }
 
-// unnameIntParam implements edgeCases.
+// mixedParamIds implements edgeCases.
+func (e edgeCasesImpl) mixedParamIds(a int, b uint8, c struct{ a int }) {
+	if e.mixedParamIdsFunc != nil {
+		e.mixedParamIdsFunc(a + int(b) + c.a)
+	}
+}
+
+// unnamedIntParam implements edgeCases.
 func (e edgeCasesImpl) unnamedIntParam(i int) {
 	if e.unnamedIntParamFunc != nil {
 		e.unnamedIntParamFunc(i)

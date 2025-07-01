@@ -15,7 +15,7 @@ type basicAPIIRpcService struct {
 func newBasicAPIIRpcService(impl basicAPI) *basicAPIIRpcService {
 	return &basicAPIIRpcService{
 		impl: impl,
-		id:   []byte{12, 195, 255, 62, 39, 223, 131, 163, 27, 186, 180, 131, 16, 120, 5, 22, 191, 101, 103, 139, 53, 4, 59, 90, 67, 235, 81, 222, 21, 171, 8, 229},
+		id:   []byte{9, 209, 175, 234, 94, 35, 162, 213, 187, 72, 38, 98, 12, 213, 157, 151, 73, 80, 224, 88, 45, 190, 146, 28, 141, 140, 42, 18, 142, 4, 152, 95},
 	}
 }
 func (s *basicAPIIRpcService) Id() []byte {
@@ -33,7 +33,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddByteResp
-				resp.Param0_ = s.impl.addByte(args.Param0_a, args.Param1_b)
+				resp.Param0 = s.impl.addByte(args.Param0_a, args.Param1_b)
 				return resp
 			}, nil
 		}, nil
@@ -47,7 +47,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddIntResp
-				resp.Param0_ = s.impl.addInt(args.Param0_a, args.Param1_b)
+				resp.Param0 = s.impl.addInt(args.Param0_a, args.Param1_b)
 				return resp
 			}, nil
 		}, nil
@@ -61,7 +61,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIswapIntResp
-				resp.Param0_, resp.Param1_ = s.impl.swapInt(args.Param0_a, args.Param1_b)
+				resp.Param0, resp.Param1 = s.impl.swapInt(args.Param0_a, args.Param1_b)
 				return resp
 			}, nil
 		}, nil
@@ -75,7 +75,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIsubUintResp
-				resp.Param0_ = s.impl.subUint(args.Param0_a, args.Param0_b)
+				resp.Param0 = s.impl.subUint(args.Param0_a, args.Param0_b)
 				return resp
 			}, nil
 		}, nil
@@ -89,7 +89,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddInt8Resp
-				resp.Param0_ = s.impl.addInt8(args.Param0_a, args.Param0_b)
+				resp.Param0 = s.impl.addInt8(args.Param0_a, args.Param0_b)
 				return resp
 			}, nil
 		}, nil
@@ -103,7 +103,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddUint8Resp
-				resp.Param0_ = s.impl.addUint8(args.Param0_a, args.Param0_b)
+				resp.Param0 = s.impl.addUint8(args.Param0_a, args.Param0_b)
 				return resp
 			}, nil
 		}, nil
@@ -117,7 +117,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddInt16Resp
-				resp.Param0_ = s.impl.addInt16(args.Param0_a, args.Param0_b)
+				resp.Param0 = s.impl.addInt16(args.Param0_a, args.Param0_b)
 				return resp
 			}, nil
 		}, nil
@@ -131,7 +131,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddUint16Resp
-				resp.Param0_ = s.impl.addUint16(args.Param0_a, args.Param0_b)
+				resp.Param0 = s.impl.addUint16(args.Param0_a, args.Param0_b)
 				return resp
 			}, nil
 		}, nil
@@ -145,7 +145,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddInt32Resp
-				resp.Param0_ = s.impl.addInt32(args.Param0_a, args.Param0_b)
+				resp.Param0 = s.impl.addInt32(args.Param0_a, args.Param0_b)
 				return resp
 			}, nil
 		}, nil
@@ -159,7 +159,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddUint32Resp
-				resp.Param0_ = s.impl.addUint32(args.Param0_a, args.Param0_b)
+				resp.Param0 = s.impl.addUint32(args.Param0_a, args.Param0_b)
 				return resp
 			}, nil
 		}, nil
@@ -173,7 +173,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddInt64Resp
-				resp.Param0_ = s.impl.addInt64(args.Param0_a, args.Param0_b)
+				resp.Param0 = s.impl.addInt64(args.Param0_a, args.Param0_b)
 				return resp
 			}, nil
 		}, nil
@@ -187,7 +187,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddUint64Resp
-				resp.Param0_ = s.impl.addUint64(args.Param0_a, args.Param0_b)
+				resp.Param0 = s.impl.addUint64(args.Param0_a, args.Param0_b)
 				return resp
 			}, nil
 		}, nil
@@ -201,7 +201,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddFloat64Resp
-				resp.Param0_ = s.impl.addFloat64(args.Param0_a, args.Param0_b)
+				resp.Param0 = s.impl.addFloat64(args.Param0_a, args.Param0_b)
 				return resp
 			}, nil
 		}, nil
@@ -215,7 +215,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPIaddFloat32Resp
-				resp.Param0_ = s.impl.addFloat32(args.Param0_a, args.Param0_b)
+				resp.Param0 = s.impl.addFloat32(args.Param0_a, args.Param0_b)
 				return resp
 			}, nil
 		}, nil
@@ -229,7 +229,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPItoUpperResp
-				resp.Param0_ = s.impl.toUpper(args.Param0_c)
+				resp.Param0 = s.impl.toUpper(args.Param0_c)
 				return resp
 			}, nil
 		}, nil
@@ -243,7 +243,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPItoUpperStringResp
-				resp.Param0_ = s.impl.toUpperString(args.Param0_s)
+				resp.Param0 = s.impl.toUpperString(args.Param0_s)
 				return resp
 			}, nil
 		}, nil
@@ -257,7 +257,7 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
 				var resp _Irpc_basicAPInegBoolResp
-				resp.Param0_ = s.impl.negBool(args.Param0_ok)
+				resp.Param0 = s.impl.negBool(args.Param0_ok)
 				return resp
 			}, nil
 		}, nil
@@ -272,7 +272,7 @@ type basicAPIIRpcClient struct {
 }
 
 func newBasicAPIIRpcClient(endpoint irpcgen.Endpoint) (*basicAPIIRpcClient, error) {
-	id := []byte{12, 195, 255, 62, 39, 223, 131, 163, 27, 186, 180, 131, 16, 120, 5, 22, 191, 101, 103, 139, 53, 4, 59, 90, 67, 235, 81, 222, 21, 171, 8, 229}
+	id := []byte{9, 209, 175, 234, 94, 35, 162, 213, 187, 72, 38, 98, 12, 213, 157, 151, 73, 80, 224, 88, 45, 190, 146, 28, 141, 140, 42, 18, 142, 4, 152, 95}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -287,7 +287,7 @@ func (_c *basicAPIIRpcClient) addByte(a byte, b byte) byte {
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
-	return resp.Param0_
+	return resp.Param0
 }
 func (_c *basicAPIIRpcClient) addInt(a int, b int) int {
 	var req = _Irpc_basicAPIaddIntReq{
@@ -298,7 +298,7 @@ func (_c *basicAPIIRpcClient) addInt(a int, b int) int {
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 1, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
-	return resp.Param0_
+	return resp.Param0
 }
 func (_c *basicAPIIRpcClient) swapInt(a int, b int) (int, int) {
 	var req = _Irpc_basicAPIswapIntReq{
@@ -309,7 +309,7 @@ func (_c *basicAPIIRpcClient) swapInt(a int, b int) (int, int) {
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 2, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
-	return resp.Param0_, resp.Param1_
+	return resp.Param0, resp.Param1
 }
 func (_c *basicAPIIRpcClient) subUint(a uint, b uint) uint {
 	var req = _Irpc_basicAPIsubUintReq{
@@ -320,7 +320,7 @@ func (_c *basicAPIIRpcClient) subUint(a uint, b uint) uint {
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 3, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
-	return resp.Param0_
+	return resp.Param0
 }
 func (_c *basicAPIIRpcClient) addInt8(a int8, b int8) int8 {
 	var req = _Irpc_basicAPIaddInt8Req{
@@ -331,7 +331,7 @@ func (_c *basicAPIIRpcClient) addInt8(a int8, b int8) int8 {
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 4, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
-	return resp.Param0_
+	return resp.Param0
 }
 func (_c *basicAPIIRpcClient) addUint8(a uint8, b uint8) uint8 {
 	var req = _Irpc_basicAPIaddUint8Req{
@@ -342,7 +342,7 @@ func (_c *basicAPIIRpcClient) addUint8(a uint8, b uint8) uint8 {
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 5, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
-	return resp.Param0_
+	return resp.Param0
 }
 func (_c *basicAPIIRpcClient) addInt16(a int16, b int16) int16 {
 	var req = _Irpc_basicAPIaddInt16Req{
@@ -353,7 +353,7 @@ func (_c *basicAPIIRpcClient) addInt16(a int16, b int16) int16 {
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 6, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
-	return resp.Param0_
+	return resp.Param0
 }
 func (_c *basicAPIIRpcClient) addUint16(a uint16, b uint16) uint16 {
 	var req = _Irpc_basicAPIaddUint16Req{
@@ -364,7 +364,7 @@ func (_c *basicAPIIRpcClient) addUint16(a uint16, b uint16) uint16 {
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 7, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
-	return resp.Param0_
+	return resp.Param0
 }
 func (_c *basicAPIIRpcClient) addInt32(a int32, b int32) int32 {
 	var req = _Irpc_basicAPIaddInt32Req{
@@ -375,7 +375,7 @@ func (_c *basicAPIIRpcClient) addInt32(a int32, b int32) int32 {
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 8, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
-	return resp.Param0_
+	return resp.Param0
 }
 func (_c *basicAPIIRpcClient) addUint32(a uint32, b uint32) uint32 {
 	var req = _Irpc_basicAPIaddUint32Req{
@@ -386,7 +386,7 @@ func (_c *basicAPIIRpcClient) addUint32(a uint32, b uint32) uint32 {
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 9, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
-	return resp.Param0_
+	return resp.Param0
 }
 func (_c *basicAPIIRpcClient) addInt64(a int64, b int64) int64 {
 	var req = _Irpc_basicAPIaddInt64Req{
@@ -397,7 +397,7 @@ func (_c *basicAPIIRpcClient) addInt64(a int64, b int64) int64 {
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 10, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
-	return resp.Param0_
+	return resp.Param0
 }
 func (_c *basicAPIIRpcClient) addUint64(a uint64, b uint64) uint64 {
 	var req = _Irpc_basicAPIaddUint64Req{
@@ -408,7 +408,7 @@ func (_c *basicAPIIRpcClient) addUint64(a uint64, b uint64) uint64 {
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 11, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
-	return resp.Param0_
+	return resp.Param0
 }
 func (_c *basicAPIIRpcClient) addFloat64(a float64, b float64) float64 {
 	var req = _Irpc_basicAPIaddFloat64Req{
@@ -419,7 +419,7 @@ func (_c *basicAPIIRpcClient) addFloat64(a float64, b float64) float64 {
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 12, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
-	return resp.Param0_
+	return resp.Param0
 }
 func (_c *basicAPIIRpcClient) addFloat32(a float32, b float32) float32 {
 	var req = _Irpc_basicAPIaddFloat32Req{
@@ -430,7 +430,7 @@ func (_c *basicAPIIRpcClient) addFloat32(a float32, b float32) float32 {
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 13, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
-	return resp.Param0_
+	return resp.Param0
 }
 func (_c *basicAPIIRpcClient) toUpper(c rune) rune {
 	var req = _Irpc_basicAPItoUpperReq{
@@ -440,7 +440,7 @@ func (_c *basicAPIIRpcClient) toUpper(c rune) rune {
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 14, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
-	return resp.Param0_
+	return resp.Param0
 }
 func (_c *basicAPIIRpcClient) toUpperString(s string) string {
 	var req = _Irpc_basicAPItoUpperStringReq{
@@ -450,7 +450,7 @@ func (_c *basicAPIIRpcClient) toUpperString(s string) string {
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 15, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
-	return resp.Param0_
+	return resp.Param0
 }
 func (_c *basicAPIIRpcClient) negBool(ok bool) bool {
 	var req = _Irpc_basicAPInegBoolReq{
@@ -460,7 +460,7 @@ func (_c *basicAPIIRpcClient) negBool(ok bool) bool {
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 16, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
-	return resp.Param0_
+	return resp.Param0
 }
 
 type _Irpc_basicAPIaddByteReq struct {
@@ -488,18 +488,18 @@ func (s *_Irpc_basicAPIaddByteReq) Deserialize(d *irpcgen.Decoder) error {
 }
 
 type _Irpc_basicAPIaddByteResp struct {
-	Param0_ byte
+	Param0 byte
 }
 
 func (s _Irpc_basicAPIaddByteResp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.Uint8(s.Param0_); err != nil {
-		return fmt.Errorf("serialize s.Param0_ of type 'uint8': %w", err)
+	if err := e.Uint8(s.Param0); err != nil {
+		return fmt.Errorf("serialize s.Param0 of type 'uint8': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddByteResp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.Uint8(&s.Param0_); err != nil {
-		return fmt.Errorf("deserialize s.Param0_ of type 'uint8': %w", err)
+	if err := d.Uint8(&s.Param0); err != nil {
+		return fmt.Errorf("deserialize s.Param0 of type 'uint8': %w", err)
 	}
 	return nil
 }
@@ -529,18 +529,18 @@ func (s *_Irpc_basicAPIaddIntReq) Deserialize(d *irpcgen.Decoder) error {
 }
 
 type _Irpc_basicAPIaddIntResp struct {
-	Param0_ int
+	Param0 int
 }
 
 func (s _Irpc_basicAPIaddIntResp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.VarInt(s.Param0_); err != nil {
-		return fmt.Errorf("serialize s.Param0_ of type 'int': %w", err)
+	if err := e.VarInt(s.Param0); err != nil {
+		return fmt.Errorf("serialize s.Param0 of type 'int': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddIntResp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.VarInt(&s.Param0_); err != nil {
-		return fmt.Errorf("deserialize s.Param0_ of type 'int': %w", err)
+	if err := d.VarInt(&s.Param0); err != nil {
+		return fmt.Errorf("deserialize s.Param0 of type 'int': %w", err)
 	}
 	return nil
 }
@@ -570,25 +570,25 @@ func (s *_Irpc_basicAPIswapIntReq) Deserialize(d *irpcgen.Decoder) error {
 }
 
 type _Irpc_basicAPIswapIntResp struct {
-	Param0_ int
-	Param1_ int
+	Param0 int
+	Param1 int
 }
 
 func (s _Irpc_basicAPIswapIntResp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.VarInt(s.Param0_); err != nil {
-		return fmt.Errorf("serialize s.Param0_ of type 'int': %w", err)
+	if err := e.VarInt(s.Param0); err != nil {
+		return fmt.Errorf("serialize s.Param0 of type 'int': %w", err)
 	}
-	if err := e.VarInt(s.Param1_); err != nil {
-		return fmt.Errorf("serialize s.Param1_ of type 'int': %w", err)
+	if err := e.VarInt(s.Param1); err != nil {
+		return fmt.Errorf("serialize s.Param1 of type 'int': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIswapIntResp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.VarInt(&s.Param0_); err != nil {
-		return fmt.Errorf("deserialize s.Param0_ of type 'int': %w", err)
+	if err := d.VarInt(&s.Param0); err != nil {
+		return fmt.Errorf("deserialize s.Param0 of type 'int': %w", err)
 	}
-	if err := d.VarInt(&s.Param1_); err != nil {
-		return fmt.Errorf("deserialize s.Param1_ of type 'int': %w", err)
+	if err := d.VarInt(&s.Param1); err != nil {
+		return fmt.Errorf("deserialize s.Param1 of type 'int': %w", err)
 	}
 	return nil
 }
@@ -618,18 +618,18 @@ func (s *_Irpc_basicAPIsubUintReq) Deserialize(d *irpcgen.Decoder) error {
 }
 
 type _Irpc_basicAPIsubUintResp struct {
-	Param0_ uint
+	Param0 uint
 }
 
 func (s _Irpc_basicAPIsubUintResp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.UvarInt(s.Param0_); err != nil {
-		return fmt.Errorf("serialize s.Param0_ of type 'uint': %w", err)
+	if err := e.UvarInt(s.Param0); err != nil {
+		return fmt.Errorf("serialize s.Param0 of type 'uint': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIsubUintResp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.UvarInt(&s.Param0_); err != nil {
-		return fmt.Errorf("deserialize s.Param0_ of type 'uint': %w", err)
+	if err := d.UvarInt(&s.Param0); err != nil {
+		return fmt.Errorf("deserialize s.Param0 of type 'uint': %w", err)
 	}
 	return nil
 }
@@ -659,18 +659,18 @@ func (s *_Irpc_basicAPIaddInt8Req) Deserialize(d *irpcgen.Decoder) error {
 }
 
 type _Irpc_basicAPIaddInt8Resp struct {
-	Param0_ int8
+	Param0 int8
 }
 
 func (s _Irpc_basicAPIaddInt8Resp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.Int8(s.Param0_); err != nil {
-		return fmt.Errorf("serialize s.Param0_ of type 'int8': %w", err)
+	if err := e.Int8(s.Param0); err != nil {
+		return fmt.Errorf("serialize s.Param0 of type 'int8': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddInt8Resp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.Int8(&s.Param0_); err != nil {
-		return fmt.Errorf("deserialize s.Param0_ of type 'int8': %w", err)
+	if err := d.Int8(&s.Param0); err != nil {
+		return fmt.Errorf("deserialize s.Param0 of type 'int8': %w", err)
 	}
 	return nil
 }
@@ -700,18 +700,18 @@ func (s *_Irpc_basicAPIaddUint8Req) Deserialize(d *irpcgen.Decoder) error {
 }
 
 type _Irpc_basicAPIaddUint8Resp struct {
-	Param0_ uint8
+	Param0 uint8
 }
 
 func (s _Irpc_basicAPIaddUint8Resp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.Uint8(s.Param0_); err != nil {
-		return fmt.Errorf("serialize s.Param0_ of type 'uint8': %w", err)
+	if err := e.Uint8(s.Param0); err != nil {
+		return fmt.Errorf("serialize s.Param0 of type 'uint8': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddUint8Resp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.Uint8(&s.Param0_); err != nil {
-		return fmt.Errorf("deserialize s.Param0_ of type 'uint8': %w", err)
+	if err := d.Uint8(&s.Param0); err != nil {
+		return fmt.Errorf("deserialize s.Param0 of type 'uint8': %w", err)
 	}
 	return nil
 }
@@ -741,18 +741,18 @@ func (s *_Irpc_basicAPIaddInt16Req) Deserialize(d *irpcgen.Decoder) error {
 }
 
 type _Irpc_basicAPIaddInt16Resp struct {
-	Param0_ int16
+	Param0 int16
 }
 
 func (s _Irpc_basicAPIaddInt16Resp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.VarInt16(s.Param0_); err != nil {
-		return fmt.Errorf("serialize s.Param0_ of type 'int16': %w", err)
+	if err := e.VarInt16(s.Param0); err != nil {
+		return fmt.Errorf("serialize s.Param0 of type 'int16': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddInt16Resp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.VarInt16(&s.Param0_); err != nil {
-		return fmt.Errorf("deserialize s.Param0_ of type 'int16': %w", err)
+	if err := d.VarInt16(&s.Param0); err != nil {
+		return fmt.Errorf("deserialize s.Param0 of type 'int16': %w", err)
 	}
 	return nil
 }
@@ -782,18 +782,18 @@ func (s *_Irpc_basicAPIaddUint16Req) Deserialize(d *irpcgen.Decoder) error {
 }
 
 type _Irpc_basicAPIaddUint16Resp struct {
-	Param0_ uint16
+	Param0 uint16
 }
 
 func (s _Irpc_basicAPIaddUint16Resp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.UvarInt16(s.Param0_); err != nil {
-		return fmt.Errorf("serialize s.Param0_ of type 'uint16': %w", err)
+	if err := e.UvarInt16(s.Param0); err != nil {
+		return fmt.Errorf("serialize s.Param0 of type 'uint16': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddUint16Resp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.UvarInt16(&s.Param0_); err != nil {
-		return fmt.Errorf("deserialize s.Param0_ of type 'uint16': %w", err)
+	if err := d.UvarInt16(&s.Param0); err != nil {
+		return fmt.Errorf("deserialize s.Param0 of type 'uint16': %w", err)
 	}
 	return nil
 }
@@ -823,18 +823,18 @@ func (s *_Irpc_basicAPIaddInt32Req) Deserialize(d *irpcgen.Decoder) error {
 }
 
 type _Irpc_basicAPIaddInt32Resp struct {
-	Param0_ int32
+	Param0 int32
 }
 
 func (s _Irpc_basicAPIaddInt32Resp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.VarInt32(s.Param0_); err != nil {
-		return fmt.Errorf("serialize s.Param0_ of type 'int32': %w", err)
+	if err := e.VarInt32(s.Param0); err != nil {
+		return fmt.Errorf("serialize s.Param0 of type 'int32': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddInt32Resp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.VarInt32(&s.Param0_); err != nil {
-		return fmt.Errorf("deserialize s.Param0_ of type 'int32': %w", err)
+	if err := d.VarInt32(&s.Param0); err != nil {
+		return fmt.Errorf("deserialize s.Param0 of type 'int32': %w", err)
 	}
 	return nil
 }
@@ -864,18 +864,18 @@ func (s *_Irpc_basicAPIaddUint32Req) Deserialize(d *irpcgen.Decoder) error {
 }
 
 type _Irpc_basicAPIaddUint32Resp struct {
-	Param0_ uint32
+	Param0 uint32
 }
 
 func (s _Irpc_basicAPIaddUint32Resp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.UvarInt32(s.Param0_); err != nil {
-		return fmt.Errorf("serialize s.Param0_ of type 'uint32': %w", err)
+	if err := e.UvarInt32(s.Param0); err != nil {
+		return fmt.Errorf("serialize s.Param0 of type 'uint32': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddUint32Resp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.UvarInt32(&s.Param0_); err != nil {
-		return fmt.Errorf("deserialize s.Param0_ of type 'uint32': %w", err)
+	if err := d.UvarInt32(&s.Param0); err != nil {
+		return fmt.Errorf("deserialize s.Param0 of type 'uint32': %w", err)
 	}
 	return nil
 }
@@ -905,18 +905,18 @@ func (s *_Irpc_basicAPIaddInt64Req) Deserialize(d *irpcgen.Decoder) error {
 }
 
 type _Irpc_basicAPIaddInt64Resp struct {
-	Param0_ int64
+	Param0 int64
 }
 
 func (s _Irpc_basicAPIaddInt64Resp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.VarInt64(s.Param0_); err != nil {
-		return fmt.Errorf("serialize s.Param0_ of type 'int64': %w", err)
+	if err := e.VarInt64(s.Param0); err != nil {
+		return fmt.Errorf("serialize s.Param0 of type 'int64': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddInt64Resp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.VarInt64(&s.Param0_); err != nil {
-		return fmt.Errorf("deserialize s.Param0_ of type 'int64': %w", err)
+	if err := d.VarInt64(&s.Param0); err != nil {
+		return fmt.Errorf("deserialize s.Param0 of type 'int64': %w", err)
 	}
 	return nil
 }
@@ -946,18 +946,18 @@ func (s *_Irpc_basicAPIaddUint64Req) Deserialize(d *irpcgen.Decoder) error {
 }
 
 type _Irpc_basicAPIaddUint64Resp struct {
-	Param0_ uint64
+	Param0 uint64
 }
 
 func (s _Irpc_basicAPIaddUint64Resp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.UvarInt64(s.Param0_); err != nil {
-		return fmt.Errorf("serialize s.Param0_ of type 'uint64': %w", err)
+	if err := e.UvarInt64(s.Param0); err != nil {
+		return fmt.Errorf("serialize s.Param0 of type 'uint64': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddUint64Resp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.UvarInt64(&s.Param0_); err != nil {
-		return fmt.Errorf("deserialize s.Param0_ of type 'uint64': %w", err)
+	if err := d.UvarInt64(&s.Param0); err != nil {
+		return fmt.Errorf("deserialize s.Param0 of type 'uint64': %w", err)
 	}
 	return nil
 }
@@ -987,18 +987,18 @@ func (s *_Irpc_basicAPIaddFloat64Req) Deserialize(d *irpcgen.Decoder) error {
 }
 
 type _Irpc_basicAPIaddFloat64Resp struct {
-	Param0_ float64
+	Param0 float64
 }
 
 func (s _Irpc_basicAPIaddFloat64Resp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.Float64le(s.Param0_); err != nil {
-		return fmt.Errorf("serialize s.Param0_ of type 'float64': %w", err)
+	if err := e.Float64le(s.Param0); err != nil {
+		return fmt.Errorf("serialize s.Param0 of type 'float64': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddFloat64Resp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.Float64le(&s.Param0_); err != nil {
-		return fmt.Errorf("deserialize s.Param0_ of type 'float64': %w", err)
+	if err := d.Float64le(&s.Param0); err != nil {
+		return fmt.Errorf("deserialize s.Param0 of type 'float64': %w", err)
 	}
 	return nil
 }
@@ -1028,18 +1028,18 @@ func (s *_Irpc_basicAPIaddFloat32Req) Deserialize(d *irpcgen.Decoder) error {
 }
 
 type _Irpc_basicAPIaddFloat32Resp struct {
-	Param0_ float32
+	Param0 float32
 }
 
 func (s _Irpc_basicAPIaddFloat32Resp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.Float32le(s.Param0_); err != nil {
-		return fmt.Errorf("serialize s.Param0_ of type 'float32': %w", err)
+	if err := e.Float32le(s.Param0); err != nil {
+		return fmt.Errorf("serialize s.Param0 of type 'float32': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPIaddFloat32Resp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.Float32le(&s.Param0_); err != nil {
-		return fmt.Errorf("deserialize s.Param0_ of type 'float32': %w", err)
+	if err := d.Float32le(&s.Param0); err != nil {
+		return fmt.Errorf("deserialize s.Param0 of type 'float32': %w", err)
 	}
 	return nil
 }
@@ -1062,18 +1062,18 @@ func (s *_Irpc_basicAPItoUpperReq) Deserialize(d *irpcgen.Decoder) error {
 }
 
 type _Irpc_basicAPItoUpperResp struct {
-	Param0_ rune
+	Param0 rune
 }
 
 func (s _Irpc_basicAPItoUpperResp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.VarInt32(s.Param0_); err != nil {
-		return fmt.Errorf("serialize s.Param0_ of type 'int32': %w", err)
+	if err := e.VarInt32(s.Param0); err != nil {
+		return fmt.Errorf("serialize s.Param0 of type 'int32': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPItoUpperResp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.VarInt32(&s.Param0_); err != nil {
-		return fmt.Errorf("deserialize s.Param0_ of type 'int32': %w", err)
+	if err := d.VarInt32(&s.Param0); err != nil {
+		return fmt.Errorf("deserialize s.Param0 of type 'int32': %w", err)
 	}
 	return nil
 }
@@ -1096,18 +1096,18 @@ func (s *_Irpc_basicAPItoUpperStringReq) Deserialize(d *irpcgen.Decoder) error {
 }
 
 type _Irpc_basicAPItoUpperStringResp struct {
-	Param0_ string
+	Param0 string
 }
 
 func (s _Irpc_basicAPItoUpperStringResp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.String(s.Param0_); err != nil {
-		return fmt.Errorf("serialize s.Param0_ of type 'string': %w", err)
+	if err := e.String(s.Param0); err != nil {
+		return fmt.Errorf("serialize s.Param0 of type 'string': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPItoUpperStringResp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.String(&s.Param0_); err != nil {
-		return fmt.Errorf("deserialize s.Param0_ of type 'string': %w", err)
+	if err := d.String(&s.Param0); err != nil {
+		return fmt.Errorf("deserialize s.Param0 of type 'string': %w", err)
 	}
 	return nil
 }
@@ -1130,18 +1130,18 @@ func (s *_Irpc_basicAPInegBoolReq) Deserialize(d *irpcgen.Decoder) error {
 }
 
 type _Irpc_basicAPInegBoolResp struct {
-	Param0_ bool
+	Param0 bool
 }
 
 func (s _Irpc_basicAPInegBoolResp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.Bool(s.Param0_); err != nil {
-		return fmt.Errorf("serialize s.Param0_ of type 'bool': %w", err)
+	if err := e.Bool(s.Param0); err != nil {
+		return fmt.Errorf("serialize s.Param0 of type 'bool': %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicAPInegBoolResp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.Bool(&s.Param0_); err != nil {
-		return fmt.Errorf("deserialize s.Param0_ of type 'bool': %w", err)
+	if err := d.Bool(&s.Param0); err != nil {
+		return fmt.Errorf("deserialize s.Param0 of type 'bool': %w", err)
 	}
 	return nil
 }

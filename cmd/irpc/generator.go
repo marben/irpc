@@ -117,11 +117,11 @@ func (g generator) write(w io.Writer) error {
 
 type paramStructGenerator struct {
 	typeName string
-	params   []varField
+	params   []funcParam
 	imports  []string
 }
 
-func newParamStructGenerator(typeName string, params []varField) (paramStructGenerator, error) {
+func newParamStructGenerator(typeName string, params []funcParam) (paramStructGenerator, error) {
 	imports := newOrderedSet[string]()
 	for _, p := range params {
 		imports.add(p.enc.imports()...)
@@ -142,7 +142,7 @@ func (sg paramStructGenerator) code() string {
 			// we comment out context var as it is not filled anyway
 			sb.WriteString("//")
 		}
-		sb.WriteString(p.structFieldName() + " " + p.typeName() + "\n")
+		sb.WriteString(p.structFieldName + " " + p.typeName + "\n")
 	}
 	sb.WriteString("\n}\n")
 	sb.WriteString(sg.serializeFunc() + "\n")
@@ -160,7 +160,7 @@ func (sg paramStructGenerator) serializeFunc() string {
 	fmt.Fprintf(sb, "func (s %s)Serialize(e *irpcgen.Encoder) error {\n", sg.typeName)
 	if len(sg.params) > 0 {
 		for _, p := range sg.params {
-			sb.WriteString(p.enc.encode("s."+p.structFieldName(), nil))
+			sb.WriteString(p.enc.encode("s."+p.structFieldName, nil))
 		}
 	}
 	sb.WriteString("return nil\n}")
@@ -173,7 +173,7 @@ func (sg paramStructGenerator) deserializeFunc() string {
 	fmt.Fprintf(sb, "func (s *%s)Deserialize(d *irpcgen.Decoder) error {\n", sg.typeName)
 	if len(sg.params) > 0 {
 		for _, p := range sg.params {
-			sb.WriteString(p.enc.decode("s."+p.structFieldName(), nil))
+			sb.WriteString(p.enc.decode("s."+p.structFieldName, nil))
 		}
 	}
 	sb.WriteString("return nil\n}")
@@ -185,7 +185,19 @@ func (sg paramStructGenerator) deserializeFunc() string {
 func (sg paramStructGenerator) funcCallParams() string {
 	b := &strings.Builder{}
 	for i, v := range sg.params {
-		fmt.Fprintf(b, "%s %s", v.name(), v.typeName())
+		fmt.Fprintf(b, "%s %s", v.identifier, v.typeName)
+		if i != len(sg.params)-1 {
+			b.WriteString(",")
+		}
+	}
+	return b.String()
+}
+
+// like funcCallParams, but omit's param names, if they were not defined
+func (sg paramStructGenerator) returnParams() string {
+	b := &strings.Builder{}
+	for i, v := range sg.params {
+		fmt.Fprintf(b, "%s %s", v.name, v.typeName)
 		if i != len(sg.params)-1 {
 			b.WriteString(",")
 		}
@@ -200,7 +212,7 @@ func (sg paramStructGenerator) funcCallParams() string {
 func (sg paramStructGenerator) paramListPrefixed(prefix string) string {
 	sb := &strings.Builder{}
 	for i, p := range sg.params {
-		fmt.Fprintf(sb, "%s%s", prefix, p.structFieldName())
+		fmt.Fprintf(sb, "%s%s", prefix, p.structFieldName)
 		if i != len(sg.params)-1 {
 			sb.WriteString(",")
 		}
@@ -214,7 +226,7 @@ func (sg paramStructGenerator) isLastTypeError() bool {
 	}
 
 	last := sg.params[len(sg.params)-1]
-	return last.param.typ.String() == "error"
+	return last.typeName == "error"
 	// log.Printf("last type: %+v", last.param.typ.String())
 }
 
@@ -228,40 +240,68 @@ func (sg paramStructGenerator) encoders() []encoder {
 }
 
 // represents a variable in param struct which in turn represents function parameter/return value
-type varField struct {
-	param rpcParam
-	enc   encoder
-	q     types.Qualifier
+type funcParam struct {
+	name            string // original name as defined in the interface. can be ""
+	identifier      string // identifier we use for this field. it's either param.name or if there is none, we generate it
+	typeName        string
+	structFieldName string
+	enc             encoder
 }
 
-func newVarField(apiName string, p rpcParam, q types.Qualifier) (varField, error) {
+// requestParamNames contains all parameter names, including ours
+// if our parameter doesn't have a name, we will create one, making suere, we don't overlap with named parameters
+func newRequestParam(apiName string, p rpcParam, q types.Qualifier, requestParamNames map[string]struct{}) (funcParam, error) {
 	enc, err := varEncoder(apiName, p.typ, q)
 	if err != nil {
-		return varField{}, fmt.Errorf("param field for type '%s': %w", p.typeName(q), err)
+		return funcParam{}, fmt.Errorf("param field for type '%s': %w", p.typeName(q), err)
 	}
 
-	return varField{
-		param: p,
-		enc:   enc,
-		q:     q,
+	// figure out a unique id
+	id := p.name
+	if id == "" || id == "_" {
+		id = fmt.Sprintf("p%d", p.pos)
+		for {
+			if _, exists := requestParamNames[id]; exists {
+				id += "_"
+			} else {
+				break
+			}
+		}
+	}
+	requestParamNames[id] = struct{}{}
+
+	return funcParam{
+		name:            p.name,
+		identifier:      id,
+		typeName:        p.typeName(q),
+		enc:             enc,
+		structFieldName: fmt.Sprintf("Param%d_%s", p.pos, id),
 	}, nil
 }
 
-func (vf varField) structFieldName() string {
-	return fmt.Sprintf("Param%d_%s", vf.param.pos, vf.param.name)
-}
+func newResultParam(apiName string, p rpcParam, q types.Qualifier) (funcParam, error) {
+	enc, err := varEncoder(apiName, p.typ, q)
+	if err != nil {
+		return funcParam{}, fmt.Errorf("param field for type '%s': %w", p.typeName(q), err)
+	}
 
-func (vf varField) name() string {
-	return vf.param.name
-}
+	sFieldName := fmt.Sprintf("Param%d", p.pos)
+	if p.name != "" {
+		sFieldName += "_" + p.name
+	}
 
-func (vf varField) typeName() string {
-	return vf.param.typeName(vf.q)
+	return funcParam{
+		name:            p.name,
+		identifier:      p.name,
+		typeName:        p.typeName(q),
+		enc:             enc,
+		structFieldName: sFieldName,
+	}, nil
 }
 
 // returns true if field is of type context.Context
-func (vf varField) isContext() bool {
-	return vf.typeName() == "context.Context"
+func (vf funcParam) isContext() bool {
+	return vf.typeName == "context.Context"
 }
 
 type methodGenerator struct {
@@ -269,16 +309,24 @@ type methodGenerator struct {
 	index     int
 	req, resp paramStructGenerator
 	imports   []string
-	q         types.Qualifier
 	ctxVar    string // context used for method call (either there is context param, or we use context.Background() )
 }
 
 func newMethodGenerator(ifaceName string, index int, m rpcMethod, q types.Qualifier) (methodGenerator, error) {
 	imports := newOrderedSet[string]()
+
+	// REQUEST
 	reqStructTypeName := "_Irpc_" + ifaceName + m.name + "Req"
-	reqFields := []varField{}
+
+	reqFieldNames := make(map[string]struct{}, len(m.params))
+	for _, rf := range m.params {
+		// make sure this name is not allocated by another param id
+		reqFieldNames[rf.name] = struct{}{}
+	}
+
+	reqFields := []funcParam{}
 	for _, param := range m.params {
-		vf, err := newVarField(ifaceName, param, q)
+		vf, err := newRequestParam(ifaceName, param, q, reqFieldNames)
 		if err != nil {
 			return methodGenerator{}, fmt.Errorf("newVarField for param '%s': %w", param.name, err)
 		}
@@ -290,10 +338,11 @@ func newMethodGenerator(ifaceName string, index int, m rpcMethod, q types.Qualif
 	}
 	imports.add(req.imports...)
 
+	// RESPONSE
 	respStructTypeName := "_Irpc_" + ifaceName + m.name + "Resp"
-	respFields := []varField{}
+	respFields := []funcParam{}
 	for _, result := range m.results {
-		vf, err := newVarField(ifaceName, result, q)
+		vf, err := newResultParam(ifaceName, result, q)
 		if err != nil {
 			return methodGenerator{}, fmt.Errorf("newVarField for param '%s': %w", result.name, err)
 		}
@@ -312,7 +361,7 @@ func newMethodGenerator(ifaceName string, index int, m rpcMethod, q types.Qualif
 	// context
 	// we currently only support one or no context var
 	// multiple ctx vars could be combined, but it doesn't make much sense and i cannot be bothered atm
-	ctxParams := []varField{}
+	ctxParams := []funcParam{}
 	for _, p := range req.params {
 		if p.isContext() {
 			ctxParams = append(ctxParams, p)
@@ -323,7 +372,7 @@ func newMethodGenerator(ifaceName string, index int, m rpcMethod, q types.Qualif
 	case 0:
 		ctxVarName = "context.Background()"
 	case 1:
-		ctxVarName = ctxParams[0].name()
+		ctxVarName = ctxParams[0].identifier
 	default:
 		return methodGenerator{}, fmt.Errorf("%s - %s : cannot have more than one context parameter", ifaceName, m.name)
 	}
@@ -334,7 +383,6 @@ func newMethodGenerator(ifaceName string, index int, m rpcMethod, q types.Qualif
 		req:     req,
 		resp:    resp,
 		imports: imports.ordered,
-		q:       q,
 		ctxVar:  ctxVarName,
 	}, nil
 }
@@ -364,7 +412,7 @@ func (mg methodGenerator) requestParamsListPrefixed(prefix, ctxVarName string) s
 		if p.isContext() {
 			sb.WriteString(ctxVarName)
 		} else {
-			fmt.Fprintf(sb, "%s%s", prefix, p.structFieldName())
+			fmt.Fprintf(sb, "%s%s", prefix, p.structFieldName)
 		}
 		if i != len(mg.req.params) {
 			sb.WriteString(",")
@@ -509,7 +557,7 @@ func (cg clientGenerator) code() string {
 					// we skip contexts, as they are treated special
 					b.WriteString("// ")
 				}
-				fmt.Fprintf(b, "%s: %s,\n", p.structFieldName(), p.name())
+				fmt.Fprintf(b, "%s: %s,\n", p.structFieldName, p.identifier)
 			}
 			fmt.Fprintf(b, "}\n") // end struct assignment
 		}
@@ -533,7 +581,7 @@ func (cg clientGenerator) code() string {
 			fmt.Fprintf(b, "return ")
 			for i := 0; i < len(m.resp.params)-1; i++ {
 				p := m.resp.params[i]
-				fmt.Fprintf(b, "%s.%s,", "zero", p.structFieldName())
+				fmt.Fprintf(b, "%s.%s,", "zero", p.structFieldName)
 			}
 			fmt.Fprintf(b, "err\n")
 		} else {
@@ -544,7 +592,7 @@ func (cg clientGenerator) code() string {
 		// return values
 		fmt.Fprintf(b, "return ")
 		for i, f := range m.resp.params {
-			fmt.Fprintf(b, "%s.%s", respVarName, f.structFieldName())
+			fmt.Fprintf(b, "%s.%s", respVarName, f.structFieldName)
 			if i != len(m.resp.params)-1 {
 				fmt.Fprintf(b, ",")
 			}

@@ -83,9 +83,6 @@ func newRpcMethod(typesInfo *types.Info, astField *ast.Field) (rpcMethod, error)
 			return rpcMethod{}, fmt.Errorf("results list load for %s: %w", methodName, err)
 		}
 	}
-	// if err != nil {
-	// 	return rpcMethod{}, fmt.Errorf("results list load for %s: %w", methodName, err)
-	// }
 	return rpcMethod{name: methodName, astField: astField, params: params, results: results}, nil
 }
 

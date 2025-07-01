@@ -16,10 +16,14 @@ func TestEdgecases(t *testing.T) {
 
 	noReturnC := make(chan int, 1)
 	nothingAtAllC := make(chan int, 1)
+	unnamedIntParamC := make(chan int, 1)
+	mixedParamIdsC := make(chan int, 1)
 	remoteEp.RegisterService(newEdgeCasesIRpcService(edgeCasesImpl{
-		noReturnFunc:     func(i int) { noReturnC <- i },
-		noParamsFunc:     func() int { return 9 },
-		nothingAtAllFunc: func() { nothingAtAllC <- 12 },
+		noReturnFunc:        func(i int) { noReturnC <- i },
+		noParamsFunc:        func() int { return 9 },
+		nothingAtAllFunc:    func() { nothingAtAllC <- 12 },
+		unnamedIntParamFunc: func(i int) { unnamedIntParamC <- i },
+		mixedParamIdsFunc:   func(i int) { mixedParamIdsC <- i },
 	}))
 
 	c, err := newEdgeCasesIRpcClient(localEp)
@@ -42,5 +46,17 @@ func TestEdgecases(t *testing.T) {
 	nothingAtAllRes := <-nothingAtAllC
 	if nothingAtAllRes != 12 {
 		t.Fatalf("nothingAtAll(): %d", nothingAtAllRes)
+	}
+
+	c.unnamedIntParam(99)
+	unnamedIntParamRes := <-unnamedIntParamC
+	if unnamedIntParamRes != 99 {
+		t.Fatalf("unnamedIntParamRes: %d", unnamedIntParamRes)
+	}
+
+	c.mixedParamIds(4, 2, struct{ a int }{9})
+	mixedParamIdsRes := <-mixedParamIdsC
+	if mixedParamIdsRes != 15 {
+		t.Fatalf("mixedParamIdsRes: %d", mixedParamIdsRes)
 	}
 }

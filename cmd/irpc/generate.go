@@ -48,10 +48,10 @@ func generateStructConstructorName(structName string) string {
 
 // makes sure varname is unique among existing vars. extends it with enough "_" if necessary.
 // returns the new unique var name
-func generateUniqueVarname(varName string, existingVars []varField) string {
+func generateUniqueVarname(varName string, existingVars []funcParam) string {
 loop:
 	for _, vf := range existingVars {
-		if vf.name() == varName {
+		if vf.identifier == varName {
 			varName += "_"
 			goto loop
 		}
