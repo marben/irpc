@@ -1,5 +1,5 @@
-- test unnamed parameters (there is a commented out func in edgecases.go)
-- write named maps and other types. perhaps there is a common pattern and we can just have named encoder pattern?
+- can we encode unnamed interfaces?
+- indent service hash so it's in one nice block?
 - support aliases
 - get rid of .codeblock() in encoders, since almost none use it - we can make a separate interface for it
 - allow serialization/deserialization of types implementing encoding.BinaryMarshaller and AppendingMarshaller. this is supported by time.Time and few others

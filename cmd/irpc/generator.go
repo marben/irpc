@@ -324,15 +324,15 @@ func newMethodGenerator(ifaceName string, index int, m rpcMethod, q types.Qualif
 		reqFieldNames[rf.name] = struct{}{}
 	}
 
-	reqFields := []funcParam{}
+	reqParams := []funcParam{}
 	for _, param := range m.params {
-		vf, err := newRequestParam(ifaceName, param, q, reqFieldNames)
+		rp, err := newRequestParam(ifaceName, param, q, reqFieldNames)
 		if err != nil {
-			return methodGenerator{}, fmt.Errorf("newVarField for param '%s': %w", param.name, err)
+			return methodGenerator{}, fmt.Errorf("newRequestParam '%s': %w", param.name, err)
 		}
-		reqFields = append(reqFields, vf)
+		reqParams = append(reqParams, rp)
 	}
-	req, err := newParamStructGenerator(reqStructTypeName, reqFields)
+	req, err := newParamStructGenerator(reqStructTypeName, reqParams)
 	if err != nil {
 		return methodGenerator{}, fmt.Errorf("new req struct for method '%s': %w", m.name, err)
 	}
@@ -340,19 +340,19 @@ func newMethodGenerator(ifaceName string, index int, m rpcMethod, q types.Qualif
 
 	// RESPONSE
 	respStructTypeName := "_Irpc_" + ifaceName + m.name + "Resp"
-	respFields := []funcParam{}
+	respParams := []funcParam{}
 	for _, result := range m.results {
-		vf, err := newResultParam(ifaceName, result, q)
+		rp, err := newResultParam(ifaceName, result, q)
 		if err != nil {
-			return methodGenerator{}, fmt.Errorf("newVarField for param '%s': %w", result.name, err)
+			return methodGenerator{}, fmt.Errorf("newResultParam '%s': %w", result.name, err)
 		}
 		// we don't support returning context.Context
-		if vf.isContext() {
+		if rp.isContext() {
 			return methodGenerator{}, fmt.Errorf("unsupported context.Context as return value for varfiled: %s - %s", ifaceName, m.name)
 		}
-		respFields = append(respFields, vf)
+		respParams = append(respParams, rp)
 	}
-	resp, err := newParamStructGenerator(respStructTypeName, respFields)
+	resp, err := newParamStructGenerator(respStructTypeName, respParams)
 	if err != nil {
 		return methodGenerator{}, fmt.Errorf("new resp struct for method '%s': %w", m.name, err)
 	}

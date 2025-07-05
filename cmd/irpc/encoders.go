@@ -25,28 +25,28 @@ func varEncoder(apiName string, t types.Type, q types.Qualifier) (encoder, error
 	case *types.Struct:
 		return newStructEncoder(apiName, t, q)
 	case *types.Named:
-		switch t.String() {
-		case "context.Context": // we treat context special
+		name := types.TypeString(t, q) //t.Obj().Name()
+		if name == "context.Context" {
 			return contextEncoder{}, nil
-		default:
-			name := t.Obj().Name()
-			switch ut := t.Underlying().(type) {
-			case *types.Basic:
-				return newNamedBasicTypeEncoder(ut, name)
-			case *types.Struct:
-				return newStructEncoder(apiName, ut, q)
-			case *types.Interface:
-				return newInterfaceEncoder(name, apiName, ut, q)
-			case *types.Slice:
-				return newSliceEncoder(apiName, ut, q, name)
+		}
+		switch ut := t.Underlying().(type) {
+		case *types.Basic:
+			return newNamedBasicTypeEncoder(ut, name)
+		case *types.Slice:
+			return newSliceEncoder(apiName, ut, q, name)
+		case *types.Map:
+			return newMapEncoder(apiName, ut.Key(), ut.Elem(), q)
+		case *types.Struct:
+			return newStructEncoder(apiName, ut, q)
+		case *types.Interface:
+			return newInterfaceEncoder(name, apiName, ut, q)
 
-			default:
-				return nil, fmt.Errorf("unsupported named type: %T", ut)
-			}
+		default:
+			return nil, fmt.Errorf("unsupported named type: '%s'", name)
 		}
 
 	default:
-		return nil, fmt.Errorf("unsupported type '%T' of %s ", t, t)
+		return nil, fmt.Errorf("unsupported type '%v'", t)
 	}
 }
 

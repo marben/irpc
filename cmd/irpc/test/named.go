@@ -28,8 +28,9 @@ const (
 	Sunday2
 )
 
-type namedWeekDaysSliceType []weekDay
+type namedWeekDaysSliceType []weekDay2
 type namedByteSliceType []byte
+type namedMap map[int]float64
 
 //go:generate go run ../
 type namedTest interface {
@@ -40,11 +41,22 @@ type namedTest interface {
 	containsSaturday2(wds namedWeekDaysSliceType) bool
 
 	namedBytesSum(nb namedByteSliceType) int
+	namedMapSum(namedMap) float64
 }
 
 var _ namedTest = namedTestImpl{}
 
 type namedTestImpl struct {
+}
+
+// namedMapSum implements namedTest.
+func (e namedTestImpl) namedMapSum(nm namedMap) float64 {
+	var sum float64
+	for i, f := range nm {
+		sum += float64(i)
+		sum += f
+	}
+	return sum
 }
 
 // namedBytesSum implements enumTest.
@@ -70,5 +82,5 @@ func (e namedTestImpl) containsSaturday(wds []weekDay) bool {
 }
 
 func (e namedTestImpl) containsSaturday2(wds namedWeekDaysSliceType) bool {
-	return slices.Contains(wds, Saturday)
+	return slices.Contains(wds, Saturday2)
 }

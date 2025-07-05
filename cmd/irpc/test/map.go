@@ -1,7 +1,5 @@
 package irpctestpkg
 
-import "log"
-
 //go:generate go run ../
 
 type mapTest interface {
@@ -14,7 +12,6 @@ type mapTestImpl struct {
 }
 
 func (mt mapTestImpl) mapSum(in map[int]float64) (keysSum int, valsSum float64) {
-	log.Printf("inside mapSum implementation. map: %#v", in)
 	for k, v := range in {
 		keysSum += k
 		valsSum += v
@@ -23,7 +20,6 @@ func (mt mapTestImpl) mapSum(in map[int]float64) (keysSum int, valsSum float64) 
 }
 
 func (mt *mapTestImpl) sumStructs(in map[intStruct]intStruct) (keysSum, valsSum int) {
-	log.Printf("len in: %d", len(in))
 	var keySum, valSum int
 	for k, v := range in {
 		keySum += k.i + k.j + k.k + k.l
