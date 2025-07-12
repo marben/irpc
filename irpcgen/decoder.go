@@ -2,6 +2,7 @@ package irpcgen
 
 import (
 	"bufio"
+	"encoding"
 	"encoding/binary"
 	"fmt"
 	"io"
@@ -192,4 +193,12 @@ func (d *Decoder) String(dst *string) error {
 	}
 	*dst = string(bs)
 	return nil
+}
+
+func (d *Decoder) BinaryUnmarshaler(dst encoding.BinaryUnmarshaler) error {
+	var data []byte
+	if err := d.ByteSlice(&data); err != nil {
+		return err
+	}
+	return dst.UnmarshalBinary(data)
 }

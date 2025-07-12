@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"go/importer"
 	"go/types"
 	"strings"
 )
@@ -14,18 +15,55 @@ type encoder interface {
 	codeblock() string                                 // requested encoder's code block at top level
 }
 
-func varEncoder(apiName string, t types.Type, q types.Qualifier) (encoder, error) {
+type encoderResolver struct {
+	binMarshaler, binUnmarshaler *types.Interface
+	apiName                      string
+	qualifier                    types.Qualifier
+}
+
+func newEncoderResolver(apiName string, qualifier types.Qualifier) (*encoderResolver, error) {
+	imp := importer.Default()
+	encodingPkg, err := imp.Import("encoding")
+	if err != nil {
+		return nil, fmt.Errorf("importer.Import(\"encoding\"): %w", err)
+	}
+	binMarshaler, ok := encodingPkg.Scope().Lookup("BinaryMarshaler").Type().Underlying().(*types.Interface)
+	if !ok {
+		return nil, fmt.Errorf("failed to find encoding.BinaryMarshaller type")
+	}
+	binUnmarshaler, ok := encodingPkg.Scope().Lookup("BinaryUnmarshaler").Type().Underlying().(*types.Interface)
+	if !ok {
+		return nil, fmt.Errorf("failed to find encoding.BinaryUnmarshaller type")
+	}
+
+	return &encoderResolver{
+			binMarshaler:   binMarshaler,
+			binUnmarshaler: binUnmarshaler,
+			apiName:        apiName,
+			qualifier:      qualifier,
+		},
+		nil
+}
+
+func (er *encoderResolver) varEncoder(t types.Type) (encoder, error) {
+	if types.Implements(t, er.binMarshaler) {
+		if !types.Implements(types.NewPointer(t), er.binUnmarshaler) {
+			return nil, fmt.Errorf("%T implements BinaryMarshaler, but %T doesn't implement BinaryUnmarshaler", t, types.NewPointer(t))
+		}
+		return newBinaryMarshalerEncoder(t)
+	}
+
 	switch t := t.(type) {
 	case *types.Basic:
 		return newBasicTypeEncoder(t)
 	case *types.Slice:
-		return newSliceEncoder(apiName, t, q, "")
+		return er.newSliceEncoder(t, "")
 	case *types.Map:
-		return newMapEncoder(apiName, t.Key(), t.Elem(), q)
+		return er.newMapEncoder(t.Key(), t.Elem())
 	case *types.Struct:
-		return newStructEncoder(apiName, t, q)
+		return er.newStructEncoder(t)
 	case *types.Named:
-		name := types.TypeString(t, q) //t.Obj().Name()
+		name := types.TypeString(t, er.qualifier)
 		if name == "context.Context" {
 			return contextEncoder{}, nil
 		}
@@ -33,13 +71,13 @@ func varEncoder(apiName string, t types.Type, q types.Qualifier) (encoder, error
 		case *types.Basic:
 			return newNamedBasicTypeEncoder(ut, name)
 		case *types.Slice:
-			return newSliceEncoder(apiName, ut, q, name)
+			return er.newSliceEncoder(ut, name)
 		case *types.Map:
-			return newMapEncoder(apiName, ut.Key(), ut.Elem(), q)
+			return er.newMapEncoder(ut.Key(), ut.Elem())
 		case *types.Struct:
-			return newStructEncoder(apiName, ut, q)
+			return er.newStructEncoder(ut)
 		case *types.Interface:
-			return newInterfaceEncoder(name, apiName, ut, q)
+			return er.newInterfaceEncoder(name, ut)
 
 		default:
 			return nil, fmt.Errorf("unsupported named type: '%s'", name)
@@ -50,7 +88,7 @@ func varEncoder(apiName string, t types.Type, q types.Qualifier) (encoder, error
 	}
 }
 
-func newBasicTypeEncoder(t *types.Basic) (primitiveTypeEncoder, error) {
+func newBasicTypeEncoder(t *types.Basic) (directCallEncoder, error) {
 	switch t.Kind() {
 	case types.Bool:
 		return boolEncoder, nil
@@ -81,89 +119,70 @@ func newBasicTypeEncoder(t *types.Basic) (primitiveTypeEncoder, error) {
 	case types.String:
 		return stringEncoder, nil
 	default:
-		return primitiveTypeEncoder{}, fmt.Errorf("unsupported basic type '%s'", t.Name())
+		return directCallEncoder{}, fmt.Errorf("unsupported basic type '%s'", t.Name())
 	}
 }
 
-func newNamedBasicTypeEncoder(t *types.Basic, name string) (primitiveTypeEncoder, error) {
+func newBinaryMarshalerEncoder(t types.Type) (encoder, error) {
+	named, isNamed := t.(*types.Named)
+	if !isNamed {
+		return nil, fmt.Errorf("binMarshaller %T is not named", t)
+	}
+
+	// log.Printf("pkgname for %T is: %s", named, named.Obj().Pkg())
+
+	return directCallEncoder{
+		encFuncName:        "BinaryMarshaler",
+		decFuncName:        "BinaryUnmarshaler",
+		underlyingTypeName: "encoding.BinaryUnmarshaler", // todo: make encoding type/decoding type
+		imports_:           []string{named.Obj().Pkg().Name()},
+	}, nil
+}
+
+func newNamedBasicTypeEncoder(t *types.Basic, name string) (directCallEncoder, error) {
 	basicEnc, err := newBasicTypeEncoder(t)
 	if err != nil {
-		return primitiveTypeEncoder{}, fmt.Errorf("get basic type encoder for named type %s: %w", name, err)
+		return directCallEncoder{}, fmt.Errorf("get basic type encoder for named type %s: %w", name, err)
 	}
 	basicEnc.typeName = name
 	return basicEnc, nil
 }
 
+func newSymmetricDirectCallEncoder(encDecFunc string, underlyingTypeName string) directCallEncoder {
+	return directCallEncoder{
+		encFuncName:        encDecFunc,
+		decFuncName:        encDecFunc,
+		underlyingTypeName: underlyingTypeName,
+	}
+}
+
 var (
-	boolEncoder = primitiveTypeEncoder{ // todo: could use bitpacking instead of one bool per byte
-		decFuncName:        "Bool",
-		underlyingTypeName: "bool",
-	}
-	intEncoder = primitiveTypeEncoder{
-		decFuncName:        "VarInt",
-		underlyingTypeName: "int",
-	}
-	uintEncoder = primitiveTypeEncoder{
-		decFuncName:        "UvarInt",
-		underlyingTypeName: "uint",
-	}
-	int8Encoder = primitiveTypeEncoder{
-		decFuncName:        "Int8",
-		underlyingTypeName: "int8",
-	}
-	uint8Encoder = primitiveTypeEncoder{
-		decFuncName:        "Uint8",
-		underlyingTypeName: "uint8",
-	}
-	int16Encoder = primitiveTypeEncoder{
-		decFuncName:        "VarInt16",
-		underlyingTypeName: "int16",
-	}
-	uint16Encoder = primitiveTypeEncoder{
-		decFuncName:        "UvarInt16",
-		underlyingTypeName: "uint16",
-	}
-	int32Encoder = primitiveTypeEncoder{
-		decFuncName:        "VarInt32",
-		underlyingTypeName: "int32",
-	}
-	uint32Encoder = primitiveTypeEncoder{
-		decFuncName:        "UvarInt32",
-		underlyingTypeName: "uint32",
-	}
-	int64Encoder = primitiveTypeEncoder{
-		decFuncName:        "VarInt64",
-		underlyingTypeName: "int64",
-	}
-	uint64Encoder = primitiveTypeEncoder{
-		decFuncName:        "UvarInt64",
-		underlyingTypeName: "uint64",
-	}
-	float32Encoder = primitiveTypeEncoder{
-		decFuncName:        "Float32le",
-		underlyingTypeName: "float32",
-	}
-	float64Encoder = primitiveTypeEncoder{
-		decFuncName:        "Float64le",
-		underlyingTypeName: "float64",
-	}
-	stringEncoder = primitiveTypeEncoder{
-		decFuncName:        "String",
-		underlyingTypeName: "string",
-	}
-	byteSliceEncoder = primitiveTypeEncoder{
-		decFuncName:        "ByteSlice",
-		underlyingTypeName: "[]byte",
-	}
+	boolEncoder      = newSymmetricDirectCallEncoder("Bool", "bool")
+	intEncoder       = newSymmetricDirectCallEncoder("VarInt", "int")
+	uintEncoder      = newSymmetricDirectCallEncoder("UvarInt", "uint")
+	int8Encoder      = newSymmetricDirectCallEncoder("Int8", "int8")
+	uint8Encoder     = newSymmetricDirectCallEncoder("Uint8", "uint8")
+	int16Encoder     = newSymmetricDirectCallEncoder("VarInt16", "int16")
+	uint16Encoder    = newSymmetricDirectCallEncoder("UvarInt16", "uint16")
+	int32Encoder     = newSymmetricDirectCallEncoder("VarInt32", "int32")
+	uint32Encoder    = newSymmetricDirectCallEncoder("UvarInt32", "uint32")
+	int64Encoder     = newSymmetricDirectCallEncoder("VarInt64", "int64")
+	uint64Encoder    = newSymmetricDirectCallEncoder("UvarInt64", "uint64")
+	float32Encoder   = newSymmetricDirectCallEncoder("Float32le", "float32")
+	float64Encoder   = newSymmetricDirectCallEncoder("Float64le", "float64")
+	stringEncoder    = newSymmetricDirectCallEncoder("String", "string")
+	byteSliceEncoder = newSymmetricDirectCallEncoder("ByteSlice", "[]byte")
 )
 
-type primitiveTypeEncoder struct {
+type directCallEncoder struct {
+	encFuncName        string
 	decFuncName        string
 	underlyingTypeName string
 	typeName           string // if named, otherwise ""
+	imports_           []string
 }
 
-func (e primitiveTypeEncoder) encode(varId string, existingVars []string) string {
+func (e directCallEncoder) encode(varId string, existingVars []string) string {
 	var varParam string
 	if e.typeName == "" {
 		varParam = varId
@@ -174,10 +193,10 @@ func (e primitiveTypeEncoder) encode(varId string, existingVars []string) string
 	return fmt.Sprintf(`if err := e.%s(%s); err != nil {
 		return fmt.Errorf("serialize %s of type '%s': %%w", err)
 	}
-	`, e.decFuncName, varParam, varId, e.underlyingTypeName)
+	`, e.encFuncName, varParam, varId, e.underlyingTypeName)
 }
 
-func (e primitiveTypeEncoder) decode(varId string, existingVars []string) string {
+func (e directCallEncoder) decode(varId string, existingVars []string) string {
 	var varParam string
 	if e.typeName == "" {
 		varParam = "&" + varId
@@ -192,11 +211,11 @@ func (e primitiveTypeEncoder) decode(varId string, existingVars []string) string
 	return sb.String()
 }
 
-func (e primitiveTypeEncoder) imports() []string {
-	return []string{irpcGenImport, fmtImport}
+func (e directCallEncoder) imports() []string {
+	return append(e.imports_, irpcGenImport, fmtImport)
 }
 
-func (e primitiveTypeEncoder) codeblock() string {
+func (e directCallEncoder) codeblock() string {
 	return ""
 }
 
@@ -209,21 +228,21 @@ type sliceEncoder struct {
 }
 
 // name can be "", in which case no type conversion will happen
-func newSliceEncoder(apiName string, t *types.Slice, q types.Qualifier, name string) (encoder, error) {
+func (er *encoderResolver) newSliceEncoder(t *types.Slice, name string) (encoder, error) {
 	if t.Elem().String() == "byte" {
 		bs := byteSliceEncoder
 		bs.typeName = name
 		return bs, nil
 	}
 
-	elemEnc, err := varEncoder(apiName, t.Elem(), q)
+	elemEnc, err := er.varEncoder(t.Elem())
 	if err != nil {
 		return sliceEncoder{}, fmt.Errorf("unsupported slice underlying type %s: %w", t.Elem(), err)
 	}
 
 	return sliceEncoder{
 		elemEnc:     elemEnc,
-		elemTypeStr: types.TypeString(t.Elem(), q),
+		elemTypeStr: types.TypeString(t.Elem(), er.qualifier),
 		lenEnc:      uint64Encoder,
 	}, nil
 }
@@ -287,21 +306,21 @@ type mapEncoder struct {
 	lenEnc encoder
 }
 
-func newMapEncoder(apiName string, keyType, valType types.Type, q types.Qualifier) (mapEncoder, error) {
-	keyEnc, err := varEncoder(apiName, keyType, q)
+func (er *encoderResolver) newMapEncoder(keyType, valType types.Type) (mapEncoder, error) {
+	keyEnc, err := er.varEncoder(keyType)
 	if err != nil {
 		return mapEncoder{}, fmt.Errorf("unsupported map key type %s: %w", keyType, err)
 	}
 
-	valEnc, err := varEncoder(apiName, valType, q)
+	valEnc, err := er.varEncoder(valType)
 	if err != nil {
 		return mapEncoder{}, fmt.Errorf("unsupported map value type %s: %w", valType, err)
 	}
 	return mapEncoder{
 		keyEnc:     keyEnc,
-		keyTypeStr: types.TypeString(keyType, q),
+		keyTypeStr: types.TypeString(keyType, er.qualifier),
 		valEnc:     valEnc,
-		valTypeStr: types.TypeString(valType, q),
+		valTypeStr: types.TypeString(valType, er.qualifier),
 		lenEnc:     uint64Encoder,
 	}, nil
 }
@@ -373,11 +392,11 @@ type structEncoder struct {
 	fields []structField
 }
 
-func newStructEncoder(apiName string, s *types.Struct, q types.Qualifier) (structEncoder, error) {
+func (er *encoderResolver) newStructEncoder(s *types.Struct) (structEncoder, error) {
 	structFields := []structField{}
 	for i := 0; i < s.NumFields(); i++ {
 		f := s.Field(i)
-		enc, err := varEncoder(apiName, f.Type(), q)
+		enc, err := er.varEncoder(f.Type())
 		if err != nil {
 			return structEncoder{}, fmt.Errorf("cannot encode structs field '%s' of type '%s': %w", f.Name(), f.Type(), err)
 		}
@@ -463,7 +482,7 @@ type interfaceEncoder struct {
 	implTypeName string
 }
 
-func newInterfaceEncoder(name string, apiName string, it *types.Interface, q types.Qualifier) (interfaceEncoder, error) {
+func (er *encoderResolver) newInterfaceEncoder(name string, it *types.Interface) (interfaceEncoder, error) {
 	fncs := []ifaceFunc{}
 	for i := 0; i < it.NumMethods(); i++ {
 		m := it.Method(i)
@@ -476,7 +495,7 @@ func newInterfaceEncoder(name string, apiName string, it *types.Interface, q typ
 		results := []ifaceRtnVar{}
 		for i := 0; i < sig.Results().Len(); i++ {
 			r := sig.Results().At(i)
-			enc, err := varEncoder(apiName, r.Type(), q)
+			enc, err := er.varEncoder(r.Type())
 			if err != nil {
 				return interfaceEncoder{}, fmt.Errorf("newInterfaceEncoder: no encoder for %s of type %s: %w", r.Name(), r.Type(), err)
 			}
@@ -499,7 +518,7 @@ func newInterfaceEncoder(name string, apiName string, it *types.Interface, q typ
 		name: name,
 		// we need to make the type unique within package, because we want each file to be self contained
 		// it would be possible to use filename instead of apiName, but that would confuse file renaming. this will do for now
-		implTypeName: "_" + name + "_" + apiName + "_irpcInterfaceImpl",
+		implTypeName: "_" + name + "_" + er.apiName + "_irpcInterfaceImpl",
 		fncs:         fncs,
 	}, nil
 }

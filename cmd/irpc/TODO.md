@@ -1,3 +1,6 @@
+- BinaryAppender
+- try basic and nonbasic types derived from outside package
+- aliases?
 - can we encode unnamed interfaces?
 - indent service hash so it's in one nice block?
 - support aliases

@@ -34,7 +34,14 @@ func newGenFile(pkg string) *genFile {
 }
 
 func (gen *genFile) addImport(imp ...string) {
-	gen.imports.add(imp...)
+	for _, i := range imp {
+		// skip import of our own package
+		if i == gen.pkg {
+			continue
+		}
+
+		gen.imports.add(i)
+	}
 }
 
 func (gen *genFile) addUniqueBlock(block string) {

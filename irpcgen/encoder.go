@@ -2,6 +2,7 @@ package irpcgen
 
 import (
 	"bufio"
+	"encoding"
 	"encoding/binary"
 	"fmt"
 	"io"
@@ -113,4 +114,12 @@ func (e *Encoder) ByteSlice(v []byte) error {
 
 func (e *Encoder) String(v string) error {
 	return e.ByteSlice([]byte(v))
+}
+
+func (e *Encoder) BinaryMarshaler(bm encoding.BinaryMarshaler) error {
+	data, err := bm.MarshalBinary()
+	if err != nil {
+		return err
+	}
+	return e.ByteSlice(data)
 }

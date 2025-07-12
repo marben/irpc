@@ -250,8 +250,8 @@ type funcParam struct {
 
 // requestParamNames contains all parameter names, including ours
 // if our parameter doesn't have a name, we will create one, making suere, we don't overlap with named parameters
-func newRequestParam(apiName string, p rpcParam, q types.Qualifier, requestParamNames map[string]struct{}) (funcParam, error) {
-	enc, err := varEncoder(apiName, p.typ, q)
+func newRequestParam(p rpcParam, q types.Qualifier, requestParamNames map[string]struct{}, encResolver *encoderResolver) (funcParam, error) {
+	enc, err := encResolver.varEncoder(p.typ)
 	if err != nil {
 		return funcParam{}, fmt.Errorf("param field for type '%s': %w", p.typeName(q), err)
 	}
@@ -279,8 +279,8 @@ func newRequestParam(apiName string, p rpcParam, q types.Qualifier, requestParam
 	}, nil
 }
 
-func newResultParam(apiName string, p rpcParam, q types.Qualifier) (funcParam, error) {
-	enc, err := varEncoder(apiName, p.typ, q)
+func newResultParam(p rpcParam, q types.Qualifier, encResolver *encoderResolver) (funcParam, error) {
+	enc, err := encResolver.varEncoder(p.typ)
 	if err != nil {
 		return funcParam{}, fmt.Errorf("param field for type '%s': %w", p.typeName(q), err)
 	}
@@ -324,9 +324,14 @@ func newMethodGenerator(ifaceName string, index int, m rpcMethod, q types.Qualif
 		reqFieldNames[rf.name] = struct{}{}
 	}
 
+	encResolver, err := newEncoderResolver(ifaceName, q)
+	if err != nil {
+		return methodGenerator{}, fmt.Errorf("newEncoderResolver(): %w", err)
+	}
+
 	reqParams := []funcParam{}
 	for _, param := range m.params {
-		rp, err := newRequestParam(ifaceName, param, q, reqFieldNames)
+		rp, err := newRequestParam(param, q, reqFieldNames, encResolver)
 		if err != nil {
 			return methodGenerator{}, fmt.Errorf("newRequestParam '%s': %w", param.name, err)
 		}
@@ -342,7 +347,7 @@ func newMethodGenerator(ifaceName string, index int, m rpcMethod, q types.Qualif
 	respStructTypeName := "_Irpc_" + ifaceName + m.name + "Resp"
 	respParams := []funcParam{}
 	for _, result := range m.results {
-		rp, err := newResultParam(ifaceName, result, q)
+		rp, err := newResultParam(result, q, encResolver)
 		if err != nil {
 			return methodGenerator{}, fmt.Errorf("newResultParam '%s': %w", result.name, err)
 		}
@@ -430,7 +435,11 @@ type serviceGenerator struct {
 }
 
 func newServiceGenerator(serviceTypeName, ifaceTypeName string, methods []methodGenerator, serviceId []byte) (serviceGenerator, error) {
-	imports := []string{fmtImport, contextImport}
+	imports := []string{fmtImport}
+	if len(methods) > 0 {
+		// every FuncExecutor uses context
+		imports = append(imports, contextImport)
+	}
 
 	return serviceGenerator{
 		ifaceName:       ifaceTypeName,
