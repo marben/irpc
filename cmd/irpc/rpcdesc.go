@@ -5,6 +5,7 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
+	"path/filepath"
 
 	"golang.org/x/tools/go/packages"
 )
@@ -151,20 +152,55 @@ func newRpcParam(position int, name string, typ types.Type) (rpcParam, error) {
 }
 
 func (rp rpcParam) typeName(q types.Qualifier) string {
+	// log.Printf("type: %#v", rp.typ)
+	// log.Printf("string: %s", rp.typ.String())
+	// log.Printf("TypeString: %s", rp.typ.String())
 	return types.TypeString(rp.typ, q)
 }
 
+type importInfo struct {
+	importSpec *ast.ImportSpec // todo: remove, once we know what exactly we need
+	pkgName    *types.PkgName  // todo: remove, once we know what exactly we need
+}
+
+type importsList struct {
+	imports []importInfo
+}
+
+func (il *importsList) add(spec *ast.ImportSpec, pkgName *types.PkgName) {
+	il.imports = append(il.imports, importInfo{spec, pkgName})
+}
+
+func newImportsList() *importsList {
+	return &importsList{}
+}
+
 type rpcFileDesc struct {
-	filename string
-	pkg      *packages.Package
-	ifaces   []rpcInterface
+	filename    string
+	packageName string
+	packagePath string // our package path (within module) (not tested outside module)
+	ifaces      []rpcInterface
+	imports     *importsList
 }
 
 func loadRpcFileDesc(filename string) (rpcFileDesc, error) {
-	cfg := &packages.Config{
-		Mode: packages.NeedTypes | packages.NeedDeps | packages.NeedImports | packages.NeedSyntax | packages.NeedTypesInfo | packages.NeedFiles,
+	absFilePath, err := filepath.Abs(filename)
+	if err != nil {
+		return rpcFileDesc{}, fmt.Errorf("filepath.Abs(): %w", err)
 	}
-	packages, err := packages.Load(cfg, filename)
+
+	dir := filepath.Dir(absFilePath)
+
+	cfg := &packages.Config{
+		Mode: packages.NeedTypes | packages.NeedDeps | packages.NeedImports | packages.NeedSyntax | packages.NeedTypesInfo |
+			packages.NeedFiles | packages.NeedName | packages.NeedCompiledGoFiles | packages.NeedExportFile | packages.NeedSyntax |
+			packages.NeedModule,
+		Dir: dir,
+	}
+
+	// we need to load all the files in directory, otherwise we get "command-line-arguments" as pkg paths
+	// todo: maybe we need to use ./... or base it at the root of our module, to get all the deps? need to test/figure out
+	packages, err := packages.Load(cfg, ".")
 	if err != nil {
 		return rpcFileDesc{}, fmt.Errorf("packages.Load(): %w", err)
 	}
@@ -178,10 +214,17 @@ func loadRpcFileDesc(filename string) (rpcFileDesc, error) {
 
 	pkg := packages[0]
 
-	if len(pkg.Syntax) != 1 {
-		return rpcFileDesc{}, fmt.Errorf("unexpectedly %d ast syntax trees returned", len(pkg.Syntax))
+	fileAst, err := findASTForFile(pkg, filename)
+	if err != nil {
+		return rpcFileDesc{}, fmt.Errorf("couldn't find ast for given file %s", filename)
 	}
-	fileAst := pkg.Syntax[0]
+
+	imports := newImportsList()
+	for _, impSpec := range fileAst.Imports {
+		// todo: impSpec seems to have a value of 'name', which can be '.', nil etc...we should use it to make imports in generated files
+		pkgName := pkg.TypesInfo.PkgNameOf(impSpec)
+		imports.add(impSpec, pkgName)
+	}
 
 	ifaces, err := loadRpcInterfaces(fileAst, pkg.TypesInfo)
 	if err != nil {
@@ -189,15 +232,17 @@ func loadRpcFileDesc(filename string) (rpcFileDesc, error) {
 	}
 
 	return rpcFileDesc{
-		filename: filename,
-		pkg:      pkg,
-		ifaces:   ifaces,
+		filename:    filename,
+		packageName: pkg.Name,
+		packagePath: pkg.PkgPath,
+		ifaces:      ifaces,
+		imports:     imports,
 	}, nil
 }
 
-func (fd *rpcFileDesc) packageName() string {
-	return fd.pkg.Types.Name()
-}
+// func (fd *rpcFileDesc) packageName() string {
+// 	return fd.pkg.Name
+// }
 
 func loadRpcInterfaces(fileAst *ast.File, tInfo *types.Info) ([]rpcInterface, error) {
 	ifaces := []rpcInterface{}
@@ -235,4 +280,20 @@ func (fd *rpcFileDesc) print(q types.Qualifier) string {
 		s += i.print(q, "\t")
 	}
 	return s
+}
+
+func findASTForFile(pkg *packages.Package, targetFile string) (*ast.File, error) {
+	absTarget, err := filepath.Abs(targetFile)
+	if err != nil {
+		return nil, err
+	}
+
+	for i, f := range pkg.CompiledGoFiles {
+		absFile, _ := filepath.Abs(f)
+		if absFile == absTarget {
+			return pkg.Syntax[i], nil
+		}
+	}
+
+	return nil, fmt.Errorf("file %s not found in package", targetFile)
 }

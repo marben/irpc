@@ -1,10 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"flag"
 	"fmt"
-	"go/types"
 	"os"
 	"strings"
 )
@@ -41,6 +41,23 @@ func run() error {
 	return nil
 }
 
+func generateFile(fd rpcFileDesc, hash []byte) (string, error) {
+	gen, err := newGenerator(fd, hash)
+	if err != nil {
+		return "", fmt.Errorf("failed to create generator")
+	}
+	for _, iface := range fd.ifaces {
+		if err := gen.addInterface(iface); err != nil {
+			return "", fmt.Errorf("addInterface(%s):%w", iface.name(), err)
+		}
+	}
+
+	buf := bytes.NewBuffer(nil)
+	gen.write(buf)
+
+	return buf.String(), nil
+}
+
 func processInputFile(inputFile string) error {
 	fd, err := loadRpcFileDesc(inputFile)
 	if err != nil {
@@ -48,17 +65,16 @@ func processInputFile(inputFile string) error {
 	}
 	// fmt.Print(fd.print())
 
-	qualifier := types.RelativeTo(fd.pkg.Types)
-
-	noHashGen, err := newGenerator(fd, qualifier, nil)
+	unshashed, err := generateFile(fd, nil)
 	if err != nil {
-		return fmt.Errorf("newGenerator for file '%s': %w", inputFile, err)
+		return fmt.Errorf("genFile2(): %w", err)
 	}
 
-	fileHash := sha256.New()
-	noHashGen.write(fileHash)
+	hasher := sha256.New()
+	hasher.Write([]byte(unshashed))
+	hash := hasher.Sum(nil)
 
-	hashGen, err := newGenerator(fd, qualifier, fileHash.Sum(nil))
+	hashed, err := generateFile(fd, hash)
 	if err != nil {
 		return fmt.Errorf("hashed enerator for file %q: %w", inputFile, err)
 	}
@@ -75,8 +91,8 @@ func processInputFile(inputFile string) error {
 	}
 	defer outFile.Close()
 
-	if err := hashGen.write(outFile); err != nil {
-		return fmt.Errorf("generator write to '%s': %w", genFileName, err)
+	if _, err := outFile.Write([]byte(hashed)); err != nil {
+		return fmt.Errorf("write to file %q: %w", genFileName, err)
 	}
 
 	return nil

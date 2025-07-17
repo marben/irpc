@@ -10,67 +10,158 @@ import (
 )
 
 // id len specifies how long our service id's will be. currently the max is 32 bytes as we are using sha256 to generate them
-// actual id to negotiate between endpoints desn't have to be full lenght (atm it's only 4 bytes)
+// actual id to negotiate between endpoints desn't have to be full lenght (currently it's only 4 bytes)
 const idLen = 32
 
 type generator struct {
-	fd       rpcFileDesc
+	fd       rpcFileDesc // todo: get rid of?
+	fileHash []byte
 	services []serviceGenerator
 	clients  []clientGenerator
-	imports  []string
+	imports  orderedSet[string]
 	params   []paramStructGenerator
+	q        types.Qualifier
 }
 
 // if fileHash is nil, we generate service id with empty hash - this is only used during dry run (first run of generator)
-func newGenerator(fd rpcFileDesc, q types.Qualifier, fileHash []byte) (generator, error) {
-	imports := newOrderedSet[string]()
-	services := []serviceGenerator{}
-	clients := []clientGenerator{}
-	paramStructs := []paramStructGenerator{}
-	for _, iface := range fd.ifaces {
-		methods := []methodGenerator{}
-		for i, m := range iface.methods {
-			mg, err := newMethodGenerator(iface.name(), i, m, q)
-			if err != nil {
-				return generator{}, fmt.Errorf("method '%s' generator: %w", m.name, err)
-			}
-			methods = append(methods, mg)
-			imports.add(mg.imports...)
-			paramStructs = append(paramStructs, mg.req, mg.resp)
+func newGenerator(fd rpcFileDesc, fileHash []byte) (*generator, error) {
+	qf := func(pkg *types.Package) string {
+		// log.Printf("requested to qualify pkg: %q. path: %q", pkg.Name(), pkg.Path())
+		var name string
+		// if n, ok := fd.imports[pkg.Path()]; ok {
+		// 	log.Fatalf("pkg.Path(): %s -- %s", pkg.Path(), n)
+		// 	// return name
+		// 	name = n
+		// } else {
+		// 	name = pkg.Name()
+		// }
+		name = pkg.Name()
+		if name == fd.packageName {
+			name = ""
 		}
 
-		// we use empty hash when file hash was not provided - during the dry run
-		// this allows us to change idLen while keeping the common part of hash the same - not really useful but nice to have
-		serviceId := []byte{}
-		if fileHash != nil {
-			serviceId = generateServiceIdHash(fileHash, iface.name(), idLen)
-		}
-
-		sg, err := newServiceGenerator(iface.name()+"IRpcService", iface.name(), methods, serviceId)
-		if err != nil {
-			return generator{}, fmt.Errorf("service generator for iface: %s: %w", iface.name(), err)
-		}
-		services = append(services, sg)
-
-		cg, err := newClientGenerator(iface.name()+"IRpcClient", iface.name(), methods, serviceId)
-		if err != nil {
-			return generator{}, fmt.Errorf("client generator for iface: %s: %w", iface.name(), err)
-		}
-		clients = append(clients, cg)
+		return name
 	}
 
-	return generator{
+	return &generator{
 		fd:       fd,
-		services: services,
-		clients:  clients,
-		imports:  imports.ordered,
-		params:   paramStructs,
+		fileHash: fileHash,
+		imports:  newOrderedSet[string](),
+		q:        qf,
+	}, nil
+}
+
+func (g *generator) addInterface(iface rpcInterface) error {
+	methods := []methodGenerator{}
+	for i, m := range iface.methods {
+		mg, err := g.addMethod(iface.name(), i, m)
+		if err != nil {
+			return fmt.Errorf("method '%s' generator: %w", m.name, err)
+		}
+		methods = append(methods, mg)
+	}
+
+	// we use empty hash when file hash was not provided - during the dry run
+	// this allows us to change idLen while keeping the common part of hash the same - not really useful but nice to have
+	serviceId := []byte{}
+	if g.fileHash != nil {
+		serviceId = generateServiceIdHash(g.fileHash, iface.name(), idLen)
+	}
+
+	sg, err := newServiceGenerator(iface.name()+"IRpcService", iface.name(), methods, serviceId)
+	if err != nil {
+		return fmt.Errorf("service generator for iface: %s: %w", iface.name(), err)
+	}
+	g.services = append(g.services, sg)
+
+	cg, err := newClientGenerator(iface.name()+"IRpcClient", iface.name(), methods, serviceId)
+	if err != nil {
+		return fmt.Errorf("client generator for iface: %s: %w", iface.name(), err)
+	}
+	g.clients = append(g.clients, cg)
+	return nil
+}
+
+func (g *generator) addMethod(ifaceName string, index int, m rpcMethod) (methodGenerator, error) {
+	// REQUEST
+	reqStructTypeName := "_Irpc_" + ifaceName + m.name + "Req"
+
+	reqFieldNames := make(map[string]struct{}, len(m.params))
+	for _, rf := range m.params {
+		// make sure this name is not allocated by another param id
+		reqFieldNames[rf.name] = struct{}{}
+	}
+
+	encResolver, err := newEncoderResolver(ifaceName, g.q)
+	if err != nil {
+		return methodGenerator{}, fmt.Errorf("newEncoderResolver(): %w", err)
+	}
+
+	reqParams := []funcParam{}
+	for _, param := range m.params {
+		rp, err := g.newRequestParam(param, reqFieldNames, encResolver)
+		if err != nil {
+			return methodGenerator{}, fmt.Errorf("newRequestParam '%s': %w", param.name, err)
+		}
+		reqParams = append(reqParams, rp)
+	}
+	req, err := newParamStructGenerator(reqStructTypeName, reqParams)
+	if err != nil {
+		return methodGenerator{}, fmt.Errorf("new req struct for method '%s': %w", m.name, err)
+	}
+
+	// RESPONSE
+	respStructTypeName := "_Irpc_" + ifaceName + m.name + "Resp"
+	respParams := []funcParam{}
+	for _, result := range m.results {
+		rp, err := g.newResultParam(result, g.q, encResolver)
+		if err != nil {
+			return methodGenerator{}, fmt.Errorf("newResultParam '%s': %w", result.name, err)
+		}
+		// we don't support returning context.Context
+		if rp.isContext() {
+			return methodGenerator{}, fmt.Errorf("unsupported context.Context as return value for varfiled: %s - %s", ifaceName, m.name)
+		}
+		respParams = append(respParams, rp)
+	}
+	resp, err := newParamStructGenerator(respStructTypeName, respParams)
+	if err != nil {
+		return methodGenerator{}, fmt.Errorf("new resp struct for method '%s': %w", m.name, err)
+	}
+
+	// context
+	// we currently only support one or no context var
+	// multiple ctx vars could be combined, but it doesn't make much sense and i cannot be bothered atm
+	ctxParams := []funcParam{}
+	for _, p := range req.params {
+		if p.isContext() {
+			ctxParams = append(ctxParams, p)
+		}
+	}
+	var ctxVarName string
+	switch len(ctxParams) {
+	case 0:
+		ctxVarName = "context.Background()"
+	case 1:
+		ctxVarName = ctxParams[0].identifier
+	default:
+		return methodGenerator{}, fmt.Errorf("%s - %s : cannot have more than one context parameter", ifaceName, m.name)
+	}
+
+	g.params = append(g.params, req, resp)
+
+	return methodGenerator{
+		name:   m.name,
+		index:  index,
+		req:    req,
+		resp:   resp,
+		ctxVar: ctxVarName,
 	}, nil
 }
 
 func (g generator) write(w io.Writer) error {
-	genF := newGenFile(g.fd.packageName())
-	genF.addImport(g.imports...)
+	genF := newGenFile(g.fd.packageName)
+	genF.addImport(g.imports.ordered...)
 
 	// SERVICES
 	for _, service := range g.services {
@@ -118,19 +209,12 @@ func (g generator) write(w io.Writer) error {
 type paramStructGenerator struct {
 	typeName string
 	params   []funcParam
-	imports  []string
 }
 
 func newParamStructGenerator(typeName string, params []funcParam) (paramStructGenerator, error) {
-	imports := newOrderedSet[string]()
-	for _, p := range params {
-		imports.add(p.enc.imports()...)
-	}
-
 	return paramStructGenerator{
 		typeName: typeName,
 		params:   params,
-		imports:  imports.ordered,
 	}, nil
 }
 
@@ -248,12 +332,22 @@ type funcParam struct {
 	enc             encoder
 }
 
+func (g *generator) addImport(imps ...string) {
+	for _, imp := range imps {
+		if imp == g.fd.packagePath {
+			// we don't want to import our own directory
+			continue
+		}
+		g.imports.add(imp)
+	}
+}
+
 // requestParamNames contains all parameter names, including ours
 // if our parameter doesn't have a name, we will create one, making suere, we don't overlap with named parameters
-func newRequestParam(p rpcParam, q types.Qualifier, requestParamNames map[string]struct{}, encResolver *encoderResolver) (funcParam, error) {
+func (g *generator) newRequestParam(p rpcParam, requestParamNames map[string]struct{}, encResolver *encoderResolver) (funcParam, error) {
 	enc, err := encResolver.varEncoder(p.typ)
 	if err != nil {
-		return funcParam{}, fmt.Errorf("param field for type '%s': %w", p.typeName(q), err)
+		return funcParam{}, fmt.Errorf("param field for type '%s': %w", p.typeName(g.q), err)
 	}
 
 	// figure out a unique id
@@ -270,16 +364,18 @@ func newRequestParam(p rpcParam, q types.Qualifier, requestParamNames map[string
 	}
 	requestParamNames[id] = struct{}{}
 
+	g.addImport(enc.imports()...)
+
 	return funcParam{
 		name:            p.name,
 		identifier:      id,
-		typeName:        p.typeName(q),
+		typeName:        p.typeName(g.q),
 		enc:             enc,
 		structFieldName: fmt.Sprintf("Param%d_%s", p.pos, id),
 	}, nil
 }
 
-func newResultParam(p rpcParam, q types.Qualifier, encResolver *encoderResolver) (funcParam, error) {
+func (g *generator) newResultParam(p rpcParam, q types.Qualifier, encResolver *encoderResolver) (funcParam, error) {
 	enc, err := encResolver.varEncoder(p.typ)
 	if err != nil {
 		return funcParam{}, fmt.Errorf("param field for type '%s': %w", p.typeName(q), err)
@@ -289,6 +385,8 @@ func newResultParam(p rpcParam, q types.Qualifier, encResolver *encoderResolver)
 	if p.name != "" {
 		sFieldName += "_" + p.name
 	}
+
+	g.addImport(enc.imports()...)
 
 	return funcParam{
 		name:            p.name,
@@ -308,88 +406,7 @@ type methodGenerator struct {
 	name      string
 	index     int
 	req, resp paramStructGenerator
-	imports   []string
 	ctxVar    string // context used for method call (either there is context param, or we use context.Background() )
-}
-
-func newMethodGenerator(ifaceName string, index int, m rpcMethod, q types.Qualifier) (methodGenerator, error) {
-	imports := newOrderedSet[string]()
-
-	// REQUEST
-	reqStructTypeName := "_Irpc_" + ifaceName + m.name + "Req"
-
-	reqFieldNames := make(map[string]struct{}, len(m.params))
-	for _, rf := range m.params {
-		// make sure this name is not allocated by another param id
-		reqFieldNames[rf.name] = struct{}{}
-	}
-
-	encResolver, err := newEncoderResolver(ifaceName, q)
-	if err != nil {
-		return methodGenerator{}, fmt.Errorf("newEncoderResolver(): %w", err)
-	}
-
-	reqParams := []funcParam{}
-	for _, param := range m.params {
-		rp, err := newRequestParam(param, q, reqFieldNames, encResolver)
-		if err != nil {
-			return methodGenerator{}, fmt.Errorf("newRequestParam '%s': %w", param.name, err)
-		}
-		reqParams = append(reqParams, rp)
-	}
-	req, err := newParamStructGenerator(reqStructTypeName, reqParams)
-	if err != nil {
-		return methodGenerator{}, fmt.Errorf("new req struct for method '%s': %w", m.name, err)
-	}
-	imports.add(req.imports...)
-
-	// RESPONSE
-	respStructTypeName := "_Irpc_" + ifaceName + m.name + "Resp"
-	respParams := []funcParam{}
-	for _, result := range m.results {
-		rp, err := newResultParam(result, q, encResolver)
-		if err != nil {
-			return methodGenerator{}, fmt.Errorf("newResultParam '%s': %w", result.name, err)
-		}
-		// we don't support returning context.Context
-		if rp.isContext() {
-			return methodGenerator{}, fmt.Errorf("unsupported context.Context as return value for varfiled: %s - %s", ifaceName, m.name)
-		}
-		respParams = append(respParams, rp)
-	}
-	resp, err := newParamStructGenerator(respStructTypeName, respParams)
-	if err != nil {
-		return methodGenerator{}, fmt.Errorf("new resp struct for method '%s': %w", m.name, err)
-	}
-	imports.add(resp.imports...)
-
-	// context
-	// we currently only support one or no context var
-	// multiple ctx vars could be combined, but it doesn't make much sense and i cannot be bothered atm
-	ctxParams := []funcParam{}
-	for _, p := range req.params {
-		if p.isContext() {
-			ctxParams = append(ctxParams, p)
-		}
-	}
-	var ctxVarName string
-	switch len(ctxParams) {
-	case 0:
-		ctxVarName = "context.Background()"
-	case 1:
-		ctxVarName = ctxParams[0].identifier
-	default:
-		return methodGenerator{}, fmt.Errorf("%s - %s : cannot have more than one context parameter", ifaceName, m.name)
-	}
-
-	return methodGenerator{
-		name:    m.name,
-		index:   index,
-		req:     req,
-		resp:    resp,
-		imports: imports.ordered,
-		ctxVar:  ctxVarName,
-	}, nil
 }
 
 func (mg methodGenerator) executorFuncCode() string {

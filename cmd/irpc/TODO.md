@@ -1,8 +1,11 @@
-- BinaryAppender
+- alias imports (test on outside pkg test)
 - try basic and nonbasic types derived from outside package
 - aliases?
+- dot imports
+- BinaryAppender
 - can we encode unnamed interfaces?
 - indent service hash so it's in one nice block?
+- test named types outside of module
 - support aliases
 - get rid of .codeblock() in encoders, since almost none use it - we can make a separate interface for it
 - allow serialization/deserialization of types implementing encoding.BinaryMarshaller and AppendingMarshaller. this is supported by time.Time and few others

@@ -67,9 +67,10 @@ func (er *encoderResolver) varEncoder(t types.Type) (encoder, error) {
 		if name == "context.Context" {
 			return contextEncoder{}, nil
 		}
+		// log.Printf("named type %q with pkg name %q nad path %q", t.Obj().Name(), t.Obj().Pkg().Name(), t.Obj().Pkg().Path())
 		switch ut := t.Underlying().(type) {
 		case *types.Basic:
-			return newNamedBasicTypeEncoder(ut, name)
+			return newNamedBasicTypeEncoder(t, ut, name)
 		case *types.Slice:
 			return er.newSliceEncoder(ut, name)
 		case *types.Map:
@@ -139,12 +140,16 @@ func newBinaryMarshalerEncoder(t types.Type) (encoder, error) {
 	}, nil
 }
 
-func newNamedBasicTypeEncoder(t *types.Basic, name string) (directCallEncoder, error) {
+func newNamedBasicTypeEncoder(n *types.Named, t *types.Basic, name string) (directCallEncoder, error) {
 	basicEnc, err := newBasicTypeEncoder(t)
 	if err != nil {
 		return directCallEncoder{}, fmt.Errorf("get basic type encoder for named type %s: %w", name, err)
 	}
 	basicEnc.typeName = name
+	if pkg := n.Obj().Pkg(); pkg != nil {
+		// log.Printf("type %T of typename %q has pkg %s", t, basicEnc.typeName, pkg)
+		basicEnc.imports_ = append(basicEnc.imports_, pkg.Path())
+	}
 	return basicEnc, nil
 }
 
