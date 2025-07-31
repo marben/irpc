@@ -11,7 +11,6 @@ import (
 type encoder interface {
 	encode(varId string, existingVars []string) string // inline variable encode
 	decode(varId string, existingVars []string) string // inline variable decode
-	imports() []string                                 // necessary imports
 	codeblock() string                                 // requested encoder's code block at top level
 }
 
@@ -19,9 +18,11 @@ type encoderResolver struct {
 	binMarshaler, binUnmarshaler *types.Interface
 	apiName                      string
 	qualifier                    types.Qualifier
+	imports                      orderedSet[importSpec]
+	typesInfo                    *types.Info
 }
 
-func newEncoderResolver(apiName string, qualifier types.Qualifier) (*encoderResolver, error) {
+func newEncoderResolver(apiName string, qualifier types.Qualifier, typesInfo *types.Info) (*encoderResolver, error) {
 	imp := importer.Default()
 	encodingPkg, err := imp.Import("encoding")
 	if err != nil {
@@ -41,6 +42,8 @@ func newEncoderResolver(apiName string, qualifier types.Qualifier) (*encoderReso
 			binUnmarshaler: binUnmarshaler,
 			apiName:        apiName,
 			qualifier:      qualifier,
+			imports:        newOrderedSet[importSpec](),
+			typesInfo:      typesInfo,
 		},
 		nil
 }
@@ -50,12 +53,12 @@ func (er *encoderResolver) varEncoder(t types.Type) (encoder, error) {
 		if !types.Implements(types.NewPointer(t), er.binUnmarshaler) {
 			return nil, fmt.Errorf("%T implements BinaryMarshaler, but %T doesn't implement BinaryUnmarshaler", t, types.NewPointer(t))
 		}
-		return newBinaryMarshalerEncoder(t)
+		return er.newBinaryMarshalerEncoder(t)
 	}
 
 	switch t := t.(type) {
 	case *types.Basic:
-		return newBasicTypeEncoder(t)
+		return er.newBasicTypeEncoder(t)
 	case *types.Slice:
 		return er.newSliceEncoder(t, "")
 	case *types.Map:
@@ -70,7 +73,7 @@ func (er *encoderResolver) varEncoder(t types.Type) (encoder, error) {
 		// log.Printf("named type %q with pkg name %q nad path %q", t.Obj().Name(), t.Obj().Pkg().Name(), t.Obj().Pkg().Path())
 		switch ut := t.Underlying().(type) {
 		case *types.Basic:
-			return newNamedBasicTypeEncoder(t, ut, name)
+			return er.newNamedBasicTypeEncoder(t, ut, name)
 		case *types.Slice:
 			return er.newSliceEncoder(ut, name)
 		case *types.Map:
@@ -89,7 +92,8 @@ func (er *encoderResolver) varEncoder(t types.Type) (encoder, error) {
 	}
 }
 
-func newBasicTypeEncoder(t *types.Basic) (directCallEncoder, error) {
+func (er *encoderResolver) newBasicTypeEncoder(t *types.Basic) (directCallEncoder, error) {
+	er.imports.add(irpcGenImport, fmtImport)
 	switch t.Kind() {
 	case types.Bool:
 		return boolEncoder, nil
@@ -124,32 +128,27 @@ func newBasicTypeEncoder(t *types.Basic) (directCallEncoder, error) {
 	}
 }
 
-func newBinaryMarshalerEncoder(t types.Type) (encoder, error) {
+func (er *encoderResolver) newBinaryMarshalerEncoder(t types.Type) (encoder, error) {
 	named, isNamed := t.(*types.Named)
 	if !isNamed {
 		return nil, fmt.Errorf("binMarshaller %T is not named", t)
 	}
 
-	// log.Printf("pkgname for %T is: %s", named, named.Obj().Pkg())
+	er.imports.add(newImportSpec("", named.Obj().Pkg()))
 
 	return directCallEncoder{
 		encFuncName:        "BinaryMarshaler",
 		decFuncName:        "BinaryUnmarshaler",
 		underlyingTypeName: "encoding.BinaryUnmarshaler", // todo: make encoding type/decoding type
-		imports_:           []string{named.Obj().Pkg().Name()},
 	}, nil
 }
 
-func newNamedBasicTypeEncoder(n *types.Named, t *types.Basic, name string) (directCallEncoder, error) {
-	basicEnc, err := newBasicTypeEncoder(t)
+func (er *encoderResolver) newNamedBasicTypeEncoder(n *types.Named, t *types.Basic, name string) (directCallEncoder, error) {
+	basicEnc, err := er.newBasicTypeEncoder(t)
 	if err != nil {
 		return directCallEncoder{}, fmt.Errorf("get basic type encoder for named type %s: %w", name, err)
 	}
 	basicEnc.typeName = name
-	if pkg := n.Obj().Pkg(); pkg != nil {
-		// log.Printf("type %T of typename %q has pkg %s", t, basicEnc.typeName, pkg)
-		basicEnc.imports_ = append(basicEnc.imports_, pkg.Path())
-	}
 	return basicEnc, nil
 }
 
@@ -179,12 +178,20 @@ var (
 	byteSliceEncoder = newSymmetricDirectCallEncoder("ByteSlice", "[]byte")
 )
 
+type importSpec struct {
+	alias string
+	path  string
+}
+
+func newImportSpec(alias string, pkg *types.Package) importSpec {
+	return importSpec{alias: alias, path: pkg.Path()}
+}
+
 type directCallEncoder struct {
 	encFuncName        string
 	decFuncName        string
 	underlyingTypeName string
 	typeName           string // if named, otherwise ""
-	imports_           []string
 }
 
 func (e directCallEncoder) encode(varId string, existingVars []string) string {
@@ -214,10 +221,6 @@ func (e directCallEncoder) decode(varId string, existingVars []string) string {
 	}
 	`, e.decFuncName, varParam, varId, e.underlyingTypeName)
 	return sb.String()
-}
-
-func (e directCallEncoder) imports() []string {
-	return append(e.imports_, irpcGenImport, fmtImport)
 }
 
 func (e directCallEncoder) codeblock() string {
@@ -291,10 +294,6 @@ func (e sliceEncoder) decode(varId string, existingVars []string) string {
 	sb.WriteString("}\n")
 
 	return sb.String()
-}
-
-func (e sliceEncoder) imports() []string {
-	return append(e.elemEnc.imports(), e.lenEnc.imports()...)
 }
 
 func (e sliceEncoder) codeblock() string {
@@ -380,10 +379,6 @@ func (e mapEncoder) decode(varId string, existingVars []string) string {
 	return sb.String()
 }
 
-func (e mapEncoder) imports() []string {
-	return append(e.keyEnc.imports(), e.valEnc.imports()...)
-}
-
 func (e mapEncoder) codeblock() string {
 	return ""
 }
@@ -429,14 +424,6 @@ func (e structEncoder) decode(varId string, existingVars []string) string {
 		sb.WriteString(f.enc.decode(varId+"."+f.name, existingVars))
 	}
 	return sb.String()
-}
-
-func (e structEncoder) imports() []string {
-	imps := newOrderedSet[string]()
-	for _, f := range e.fields {
-		imps.add(f.enc.imports()...)
-	}
-	return imps.ordered
 }
 
 func (e structEncoder) codeblock() string {
@@ -583,16 +570,6 @@ func (e interfaceEncoder) decode(varId string, existingVars []string) string {
 	return sb.String()
 }
 
-func (e interfaceEncoder) imports() []string {
-	imps := newOrderedSet[string]()
-	for _, f := range e.fncs {
-		for _, v := range f.results {
-			imps.add(v.enc.imports()...)
-		}
-	}
-	return imps.ordered
-}
-
 func (e interfaceEncoder) codeblock() string {
 	sb := &strings.Builder{}
 
@@ -635,9 +612,4 @@ func (c contextEncoder) decode(varId string, existingVars []string) string {
 // encode implements encoder.
 func (c contextEncoder) encode(varId string, existingVars []string) string {
 	return "// no code for context encoding\n"
-}
-
-// imports implements encoder.
-func (c contextEncoder) imports() []string {
-	return []string{contextImport}
 }

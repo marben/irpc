@@ -100,7 +100,7 @@ func (m rpcMethod) print(q types.Qualifier) string {
 func printParamList(q types.Qualifier, list []rpcParam) string {
 	s := ""
 	for i, p := range list {
-		s += fmt.Sprintf("%s %s", p.name, p.typeName(q))
+		s += fmt.Sprintf("%s %s", p.name, p.tDesc.TypeName)
 		if i != len(list)-1 {
 			s += ","
 		}
@@ -111,21 +111,32 @@ func printParamList(q types.Qualifier, list []rpcParam) string {
 func loadRpcParamList(typesInfo *types.Info, list []*ast.Field) ([]rpcParam, error) {
 	params := []rpcParam{}
 	for pos, field := range list {
+		// try to get qualifier, if there is one
+		var qualifier string
+		if selExpr, ok := field.Type.(*ast.SelectorExpr); ok {
+			if ident, ok := selExpr.X.(*ast.Ident); ok {
+				qualifier = ident.Name
+			}
+
+		}
+
 		tv, ok := typesInfo.Types[field.Type]
 		if !ok {
 			fmt.Printf("couldn't determine fileld's %v type and value", field)
 			continue
 		}
+
 		if field.Names == nil {
 			// parameter doesn't have name, just a type (typically function returns)
-			param, err := newRpcParam(pos, "", tv.Type)
+			param, err := newRpcParam(pos, "", tv.Type, qualifier)
 			if err != nil {
 				return nil, fmt.Errorf("newRpcParam on pos %d: %w", pos, err)
 			}
 			params = append(params, param)
 		} else {
 			for _, name := range field.Names {
-				param, err := newRpcParam(pos, name.Name, tv.Type)
+				// obj := typesInfo.ObjectOf(name)
+				param, err := newRpcParam(pos, name.Name, tv.Type, qualifier)
 				if err != nil {
 					return nil, fmt.Errorf("newRpcParam on pos %d: %w", pos, err)
 				}
@@ -138,24 +149,41 @@ func loadRpcParamList(typesInfo *types.Info, list []*ast.Field) ([]rpcParam, err
 
 // represents function parameters/return value
 type rpcParam struct {
-	pos  int // position in field
-	name string
-	typ  types.Type
+	pos   int // position in field
+	name  string
+	imp   *importSpec
+	tDesc typeDesc
 }
 
-func newRpcParam(position int, name string, typ types.Type) (rpcParam, error) {
+func newRpcParam(position int, name string, typ types.Type, qualifier string) (rpcParam, error) {
+	// log.Printf("creating rpcParam with object: %+v", object)
+	tDesc, err := newTypeDesc(typ, qualifier)
+	if err != nil {
+		return rpcParam{}, fmt.Errorf("newTypeDesc(): %w", err)
+	}
+
+	var imp *importSpec
+	if named, ok := typ.(*types.Named); ok {
+		if ok {
+			obj := named.Obj()
+			if pkg := obj.Pkg(); pkg != nil {
+				// we skip the pkg alias, if it's not needed
+				var alias string
+				if qualifier != pkg.Name() {
+					alias = qualifier
+				}
+
+				imp = &importSpec{alias: alias, path: pkg.Path()}
+			}
+		}
+	}
+
 	return rpcParam{
-		pos:  position,
-		name: name,
-		typ:  typ,
+		pos:   position,
+		name:  name,
+		imp:   imp,
+		tDesc: tDesc,
 	}, nil
-}
-
-func (rp rpcParam) typeName(q types.Qualifier) string {
-	// log.Printf("type: %#v", rp.typ)
-	// log.Printf("string: %s", rp.typ.String())
-	// log.Printf("TypeString: %s", rp.typ.String())
-	return types.TypeString(rp.typ, q)
 }
 
 type importInfo struct {
@@ -163,16 +191,30 @@ type importInfo struct {
 	pkgName    *types.PkgName  // todo: remove, once we know what exactly we need
 }
 
+func (iif importInfo) Path() string {
+	return iif.pkgName.Imported().Path()
+}
+
+func (iif importInfo) Alias() string {
+	return iif.importSpec.Name.Name
+}
+
+func (iif importInfo) String() string {
+	return fmt.Sprintf("importSpec.Name: %q, importSpec.Path: %q, pkgName.Name: %q, pkgName.Imported.Path: %q, pkgName.Pkg().Path(): %q",
+		iif.importSpec.Name.Name, iif.importSpec.Path.Value, iif.pkgName.Name(), iif.pkgName.Imported().Path(), iif.pkgName.Pkg().Path())
+}
+
 type importsList struct {
 	imports []importInfo
 }
 
-func (il *importsList) add(spec *ast.ImportSpec, pkgName *types.PkgName) {
-	il.imports = append(il.imports, importInfo{spec, pkgName})
-}
-
 func newImportsList() *importsList {
 	return &importsList{}
+}
+
+func (il *importsList) add(spec *ast.ImportSpec, pkgName *types.PkgName) {
+	iif := importInfo{spec, pkgName}
+	il.imports = append(il.imports, iif)
 }
 
 type rpcFileDesc struct {
@@ -181,6 +223,7 @@ type rpcFileDesc struct {
 	packagePath string // our package path (within module) (not tested outside module)
 	ifaces      []rpcInterface
 	imports     *importsList
+	typesInfo   *types.Info // todo: needed? can we pass everything in our own types?
 }
 
 func loadRpcFileDesc(filename string) (rpcFileDesc, error) {
@@ -237,12 +280,9 @@ func loadRpcFileDesc(filename string) (rpcFileDesc, error) {
 		packagePath: pkg.PkgPath,
 		ifaces:      ifaces,
 		imports:     imports,
+		typesInfo:   pkg.TypesInfo,
 	}, nil
 }
-
-// func (fd *rpcFileDesc) packageName() string {
-// 	return fd.pkg.Name
-// }
 
 func loadRpcInterfaces(fileAst *ast.File, tInfo *types.Info) ([]rpcInterface, error) {
 	ifaces := []rpcInterface{}

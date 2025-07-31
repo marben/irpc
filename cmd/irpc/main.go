@@ -5,9 +5,14 @@ import (
 	"crypto/sha256"
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 )
+
+func init() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+}
 
 func main() {
 	if err := run(); err != nil {
@@ -42,7 +47,7 @@ func run() error {
 }
 
 func generateFile(fd rpcFileDesc, hash []byte) (string, error) {
-	gen, err := newGenerator(fd, hash)
+	gen, err := newGenerator(fd, hash, fd.typesInfo)
 	if err != nil {
 		return "", fmt.Errorf("failed to create generator")
 	}

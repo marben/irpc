@@ -8,15 +8,10 @@ import (
 	"unicode"
 )
 
-const (
-	irpcImport    = "github.com/marben/irpc"
-	irpcGenImport = "github.com/marben/irpc/irpcgen"
-	binaryImport  = "encoding/binary"
-	fmtImport     = "fmt"
-	ioImport      = "io"
-	bytesImport   = "bytes"
-	mathImport    = "math"
-	contextImport = "context"
+var (
+	irpcGenImport = importSpec{path: "github.com/marben/irpc/irpcgen"}
+	fmtImport     = importSpec{path: "fmt"} // todo: figure out the imports with importer, like we do with binmarshaller?
+	contextImport = importSpec{path: "context"}
 )
 
 // generates unique service hash based on generated code's hash (without the hash;) and service name
