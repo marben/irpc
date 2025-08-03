@@ -5,9 +5,14 @@ import (
 	"crypto/sha256"
 	"flag"
 	"fmt"
+	"go/ast"
+	"go/token"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
+
+	"golang.org/x/tools/go/packages"
 )
 
 func init() {
@@ -46,14 +51,70 @@ func run() error {
 	return nil
 }
 
-func generateFile(fd rpcFileDesc, hash []byte) (string, error) {
-	gen, err := newGenerator(fd, hash, fd.typesInfo)
+func generateFile(filename string, hash []byte) (string, error) {
+	absFilePath, err := filepath.Abs(filename)
+	if err != nil {
+		return "", fmt.Errorf("filepath.Abs(): %w", err)
+	}
+
+	dir := filepath.Dir(absFilePath)
+
+	cfg := &packages.Config{
+		Mode: packages.NeedTypes | packages.NeedDeps | packages.NeedImports | packages.NeedSyntax | packages.NeedTypesInfo |
+			packages.NeedFiles | packages.NeedName | packages.NeedCompiledGoFiles | packages.NeedExportFile | packages.NeedSyntax |
+			packages.NeedModule,
+		Dir: dir,
+	}
+
+	// we need to load all the files in directory, otherwise we get "command-line-arguments" as pkg paths
+	// todo: maybe we need to use ./... or base it at the root of our module, to get all the deps? need to test/figure out
+	packages, err := packages.Load(cfg, ".")
+	if err != nil {
+		return "", fmt.Errorf("packages.Load(): %w", err)
+	}
+
+	// packages.Load() seems to be designed to parse multiple files (passed in go command style (./... etc))
+	// we only care about one file though, therefore it should always be the first in the array in following code
+
+	if len(packages) != 1 {
+		return "", fmt.Errorf("unexpectedly %d packages returned for file %q", len(packages), filename)
+	}
+
+	pkg := packages[0]
+
+	fileAst, err := findASTForFile(pkg, filename)
+	if err != nil {
+		return "", fmt.Errorf("couldn't find ast for given file %s", filename)
+	}
+
+	imports := newImportsList()
+	for _, impSpec := range fileAst.Imports {
+		// todo: impSpec seems to have a value of 'name', which can be '.', nil etc...we should use it to make imports in generated files
+		pkgName := pkg.TypesInfo.PkgNameOf(impSpec)
+		imports.add(impSpec, pkgName)
+	}
+
+	gen, err := newGenerator(pkg.Name, pkg.PkgPath, hash, pkg.TypesInfo)
 	if err != nil {
 		return "", fmt.Errorf("failed to create generator")
 	}
-	for _, iface := range fd.ifaces {
-		if err := gen.addInterface(iface); err != nil {
-			return "", fmt.Errorf("addInterface(%s):%w", iface.name(), err)
+
+	for _, decl := range fileAst.Decls {
+		genDecl, ok := decl.(*ast.GenDecl)
+		if !ok {
+			continue
+		}
+		if genDecl.Tok != token.TYPE {
+			continue
+		}
+		for _, spec := range genDecl.Specs {
+			ts, ok := spec.(*ast.TypeSpec)
+			if !ok {
+				continue
+			}
+			if iface, ok := ts.Type.(*ast.InterfaceType); ok {
+				gen.addInterface(ts.Name.String(), iface)
+			}
 		}
 	}
 
@@ -64,13 +125,7 @@ func generateFile(fd rpcFileDesc, hash []byte) (string, error) {
 }
 
 func processInputFile(inputFile string) error {
-	fd, err := loadRpcFileDesc(inputFile)
-	if err != nil {
-		return fmt.Errorf("loadRpcFileDesc for file '%s': %w", inputFile, err)
-	}
-	// fmt.Print(fd.print())
-
-	unshashed, err := generateFile(fd, nil)
+	unshashed, err := generateFile(inputFile, nil)
 	if err != nil {
 		return fmt.Errorf("genFile2(): %w", err)
 	}
@@ -79,7 +134,7 @@ func processInputFile(inputFile string) error {
 	hasher.Write([]byte(unshashed))
 	hash := hasher.Sum(nil)
 
-	hashed, err := generateFile(fd, hash)
+	hashed, err := generateFile(inputFile, hash)
 	if err != nil {
 		return fmt.Errorf("hashed enerator for file %q: %w", inputFile, err)
 	}

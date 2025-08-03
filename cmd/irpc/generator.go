@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"go/ast"
 	"go/format"
 	"go/types"
 	"io"
@@ -15,21 +16,23 @@ import (
 const idLen = 32
 
 type generator struct {
-	origFile     rpcFileDesc
+	packageName  string
+	packagePath  string
 	fileHash     []byte
 	services     []serviceGenerator
 	clients      []clientGenerator
 	params       []paramStructGenerator
-	qf           types.Qualifier
+	qf           types.Qualifier // todo: not sure we need this
 	typesInfo    *types.Info
 	uniqueBlocks orderedSet[string]
 	imports      orderedSet[importSpec]
 }
 
 // if fileHash is nil, we generate service id with empty hash - this is only used during dry run (first run of generator)
-func newGenerator(fd rpcFileDesc, fileHash []byte, typesInfo *types.Info) (*generator, error) {
+func newGenerator(packageName, packagePath string, fileHash []byte, typesInfo *types.Info) (*generator, error) {
 	g := &generator{
-		origFile:     fd,
+		packageName:  packageName,
+		packagePath:  packagePath,
 		fileHash:     fileHash,
 		typesInfo:    typesInfo,
 		uniqueBlocks: newOrderedSet[string](),
@@ -39,17 +42,10 @@ func newGenerator(fd rpcFileDesc, fileHash []byte, typesInfo *types.Info) (*gene
 	g.qf = func(pkg *types.Package) string {
 		// log.Printf("requested to qualify pkg: %q. path: %q", pkg.Name(), pkg.Path())
 		var name string
-		// if n, ok := fd.imports[pkg.Path()]; ok {
-		// 	log.Fatalf("pkg.Path(): %s -- %s", pkg.Path(), n)
-		// 	// return name
-		// 	name = n
-		// } else {
-		// 	name = pkg.Name()
-		// }
 		name = pkg.Name()
 
 		// don't qualify our own package
-		if name == fd.packageName {
+		if name == packageName {
 			name = ""
 		}
 
@@ -60,12 +56,35 @@ func newGenerator(fd rpcFileDesc, fileHash []byte, typesInfo *types.Info) (*gene
 	return g, nil
 }
 
-func (g *generator) addInterface(iface rpcInterface) error {
+func (g *generator) addInterface(ifaceName string, astIface *ast.InterfaceType) error {
 	methods := []methodGenerator{}
-	for i, m := range iface.methods {
-		mg, err := g.addMethod(iface.name(), i, m)
+	for i, methodField := range astIface.Methods.List {
+		if len(methodField.Names) == 0 {
+			return fmt.Errorf("method of interface %q has no name", ifaceName)
+		}
+		methodName := methodField.Names[0].Name
+
+		astFuncType, ok := methodField.Type.(*ast.FuncType)
+		if !ok {
+			return fmt.Errorf("*ast.Field %v is not *ast.FuncType", methodField)
+		}
+
+		params, err := g.loadRpcParamList(ifaceName, astFuncType.Params.List)
 		if err != nil {
-			return fmt.Errorf("method '%s' generator: %w", m.name, err)
+			return fmt.Errorf("params list load for %s: %w", methodName, err)
+		}
+
+		var results []rpcParam
+		if astFuncType.Results != nil {
+			results, err = g.loadRpcParamList(ifaceName, astFuncType.Results.List)
+			if err != nil {
+				return fmt.Errorf("results list load for %s: %w", methodName, err)
+			}
+		}
+
+		mg, err := g.newMethodGenerator(ifaceName, i, methodName, params, results)
+		if err != nil {
+			return fmt.Errorf("method '%s' generator: %w", methodName, err)
 		}
 		methods = append(methods, mg)
 	}
@@ -74,36 +93,36 @@ func (g *generator) addInterface(iface rpcInterface) error {
 	// this allows us to change idLen while keeping the common part of hash the same - not really useful but nice to have
 	serviceId := []byte{}
 	if g.fileHash != nil {
-		serviceId = generateServiceIdHash(g.fileHash, iface.name(), idLen)
+		serviceId = generateServiceIdHash(g.fileHash, ifaceName, idLen)
 	}
 
-	sg, err := g.newServiceGenerator(iface.name()+"IRpcService", iface.name(), methods, serviceId)
+	sg, err := g.newServiceGenerator(ifaceName+"IRpcService", ifaceName, methods, serviceId)
 	if err != nil {
-		return fmt.Errorf("service generator for iface: %s: %w", iface.name(), err)
+		return fmt.Errorf("service generator for iface: %s: %w", ifaceName, err)
 	}
 	g.services = append(g.services, sg)
 
-	cg, err := g.newClientGenerator(iface.name()+"IRpcClient", iface.name(), methods, serviceId)
+	cg, err := g.newClientGenerator(ifaceName+"IRpcClient", ifaceName, methods, serviceId)
 	if err != nil {
-		return fmt.Errorf("client generator for iface: %s: %w", iface.name(), err)
+		return fmt.Errorf("client generator for iface: %s: %w", ifaceName, err)
 	}
 	g.clients = append(g.clients, cg)
 	return nil
 }
 
-func (g *generator) addMethod(ifaceName string, index int, m rpcMethod) (methodGenerator, error) {
+func (g *generator) newMethodGenerator(ifaceName string, index int, methodName string, params, results []rpcParam) (methodGenerator, error) {
 	// REQUEST
-	reqStructTypeName := "_Irpc_" + ifaceName + m.name + "Req"
+	reqStructTypeName := "_Irpc_" + ifaceName + methodName + "Req"
 
-	reqFieldNames := make(map[string]struct{}, len(m.params))
-	for _, rf := range m.params {
+	reqFieldNames := make(map[string]struct{}, len(params))
+	for _, rf := range params {
 		// make sure this name is not allocated by another param id
 		reqFieldNames[rf.name] = struct{}{}
 	}
 
 	reqParams := []funcParam{}
-	for _, param := range m.params {
-		rp, err := g.newRequestParam(param, reqFieldNames, ifaceName)
+	for _, param := range params {
+		rp, err := g.newRequestParam(param, reqFieldNames)
 		if err != nil {
 			return methodGenerator{}, fmt.Errorf("newRequestParam '%s': %w", param.name, err)
 		}
@@ -111,26 +130,26 @@ func (g *generator) addMethod(ifaceName string, index int, m rpcMethod) (methodG
 	}
 	req, err := g.addParamStructGenerator(reqStructTypeName, reqParams)
 	if err != nil {
-		return methodGenerator{}, fmt.Errorf("new req struct for method '%s': %w", m.name, err)
+		return methodGenerator{}, fmt.Errorf("new req struct for method '%s': %w", methodName, err)
 	}
 
 	// RESPONSE
-	respStructTypeName := "_Irpc_" + ifaceName + m.name + "Resp"
+	respStructTypeName := "_Irpc_" + ifaceName + methodName + "Resp"
 	respParams := []funcParam{}
-	for _, result := range m.results {
-		rp, err := g.newResultParam(result, ifaceName)
+	for _, result := range results {
+		rp, err := g.newResultParam(result)
 		if err != nil {
 			return methodGenerator{}, fmt.Errorf("newResultParam '%s': %w", result.name, err)
 		}
 		// we don't support returning context.Context
 		if rp.isContext() {
-			return methodGenerator{}, fmt.Errorf("unsupported context.Context as return value for varfiled: %s - %s", ifaceName, m.name)
+			return methodGenerator{}, fmt.Errorf("unsupported context.Context as return value for varfiled: %s - %s", ifaceName, methodName)
 		}
 		respParams = append(respParams, rp)
 	}
 	resp, err := g.addParamStructGenerator(respStructTypeName, respParams)
 	if err != nil {
-		return methodGenerator{}, fmt.Errorf("new resp struct for method '%s': %w", m.name, err)
+		return methodGenerator{}, fmt.Errorf("new resp struct for method '%s': %w", methodName, err)
 	}
 
 	// context
@@ -149,11 +168,11 @@ func (g *generator) addMethod(ifaceName string, index int, m rpcMethod) (methodG
 	case 1:
 		ctxVarName = ctxParams[0].identifier
 	default:
-		return methodGenerator{}, fmt.Errorf("%s - %s : cannot have more than one context parameter", ifaceName, m.name)
+		return methodGenerator{}, fmt.Errorf("%s - %s : cannot have more than one context parameter", ifaceName, methodName)
 	}
 
 	return methodGenerator{
-		name:   m.name,
+		name:   methodName,
 		index:  index,
 		req:    req,
 		resp:   resp,
@@ -161,16 +180,146 @@ func (g *generator) addMethod(ifaceName string, index int, m rpcMethod) (methodG
 	}, nil
 }
 
-func (g *generator) write(w io.Writer) error {
+func (g *generator) loadRpcParamList(interfaceName string, list []*ast.Field) ([]rpcParam, error) {
+	params := []rpcParam{}
+	for pos, field := range list {
+		// try to get qualifier, if there is one
+		var qualifier string
+		if selExpr, ok := field.Type.(*ast.SelectorExpr); ok {
+			if ident, ok := selExpr.X.(*ast.Ident); ok {
+				qualifier = ident.Name
+			}
 
+		}
+
+		tv, ok := g.typesInfo.Types[field.Type]
+		if !ok {
+			fmt.Printf("couldn't determine fileld's %v type and value", field)
+			continue
+		}
+
+		if field.Names == nil {
+			// parameter doesn't have name, just a type (typically function returns)
+			param, err := g.newRpcParam(interfaceName, pos, "", tv.Type, qualifier)
+			if err != nil {
+				return nil, fmt.Errorf("newRpcParam on pos %d: %w", pos, err)
+			}
+			params = append(params, param)
+		} else {
+			for _, name := range field.Names {
+				// obj := typesInfo.ObjectOf(name)
+				param, err := g.newRpcParam(interfaceName, pos, name.Name, tv.Type, qualifier)
+				if err != nil {
+					return nil, fmt.Errorf("newRpcParam on pos %d: %w", pos, err)
+				}
+				params = append(params, param)
+			}
+		}
+	}
+	return params, nil
+}
+
+func (g *generator) newRpcParam(interfaceName string, position int, name string, typ types.Type, qualifier string) (rpcParam, error) {
+	tDesc, err := g.newTypeDesc(interfaceName, typ, qualifier)
+	if err != nil {
+		return rpcParam{}, fmt.Errorf("newTypeDesc(): %w", err)
+	}
+
+	var imp *importSpec
+	if named, ok := typ.(*types.Named); ok {
+		if ok {
+			obj := named.Obj()
+			if pkg := obj.Pkg(); pkg != nil {
+				// we skip the pkg alias, if it's not needed
+				var alias string
+				if qualifier != pkg.Name() {
+					alias = qualifier
+				}
+
+				imp = &importSpec{alias: alias, path: pkg.Path()}
+			}
+		}
+	}
+
+	return rpcParam{
+		pos:   position,
+		name:  name,
+		imp:   imp,
+		tDesc: tDesc,
+	}, nil
+}
+
+func (g *generator) newTypeDesc(apiName string, t types.Type, qualifier string) (typeDesc, error) {
+	/*
+		var enc encoder
+		switch t := t.Underlying().(type) {
+		case *types.Basic:
+			switch t.Kind() {
+			case types.Bool:
+				enc = boolEncoder
+			case types.Int:
+				enc = intEncoder
+			case types.Uint:
+				enc = uintEncoder
+			case types.Int8:
+				enc = int8Encoder
+			case types.Uint8: // serves 'types.Byte' as well
+				enc = uint8Encoder
+			case types.Int16:
+				enc = int16Encoder
+			case types.Uint16:
+				enc = uint16Encoder
+			case types.Int32: // serves 'types.Rune' as well
+				enc = int32Encoder
+			case types.Uint32:
+				enc = uint32Encoder
+			case types.Int64:
+				enc = int64Encoder
+			case types.Uint64:
+				enc = uint64Encoder
+			case types.Float32:
+				enc = float32Encoder
+			case types.Float64:
+				enc = float64Encoder
+			case types.String:
+				enc = stringEncoder
+			default:
+				return typeDesc{}, fmt.Errorf("unsupported basic type '%s'", t.Name())
+			}
+		}
+	*/
+
+	qf := func(pkg *types.Package) string {
+		return qualifier
+	}
+
+	encGen, err := newEncoderResolver(apiName, qf, g.typesInfo)
+	if err != nil {
+		return typeDesc{}, fmt.Errorf("newEncoderResolver(): %w", err)
+	}
+
+	enc, err := encGen.varEncoder(t)
+	if err != nil {
+		return typeDesc{}, fmt.Errorf("varEncoder(): %w", err)
+	}
+
+	return typeDesc{
+		tt:                t,
+		qualifier:         qualifier,
+		qualifiedTypeName: types.TypeString(t, qf),
+		enc:               enc,
+	}, nil
+}
+
+func (g *generator) write(w io.Writer) error {
 	// SERVICES
 	for _, service := range g.services {
 		g.uniqueBlocks.add((service.code()))
 	}
 
 	// CLIENTS
-	for _, c := range g.clients {
-		g.uniqueBlocks.add((c.code()))
+	for _, client := range g.clients {
+		g.uniqueBlocks.add((client.code()))
 	}
 
 	// PARAM STRUCTS
@@ -335,7 +484,7 @@ type funcParam struct {
 
 func (g *generator) addImport(imps ...importSpec) {
 	for _, imp := range imps {
-		if imp.path == g.origFile.packagePath {
+		if imp.path == g.packagePath {
 			// we don't want to import our own directory
 			continue
 		}
@@ -345,12 +494,7 @@ func (g *generator) addImport(imps ...importSpec) {
 
 // requestParamNames contains all parameter names, including ours
 // if our parameter doesn't have a name, we will create one, making suere, we don't overlap with named parameters
-func (g *generator) newRequestParam(p rpcParam, requestParamNames map[string]struct{}, apiName string) (funcParam, error) {
-	enc, err := g.varEncoder(apiName, p.tDesc)
-	if err != nil {
-		return funcParam{}, fmt.Errorf("param field for type '%s': %w", p.tDesc.TypeName, err)
-	}
-
+func (g *generator) newRequestParam(p rpcParam, requestParamNames map[string]struct{}) (funcParam, error) {
 	// figure out a unique id
 	id := p.name
 	if id == "" || id == "_" {
@@ -372,18 +516,13 @@ func (g *generator) newRequestParam(p rpcParam, requestParamNames map[string]str
 	return funcParam{
 		name:            p.name,
 		identifier:      id,
-		typeName:        p.tDesc.TypeName,
-		enc:             enc,
+		typeName:        p.tDesc.qualifiedTypeName,
+		enc:             p.tDesc.enc,
 		structFieldName: fmt.Sprintf("Param%d_%s", p.pos, id),
 	}, nil
 }
 
-func (g *generator) newResultParam(p rpcParam, apiName string) (funcParam, error) {
-	enc, err := g.varEncoder(apiName, p.tDesc)
-	if err != nil {
-		return funcParam{}, fmt.Errorf("param field for type '%s': %w", p.tDesc.TypeName, err)
-	}
-
+func (g *generator) newResultParam(p rpcParam) (funcParam, error) {
 	sFieldName := fmt.Sprintf("Param%d", p.pos)
 	if p.name != "" {
 		sFieldName += "_" + p.name
@@ -396,8 +535,8 @@ func (g *generator) newResultParam(p rpcParam, apiName string) (funcParam, error
 	return funcParam{
 		name:            p.name,
 		identifier:      p.name,
-		typeName:        p.tDesc.TypeName,
-		enc:             enc,
+		typeName:        p.tDesc.qualifiedTypeName,
+		enc:             p.tDesc.enc,
 		structFieldName: sFieldName,
 	}, nil
 }
@@ -418,7 +557,7 @@ func (g *generator) genRaw() string {
 	headerStr := `// Code generated by irpc generator; DO NOT EDIT
 	package %s
 	`
-	fmt.Fprintf(sb, headerStr, g.origFile.packageName)
+	fmt.Fprintf(sb, headerStr, g.packageName)
 
 	// IMPORTS
 	if g.imports.len() != 0 {
@@ -449,7 +588,7 @@ func (g *generator) varEncoder(ifaceName string, td typeDesc) (encoder, error) {
 		}
 	}()
 
-	return encResolver.varEncoder(td.TT)
+	return encResolver.varEncoder(td.tt)
 }
 
 // returns true if field is of type context.Context
