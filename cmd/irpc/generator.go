@@ -20,7 +20,6 @@ type generator struct {
 	packagePath  string
 	fileHash     []byte
 	services     []serviceGenerator
-	clients      []clientGenerator
 	params       []paramStructGenerator
 	qf           types.Qualifier // todo: not sure we need this
 	typesInfo    *types.Info
@@ -96,17 +95,9 @@ func (g *generator) addInterface(ifaceName string, astIface *ast.InterfaceType) 
 		serviceId = generateServiceIdHash(g.fileHash, ifaceName, idLen)
 	}
 
-	sg, err := g.newServiceGenerator(ifaceName+"IRpcService", ifaceName, methods, serviceId)
-	if err != nil {
-		return fmt.Errorf("service generator for iface: %s: %w", ifaceName, err)
+	if err := g.addServiceGenerator(ifaceName, methods, serviceId); err != nil {
+		return fmt.Errorf("addServiceGenerator(): %w", err)
 	}
-	g.services = append(g.services, sg)
-
-	cg, err := g.newClientGenerator(ifaceName+"IRpcClient", ifaceName, methods, serviceId)
-	if err != nil {
-		return fmt.Errorf("client generator for iface: %s: %w", ifaceName, err)
-	}
-	g.clients = append(g.clients, cg)
 	return nil
 }
 
@@ -305,7 +296,6 @@ func (g *generator) newTypeDesc(apiName string, t types.Type, qualifier string) 
 
 	return typeDesc{
 		tt:                t,
-		qualifier:         qualifier,
 		qualifiedTypeName: types.TypeString(t, qf),
 		enc:               enc,
 	}, nil
@@ -314,12 +304,12 @@ func (g *generator) newTypeDesc(apiName string, t types.Type, qualifier string) 
 func (g *generator) write(w io.Writer) error {
 	// SERVICES
 	for _, service := range g.services {
-		g.uniqueBlocks.add((service.code()))
+		g.uniqueBlocks.add(service.serviceCode(g.fileHash))
 	}
 
 	// CLIENTS
-	for _, client := range g.clients {
-		g.uniqueBlocks.add((client.code()))
+	for _, service := range g.services {
+		g.uniqueBlocks.add(service.clientCode(g.fileHash))
 	}
 
 	// PARAM STRUCTS
@@ -420,18 +410,6 @@ func (sg paramStructGenerator) funcCallParams() string {
 	b := &strings.Builder{}
 	for i, v := range sg.params {
 		fmt.Fprintf(b, "%s %s", v.identifier, v.typeName)
-		if i != len(sg.params)-1 {
-			b.WriteString(",")
-		}
-	}
-	return b.String()
-}
-
-// like funcCallParams, but omit's param names, if they were not defined
-func (sg paramStructGenerator) returnParams() string {
-	b := &strings.Builder{}
-	for i, v := range sg.params {
-		fmt.Fprintf(b, "%s %s", v.name, v.typeName)
 		if i != len(sg.params)-1 {
 			b.WriteString(",")
 		}
@@ -576,21 +554,6 @@ func (g *generator) genRaw() string {
 	return sb.String()
 }
 
-func (g *generator) varEncoder(ifaceName string, td typeDesc) (encoder, error) {
-	encResolver, err := newEncoderResolver(ifaceName, g.qf, g.typesInfo)
-	if err != nil {
-		return nil, fmt.Errorf("newEncoderResolver(): %w", err)
-	}
-
-	defer func() {
-		for _, imp := range encResolver.imports.ordered {
-			g.addImport(imp)
-		}
-	}()
-
-	return encResolver.varEncoder(td.tt)
-}
-
 // returns true if field is of type context.Context
 func (vf funcParam) isContext() bool {
 	return vf.typeName == "context.Context"
@@ -638,64 +601,70 @@ func (mg methodGenerator) requestParamsListPrefixed(prefix, ctxVarName string) s
 }
 
 type serviceGenerator struct {
-	ifaceName       string
-	serviceTypeName string
-	methods         []methodGenerator
-	serviceId       []byte
+	ifaceName string
+	methods   []methodGenerator
 }
 
-func (g *generator) newServiceGenerator(serviceTypeName, ifaceTypeName string, methods []methodGenerator, serviceId []byte) (serviceGenerator, error) {
+func (g *generator) addServiceGenerator(ifaceName string, methods []methodGenerator, serviceId []byte) error {
 	g.addImport(fmtImport)
+	g.addImport(irpcGenImport)
 	if len(methods) > 0 {
 		// every FuncExecutor uses context
 		g.addImport(contextImport)
 	}
 
-	return serviceGenerator{
-		ifaceName:       ifaceTypeName,
-		serviceTypeName: serviceTypeName,
-		methods:         methods,
-		serviceId:       serviceId,
-	}, nil
+	sg2 := serviceGenerator{
+		ifaceName: ifaceName,
+		methods:   methods,
+	}
+	g.services = append(g.services, sg2)
+
+	return nil
 }
 
-func (sg serviceGenerator) code() string {
-	sb := &strings.Builder{}
+func (sg serviceGenerator) serviceCode(hash []byte) string {
+	serviceTypeName := sg.ifaceName + "IRpcService"
+	var serviceId []byte
+	if hash != nil {
+		serviceId = generateServiceIdHash(hash, sg.ifaceName, idLen)
+	}
+
+	w := &strings.Builder{}
 
 	// type definition
-	fmt.Fprintf(sb, `type %s struct{
+	fmt.Fprintf(w, `type %s struct{
 		impl %s
 		id []byte
 	}
-	`, sg.serviceTypeName, sg.ifaceName)
+	`, serviceTypeName, sg.ifaceName)
 
 	// constructor
-	fmt.Fprintf(sb, `func %s (impl %s) *%[3]s {
+	fmt.Fprintf(w, `func %s (impl %s) *%[3]s {
 		return &%[3]s{
 			impl:impl,
 			id: %s,
 		}
 	}
-	`, generateStructConstructorName(sg.serviceTypeName), sg.ifaceName, sg.serviceTypeName, byteSliceLiteral(sg.serviceId))
+	`, generateStructConstructorName(serviceTypeName), sg.ifaceName, serviceTypeName, byteSliceLiteral(serviceId))
 
 	// Id() func
-	fmt.Fprintf(sb, `func (s *%s) Id() []byte {
+	fmt.Fprintf(w, `func (s *%s) Id() []byte {
 		return s.id
 	}
-	`, sg.serviceTypeName)
+	`, serviceTypeName)
 
 	// Call func call swith
-	fmt.Fprintf(sb, `func (s *%s) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error){
+	fmt.Fprintf(w, `func (s *%s) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error){
 		switch funcId {
-			`, sg.serviceTypeName)
+			`, serviceTypeName)
 
 	for _, m := range sg.methods {
-		fmt.Fprintf(sb, "case %d: // %s\n", m.index, m.name)
-		fmt.Fprintf(sb, "return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {\n")
+		fmt.Fprintf(w, "case %d: // %s\n", m.index, m.name)
+		fmt.Fprintf(w, "return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {\n")
 
 		// deserialize, if not empty
 		if !m.req.isEmpty() {
-			fmt.Fprintf(sb, `// DESERIALIZE
+			fmt.Fprintf(w, `// DESERIALIZE
 		 	var args %s
 		 	if err := args.Deserialize(d); err != nil {
 		 		return nil, err
@@ -703,39 +672,26 @@ func (sg serviceGenerator) code() string {
 			`, m.req.typeName)
 		}
 
-		fmt.Fprintf(sb, `return %s, nil
+		fmt.Fprintf(w, `return %s, nil
 		}, nil
 		 `, m.executorFuncCode())
 	}
-	fmt.Fprintf(sb, `default:
+	fmt.Fprintf(w, `default:
 			return nil, fmt.Errorf("function '%%d' doesn't exist on service '%%s'", funcId, s.Id())
 		}
 	}
 	`)
-
-	return sb.String()
+	return w.String()
 }
 
-type clientGenerator struct {
-	typeName        string
-	ifaceName       string
-	methods         []methodGenerator
-	fncReceiverName string
-	serviceId       []byte
-}
+func (sg serviceGenerator) clientCode(hash []byte) string {
+	clientTypeName := sg.ifaceName + "IRpcClient"
+	fncReceiverName := "_c" // todo: must not collide with any of fnc variable names
+	var serviceId []byte
+	if hash != nil {
+		serviceId = generateServiceIdHash(hash, sg.ifaceName, idLen)
+	}
 
-func (g *generator) newClientGenerator(clientTypeName string, ifaceTypeName string, methods []methodGenerator, serviceId []byte) (clientGenerator, error) {
-	g.addImport(irpcGenImport)
-	return clientGenerator{
-		typeName:        clientTypeName,
-		ifaceName:       ifaceTypeName,
-		methods:         methods,
-		fncReceiverName: "_c", // todo: must not collide with any of fnc variable names
-		serviceId:       serviceId,
-	}, nil
-}
-
-func (cg clientGenerator) code() string {
 	b := &strings.Builder{}
 	// type definition
 	fmt.Fprintf(b, `
@@ -751,12 +707,12 @@ func (cg clientGenerator) code() string {
 		}
 		return &%[1]s{endpoint: endpoint, id: id}, nil
 	}
-	`, cg.typeName, generateStructConstructorName(cg.typeName), byteSliceLiteral(cg.serviceId))
+	`, clientTypeName, generateStructConstructorName(clientTypeName), byteSliceLiteral(serviceId))
 
 	// func calls
-	for _, m := range cg.methods {
+	for _, m := range sg.methods {
 		// func header
-		fmt.Fprintf(b, "func(%s *%s)%s(%s)(%s){\n", cg.fncReceiverName, cg.typeName, m.name, m.req.funcCallParams(), m.resp.funcCallParams())
+		fmt.Fprintf(b, "func(%s *%s)%s(%s)(%s){\n", fncReceiverName, clientTypeName, m.name, m.req.funcCallParams(), m.resp.funcCallParams())
 
 		allVars := append(m.req.params, m.resp.params...)
 
@@ -788,7 +744,7 @@ func (cg clientGenerator) code() string {
 		}
 
 		// func call
-		fmt.Fprintf(b, "if err := %s.endpoint.CallRemoteFunc(%s,%[1]s.id, %[3]d, %s, &%s); err != nil {\n", cg.fncReceiverName, m.ctxVar, m.index, reqVarName, respVarName)
+		fmt.Fprintf(b, "if err := %s.endpoint.CallRemoteFunc(%s,%[1]s.id, %[3]d, %s, &%s); err != nil {\n", fncReceiverName, m.ctxVar, m.index, reqVarName, respVarName)
 		if m.resp.isLastTypeError() {
 			// declare zero var, because i don't know, how to directly instantiate zero values
 			if len(m.resp.params) > 1 {
