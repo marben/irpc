@@ -1,14 +1,17 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"go/ast"
 	"go/format"
+	"go/token"
 	"go/types"
 	"io"
 	"log"
+	"path/filepath"
 	"strings"
+
+	"golang.org/x/tools/go/packages"
 )
 
 // id len specifies how long our service id's will be. currently the max is 32 bytes as we are using sha256 to generate them
@@ -16,43 +19,75 @@ import (
 const idLen = 32
 
 type generator struct {
-	packageName  string
-	packagePath  string
-	fileHash     []byte
+	inputPkg     *packages.Package
 	services     []serviceGenerator
-	params       []paramStructGenerator
-	qf           types.Qualifier // todo: not sure we need this
-	typesInfo    *types.Info
-	uniqueBlocks orderedSet[string]
+	paramStructs []paramStructGenerator
+	typesInfo    *types.Info // can we simply use the inputPkg?
 	imports      orderedSet[importSpec]
 }
 
-// if fileHash is nil, we generate service id with empty hash - this is only used during dry run (first run of generator)
-func newGenerator(packageName, packagePath string, fileHash []byte, typesInfo *types.Info) (*generator, error) {
-	g := &generator{
-		packageName:  packageName,
-		packagePath:  packagePath,
-		fileHash:     fileHash,
-		typesInfo:    typesInfo,
-		uniqueBlocks: newOrderedSet[string](),
-		imports:      newOrderedSet[importSpec](),
+func newGenerator(filename string) (*generator, error) {
+	absFilePath, err := filepath.Abs(filename)
+	if err != nil {
+		return nil, fmt.Errorf("filepath.Abs(): %w", err)
 	}
 
-	g.qf = func(pkg *types.Package) string {
-		// log.Printf("requested to qualify pkg: %q. path: %q", pkg.Name(), pkg.Path())
-		var name string
-		name = pkg.Name()
+	dir := filepath.Dir(absFilePath)
 
-		// don't qualify our own package
-		if name == packageName {
-			name = ""
+	cfg := &packages.Config{
+		Mode: packages.NeedTypes | packages.NeedDeps | packages.NeedImports | packages.NeedSyntax | packages.NeedTypesInfo |
+			packages.NeedFiles | packages.NeedName | packages.NeedCompiledGoFiles | packages.NeedExportFile | packages.NeedSyntax |
+			packages.NeedModule,
+		Dir: dir,
+	}
+
+	// we need to load all the files in directory, otherwise we get "command-line-arguments" as pkg paths
+	// todo: maybe we need to use ./... or base it at the root of our module, to get all the deps? need to test/figure out
+	packages, err := packages.Load(cfg, ".")
+	if err != nil {
+		return nil, fmt.Errorf("packages.Load(): %w", err)
+	}
+
+	// packages.Load() seems to be designed to parse multiple files (passed in go command style (./... etc))
+	// we only care about one file though, therefore it should always be the first in the array in following code
+
+	if len(packages) != 1 {
+		return nil, fmt.Errorf("unexpectedly %d packages returned for file %q", len(packages), filename)
+	}
+
+	pkg := packages[0]
+
+	gen := &generator{
+		typesInfo: pkg.TypesInfo,
+		inputPkg:  pkg,
+		imports:   newOrderedSet[importSpec](),
+	}
+
+	fileAst, err := findASTForFile(pkg, filename)
+	if err != nil {
+		return nil, fmt.Errorf("couldn't find ast for given file %s", filename)
+	}
+
+	for _, decl := range fileAst.Decls {
+		genDecl, ok := decl.(*ast.GenDecl)
+		if !ok {
+			continue
 		}
-
-		// log.Printf("requested to qualify pkg: %q. path: %q qualified to:  %q", pkg.Name(), pkg.Path(), name)
-		return name
+		if genDecl.Tok != token.TYPE {
+			continue
+		}
+		for _, spec := range genDecl.Specs {
+			ts, ok := spec.(*ast.TypeSpec)
+			if !ok {
+				continue
+			}
+			if iface, ok := ts.Type.(*ast.InterfaceType); ok {
+				gen.addInterface(ts.Name.String(), iface)
+			}
+		}
 	}
 
-	return g, nil
+	return gen, nil
 }
 
 func (g *generator) addInterface(ifaceName string, astIface *ast.InterfaceType) error {
@@ -88,14 +123,7 @@ func (g *generator) addInterface(ifaceName string, astIface *ast.InterfaceType) 
 		methods = append(methods, mg)
 	}
 
-	// we use empty hash when file hash was not provided - during the dry run
-	// this allows us to change idLen while keeping the common part of hash the same - not really useful but nice to have
-	serviceId := []byte{}
-	if g.fileHash != nil {
-		serviceId = generateServiceIdHash(g.fileHash, ifaceName, idLen)
-	}
-
-	if err := g.addServiceGenerator(ifaceName, methods, serviceId); err != nil {
+	if err := g.addServiceGenerator(ifaceName, methods); err != nil {
 		return fmt.Errorf("addServiceGenerator(): %w", err)
 	}
 	return nil
@@ -301,42 +329,46 @@ func (g *generator) newTypeDesc(apiName string, t types.Type, qualifier string) 
 	}, nil
 }
 
-func (g *generator) write(w io.Writer) error {
+// if hash is nil, we generate service id with empty hash
+//   - this is used during first run of generator
+func (g *generator) generate(w io.Writer, hash []byte) error {
+	codeBlocks := newOrderedSet[string]()
+
 	// SERVICES
 	for _, service := range g.services {
-		g.uniqueBlocks.add(service.serviceCode(g.fileHash))
+		codeBlocks.add(service.serviceCode(hash))
 	}
 
 	// CLIENTS
 	for _, service := range g.services {
-		g.uniqueBlocks.add(service.clientCode(g.fileHash))
+		codeBlocks.add(service.clientCode(hash))
 	}
 
 	// PARAM STRUCTS
-	for _, p := range g.params {
+	for _, p := range g.paramStructs {
 		// we don't generate empty types (even though the generator is capable of generating them)
 		// we use irpcgen.Empty(Ser/Deser) instead
 		if !p.isEmpty() {
-			g.uniqueBlocks.add(p.code())
+			codeBlocks.add(p.code())
 			for _, e := range p.encoders() {
-				g.uniqueBlocks.add(e.codeblock())
+				codeBlocks.add(e.codeblock())
 			}
 		}
 	}
 
-	file, err := g.genFormatted()
+	// GENERATE
+	rawOutput := g.genRaw(codeBlocks)
+
+	// FORMAT
+	formatted, err := format.Source([]byte(rawOutput))
 	if err != nil {
-		var formatErr *formattingErr
-		if errors.As(err, &formatErr) {
-			log.Println("formatting failed. writing raw code to output file anyway")
-			if _, err := w.Write([]byte(formatErr.unformattedCode)); err != nil {
-				return fmt.Errorf("failed to write unformatted code to file: %w", err)
-			}
+		log.Println("formatting failed. writing raw code to output file anyway")
+		if _, err := w.Write([]byte(rawOutput)); err != nil {
+			return fmt.Errorf("writing unformatted code to file: %w", err)
 		}
-		return err
 	}
 
-	if _, err := w.Write([]byte(file)); err != nil {
+	if _, err := w.Write([]byte(formatted)); err != nil {
 		return fmt.Errorf("copy of generated code to file: %w", err)
 	}
 
@@ -353,7 +385,7 @@ func (g *generator) addParamStructGenerator(typeName string, params []funcParam)
 		typeName: typeName,
 		params:   params,
 	}
-	g.params = append(g.params, sg)
+	g.paramStructs = append(g.paramStructs, sg)
 
 	return sg, nil
 }
@@ -462,7 +494,7 @@ type funcParam struct {
 
 func (g *generator) addImport(imps ...importSpec) {
 	for _, imp := range imps {
-		if imp.path == g.packagePath {
+		if imp.path == g.inputPkg.PkgPath {
 			// we don't want to import our own directory
 			continue
 		}
@@ -519,23 +551,13 @@ func (g *generator) newResultParam(p rpcParam) (funcParam, error) {
 	}, nil
 }
 
-func (g *generator) genFormatted() (string, error) {
-	raw := g.genRaw()
-	formatted, err := format.Source([]byte(raw))
-	if err != nil {
-		return "", &formattingErr{formattingError: err, unformattedCode: raw}
-	}
-
-	return string(formatted), nil
-}
-
-func (g *generator) genRaw() string {
+func (g *generator) genRaw(codeBlocks orderedSet[string]) string {
 	sb := &strings.Builder{}
 	// HEADER
 	headerStr := `// Code generated by irpc generator; DO NOT EDIT
 	package %s
 	`
-	fmt.Fprintf(sb, headerStr, g.packageName)
+	fmt.Fprintf(sb, headerStr, g.inputPkg.Name)
 
 	// IMPORTS
 	if g.imports.len() != 0 {
@@ -547,7 +569,7 @@ func (g *generator) genRaw() string {
 	}
 
 	// UNIQUE BLOCKS
-	for _, b := range g.uniqueBlocks.ordered {
+	for _, b := range codeBlocks.ordered {
 		fmt.Fprintf(sb, "\n%s\n", b)
 	}
 
@@ -605,7 +627,7 @@ type serviceGenerator struct {
 	methods   []methodGenerator
 }
 
-func (g *generator) addServiceGenerator(ifaceName string, methods []methodGenerator, serviceId []byte) error {
+func (g *generator) addServiceGenerator(ifaceName string, methods []methodGenerator) error {
 	g.addImport(fmtImport)
 	g.addImport(irpcGenImport)
 	if len(methods) > 0 {
@@ -622,13 +644,18 @@ func (g *generator) addServiceGenerator(ifaceName string, methods []methodGenera
 	return nil
 }
 
-func (sg serviceGenerator) serviceCode(hash []byte) string {
-	serviceTypeName := sg.ifaceName + "IRpcService"
-	var serviceId []byte
-	if hash != nil {
-		serviceId = generateServiceIdHash(hash, sg.ifaceName, idLen)
+func (sg serviceGenerator) serviceId(hash []byte) []byte {
+	// we use empty hash when file hash was not provided - during the dry run
+	// this allows us to change idLen while keeping the common part of hash the same - not really useful but nice to have
+	if hash == nil {
+		return nil
 	}
 
+	return generateServiceIdHash(hash, sg.ifaceName, idLen)
+}
+
+func (sg serviceGenerator) serviceCode(hash []byte) string {
+	serviceTypeName := sg.ifaceName + "IRpcService"
 	w := &strings.Builder{}
 
 	// type definition
@@ -645,7 +672,7 @@ func (sg serviceGenerator) serviceCode(hash []byte) string {
 			id: %s,
 		}
 	}
-	`, generateStructConstructorName(serviceTypeName), sg.ifaceName, serviceTypeName, byteSliceLiteral(serviceId))
+	`, generateStructConstructorName(serviceTypeName), sg.ifaceName, serviceTypeName, byteSliceLiteral(sg.serviceId(hash)))
 
 	// Id() func
 	fmt.Fprintf(w, `func (s *%s) Id() []byte {
@@ -687,10 +714,6 @@ func (sg serviceGenerator) serviceCode(hash []byte) string {
 func (sg serviceGenerator) clientCode(hash []byte) string {
 	clientTypeName := sg.ifaceName + "IRpcClient"
 	fncReceiverName := "_c" // todo: must not collide with any of fnc variable names
-	var serviceId []byte
-	if hash != nil {
-		serviceId = generateServiceIdHash(hash, sg.ifaceName, idLen)
-	}
 
 	b := &strings.Builder{}
 	// type definition
@@ -707,7 +730,7 @@ func (sg serviceGenerator) clientCode(hash []byte) string {
 		}
 		return &%[1]s{endpoint: endpoint, id: id}, nil
 	}
-	`, clientTypeName, generateStructConstructorName(clientTypeName), byteSliceLiteral(serviceId))
+	`, clientTypeName, generateStructConstructorName(clientTypeName), byteSliceLiteral(sg.serviceId(hash)))
 
 	// func calls
 	for _, m := range sg.methods {
