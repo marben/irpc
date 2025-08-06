@@ -244,18 +244,15 @@ func (g *generator) newRpcParam(interfaceName string, position int, name string,
 		return rpcParam{}, fmt.Errorf("newTypeDesc(): %w", err)
 	}
 
-	var imp *importSpec
 	if named, ok := typ.(*types.Named); ok {
 		if ok {
 			obj := named.Obj()
 			if pkg := obj.Pkg(); pkg != nil {
-				// we skip the pkg alias, if it's not needed
 				var alias string
 				if qualifier != pkg.Name() {
 					alias = qualifier
 				}
-
-				imp = &importSpec{alias: alias, path: pkg.Path()}
+				g.addImport(importSpec{alias: alias, path: pkg.Path()})
 			}
 		}
 	}
@@ -263,7 +260,6 @@ func (g *generator) newRpcParam(interfaceName string, position int, name string,
 	return rpcParam{
 		pos:   position,
 		name:  name,
-		imp:   imp,
 		tDesc: tDesc,
 	}, nil
 }
@@ -519,10 +515,6 @@ func (g *generator) newRequestParam(p rpcParam, requestParamNames map[string]str
 	}
 	requestParamNames[id] = struct{}{}
 
-	if p.imp != nil {
-		g.addImport(*p.imp)
-	}
-
 	return funcParam{
 		name:            p.name,
 		identifier:      id,
@@ -536,10 +528,6 @@ func (g *generator) newResultParam(p rpcParam) (funcParam, error) {
 	sFieldName := fmt.Sprintf("Param%d", p.pos)
 	if p.name != "" {
 		sFieldName += "_" + p.name
-	}
-
-	if p.imp != nil {
-		g.addImport(*p.imp)
 	}
 
 	return funcParam{

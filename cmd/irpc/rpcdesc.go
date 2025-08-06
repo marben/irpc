@@ -12,7 +12,6 @@ import (
 type rpcParam struct {
 	pos   int // position in field
 	name  string
-	imp   *importSpec // todo: wasn't this some ad-hoc hack
 	tDesc typeDesc
 }
 
