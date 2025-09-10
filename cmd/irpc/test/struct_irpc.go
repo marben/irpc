@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/marben/irpc/irpcgen"
+	"image"
 )
 
 type structAPIIRpcService struct {
@@ -15,7 +16,7 @@ type structAPIIRpcService struct {
 func newStructAPIIRpcService(impl structAPI) *structAPIIRpcService {
 	return &structAPIIRpcService{
 		impl: impl,
-		id:   []byte{146, 180, 118, 27, 58, 192, 18, 234, 82, 253, 46, 187, 179, 20, 238, 205, 54, 253, 72, 187, 220, 32, 52, 206, 150, 40, 195, 187, 30, 151, 83, 81},
+		id:   []byte{55, 184, 84, 247, 137, 88, 229, 81, 193, 177, 253, 158, 7, 40, 130, 242, 206, 46, 229, 116, 109, 33, 29, 172, 128, 245, 223, 31, 157, 78, 239, 207},
 	}
 }
 func (s *structAPIIRpcService) Id() []byte {
@@ -107,6 +108,20 @@ func (s *structAPIIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 				return resp
 			}, nil
 		}, nil
+	case 6: // PointNeg
+		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_structAPIPointNegReq
+			if err := args.Deserialize(d); err != nil {
+				return nil, err
+			}
+			return func(ctx context.Context) irpcgen.Serializable {
+				// EXECUTE
+				var resp _Irpc_structAPIPointNegResp
+				resp.Param0 = s.impl.PointNeg(args.Param0_p)
+				return resp
+			}, nil
+		}, nil
 	default:
 		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, s.Id())
 	}
@@ -118,7 +133,7 @@ type structAPIIRpcClient struct {
 }
 
 func newStructAPIIRpcClient(endpoint irpcgen.Endpoint) (*structAPIIRpcClient, error) {
-	id := []byte{146, 180, 118, 27, 58, 192, 18, 234, 82, 253, 46, 187, 179, 20, 238, 205, 54, 253, 72, 187, 220, 32, 52, 206, 150, 40, 195, 187, 30, 151, 83, 81}
+	id := []byte{55, 184, 84, 247, 137, 88, 229, 81, 193, 177, 253, 158, 7, 40, 130, 242, 206, 46, 229, 116, 109, 33, 29, 172, 128, 245, 223, 31, 157, 78, 239, 207}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -180,6 +195,16 @@ func (_c *structAPIIRpcClient) InlineReturn(a int) struct{ b int } {
 	}
 	var resp _Irpc_structAPIInlineReturnResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 5, req, &resp); err != nil {
+		panic(err) // to avoid panic, make your func return error and regenerate the code
+	}
+	return resp.Param0
+}
+func (_c *structAPIIRpcClient) PointNeg(p image.Point) image.Point {
+	var req = _Irpc_structAPIPointNegReq{
+		Param0_p: p,
+	}
+	var resp _Irpc_structAPIPointNegResp
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 6, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
 	return resp.Param0
@@ -499,6 +524,52 @@ func (s _Irpc_structAPIInlineReturnResp) Serialize(e *irpcgen.Encoder) error {
 func (s *_Irpc_structAPIInlineReturnResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0.b); err != nil {
 		return fmt.Errorf("deserialize s.Param0.b of type 'int': %w", err)
+	}
+	return nil
+}
+
+type _Irpc_structAPIPointNegReq struct {
+	Param0_p image.Point
+}
+
+func (s _Irpc_structAPIPointNegReq) Serialize(e *irpcgen.Encoder) error {
+	if err := e.VarInt(s.Param0_p.X); err != nil {
+		return fmt.Errorf("serialize s.Param0_p.X of type 'int': %w", err)
+	}
+	if err := e.VarInt(s.Param0_p.Y); err != nil {
+		return fmt.Errorf("serialize s.Param0_p.Y of type 'int': %w", err)
+	}
+	return nil
+}
+func (s *_Irpc_structAPIPointNegReq) Deserialize(d *irpcgen.Decoder) error {
+	if err := d.VarInt(&s.Param0_p.X); err != nil {
+		return fmt.Errorf("deserialize s.Param0_p.X of type 'int': %w", err)
+	}
+	if err := d.VarInt(&s.Param0_p.Y); err != nil {
+		return fmt.Errorf("deserialize s.Param0_p.Y of type 'int': %w", err)
+	}
+	return nil
+}
+
+type _Irpc_structAPIPointNegResp struct {
+	Param0 image.Point
+}
+
+func (s _Irpc_structAPIPointNegResp) Serialize(e *irpcgen.Encoder) error {
+	if err := e.VarInt(s.Param0.X); err != nil {
+		return fmt.Errorf("serialize s.Param0.X of type 'int': %w", err)
+	}
+	if err := e.VarInt(s.Param0.Y); err != nil {
+		return fmt.Errorf("serialize s.Param0.Y of type 'int': %w", err)
+	}
+	return nil
+}
+func (s *_Irpc_structAPIPointNegResp) Deserialize(d *irpcgen.Decoder) error {
+	if err := d.VarInt(&s.Param0.X); err != nil {
+		return fmt.Errorf("deserialize s.Param0.X of type 'int': %w", err)
+	}
+	if err := d.VarInt(&s.Param0.Y); err != nil {
+		return fmt.Errorf("deserialize s.Param0.Y of type 'int': %w", err)
 	}
 	return nil
 }

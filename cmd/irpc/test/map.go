@@ -2,11 +2,19 @@ package irpctestpkg
 
 //go:generate go run ../
 
+type namedIntFloatMap map[int]float64
+type mapNamedInt int
+type mapNamedFloat64 float64
+
 type mapTest interface {
 	mapSum(in map[int]float64) (keysSum int, valsSum float64)
 	sumStructs(in map[intStruct]intStruct) (keysSum, valsSum int)
 	sumSlices(in map[intStruct][]intStruct) (keysSum, valsSum int)
+	namedMapInc(in namedIntFloatMap) namedIntFloatMap               // todo: write a test
+	namedKeySum(in map[mapNamedInt]mapNamedFloat64) mapNamedFloat64 // todo: write a test
 }
+
+var _ mapTest = mapTestImpl{}
 
 type mapTestImpl struct {
 }
@@ -19,7 +27,7 @@ func (mt mapTestImpl) mapSum(in map[int]float64) (keysSum int, valsSum float64) 
 	return keysSum, valsSum
 }
 
-func (mt *mapTestImpl) sumStructs(in map[intStruct]intStruct) (keysSum, valsSum int) {
+func (mt mapTestImpl) sumStructs(in map[intStruct]intStruct) (keysSum, valsSum int) {
 	var keySum, valSum int
 	for k, v := range in {
 		keySum += k.i + k.j + k.k + k.l
@@ -28,7 +36,7 @@ func (mt *mapTestImpl) sumStructs(in map[intStruct]intStruct) (keysSum, valsSum 
 	return keySum, valSum
 }
 
-func (mt *mapTestImpl) sumSlices(in map[intStruct][]intStruct) (keysSum, valsSum int) {
+func (mt mapTestImpl) sumSlices(in map[intStruct][]intStruct) (keysSum, valsSum int) {
 	var keySum, valSum int
 	for k, v := range in {
 		keySum += k.i + k.j + k.k + k.l
@@ -37,6 +45,16 @@ func (mt *mapTestImpl) sumSlices(in map[intStruct][]intStruct) (keysSum, valsSum
 		}
 	}
 	return keySum, valSum
+}
+
+// namedKeySum implements mapTest.
+func (mt mapTestImpl) namedKeySum(in map[mapNamedInt]mapNamedFloat64) mapNamedFloat64 {
+	panic("unimplemented")
+}
+
+// namedMapInc implements mapTest.
+func (mt mapTestImpl) namedMapInc(in namedIntFloatMap) namedIntFloatMap {
+	panic("unimplemented")
 }
 
 type intStruct struct {

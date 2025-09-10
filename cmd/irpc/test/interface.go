@@ -2,6 +2,9 @@ package irpctestpkg
 
 import (
 	"errors"
+
+	"github.com/marben/irpc/cmd/irpc/test/out"
+	out2 "github.com/marben/irpc/cmd/irpc/test/out"
 )
 
 //go:generate go run ../
@@ -11,9 +14,40 @@ type interfaceTest interface {
 	rtnTwoErrors() (error, error)
 	rtnStringAndError(msg string) (s string, err error)
 	passCustomInterfaceAndReturnItModified(ci customInterface) (customInterface, error)
+	passJustCustomInterfaceWithoutError(ci customInterface) customInterface // todo: write a test
+
+	// anonymous interface: // todo: write a test
+	passAnonInterface(input interface {
+		Name() string
+		Age() int
+	}) string
+
+	// todo: unsomment and implement proper type naming
+	// passAnonInterfaceWithNamedParams(input interface {
+	// 	a() out.Uint8
+	// 	b() out2.Uint8
+	// }) string
 }
 
+var _ interfaceTest = interfaceTestImpl{}
+
 type interfaceTestImpl struct {
+}
+
+// passAnonInterfaceWithNamedParams implements interfaceTest.
+func (i interfaceTestImpl) passAnonInterfaceWithNamedParams(input interface {
+	a() out.Uint8
+	b() out2.Uint8
+}) string {
+	panic("unimplemented")
+}
+
+// passAnonInterface implements interfaceTest.
+func (i interfaceTestImpl) passAnonInterface(input interface {
+	Age() int
+	Name() string
+}) string {
+	panic("unimplemented")
 }
 
 func (interfaceTestImpl) rtnErrorWithMessage(msg string) error {
@@ -42,6 +76,11 @@ func (interfaceTestImpl) passCustomInterfaceAndReturnItModified(ci customInterfa
 		s: ci.StringFunc() + "_modified",
 	}
 	return impl, nil
+}
+
+// passJustCustomInterfaceWithoutError implements interfaceTest.
+func (i interfaceTestImpl) passJustCustomInterfaceWithoutError(ci customInterface) customInterface {
+	return ci
 }
 
 // todo: currently we are also generating service and client for this interface. perhaps we don't want that?

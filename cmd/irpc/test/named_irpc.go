@@ -15,7 +15,7 @@ type namedTestIRpcService struct {
 func newNamedTestIRpcService(impl namedTest) *namedTestIRpcService {
 	return &namedTestIRpcService{
 		impl: impl,
-		id:   []byte{150, 248, 99, 138, 96, 229, 152, 138, 189, 139, 212, 63, 46, 223, 95, 91, 25, 201, 235, 127, 249, 52, 35, 237, 74, 46, 128, 32, 111, 134, 221, 119},
+		id:   []byte{158, 128, 103, 103, 108, 106, 155, 56, 224, 39, 212, 240, 67, 180, 122, 58, 245, 199, 49, 202, 231, 55, 8, 24, 154, 202, 161, 204, 98, 53, 171, 248},
 	}
 }
 func (s *namedTestIRpcService) Id() []byte {
@@ -118,7 +118,7 @@ type namedTestIRpcClient struct {
 }
 
 func newNamedTestIRpcClient(endpoint irpcgen.Endpoint) (*namedTestIRpcClient, error) {
-	id := []byte{150, 248, 99, 138, 96, 229, 152, 138, 189, 139, 212, 63, 46, 223, 95, 91, 25, 201, 235, 127, 249, 52, 35, 237, 74, 46, 128, 32, 111, 134, 221, 119}
+	id := []byte{158, 128, 103, 103, 108, 106, 155, 56, 224, 39, 212, 240, 67, 180, 122, 58, 245, 199, 49, 202, 231, 55, 8, 24, 154, 202, 161, 204, 98, 53, 171, 248}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -310,7 +310,7 @@ type _Irpc_namedTestcontainsSaturday2Req struct {
 }
 
 func (s _Irpc_namedTestcontainsSaturday2Req) Serialize(e *irpcgen.Encoder) error {
-	{ // s.Param0_wds []weekDay2
+	{ // s.Param0_wds namedWeekDaysSliceType
 		var l int = len(s.Param0_wds)
 		if err := e.UvarInt64(uint64(l)); err != nil {
 			return fmt.Errorf("serialize uint64(l) of type 'uint64': %w", err)
@@ -324,13 +324,13 @@ func (s _Irpc_namedTestcontainsSaturday2Req) Serialize(e *irpcgen.Encoder) error
 	return nil
 }
 func (s *_Irpc_namedTestcontainsSaturday2Req) Deserialize(d *irpcgen.Decoder) error {
-	{ // s.Param0_wds []weekDay2
+	{ // s.Param0_wds namedWeekDaysSliceType
 		var ul uint64
 		if err := d.UvarInt64(&ul); err != nil {
 			return fmt.Errorf("deserialize ul of type 'uint64': %w", err)
 		}
 		var l int = int(ul)
-		s.Param0_wds = make([]weekDay2, l)
+		s.Param0_wds = make(namedWeekDaysSliceType, l)
 		for i := range l {
 			if err := d.Uint8((*uint8)(&s.Param0_wds[i])); err != nil {
 				return fmt.Errorf("deserialize s.Param0_wds[i] of type 'uint8': %w", err)
@@ -362,14 +362,32 @@ type _Irpc_namedTestnamedBytesSumReq struct {
 }
 
 func (s _Irpc_namedTestnamedBytesSumReq) Serialize(e *irpcgen.Encoder) error {
-	if err := e.ByteSlice([]byte(s.Param0_nb)); err != nil {
-		return fmt.Errorf("serialize s.Param0_nb of type '[]byte': %w", err)
+	{ // s.Param0_nb namedByteSliceType
+		var l int = len(s.Param0_nb)
+		if err := e.UvarInt64(uint64(l)); err != nil {
+			return fmt.Errorf("serialize uint64(l) of type 'uint64': %w", err)
+		}
+		for _, v := range s.Param0_nb {
+			if err := e.Uint8(v); err != nil {
+				return fmt.Errorf("serialize v of type 'byte': %w", err)
+			}
+		}
 	}
 	return nil
 }
 func (s *_Irpc_namedTestnamedBytesSumReq) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.ByteSlice((*[]byte)(&s.Param0_nb)); err != nil {
-		return fmt.Errorf("deserialize s.Param0_nb of type '[]byte': %w", err)
+	{ // s.Param0_nb namedByteSliceType
+		var ul uint64
+		if err := d.UvarInt64(&ul); err != nil {
+			return fmt.Errorf("deserialize ul of type 'uint64': %w", err)
+		}
+		var l int = int(ul)
+		s.Param0_nb = make(namedByteSliceType, l)
+		for i := range l {
+			if err := d.Uint8(&s.Param0_nb[i]); err != nil {
+				return fmt.Errorf("deserialize s.Param0_nb[i] of type 'byte': %w", err)
+			}
+		}
 	}
 	return nil
 }
@@ -396,7 +414,7 @@ type _Irpc_namedTestnamedMapSumReq struct {
 }
 
 func (s _Irpc_namedTestnamedMapSumReq) Serialize(e *irpcgen.Encoder) error {
-	{ // s.Param0_p0 map[int]float64
+	{ // s.Param0_p0 namedMap
 		var l int = len(s.Param0_p0)
 		if err := e.UvarInt64(uint64(l)); err != nil {
 			return fmt.Errorf("serialize uint64(l) of type 'uint64': %w", err)
@@ -419,7 +437,7 @@ func (s *_Irpc_namedTestnamedMapSumReq) Deserialize(d *irpcgen.Decoder) error {
 			return fmt.Errorf("deserialize ul of type 'uint64': %w", err)
 		}
 		var l int = int(ul)
-		s.Param0_p0 = make(map[int]float64, l)
+		s.Param0_p0 = make(namedMap, l)
 		for range l {
 			var k int
 			if err := d.VarInt(&k); err != nil {

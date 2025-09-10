@@ -5,8 +5,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/marben/irpc/cmd/irpc/test/out"
-	out1 "github.com/marben/irpc/cmd/irpc/test/out"
-	out2 "github.com/marben/irpc/cmd/irpc/test/out"
 	"github.com/marben/irpc/irpcgen"
 )
 
@@ -18,7 +16,7 @@ type outsidepkgaliasIRpcService struct {
 func newOutsidepkgaliasIRpcService(impl outsidepkgalias) *outsidepkgaliasIRpcService {
 	return &outsidepkgaliasIRpcService{
 		impl: impl,
-		id:   []byte{172, 209, 159, 209, 120, 250, 41, 133, 117, 68, 49, 116, 145, 229, 52, 209, 25, 40, 152, 38, 184, 99, 32, 190, 166, 214, 112, 79, 235, 144, 63, 180},
+		id:   []byte{160, 100, 47, 15, 53, 98, 236, 226, 84, 186, 208, 154, 129, 40, 227, 242, 153, 46, 42, 123, 23, 5, 152, 247, 85, 129, 62, 182, 194, 236, 67, 81},
 	}
 }
 func (s *outsidepkgaliasIRpcService) Id() []byte {
@@ -68,6 +66,20 @@ func (s *outsidepkgaliasIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen
 				return resp
 			}, nil
 		}, nil
+	case 3: // sum
+		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_outsidepkgaliassumReq
+			if err := args.Deserialize(d); err != nil {
+				return nil, err
+			}
+			return func(ctx context.Context) irpcgen.Serializable {
+				// EXECUTE
+				var resp _Irpc_outsidepkgaliassumResp
+				resp.Param0 = s.impl.sum(args.Param0_inSlice)
+				return resp
+			}, nil
+		}, nil
 	default:
 		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, s.Id())
 	}
@@ -79,13 +91,13 @@ type outsidepkgaliasIRpcClient struct {
 }
 
 func newOutsidepkgaliasIRpcClient(endpoint irpcgen.Endpoint) (*outsidepkgaliasIRpcClient, error) {
-	id := []byte{172, 209, 159, 209, 120, 250, 41, 133, 117, 68, 49, 116, 145, 229, 52, 209, 25, 40, 152, 38, 184, 99, 32, 190, 166, 214, 112, 79, 235, 144, 63, 180}
+	id := []byte{160, 100, 47, 15, 53, 98, 236, 226, 84, 186, 208, 154, 129, 40, 227, 242, 153, 46, 42, 123, 23, 5, 152, 247, 85, 129, 62, 182, 194, 236, 67, 81}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
 	return &outsidepkgaliasIRpcClient{endpoint: endpoint, id: id}, nil
 }
-func (_c *outsidepkgaliasIRpcClient) add(a out1.Uint8, b out1.Uint8) int {
+func (_c *outsidepkgaliasIRpcClient) add(a out.Uint8, b out.Uint8) int {
 	var req = _Irpc_outsidepkgaliasaddReq{
 		Param0_a: a,
 		Param1_b: b,
@@ -96,7 +108,7 @@ func (_c *outsidepkgaliasIRpcClient) add(a out1.Uint8, b out1.Uint8) int {
 	}
 	return resp.Param0
 }
-func (_c *outsidepkgaliasIRpcClient) add2(a out1.Uint8, b out.Uint8) int {
+func (_c *outsidepkgaliasIRpcClient) add2(a out.Uint8, b out.Uint8) int {
 	var req = _Irpc_outsidepkgaliasadd2Req{
 		Param0_a: a,
 		Param1_b: b,
@@ -107,7 +119,7 @@ func (_c *outsidepkgaliasIRpcClient) add2(a out1.Uint8, b out.Uint8) int {
 	}
 	return resp.Param0
 }
-func (_c *outsidepkgaliasIRpcClient) add3(a int, b out.Uint8) out2.Uint8 {
+func (_c *outsidepkgaliasIRpcClient) add3(a int, b out.Uint8) out.Uint8 {
 	var req = _Irpc_outsidepkgaliasadd3Req{
 		Param0_a: a,
 		Param1_b: b,
@@ -118,10 +130,20 @@ func (_c *outsidepkgaliasIRpcClient) add3(a int, b out.Uint8) out2.Uint8 {
 	}
 	return resp.Param0
 }
+func (_c *outsidepkgaliasIRpcClient) sum(inSlice out.AliasedByteSlice) int {
+	var req = _Irpc_outsidepkgaliassumReq{
+		Param0_inSlice: inSlice,
+	}
+	var resp _Irpc_outsidepkgaliassumResp
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 3, req, &resp); err != nil {
+		panic(err) // to avoid panic, make your func return error and regenerate the code
+	}
+	return resp.Param0
+}
 
 type _Irpc_outsidepkgaliasaddReq struct {
-	Param0_a out1.Uint8
-	Param1_b out1.Uint8
+	Param0_a out.Uint8
+	Param1_b out.Uint8
 }
 
 func (s _Irpc_outsidepkgaliasaddReq) Serialize(e *irpcgen.Encoder) error {
@@ -161,7 +183,7 @@ func (s *_Irpc_outsidepkgaliasaddResp) Deserialize(d *irpcgen.Decoder) error {
 }
 
 type _Irpc_outsidepkgaliasadd2Req struct {
-	Param0_a out1.Uint8
+	Param0_a out.Uint8
 	Param1_b out.Uint8
 }
 
@@ -226,7 +248,7 @@ func (s *_Irpc_outsidepkgaliasadd3Req) Deserialize(d *irpcgen.Decoder) error {
 }
 
 type _Irpc_outsidepkgaliasadd3Resp struct {
-	Param0 out2.Uint8
+	Param0 out.Uint8
 }
 
 func (s _Irpc_outsidepkgaliasadd3Resp) Serialize(e *irpcgen.Encoder) error {
@@ -238,6 +260,58 @@ func (s _Irpc_outsidepkgaliasadd3Resp) Serialize(e *irpcgen.Encoder) error {
 func (s *_Irpc_outsidepkgaliasadd3Resp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.Uint8((*uint8)(&s.Param0)); err != nil {
 		return fmt.Errorf("deserialize s.Param0 of type 'uint8': %w", err)
+	}
+	return nil
+}
+
+type _Irpc_outsidepkgaliassumReq struct {
+	Param0_inSlice out.AliasedByteSlice
+}
+
+func (s _Irpc_outsidepkgaliassumReq) Serialize(e *irpcgen.Encoder) error {
+	{ // s.Param0_inSlice AliasedByteSlice
+		var l int = len(s.Param0_inSlice)
+		if err := e.UvarInt64(uint64(l)); err != nil {
+			return fmt.Errorf("serialize uint64(l) of type 'uint64': %w", err)
+		}
+		for _, v := range s.Param0_inSlice {
+			if err := e.Uint8(uint8(v)); err != nil {
+				return fmt.Errorf("serialize v of type 'uint8': %w", err)
+			}
+		}
+	}
+	return nil
+}
+func (s *_Irpc_outsidepkgaliassumReq) Deserialize(d *irpcgen.Decoder) error {
+	{ // s.Param0_inSlice out.AliasedByteSlice
+		var ul uint64
+		if err := d.UvarInt64(&ul); err != nil {
+			return fmt.Errorf("deserialize ul of type 'uint64': %w", err)
+		}
+		var l int = int(ul)
+		s.Param0_inSlice = make(out.AliasedByteSlice, l)
+		for i := range l {
+			if err := d.Uint8((*uint8)(&s.Param0_inSlice[i])); err != nil {
+				return fmt.Errorf("deserialize s.Param0_inSlice[i] of type 'uint8': %w", err)
+			}
+		}
+	}
+	return nil
+}
+
+type _Irpc_outsidepkgaliassumResp struct {
+	Param0 int
+}
+
+func (s _Irpc_outsidepkgaliassumResp) Serialize(e *irpcgen.Encoder) error {
+	if err := e.VarInt(s.Param0); err != nil {
+		return fmt.Errorf("serialize s.Param0 of type 'int': %w", err)
+	}
+	return nil
+}
+func (s *_Irpc_outsidepkgaliassumResp) Deserialize(d *irpcgen.Decoder) error {
+	if err := d.VarInt(&s.Param0); err != nil {
+		return fmt.Errorf("deserialize s.Param0 of type 'int': %w", err)
 	}
 	return nil
 }

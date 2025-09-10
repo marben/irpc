@@ -11,9 +11,19 @@ type outsidepkgalias interface {
 	add(a out1.Uint8, b out1.Uint8) int
 	add2(a out1.Uint8, b out.Uint8) int
 	add3(a int, b out.Uint8) out2.Uint8
+	sum(inSlice out1.AliasedByteSlice) int
 }
 
 type outsidepkgaliasImpl struct{}
+
+// sum implements outsidepkgalias.
+func (o *outsidepkgaliasImpl) sum(inSlice out2.AliasedByteSlice) int {
+	var sum int
+	for _, v := range inSlice {
+		sum += int(v)
+	}
+	return sum
+}
 
 // add3 implements outsidepkgalias.
 func (o *outsidepkgaliasImpl) add3(a int, b out2.Uint8) out2.Uint8 {

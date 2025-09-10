@@ -1,6 +1,7 @@
 package irpctestpkg
 
 import (
+	"image"
 	"testing"
 
 	"github.com/marben/irpc/cmd/irpc/test/testtools"
@@ -63,5 +64,10 @@ func TestStructParam(t *testing.T) {
 	res6 := c.InlineReturn(-11)
 	if res6.b != -11+skew {
 		t.Fatalf("res6: %d", res6)
+	}
+
+	res7 := c.PointNeg(image.Point{10, 10})
+	if res7 != (image.Point{-10, -10}) {
+		t.Fatalf("res7: %v", res7)
 	}
 }

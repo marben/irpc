@@ -1,5 +1,7 @@
 package irpctestpkg
 
+import "image"
+
 //go:generate go run ../
 
 type vect3 struct {
@@ -22,6 +24,7 @@ type structAPI interface {
 	InlineParams(s struct{ a int }) int
 	InlineInlineParams(s struct{ a struct{ b int } }) int
 	InlineReturn(a int) struct{ b int }
+	PointNeg(p image.Point) image.Point // todo: write test
 }
 
 var _ structAPI = structImpl{}
@@ -65,4 +68,12 @@ func (i structImpl) SumSliceStruct(s sliceStruct) int {
 		sum += v
 	}
 	return sum + i.skew
+}
+
+// PointNeg implements structAPI.
+func (i structImpl) PointNeg(p image.Point) image.Point {
+	return image.Point{
+		X: -p.X,
+		Y: -p.Y,
+	}
 }

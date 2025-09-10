@@ -3,15 +3,17 @@ package main
 import (
 	"crypto/sha256"
 	"fmt"
+	"go/types"
+	"regexp"
 	"slices"
 	"strings"
 	"unicode"
 )
 
 var (
-	irpcGenImport = importSpec{path: "github.com/marben/irpc/irpcgen"}
-	fmtImport     = importSpec{path: "fmt"} // todo: figure out the imports with importer, like we do with binmarshaller?
-	contextImport = importSpec{path: "context"}
+	irpcGenImport = importSpec{path: "github.com/marben/irpc/irpcgen", pkgName: "irpcgen"}
+	fmtImport     = importSpec{path: "fmt", pkgName: "fmt"} // todo: figure out the imports with importer, like we do with binmarshaller?
+	contextImport = importSpec{path: "context", pkgName: "context"}
 )
 
 // generates unique service hash based on generated code's hash (without the hash;) and service name
@@ -96,4 +98,30 @@ func byteSliceLiteral(in []byte) string {
 		}
 	}
 	return fmt.Sprintf("[]byte{%s}", sb.String())
+}
+
+// sanitizeInterfaceName builds a readable identifier for an inline interface.
+// Example: interface{Age() int; Name() string} → "Iface_Age_Name"
+func sanitizeInterfaceName(iface *types.Interface) string {
+	var parts []string
+
+	// Collect method names
+	for i := 0; i < iface.NumMethods(); i++ {
+		m := iface.Method(i)
+		parts = append(parts, m.Name())
+	}
+
+	// If no methods, just call it "Empty"
+	if len(parts) == 0 {
+		parts = append(parts, "Empty")
+	}
+
+	// Join with underscores
+	name := "Iface_" + strings.Join(parts, "_")
+
+	// Final cleanup: allow only letters, numbers, underscore
+	re := regexp.MustCompile(`[^a-zA-Z0-9_]`)
+	name = re.ReplaceAllString(name, "_")
+
+	return name
 }

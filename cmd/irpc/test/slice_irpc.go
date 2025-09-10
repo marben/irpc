@@ -15,7 +15,7 @@ type sliceTestIRpcService struct {
 func newSliceTestIRpcService(impl sliceTest) *sliceTestIRpcService {
 	return &sliceTestIRpcService{
 		impl: impl,
-		id:   []byte{233, 189, 164, 16, 56, 232, 106, 231, 254, 83, 186, 64, 190, 137, 23, 164, 68, 77, 145, 27, 181, 61, 94, 187, 19, 21, 242, 23, 90, 96, 136, 48},
+		id:   []byte{53, 205, 252, 31, 18, 15, 78, 35, 224, 160, 247, 231, 23, 28, 63, 34, 193, 246, 41, 224, 26, 90, 97, 221, 114, 222, 126, 112, 250, 69, 46, 139},
 	}
 }
 func (s *sliceTestIRpcService) Id() []byte {
@@ -104,7 +104,7 @@ type sliceTestIRpcClient struct {
 }
 
 func newSliceTestIRpcClient(endpoint irpcgen.Endpoint) (*sliceTestIRpcClient, error) {
-	id := []byte{233, 189, 164, 16, 56, 232, 106, 231, 254, 83, 186, 64, 190, 137, 23, 164, 68, 77, 145, 27, 181, 61, 94, 187, 19, 21, 242, 23, 90, 96, 136, 48}
+	id := []byte{53, 205, 252, 31, 18, 15, 78, 35, 224, 160, 247, 231, 23, 28, 63, 34, 193, 246, 41, 224, 26, 90, 97, 221, 114, 222, 126, 112, 250, 69, 46, 139}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -418,14 +418,32 @@ type _Irpc_sliceTestSliceOfBytesSumReq struct {
 }
 
 func (s _Irpc_sliceTestSliceOfBytesSumReq) Serialize(e *irpcgen.Encoder) error {
-	if err := e.ByteSlice(s.Param0_slice); err != nil {
-		return fmt.Errorf("serialize s.Param0_slice of type '[]byte': %w", err)
+	{ // s.Param0_slice []byte
+		var l int = len(s.Param0_slice)
+		if err := e.UvarInt64(uint64(l)); err != nil {
+			return fmt.Errorf("serialize uint64(l) of type 'uint64': %w", err)
+		}
+		for _, v := range s.Param0_slice {
+			if err := e.Uint8(v); err != nil {
+				return fmt.Errorf("serialize v of type 'byte': %w", err)
+			}
+		}
 	}
 	return nil
 }
 func (s *_Irpc_sliceTestSliceOfBytesSumReq) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.ByteSlice(&s.Param0_slice); err != nil {
-		return fmt.Errorf("deserialize s.Param0_slice of type '[]byte': %w", err)
+	{ // s.Param0_slice []byte
+		var ul uint64
+		if err := d.UvarInt64(&ul); err != nil {
+			return fmt.Errorf("deserialize ul of type 'uint64': %w", err)
+		}
+		var l int = int(ul)
+		s.Param0_slice = make([]byte, l)
+		for i := range l {
+			if err := d.Uint8(&s.Param0_slice[i]); err != nil {
+				return fmt.Errorf("deserialize s.Param0_slice[i] of type 'byte': %w", err)
+			}
+		}
 	}
 	return nil
 }

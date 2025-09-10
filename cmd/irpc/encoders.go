@@ -9,20 +9,23 @@ import (
 )
 
 type encoder interface {
-	encode(varId string, existingVars []string) string // inline variable encode
-	decode(varId string, existingVars []string) string // inline variable decode
-	codeblock() string                                 // requested encoder's code block at top level
+	encode(varId string, existingVars []string) string               // inline variable encode
+	decode(varId string, existingVars []string, q *qualifier) string // inline variable decode
+	codeblock() string                                               // requested encoder's code block at top level
 }
 
 type encoderResolver struct {
 	binMarshaler, binUnmarshaler *types.Interface
 	apiName                      string
 	qualifier                    types.Qualifier
-	imports                      orderedSet[importSpec]
 	typesInfo                    *types.Info
 }
 
-func newEncoderResolver(apiName string, qualifier types.Qualifier, typesInfo *types.Info) (*encoderResolver, error) {
+func newEncoderResolver(apiName string, qualifier string, typesInfo *types.Info) (*encoderResolver, error) {
+	qf := func(pkg *types.Package) string {
+		return qualifier
+	}
+
 	imp := importer.Default()
 	encodingPkg, err := imp.Import("encoding")
 	if err != nil {
@@ -41,8 +44,7 @@ func newEncoderResolver(apiName string, qualifier types.Qualifier, typesInfo *ty
 			binMarshaler:   binMarshaler,
 			binUnmarshaler: binUnmarshaler,
 			apiName:        apiName,
-			qualifier:      qualifier,
-			imports:        newOrderedSet[importSpec](),
+			qualifier:      qf,
 			typesInfo:      typesInfo,
 		},
 		nil
@@ -80,8 +82,8 @@ func (er *encoderResolver) varEncoder(t types.Type) (encoder, error) {
 			return er.newMapEncoder(ut.Key(), ut.Elem())
 		case *types.Struct:
 			return er.newStructEncoder(ut)
-		case *types.Interface:
-			return er.newInterfaceEncoder(name, ut)
+		// case *types.Interface:
+		// 	return er.newInterfaceEncoder(name, ut)
 
 		default:
 			return nil, fmt.Errorf("unsupported named type: '%s'", name)
@@ -93,7 +95,6 @@ func (er *encoderResolver) varEncoder(t types.Type) (encoder, error) {
 }
 
 func (er *encoderResolver) newBasicTypeEncoder(t *types.Basic) (directCallEncoder, error) {
-	er.imports.add(irpcGenImport, fmtImport)
 	switch t.Kind() {
 	case types.Bool:
 		return boolEncoder, nil
@@ -128,38 +129,6 @@ func (er *encoderResolver) newBasicTypeEncoder(t *types.Basic) (directCallEncode
 	}
 }
 
-func (er *encoderResolver) newBinaryMarshalerEncoder(t types.Type) (encoder, error) {
-	named, isNamed := t.(*types.Named)
-	if !isNamed {
-		return nil, fmt.Errorf("binMarshaller %T is not named", t)
-	}
-
-	er.imports.add(newImportSpec("", named.Obj().Pkg()))
-
-	return directCallEncoder{
-		encFuncName:        "BinaryMarshaler",
-		decFuncName:        "BinaryUnmarshaler",
-		underlyingTypeName: "encoding.BinaryUnmarshaler", // todo: make encoding type/decoding type
-	}, nil
-}
-
-func (er *encoderResolver) newNamedBasicTypeEncoder(n *types.Named, t *types.Basic, name string) (directCallEncoder, error) {
-	basicEnc, err := er.newBasicTypeEncoder(t)
-	if err != nil {
-		return directCallEncoder{}, fmt.Errorf("get basic type encoder for named type %s: %w", name, err)
-	}
-	basicEnc.typeName = name
-	return basicEnc, nil
-}
-
-func newSymmetricDirectCallEncoder(encDecFunc string, underlyingTypeName string) directCallEncoder {
-	return directCallEncoder{
-		encFuncName:        encDecFunc,
-		decFuncName:        encDecFunc,
-		underlyingTypeName: underlyingTypeName,
-	}
-}
-
 var (
 	boolEncoder      = newSymmetricDirectCallEncoder("Bool", "bool")
 	intEncoder       = newSymmetricDirectCallEncoder("VarInt", "int")
@@ -178,28 +147,66 @@ var (
 	byteSliceEncoder = newSymmetricDirectCallEncoder("ByteSlice", "[]byte")
 )
 
-type importSpec struct {
-	alias string
-	path  string
+func (er *encoderResolver) newBinaryMarshalerEncoder(t types.Type) (encoder, error) {
+	return directCallEncoder{
+		encFuncName:        "BinaryMarshaler",
+		decFuncName:        "BinaryUnmarshaler",
+		underlyingTypeName: "encoding.BinaryUnmarshaler", // todo: make encoding type/decoding type
+	}, nil
 }
 
-func newImportSpec(alias string, pkg *types.Package) importSpec {
-	return importSpec{alias: alias, path: pkg.Path()}
+func (er *encoderResolver) newNamedBasicTypeEncoder(n *types.Named, t *types.Basic, name string) (directCallEncoder, error) {
+	basicEnc, err := er.newBasicTypeEncoder(t)
+	if err != nil {
+		return directCallEncoder{}, fmt.Errorf("get basic type encoder for named type %s: %w", name, err)
+	}
+	basicEnc.needsCasting = name != ""
+	return basicEnc, nil
+}
+
+func newSymmetricDirectCallEncoder(encDecFunc string, underlyingTypeName string) directCallEncoder {
+	return directCallEncoder{
+		encFuncName:        encDecFunc,
+		decFuncName:        encDecFunc,
+		underlyingTypeName: underlyingTypeName,
+	}
+}
+
+func newSymmetricDirectCallEncoder2(encDecFunc string, underlyingTypeName, qualifiedTypeName string) directCallEncoder {
+	return directCallEncoder{
+		encFuncName:        encDecFunc,
+		decFuncName:        encDecFunc,
+		underlyingTypeName: underlyingTypeName,
+		needsCasting:       qualifiedTypeName != "",
+	}
+}
+
+type importSpec struct {
+	alias   string // "myCtx" in `import myCtx "context"``
+	path    string // fully qualifies the package
+	pkgName string // the "context" in "context.Context"
+}
+
+func (is importSpec) packageQualifier() string {
+	if is.alias != "" {
+		return is.alias
+	}
+	return is.pkgName
 }
 
 type directCallEncoder struct {
 	encFuncName        string
 	decFuncName        string
 	underlyingTypeName string
-	typeName           string // if named, otherwise ""
+	needsCasting       bool // if named, otherwise ""
 }
 
 func (e directCallEncoder) encode(varId string, existingVars []string) string {
 	var varParam string
-	if e.typeName == "" {
-		varParam = varId
-	} else {
+	if e.needsCasting {
 		varParam = fmt.Sprintf("%s(%s)", e.underlyingTypeName, varId)
+	} else {
+		varParam = varId
 	}
 
 	return fmt.Sprintf(`if err := e.%s(%s); err != nil {
@@ -208,12 +215,12 @@ func (e directCallEncoder) encode(varId string, existingVars []string) string {
 	`, e.encFuncName, varParam, varId, e.underlyingTypeName)
 }
 
-func (e directCallEncoder) decode(varId string, existingVars []string) string {
+func (e directCallEncoder) decode(varId string, existingVars []string, _ *qualifier) string {
 	var varParam string
-	if e.typeName == "" {
-		varParam = "&" + varId
-	} else {
+	if e.needsCasting {
 		varParam = fmt.Sprintf("(*%s)(&%s)", e.underlyingTypeName, varId)
+	} else {
+		varParam = "&" + varId
 	}
 	sb := &strings.Builder{}
 	fmt.Fprintf(sb, `if err := d.%s(%s); err != nil{
@@ -239,7 +246,7 @@ type sliceEncoder struct {
 func (er *encoderResolver) newSliceEncoder(t *types.Slice, name string) (encoder, error) {
 	if t.Elem().String() == "byte" {
 		bs := byteSliceEncoder
-		bs.typeName = name
+		bs.needsCasting = name != "" // todo: not nic, pass bool to this func
 		return bs, nil
 	}
 
@@ -274,13 +281,13 @@ func (e sliceEncoder) encode(varId string, existingVars []string) string {
 	return sb.String()
 }
 
-func (e sliceEncoder) decode(varId string, existingVars []string) string {
+func (e sliceEncoder) decode(varId string, existingVars []string, q *qualifier) string {
 	sb := &strings.Builder{}
 
 	// length
 	fmt.Fprintf(sb, "{ // %s []%s\n", varId, e.elemTypeStr)
 	sb.WriteString("var ul uint64\n")
-	sb.WriteString(e.lenEnc.decode("ul", existingVars))
+	sb.WriteString(e.lenEnc.decode("ul", existingVars, q))
 	sb.WriteString("var l int = int(ul)\n")
 	existingVars = append(existingVars, "l", "ul")
 
@@ -289,7 +296,7 @@ func (e sliceEncoder) decode(varId string, existingVars []string) string {
 	existingVars = append(existingVars, itName)
 	fmt.Fprintf(sb, "%s = make([]%s, l)\n", varId, e.elemTypeStr)
 	fmt.Fprintf(sb, "for %s := range l {", itName)
-	sb.WriteString(e.elemEnc.decode(varId+"["+itName+"]", existingVars))
+	sb.WriteString(e.elemEnc.decode(varId+"["+itName+"]", existingVars, q))
 	sb.WriteString("}\n")
 	sb.WriteString("}\n")
 
@@ -352,13 +359,13 @@ func (e mapEncoder) encode(varId string, existingVars []string) string {
 	return sb.String()
 }
 
-func (e mapEncoder) decode(varId string, existingVars []string) string {
+func (e mapEncoder) decode(varId string, existingVars []string, q *qualifier) string {
 	sb := &strings.Builder{}
 
 	// length
 	fmt.Fprintf(sb, "{ // %s\n", varId)
 	sb.WriteString("var ul uint64\n")
-	sb.WriteString(e.lenEnc.decode("ul", existingVars))
+	sb.WriteString(e.lenEnc.decode("ul", existingVars, q))
 	sb.WriteString("var l int = int(ul)\n")
 	existingVars = append(existingVars, "ul", "l")
 
@@ -367,11 +374,11 @@ func (e mapEncoder) decode(varId string, existingVars []string) string {
 
 	fmt.Fprintf(sb, "var k %s\n", e.keyTypeStr)
 	existingVars = append(existingVars, "k")
-	fmt.Fprintf(sb, "%s\n", e.keyEnc.decode("k", existingVars))
+	fmt.Fprintf(sb, "%s\n", e.keyEnc.decode("k", existingVars, q))
 
 	fmt.Fprintf(sb, "var v %s\n", e.valTypeStr)
 	existingVars = append(existingVars, "v")
-	fmt.Fprintf(sb, "%s\n", e.valEnc.decode("v", existingVars))
+	fmt.Fprintf(sb, "%s\n", e.valEnc.decode("v", existingVars, q))
 
 	fmt.Fprintf(sb, "%s[k] = v", varId)
 	sb.WriteString("}\n")
@@ -418,10 +425,10 @@ func (e structEncoder) encode(varId string, existingVars []string) string {
 	return sb.String()
 }
 
-func (e structEncoder) decode(varId string, existingVars []string) string {
+func (e structEncoder) decode(varId string, existingVars []string, q *qualifier) string {
 	sb := &strings.Builder{}
 	for _, f := range e.fields {
-		sb.WriteString(f.enc.decode(varId+"."+f.name, existingVars))
+		sb.WriteString(f.enc.decode(varId+"."+f.name, existingVars, q))
 	}
 	return sb.String()
 }
@@ -432,7 +439,7 @@ func (e structEncoder) codeblock() string {
 
 type ifaceFunc struct {
 	funcName string
-	results  []ifaceRtnVar
+	results  []ifaceRtnVar2
 }
 
 // comma separated list of variable names and types. ex: "a int, b float64"
@@ -440,7 +447,7 @@ func (ifnc ifaceFunc) rtnParams() string {
 	// todo: somehow share with paramStructGenerator's funcCallParams ?
 	b := &strings.Builder{}
 	for i, v := range ifnc.results {
-		fmt.Fprintf(b, "%s %s", v.varName, v.rtnTypeName)
+		fmt.Fprintf(b, "%s %s", v.name, v.t.Name()) // todo: need qualified name?
 		if i != len(ifnc.results)-1 {
 			b.WriteString(",")
 		}
@@ -458,6 +465,12 @@ func (ifnc ifaceFunc) retParamsPrefixed(prefix string) string {
 		}
 	}
 	return buf.String()
+}
+
+type ifaceRtnVar2 struct {
+	name          string
+	implParamName string // name as used within interface's implementation struct // todo: get rid of?
+	t             Type
 }
 
 type ifaceRtnVar struct {
@@ -502,7 +515,7 @@ func (er *encoderResolver) newInterfaceEncoder(name string, it *types.Interface)
 
 		fncs = append(fncs, ifaceFunc{
 			funcName: m.Name(),
-			results:  results,
+			// results:  results,
 		})
 	}
 
@@ -515,6 +528,7 @@ func (er *encoderResolver) newInterfaceEncoder(name string, it *types.Interface)
 	}, nil
 }
 
+/*
 func (e interfaceEncoder) encode(varId string, existingVars []string) string {
 	sb := &strings.Builder{}
 	sb.WriteString("{\n") // separate block
@@ -544,51 +558,54 @@ func (e interfaceEncoder) encode(varId string, existingVars []string) string {
 
 	return sb.String()
 }
+*/
 
-func (e interfaceEncoder) decode(varId string, existingVars []string) string {
+func (e interfaceEncoder) decode(varId string, existingVars []string, q *qualifier) string {
 	sb := &strings.Builder{}
-	sb.WriteString("{\n") // separate block
-	fmt.Fprintf(sb, `var isNil bool
-	%s
-	if isNil {
-		%s = nil
-	} else {
-	`, boolEncoder.decode("isNil", existingVars), varId)
+	/*
+		sb.WriteString("{\n") // separate block
+		fmt.Fprintf(sb, `var isNil bool
+		%s
+		if isNil {
+			%s = nil
+		} else {
+		`, boolEncoder.decode("isNil", existingVars, q), varId)
 
-	fmt.Fprintf(sb, "var impl %s\n", e.implTypeName)
-	for _, f := range e.fncs {
-		fmt.Fprintf(sb, "{ // %s()\n", f.funcName)
-		for _, v := range f.results {
-			sb.WriteString(v.enc.decode("impl."+v.implParamName, existingVars))
+		fmt.Fprintf(sb, "var impl %s\n", e.implTypeName)
+		for _, f := range e.fncs {
+			fmt.Fprintf(sb, "{ // %s()\n", f.funcName)
+			for _, v := range f.results {
+				sb.WriteString(v.enc.decode("impl."+v.implParamName, existingVars, q))
+			}
+			sb.WriteString("}\n")
 		}
-		sb.WriteString("}\n")
-	}
-	fmt.Fprintf(sb, "%s = impl\n", varId)
-	sb.WriteString("}\n") // else {
-	sb.WriteString("}\n") // separate block
-
+		fmt.Fprintf(sb, "%s = impl\n", varId)
+		sb.WriteString("}\n") // else {
+		sb.WriteString("}\n") // separate block
+	*/
 	return sb.String()
 }
 
 func (e interfaceEncoder) codeblock() string {
 	sb := &strings.Builder{}
-
-	// type declaration
-	fmt.Fprintf(sb, "type %s struct {\n", e.implTypeName)
-	for _, f := range e.fncs {
-		for _, v := range f.results {
-			fmt.Fprintf(sb, "%s %s\n", v.implParamName, v.rtnTypeName)
+	/*
+		// type declaration
+		fmt.Fprintf(sb, "type %s struct {\n", e.implTypeName)
+		for _, f := range e.fncs {
+			for _, v := range f.results {
+				fmt.Fprintf(sb, "%s %s\n", v.implParamName, v.rtnTypeName)
+			}
 		}
-	}
-	sb.WriteString("}\n")
-
-	// fncs
-	for _, f := range e.fncs {
-		fmt.Fprintf(sb, "func (i %s)%s()(%s){\n", e.implTypeName, f.funcName, f.rtnParams())
-		fmt.Fprintf(sb, "return %s\n", f.retParamsPrefixed("i."))
 		sb.WriteString("}\n")
-	}
 
+		// fncs
+		for _, f := range e.fncs {
+			fmt.Fprintf(sb, "func (i %s)%s()(%s){\n", e.implTypeName, f.funcName, f.rtnParams())
+			fmt.Fprintf(sb, "return %s\n", f.retParamsPrefixed("i."))
+			sb.WriteString("}\n")
+		}
+
+	*/
 	return sb.String()
 }
 
@@ -605,7 +622,7 @@ func (c contextEncoder) codeblock() string {
 }
 
 // decode implements encoder.
-func (c contextEncoder) decode(varId string, existingVars []string) string {
+func (c contextEncoder) decode(varId string, existingVars []string, q *qualifier) string {
 	return "// no code for context decoding\n"
 }
 
