@@ -70,8 +70,7 @@ func (st sliceType) decode(varId string, existingVars varNameList, q *qualifier)
 	existingVars = append(existingVars, "l", "ul")
 
 	// for loop
-	itName := generateIteratorName(existingVars)
-	existingVars = append(existingVars, itName)
+	itName := existingVars.generateIteratorName()
 	fmt.Fprintf(sb, "%s = make(%s, l)\n", varId, st.Name(q))
 	fmt.Fprintf(sb, "for %s := range l {", itName)
 	sb.WriteString(st.elem.decode(varId+"["+itName+"]", existingVars, q))

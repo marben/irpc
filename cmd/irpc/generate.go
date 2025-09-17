@@ -42,59 +42,51 @@ func generateStructConstructorName(structName string) string {
 	return string(rtn)
 }
 
-// makes sure varname is unique among existing vars. extends it with enough "_" if necessary.
-// returns the new unique var name
-// todo: have a look why func params etc. perhaps turn into a single func?
-func generateUniqueVarnameForFuncParams(varName string, existingVars []funcParam) string {
-loop:
-	for _, vf := range existingVars {
-		if vf.identifier == varName {
-			varName += "_"
-			goto loop
-		}
-	}
-	return varName
-}
-
+// not a pointer type!
 type varNameList []string
 
 func (l *varNameList) generateUniqueVarName(idealName string) string {
-	if !slices.Contains(*l, idealName) {
-		*l = append(*l, idealName)
+	if !l.contains(idealName) {
+		l.addVarName(idealName)
 		return idealName
 	}
 	for i := 2; ; i++ {
 		testVar := idealName + strconv.Itoa(i)
-		if !slices.Contains(*l, testVar) {
-			*l = append(*l, testVar)
+		if !l.contains(testVar) {
+			l.addVarName(testVar)
 			return testVar
 		}
 	}
 }
 
-func (l *varNameList) addVarName(vn string) {
-	*l = append(*l, vn)
+func (l *varNameList) addVarName(vn ...string) {
+	*l = append(*l, vn...)
 }
 
-// encoding/decoding of slices requires unique iterator names
-// we generate them from variable name, but we need to remove some characters
-// replaces '[' ']' '.' with underscore
-func generateIteratorName(existingVars []string) string {
+func (l varNameList) contains(vn string) bool {
+	return slices.Contains(l, vn)
+}
+
+func (l *varNameList) generateIteratorName() string {
 	possibleNames := []string{"i", "j", "k", "l", "m", "n"}
+	appendix := 2
 	for {
 		for i, n := range possibleNames {
-			if !slices.Contains(existingVars, n) {
+			if !l.contains(n) {
+				l.addVarName(n)
 				return n
 			}
-			possibleNames[i] = n + "_"
+			possibleNames[i] = n + strconv.Itoa(appendix)
 		}
+		appendix++
 	}
 }
 
-func generateKeyValueIteratorNames(existingVars []string) (kIt, vIt string) {
+func (l *varNameList) generateKeyValueIteratorNames() (kIt, vIt string) {
 	// start with k, v ; if those are taken, continue to k2, v2; k3, v3 etc
 
-	if !slices.Contains(existingVars, "k") && !slices.Contains(existingVars, "v") {
+	if !l.contains("k") && !l.contains("v") {
+		l.addVarName("k", "v")
 		return "k", "v"
 	}
 
@@ -102,7 +94,8 @@ func generateKeyValueIteratorNames(existingVars []string) (kIt, vIt string) {
 	for i := 2; ; i++ {
 		k := fmt.Sprintf("k%d", i)
 		v := fmt.Sprintf("v%d", i)
-		if !slices.Contains(existingVars, k) && !slices.Contains(existingVars, v) {
+		if !l.contains(k) && !l.contains(v) {
+			l.addVarName(k, v)
 			return k, v
 		}
 	}

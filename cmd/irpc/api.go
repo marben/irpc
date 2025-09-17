@@ -64,14 +64,20 @@ func (ag *apiGenerator) clientCode(hash []byte, q *qualifier) string {
 		// func header
 		fmt.Fprintf(b, "func(%s *%s)%s(%s)(%s){\n", fncReceiverName, clientTypeName, m.name, m.req.funcCallParams(q), m.resp.funcCallParams(q))
 
-		allVars := append(m.req.params, m.resp.params...)
+		var allVarIds varNameList
+		for _, p := range m.req.params {
+			allVarIds.addVarName(p.identifier)
+		}
+		for _, p := range m.resp.params {
+			allVarIds.addVarName(p.identifier)
+		}
 
 		// request
 		var reqVarName string
 		if m.req.isEmpty() {
 			reqVarName = "irpcgen.EmptySerializable{}"
 		} else {
-			reqVarName = generateUniqueVarnameForFuncParams("req", allVars)
+			reqVarName = allVarIds.generateUniqueVarName("req")
 			// request construction
 			fmt.Fprintf(b, "var %s = %s {\n", reqVarName, m.req.typeName)
 			for _, p := range m.req.params {
@@ -89,7 +95,8 @@ func (ag *apiGenerator) clientCode(hash []byte, q *qualifier) string {
 		if m.resp.isEmpty() {
 			respVarName = "irpcgen.EmptyDeserializable{}"
 		} else {
-			respVarName = generateUniqueVarnameForFuncParams("resp", allVars)
+			// respVarName = generateUniqueVarnameForFuncParams("resp", allVarIds)
+			respVarName = allVarIds.generateUniqueVarName("resp")
 			fmt.Fprintf(b, "var %s %s\n", respVarName, m.resp.typeName)
 		}
 

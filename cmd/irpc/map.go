@@ -96,8 +96,7 @@ func (m mapType) encode(varId string, existingVars varNameList, q *qualifier) st
 	sb.WriteString(m.lenEnc.encode("uint64(l)", existingVars, q))
 	existingVars = append(existingVars, "l")
 
-	keyIt, valIt := generateKeyValueIteratorNames(existingVars)
-	existingVars = append(existingVars, keyIt, valIt)
+	keyIt, valIt := existingVars.generateKeyValueIteratorNames()
 
 	// for loop
 	fmt.Fprintf(sb, "for %s, %s := range %s {", keyIt, valIt, varId)
