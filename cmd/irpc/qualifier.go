@@ -1,7 +1,5 @@
 package main
 
-import "log"
-
 // todo: remove the cyclic dependency to generator
 // todo: probably best would be to contain all the import specs in here
 type qualifier struct {
@@ -21,7 +19,7 @@ func newQualifier(g *generator, tr *typeResolver, srcFileImports orderedSet[impo
 }
 
 func (q *qualifier) qualifyNamedInfo(ni namedInfo) string {
-	log.Printf("qualifying for importspec: %#v", ni.importSpec)
+	// log.Printf("qualifying for importspec: %#v", ni.importSpec)
 	qual := q.qualifierForImportSpec(ni.importSpec)
 	if qual == "" {
 		return ni.namedName
