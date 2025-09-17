@@ -4,6 +4,8 @@ package irpctestpkg
 import (
 	"context"
 	"fmt"
+	"github.com/marben/irpc/cmd/irpc/test/out"
+	out2 "github.com/marben/irpc/cmd/irpc/test/out"
 	"github.com/marben/irpc/irpcgen"
 )
 
@@ -15,7 +17,7 @@ type interfaceTestIRpcService struct {
 func newInterfaceTestIRpcService(impl interfaceTest) *interfaceTestIRpcService {
 	return &interfaceTestIRpcService{
 		impl: impl,
-		id:   []byte{241, 103, 62, 38, 149, 235, 209, 167, 120, 217, 112, 193, 144, 19, 243, 208, 90, 214, 99, 107, 45, 78, 50, 75, 145, 228, 47, 95, 77, 201, 216, 227},
+		id:   []byte{86, 227, 247, 136, 86, 170, 197, 88, 139, 109, 179, 41, 16, 211, 140, 228, 208, 49, 28, 230, 5, 226, 40, 168, 158, 116, 55, 240, 51, 2, 77, 158},
 	}
 }
 func (s *interfaceTestIRpcService) Id() []byte {
@@ -111,6 +113,20 @@ func (s *interfaceTestIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.A
 				return resp
 			}, nil
 		}, nil
+	case 7: // passAnonInterfaceWithNamedParams
+		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_interfaceTestpassAnonInterfaceWithNamedParamsReq
+			if err := args.Deserialize(d); err != nil {
+				return nil, err
+			}
+			return func(ctx context.Context) irpcgen.Serializable {
+				// EXECUTE
+				var resp _Irpc_interfaceTestpassAnonInterfaceWithNamedParamsResp
+				resp.Param0 = s.impl.passAnonInterfaceWithNamedParams(args.Param0_input)
+				return resp
+			}, nil
+		}, nil
 	default:
 		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, s.Id())
 	}
@@ -124,7 +140,7 @@ type customInterfaceIRpcService struct {
 func newCustomInterfaceIRpcService(impl customInterface) *customInterfaceIRpcService {
 	return &customInterfaceIRpcService{
 		impl: impl,
-		id:   []byte{2, 126, 102, 21, 86, 149, 168, 94, 37, 179, 187, 121, 68, 95, 156, 163, 170, 2, 69, 176, 49, 121, 199, 228, 122, 127, 44, 214, 80, 145, 114, 139},
+		id:   []byte{51, 1, 171, 16, 21, 190, 80, 119, 145, 192, 35, 4, 231, 85, 180, 42, 84, 87, 187, 71, 146, 43, 8, 223, 173, 79, 15, 146, 204, 228, 246, 77},
 	}
 }
 func (s *customInterfaceIRpcService) Id() []byte {
@@ -161,7 +177,7 @@ type interfaceTestIRpcClient struct {
 }
 
 func newInterfaceTestIRpcClient(endpoint irpcgen.Endpoint) (*interfaceTestIRpcClient, error) {
-	id := []byte{241, 103, 62, 38, 149, 235, 209, 167, 120, 217, 112, 193, 144, 19, 243, 208, 90, 214, 99, 107, 45, 78, 50, 75, 145, 228, 47, 95, 77, 201, 216, 227}
+	id := []byte{86, 227, 247, 136, 86, 170, 197, 88, 139, 109, 179, 41, 16, 211, 140, 228, 208, 49, 28, 230, 5, 226, 40, 168, 158, 116, 55, 240, 51, 2, 77, 158}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -237,6 +253,20 @@ func (_c *interfaceTestIRpcClient) passAnonInterface(input interface {
 	}
 	return resp.Param0
 }
+func (_c *interfaceTestIRpcClient) passAnonInterfaceWithNamedParams(input interface {
+	a() (out.Uint8, int)
+	b() out2.Uint8
+	c() (out2.Uint8, error)
+}) string {
+	var req = _Irpc_interfaceTestpassAnonInterfaceWithNamedParamsReq{
+		Param0_input: input,
+	}
+	var resp _Irpc_interfaceTestpassAnonInterfaceWithNamedParamsResp
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 7, req, &resp); err != nil {
+		panic(err) // to avoid panic, make your func return error and regenerate the code
+	}
+	return resp.Param0
+}
 
 type customInterfaceIRpcClient struct {
 	endpoint irpcgen.Endpoint
@@ -244,7 +274,7 @@ type customInterfaceIRpcClient struct {
 }
 
 func newCustomInterfaceIRpcClient(endpoint irpcgen.Endpoint) (*customInterfaceIRpcClient, error) {
-	id := []byte{2, 126, 102, 21, 86, 149, 168, 94, 37, 179, 187, 121, 68, 95, 156, 163, 170, 2, 69, 176, 49, 121, 199, 228, 122, 127, 44, 214, 80, 145, 114, 139}
+	id := []byte{51, 1, 171, 16, 21, 190, 80, 119, 145, 192, 35, 4, 231, 85, 180, 42, 84, 87, 187, 71, 146, 43, 8, 223, 173, 79, 15, 146, 204, 228, 246, 77}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -317,7 +347,7 @@ func (s *_Irpc_interfaceTestrtnErrorWithMessageResp) Deserialize(d *irpcgen.Deco
 		if isNil {
 			s.Param0 = nil
 		} else {
-			var impl _error_interfaceTest_irpcInterfaceImpl
+			var impl _error_interfaceTest_impl
 			{ // Error()
 				if err := d.String(&impl._Error_0_); err != nil {
 					return fmt.Errorf("deserialize impl._Error_0_ of type 'string': %w", err)
@@ -329,11 +359,11 @@ func (s *_Irpc_interfaceTestrtnErrorWithMessageResp) Deserialize(d *irpcgen.Deco
 	return nil
 }
 
-type _error_interfaceTest_irpcInterfaceImpl struct {
+type _error_interfaceTest_impl struct {
 	_Error_0_ string
 }
 
-func (i _error_interfaceTest_irpcInterfaceImpl) Error() string {
+func (i _error_interfaceTest_impl) Error() string {
 	return i._Error_0_
 }
 
@@ -372,7 +402,7 @@ func (s *_Irpc_interfaceTestrtnNilErrorResp) Deserialize(d *irpcgen.Decoder) err
 		if isNil {
 			s.Param0 = nil
 		} else {
-			var impl _error_interfaceTest_irpcInterfaceImpl
+			var impl _error_interfaceTest_impl
 			{ // Error()
 				if err := d.String(&impl._Error_0_); err != nil {
 					return fmt.Errorf("deserialize impl._Error_0_ of type 'string': %w", err)
@@ -438,7 +468,7 @@ func (s *_Irpc_interfaceTestrtnTwoErrorsResp) Deserialize(d *irpcgen.Decoder) er
 		if isNil {
 			s.Param0 = nil
 		} else {
-			var impl _error_interfaceTest_irpcInterfaceImpl
+			var impl _error_interfaceTest_impl
 			{ // Error()
 				if err := d.String(&impl._Error_0_); err != nil {
 					return fmt.Errorf("deserialize impl._Error_0_ of type 'string': %w", err)
@@ -456,7 +486,7 @@ func (s *_Irpc_interfaceTestrtnTwoErrorsResp) Deserialize(d *irpcgen.Decoder) er
 		if isNil {
 			s.Param1 = nil
 		} else {
-			var impl _error_interfaceTest_irpcInterfaceImpl
+			var impl _error_interfaceTest_impl
 			{ // Error()
 				if err := d.String(&impl._Error_0_); err != nil {
 					return fmt.Errorf("deserialize impl._Error_0_ of type 'string': %w", err)
@@ -527,7 +557,7 @@ func (s *_Irpc_interfaceTestrtnStringAndErrorResp) Deserialize(d *irpcgen.Decode
 		if isNil {
 			s.Param1_err = nil
 		} else {
-			var impl _error_interfaceTest_irpcInterfaceImpl
+			var impl _error_interfaceTest_impl
 			{ // Error()
 				if err := d.String(&impl._Error_0_); err != nil {
 					return fmt.Errorf("deserialize impl._Error_0_ of type 'string': %w", err)
@@ -580,7 +610,7 @@ func (s *_Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedReq) Deseriali
 		if isNil {
 			s.Param0_ci = nil
 		} else {
-			var impl _customInterface_interfaceTest_irpcInterfaceImpl
+			var impl _customInterface_interfaceTest_impl
 			{ // IntFunc()
 				if err := d.VarInt(&impl._IntFunc_0_); err != nil {
 					return fmt.Errorf("deserialize impl._IntFunc_0_ of type 'int': %w", err)
@@ -597,15 +627,15 @@ func (s *_Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedReq) Deseriali
 	return nil
 }
 
-type _customInterface_interfaceTest_irpcInterfaceImpl struct {
+type _customInterface_interfaceTest_impl struct {
 	_IntFunc_0_    int
 	_StringFunc_0_ string
 }
 
-func (i _customInterface_interfaceTest_irpcInterfaceImpl) IntFunc() int {
+func (i _customInterface_interfaceTest_impl) IntFunc() int {
 	return i._IntFunc_0_
 }
-func (i _customInterface_interfaceTest_irpcInterfaceImpl) StringFunc() string {
+func (i _customInterface_interfaceTest_impl) StringFunc() string {
 	return i._StringFunc_0_
 }
 
@@ -669,7 +699,7 @@ func (s *_Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp) Deserial
 		if isNil {
 			s.Param0 = nil
 		} else {
-			var impl _customInterface_interfaceTest_irpcInterfaceImpl
+			var impl _customInterface_interfaceTest_impl
 			{ // IntFunc()
 				if err := d.VarInt(&impl._IntFunc_0_); err != nil {
 					return fmt.Errorf("deserialize impl._IntFunc_0_ of type 'int': %w", err)
@@ -692,7 +722,7 @@ func (s *_Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedResp) Deserial
 		if isNil {
 			s.Param1 = nil
 		} else {
-			var impl _error_interfaceTest_irpcInterfaceImpl
+			var impl _error_interfaceTest_impl
 			{ // Error()
 				if err := d.String(&impl._Error_0_); err != nil {
 					return fmt.Errorf("deserialize impl._Error_0_ of type 'string': %w", err)
@@ -745,7 +775,7 @@ func (s *_Irpc_interfaceTestpassJustCustomInterfaceWithoutErrorReq) Deserialize(
 		if isNil {
 			s.Param0_ci = nil
 		} else {
-			var impl _customInterface_interfaceTest_irpcInterfaceImpl
+			var impl _customInterface_interfaceTest_impl
 			{ // IntFunc()
 				if err := d.VarInt(&impl._IntFunc_0_); err != nil {
 					return fmt.Errorf("deserialize impl._IntFunc_0_ of type 'int': %w", err)
@@ -803,7 +833,7 @@ func (s *_Irpc_interfaceTestpassJustCustomInterfaceWithoutErrorResp) Deserialize
 		if isNil {
 			s.Param0 = nil
 		} else {
-			var impl _customInterface_interfaceTest_irpcInterfaceImpl
+			var impl _customInterface_interfaceTest_impl
 			{ // IntFunc()
 				if err := d.VarInt(&impl._IntFunc_0_); err != nil {
 					return fmt.Errorf("deserialize impl._IntFunc_0_ of type 'int': %w", err)
@@ -864,7 +894,7 @@ func (s *_Irpc_interfaceTestpassAnonInterfaceReq) Deserialize(d *irpcgen.Decoder
 		if isNil {
 			s.Param0_input = nil
 		} else {
-			var impl _Iface_Age_Name_interfaceTest_irpcInterfaceImpl
+			var impl _iface_Age_Name_interfaceTest_impl
 			{ // Age()
 				if err := d.VarInt(&impl._Age_0_); err != nil {
 					return fmt.Errorf("deserialize impl._Age_0_ of type 'int': %w", err)
@@ -881,15 +911,15 @@ func (s *_Irpc_interfaceTestpassAnonInterfaceReq) Deserialize(d *irpcgen.Decoder
 	return nil
 }
 
-type _Iface_Age_Name_interfaceTest_irpcInterfaceImpl struct {
+type _iface_Age_Name_interfaceTest_impl struct {
 	_Age_0_  int
 	_Name_0_ string
 }
 
-func (i _Iface_Age_Name_interfaceTest_irpcInterfaceImpl) Age() int {
+func (i _iface_Age_Name_interfaceTest_impl) Age() int {
 	return i._Age_0_
 }
-func (i _Iface_Age_Name_interfaceTest_irpcInterfaceImpl) Name() string {
+func (i _iface_Age_Name_interfaceTest_impl) Name() string {
 	return i._Name_0_
 }
 
@@ -904,6 +934,156 @@ func (s _Irpc_interfaceTestpassAnonInterfaceResp) Serialize(e *irpcgen.Encoder) 
 	return nil
 }
 func (s *_Irpc_interfaceTestpassAnonInterfaceResp) Deserialize(d *irpcgen.Decoder) error {
+	if err := d.String(&s.Param0); err != nil {
+		return fmt.Errorf("deserialize s.Param0 of type 'string': %w", err)
+	}
+	return nil
+}
+
+type _Irpc_interfaceTestpassAnonInterfaceWithNamedParamsReq struct {
+	Param0_input interface {
+		a() (out.Uint8, int)
+		b() out2.Uint8
+		c() (out2.Uint8, error)
+	}
+}
+
+func (s _Irpc_interfaceTestpassAnonInterfaceWithNamedParamsReq) Serialize(e *irpcgen.Encoder) error {
+	{
+		var isNil bool
+		if s.Param0_input == nil {
+			isNil = true
+		}
+		if err := e.Bool(isNil); err != nil {
+			return fmt.Errorf("serialize isNil of type 'bool': %w", err)
+		}
+
+		if !isNil {
+			{ // a()
+				_a_0_, _a_1_ := s.Param0_input.a()
+				if err := e.Uint8(uint8(_a_0_)); err != nil {
+					return fmt.Errorf("serialize _a_0_ of type 'uint8': %w", err)
+				}
+				if err := e.VarInt(_a_1_); err != nil {
+					return fmt.Errorf("serialize _a_1_ of type 'int': %w", err)
+				}
+			}
+			{ // b()
+				_b_0_ := s.Param0_input.b()
+				if err := e.Uint8(uint8(_b_0_)); err != nil {
+					return fmt.Errorf("serialize _b_0_ of type 'uint8': %w", err)
+				}
+			}
+			{ // c()
+				_c_0_, _c_1_ := s.Param0_input.c()
+				if err := e.Uint8(uint8(_c_0_)); err != nil {
+					return fmt.Errorf("serialize _c_0_ of type 'uint8': %w", err)
+				}
+				{
+					var isNil bool
+					if _c_1_ == nil {
+						isNil = true
+					}
+					if err := e.Bool(isNil); err != nil {
+						return fmt.Errorf("serialize isNil of type 'bool': %w", err)
+					}
+
+					if !isNil {
+						{ // Error()
+							_Error_0_ := _c_1_.Error()
+							if err := e.String(_Error_0_); err != nil {
+								return fmt.Errorf("serialize _Error_0_ of type 'string': %w", err)
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return nil
+}
+func (s *_Irpc_interfaceTestpassAnonInterfaceWithNamedParamsReq) Deserialize(d *irpcgen.Decoder) error {
+	{
+		var isNil bool
+		if err := d.Bool(&isNil); err != nil {
+			return fmt.Errorf("deserialize isNil of type 'bool': %w", err)
+		}
+
+		if isNil {
+			s.Param0_input = nil
+		} else {
+			var impl _iface_a_b_c_interfaceTest_impl
+			{ // a()
+				if err := d.Uint8((*uint8)(&impl._a_0_)); err != nil {
+					return fmt.Errorf("deserialize impl._a_0_ of type 'uint8': %w", err)
+				}
+				if err := d.VarInt(&impl._a_1_); err != nil {
+					return fmt.Errorf("deserialize impl._a_1_ of type 'int': %w", err)
+				}
+			}
+			{ // b()
+				if err := d.Uint8((*uint8)(&impl._b_0_)); err != nil {
+					return fmt.Errorf("deserialize impl._b_0_ of type 'uint8': %w", err)
+				}
+			}
+			{ // c()
+				if err := d.Uint8((*uint8)(&impl._c_0_)); err != nil {
+					return fmt.Errorf("deserialize impl._c_0_ of type 'uint8': %w", err)
+				}
+				{
+					var isNil bool
+					if err := d.Bool(&isNil); err != nil {
+						return fmt.Errorf("deserialize isNil of type 'bool': %w", err)
+					}
+
+					if isNil {
+						impl._c_1_ = nil
+					} else {
+						var impl2 _error_interfaceTest_impl
+						{ // Error()
+							if err := d.String(&impl2._Error_0_); err != nil {
+								return fmt.Errorf("deserialize impl2._Error_0_ of type 'string': %w", err)
+							}
+						}
+						impl._c_1_ = impl2
+					}
+				}
+			}
+			s.Param0_input = impl
+		}
+	}
+	return nil
+}
+
+type _iface_a_b_c_interfaceTest_impl struct {
+	_a_0_ out.Uint8
+	_a_1_ int
+	_b_0_ out2.Uint8
+	_c_0_ out2.Uint8
+	_c_1_ error
+}
+
+func (i _iface_a_b_c_interfaceTest_impl) a() (out.Uint8, int) {
+	return i._a_0_, i._a_1_
+}
+func (i _iface_a_b_c_interfaceTest_impl) b() out2.Uint8 {
+	return i._b_0_
+}
+func (i _iface_a_b_c_interfaceTest_impl) c() (out2.Uint8, error) {
+	return i._c_0_, i._c_1_
+}
+
+type _Irpc_interfaceTestpassAnonInterfaceWithNamedParamsResp struct {
+	Param0 string
+}
+
+func (s _Irpc_interfaceTestpassAnonInterfaceWithNamedParamsResp) Serialize(e *irpcgen.Encoder) error {
+	if err := e.String(s.Param0); err != nil {
+		return fmt.Errorf("serialize s.Param0 of type 'string': %w", err)
+	}
+	return nil
+}
+func (s *_Irpc_interfaceTestpassAnonInterfaceWithNamedParamsResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.String(&s.Param0); err != nil {
 		return fmt.Errorf("deserialize s.Param0 of type 'string': %w", err)
 	}

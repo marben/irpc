@@ -25,10 +25,10 @@ func (sg paramStructGenerator) code(q *qualifier) string {
 			// we comment out context var as it is not filled anyway
 			sb.WriteString("//")
 		}
-		sb.WriteString(p.structFieldName + " " + q.qualifyType(p.typ) + "\n")
+		sb.WriteString(p.structFieldName + " " + p.typ.Name(q) + "\n")
 	}
 	sb.WriteString("\n}\n")
-	sb.WriteString(sg.serializeFunc() + "\n")
+	sb.WriteString(sg.serializeFunc(q) + "\n")
 	sb.WriteString(sg.deserializeFunc(q))
 
 	return sb.String()
@@ -38,12 +38,12 @@ func (sg paramStructGenerator) isEmpty() bool {
 	return len(sg.params) == 0
 }
 
-func (sg paramStructGenerator) serializeFunc() string {
+func (sg paramStructGenerator) serializeFunc(q *qualifier) string {
 	sb := &strings.Builder{}
 	fmt.Fprintf(sb, "func (s %s)Serialize(e *irpcgen.Encoder) error {\n", sg.typeName)
 	if len(sg.params) > 0 {
 		for _, p := range sg.params {
-			sb.WriteString(p.typ.encode("s."+p.structFieldName, nil))
+			sb.WriteString(p.typ.encode("s."+p.structFieldName, nil, q))
 		}
 	}
 	sb.WriteString("return nil\n}")
@@ -68,7 +68,7 @@ func (sg paramStructGenerator) deserializeFunc(q *qualifier) string {
 func (sg paramStructGenerator) funcCallParams(q *qualifier) string {
 	b := &strings.Builder{}
 	for i, v := range sg.params {
-		fmt.Fprintf(b, "%s %s", v.identifier, q.qualifyType(v.typ))
+		fmt.Fprintf(b, "%s %s", v.identifier, v.typ.Name(q))
 		if i != len(sg.params)-1 {
 			b.WriteString(",")
 		}
@@ -91,13 +91,14 @@ func (sg paramStructGenerator) paramListPrefixed(prefix string) string {
 	return sb.String()
 }
 
-func (sg paramStructGenerator) isLastTypeError() bool {
+func (sg paramStructGenerator) isLastTypeError(q *qualifier) bool {
 	if len(sg.params) == 0 {
 		return false
 	}
 
+	// todo: reimplement with better error recognition?
 	last := sg.params[len(sg.params)-1]
-	return last.typeName == "error"
+	return last.typ.Name(q) == "error"
 	// log.Printf("last type: %+v", last.param.typ.String())
 }
 

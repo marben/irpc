@@ -68,29 +68,30 @@ func (tr *typeResolver) loadRpcParamList(apiName string, list []*ast.Field) ([]r
 }
 
 func (tr *typeResolver) newType(apiName string, t types.Type, astExpr ast.Expr) (Type, error) {
-	ut := t.Underlying()
+	ni, utAst, err := tr.unwrapNamedOrPassThrough(t, astExpr)
+	if err != nil {
+		return nil, fmt.Errorf("unwrapNamedOrPassThrough(): %w", err)
+	}
 
-	switch ut := ut.(type) {
+	switch ut := t.Underlying().(type) {
 	case *types.Basic:
-		return tr.newBasicTypeT(t, ut, astExpr)
+		return tr.newBasicType(ut, ni)
 	case *types.Slice:
-		return tr.newSliceTypeT(apiName, t, ut, astExpr)
+		return tr.newSliceType(apiName, ni, ut, utAst)
 	case *types.Map: // todo: test maps using http.Header named map (doesn't have ast etc..)
-		return tr.newMapType(apiName, astExpr, t)
+		return tr.newMapType(apiName, ni, ut, utAst)
 	case *types.Struct:
-		return tr.newStructTypeT(apiName, t, ut, astExpr)
+		return tr.newStructType(apiName, ni, ut, utAst)
 	case *types.Interface:
-		return tr.newInterfaceTypeT(apiName, t, ut, astExpr)
+		return tr.newInterfaceType(apiName, ni, ut, utAst)
 	default:
-		return nil, fmt.Errorf("unsupported Type %T", ut)
+		return nil, fmt.Errorf("unsupported type: %T", ut)
 	}
 }
 
-// if type is named, resolves it's name and import specs
-// extracts package prefix from astExpr (if it's ast.SelectorExpr)
-// astExpr can be nil in which case the alias in import spec will be empty
-func (tr *typeResolver) typeNameAndImport(t types.Type, astExpr ast.Expr) (name string, is importSpec) {
-	// var is importSpec
+func (tr *typeResolver) unwrapNamedOrPassThrough(t types.Type, astExpr ast.Expr) (*namedInfo, ast.Expr, error) {
+	var is importSpec
+	// var namedInfo namedInfo
 	named, isNamed := t.(*types.Named)
 	if isNamed {
 		obj := named.Obj()
@@ -110,18 +111,14 @@ func (tr *typeResolver) typeNameAndImport(t types.Type, astExpr ast.Expr) (name 
 			is.alias = packagePrefix
 		}
 
-		return namedName, is
+		return &namedInfo{
+			namedName:  namedName,
+			importSpec: is,
+		}, nil, nil
 	}
-	// todo: inline interfaces are not yet supported. it seems like we will need
-	// our own implementation of TypeString(). or at least a good qualifier
-	// we have inline type. can be interface, struct slice
-	// needs to be sanitized
-	// unsanitized := t.String()
-	// log.Printf("unsanitized: %q", unsanitized)
-	// sanitized := "this_is_sanitized_interface_name"
-	// return sanitized, importSpec{}
 
-	return types.TypeString(t, nil), importSpec{}
+	// pass through
+	return nil, astExpr, nil
 }
 
 // if type is named, it tries to find it's ast in the package. returns nil if not found

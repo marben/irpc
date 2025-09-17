@@ -1,6 +1,11 @@
 package irpctestpkg
 
-import "image"
+import (
+	"image"
+
+	out "github.com/marben/irpc/cmd/irpc/test/out2"
+	out2 "github.com/marben/irpc/cmd/irpc/test/out2"
+)
 
 //go:generate go run ../
 
@@ -22,6 +27,10 @@ type structAPI interface {
 	Vect3x3Sum(v vect3x3) vect3
 	SumSliceStruct(s sliceStruct) int
 	InlineParams(s struct{ a int }) int
+	InlineParamsNamed(s struct {
+		a out.Uint8
+		b out2.Uint8
+	})
 	InlineInlineParams(s struct{ a struct{ b int } }) int
 	InlineReturn(a int) struct{ b int }
 	PointNeg(p image.Point) image.Point // todo: write test
@@ -31,6 +40,14 @@ var _ structAPI = structImpl{}
 
 type structImpl struct {
 	skew int
+}
+
+// InlineParamsNamed implements structAPI.
+func (i structImpl) InlineParamsNamed(s struct {
+	a out2.Uint8
+	b out2.Uint8
+}) {
+	panic("unimplemented")
 }
 
 // InlineReturn implements structAPI.

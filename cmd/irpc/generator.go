@@ -6,7 +6,6 @@ import (
 	"go/format"
 	"go/importer"
 	"go/token"
-	"go/types"
 	"io"
 	"log"
 	"path/filepath"
@@ -24,9 +23,8 @@ type generator struct {
 	inputPkg *packages.Package   // todo:remove
 	allPkgs  []*packages.Package // todo:remove
 	services []*apiGenerator
-	// imports  orderedSet[importSpec] // todo:remove
-	qual *qualifier
-	tr   *typeResolver
+	qual     *qualifier
+	tr       *typeResolver
 }
 
 func newGenerator(filename string) (*generator, error) {
@@ -148,30 +146,6 @@ func newRpcParam(position int, name string, t Type) (rpcParam, error) {
 	}, nil
 }
 
-// todo: this is a leftover from when we were relient on ast only
-// todo: this may come in handy later, but for now, it's here just for reference
-func (g *generator) qualifiedTypeName(astExpr ast.Expr) (string, error) {
-	var qualifier string
-	if selExpr, ok := astExpr.(*ast.SelectorExpr); ok {
-		if ident, ok := selExpr.X.(*ast.Ident); ok {
-			qualifier = ident.Name
-		}
-	}
-
-	qf := func(pkg *types.Package) string {
-		return qualifier
-	}
-
-	tv, err := g.tr.findTypeAndValueForAst(astExpr)
-	if err != nil {
-		return "", fmt.Errorf("findTypeAndValueForAst: %w", err)
-	}
-
-	qualifiedTypeName := types.TypeString(tv.Type, qf)
-
-	return qualifiedTypeName, nil
-}
-
 // if hash is nil, we generate service id with empty hash
 //   - this is used during first run of generator
 func (g *generator) generate(w io.Writer, hash []byte) error {
@@ -200,7 +174,7 @@ func (g *generator) generate(w io.Writer, hash []byte) error {
 		if !p.isEmpty() {
 			codeBlocks.add(p.code(g.qual))
 			for _, e := range p.encoders() {
-				codeBlocks.add(e.codeblock())
+				codeBlocks.add(e.codeblock(g.qual))
 			}
 		}
 	}
@@ -223,19 +197,6 @@ func (g *generator) generate(w io.Writer, hash []byte) error {
 
 	return nil
 }
-
-/*
-// todo: unused?
-func (g *generator) addImport(imps ...importSpec) {
-	// for _, imp := range imps {
-	// 	if imp.path == g.inputPkg.PkgPath {
-	// 		// we don't want to import our own directory
-	// 		continue
-	// 	}
-	// 	g.imports.add(imp)
-	// }
-}
-*/
 
 func (g *generator) genRaw(codeBlocks orderedSet[string]) string {
 	sb := &strings.Builder{}

@@ -15,7 +15,7 @@ type mapTestIRpcService struct {
 func newMapTestIRpcService(impl mapTest) *mapTestIRpcService {
 	return &mapTestIRpcService{
 		impl: impl,
-		id:   []byte{58, 224, 26, 169, 134, 108, 76, 113, 156, 18, 109, 250, 205, 29, 124, 77, 121, 210, 219, 239, 28, 98, 243, 122, 255, 61, 39, 150, 159, 8, 235, 190},
+		id:   []byte{47, 160, 218, 43, 225, 130, 119, 103, 30, 47, 197, 251, 242, 89, 137, 164, 47, 181, 53, 236, 115, 212, 203, 201, 4, 255, 124, 233, 114, 139, 157, 86},
 	}
 }
 func (s *mapTestIRpcService) Id() []byte {
@@ -104,7 +104,7 @@ type mapTestIRpcClient struct {
 }
 
 func newMapTestIRpcClient(endpoint irpcgen.Endpoint) (*mapTestIRpcClient, error) {
-	id := []byte{58, 224, 26, 169, 134, 108, 76, 113, 156, 18, 109, 250, 205, 29, 124, 77, 121, 210, 219, 239, 28, 98, 243, 122, 255, 61, 39, 150, 159, 8, 235, 190}
+	id := []byte{47, 160, 218, 43, 225, 130, 119, 103, 30, 47, 197, 251, 242, 89, 137, 164, 47, 181, 53, 236, 115, 212, 203, 201, 4, 255, 124, 233, 114, 139, 157, 86}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -183,7 +183,7 @@ func (s _Irpc_mapTestmapSumReq) Serialize(e *irpcgen.Encoder) error {
 	return nil
 }
 func (s *_Irpc_mapTestmapSumReq) Deserialize(d *irpcgen.Decoder) error {
-	{ // s.Param0_in
+	{ // s.Param0_in map[int]float64
 		var ul uint64
 		if err := d.UvarInt64(&ul); err != nil {
 			return fmt.Errorf("deserialize ul of type 'uint64': %w", err)
@@ -271,7 +271,7 @@ func (s _Irpc_mapTestsumStructsReq) Serialize(e *irpcgen.Encoder) error {
 	return nil
 }
 func (s *_Irpc_mapTestsumStructsReq) Deserialize(d *irpcgen.Decoder) error {
-	{ // s.Param0_in
+	{ // s.Param0_in map[intStruct]intStruct
 		var ul uint64
 		if err := d.UvarInt64(&ul); err != nil {
 			return fmt.Errorf("deserialize ul of type 'uint64': %w", err)
@@ -385,7 +385,7 @@ func (s _Irpc_mapTestsumSlicesReq) Serialize(e *irpcgen.Encoder) error {
 	return nil
 }
 func (s *_Irpc_mapTestsumSlicesReq) Deserialize(d *irpcgen.Decoder) error {
-	{ // s.Param0_in
+	{ // s.Param0_in map[intStruct][]intStruct
 		var ul uint64
 		if err := d.UvarInt64(&ul); err != nil {
 			return fmt.Errorf("deserialize ul of type 'uint64': %w", err)
@@ -483,7 +483,7 @@ func (s _Irpc_mapTestnamedMapIncReq) Serialize(e *irpcgen.Encoder) error {
 	return nil
 }
 func (s *_Irpc_mapTestnamedMapIncReq) Deserialize(d *irpcgen.Decoder) error {
-	{ // s.Param0_in
+	{ // s.Param0_in namedIntFloatMap
 		var ul uint64
 		if err := d.UvarInt64(&ul); err != nil {
 			return fmt.Errorf("deserialize ul of type 'uint64': %w", err)
@@ -529,7 +529,7 @@ func (s _Irpc_mapTestnamedMapIncResp) Serialize(e *irpcgen.Encoder) error {
 	return nil
 }
 func (s *_Irpc_mapTestnamedMapIncResp) Deserialize(d *irpcgen.Decoder) error {
-	{ // s.Param0
+	{ // s.Param0 namedIntFloatMap
 		var ul uint64
 		if err := d.UvarInt64(&ul); err != nil {
 			return fmt.Errorf("deserialize ul of type 'uint64': %w", err)
@@ -575,7 +575,7 @@ func (s _Irpc_mapTestnamedKeySumReq) Serialize(e *irpcgen.Encoder) error {
 	return nil
 }
 func (s *_Irpc_mapTestnamedKeySumReq) Deserialize(d *irpcgen.Decoder) error {
-	{ // s.Param0_in
+	{ // s.Param0_in map[mapNamedInt]mapNamedFloat64
 		var ul uint64
 		if err := d.UvarInt64(&ul); err != nil {
 			return fmt.Errorf("deserialize ul of type 'uint64': %w", err)

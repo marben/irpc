@@ -3,9 +3,8 @@ package main
 import (
 	"crypto/sha256"
 	"fmt"
-	"go/types"
-	"regexp"
 	"slices"
+	"strconv"
 	"strings"
 	"unicode"
 )
@@ -45,7 +44,8 @@ func generateStructConstructorName(structName string) string {
 
 // makes sure varname is unique among existing vars. extends it with enough "_" if necessary.
 // returns the new unique var name
-func generateUniqueVarname(varName string, existingVars []funcParam) string {
+// todo: have a look why func params etc. perhaps turn into a single func?
+func generateUniqueVarnameForFuncParams(varName string, existingVars []funcParam) string {
 loop:
 	for _, vf := range existingVars {
 		if vf.identifier == varName {
@@ -54,6 +54,26 @@ loop:
 		}
 	}
 	return varName
+}
+
+type varNameList []string
+
+func (l *varNameList) generateUniqueVarName(idealName string) string {
+	if !slices.Contains(*l, idealName) {
+		*l = append(*l, idealName)
+		return idealName
+	}
+	for i := 2; ; i++ {
+		testVar := idealName + strconv.Itoa(i)
+		if !slices.Contains(*l, testVar) {
+			*l = append(*l, testVar)
+			return testVar
+		}
+	}
+}
+
+func (l *varNameList) addVarName(vn string) {
+	*l = append(*l, vn)
 }
 
 // encoding/decoding of slices requires unique iterator names
@@ -98,30 +118,4 @@ func byteSliceLiteral(in []byte) string {
 		}
 	}
 	return fmt.Sprintf("[]byte{%s}", sb.String())
-}
-
-// sanitizeInterfaceName builds a readable identifier for an inline interface.
-// Example: interface{Age() int; Name() string} → "Iface_Age_Name"
-func sanitizeInterfaceName(iface *types.Interface) string {
-	var parts []string
-
-	// Collect method names
-	for i := 0; i < iface.NumMethods(); i++ {
-		m := iface.Method(i)
-		parts = append(parts, m.Name())
-	}
-
-	// If no methods, just call it "Empty"
-	if len(parts) == 0 {
-		parts = append(parts, "Empty")
-	}
-
-	// Join with underscores
-	name := "Iface_" + strings.Join(parts, "_")
-
-	// Final cleanup: allow only letters, numbers, underscore
-	re := regexp.MustCompile(`[^a-zA-Z0-9_]`)
-	name = re.ReplaceAllString(name, "_")
-
-	return name
 }

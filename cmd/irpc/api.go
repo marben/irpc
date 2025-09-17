@@ -71,7 +71,7 @@ func (ag *apiGenerator) clientCode(hash []byte, q *qualifier) string {
 		if m.req.isEmpty() {
 			reqVarName = "irpcgen.EmptySerializable{}"
 		} else {
-			reqVarName = generateUniqueVarname("req", allVars)
+			reqVarName = generateUniqueVarnameForFuncParams("req", allVars)
 			// request construction
 			fmt.Fprintf(b, "var %s = %s {\n", reqVarName, m.req.typeName)
 			for _, p := range m.req.params {
@@ -89,13 +89,13 @@ func (ag *apiGenerator) clientCode(hash []byte, q *qualifier) string {
 		if m.resp.isEmpty() {
 			respVarName = "irpcgen.EmptyDeserializable{}"
 		} else {
-			respVarName = generateUniqueVarname("resp", allVars)
+			respVarName = generateUniqueVarnameForFuncParams("resp", allVars)
 			fmt.Fprintf(b, "var %s %s\n", respVarName, m.resp.typeName)
 		}
 
 		// func call
 		fmt.Fprintf(b, "if err := %s.endpoint.CallRemoteFunc(%s,%[1]s.id, %[3]d, %s, &%s); err != nil {\n", fncReceiverName, m.ctxVar, m.index, reqVarName, respVarName)
-		if m.resp.isLastTypeError() {
+		if m.resp.isLastTypeError(q) {
 			// declare zero var, because i don't know, how to directly instantiate zero values
 			if len(m.resp.params) > 1 {
 				fmt.Fprintf(b, "var zero %s\n", m.resp.typeName)

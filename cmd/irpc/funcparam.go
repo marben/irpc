@@ -4,9 +4,9 @@ import "fmt"
 
 // represents a variable in param struct which in turn represents function parameter/return value
 type funcParam struct {
-	name            string // original name as defined in the interface. can be ""
-	identifier      string // identifier we use for this field. it's either param.name or if there is none, we generate it
-	typeName        string
+	name       string // original name as defined in the interface. can be ""
+	identifier string // identifier we use for this field. it's either param.name or if there is none, we generate it
+	// typeName        string
 	structFieldName string
 	typ             Type
 }
@@ -29,9 +29,9 @@ func newRequestParam(p rpcParam, requestParamNames map[string]struct{}) (funcPar
 	requestParamNames[id] = struct{}{}
 
 	return funcParam{
-		name:            p.name,
-		identifier:      id,
-		typeName:        p.typ.Name(),
+		name:       p.name,
+		identifier: id,
+		// typeName:        p.typ.Name(),
 		structFieldName: fmt.Sprintf("Param%d_%s", p.pos, id),
 		typ:             p.typ,
 	}, nil
@@ -44,9 +44,9 @@ func newResultParam(p rpcParam) (funcParam, error) {
 	}
 
 	return funcParam{
-		name:            p.name,
-		identifier:      p.name,
-		typeName:        p.typ.Name(),
+		name:       p.name,
+		identifier: p.name,
+		// typeName:        p.typ.Name(),
 		structFieldName: sFieldName,
 		typ:             p.typ,
 	}, nil
@@ -54,5 +54,7 @@ func newResultParam(p rpcParam) (funcParam, error) {
 
 // returns true if field is of type context.Context
 func (vf funcParam) isContext() bool {
-	return vf.typeName == "context.Context"
+	// todo: reimplement
+	return false
+	// return vf.typeName == "context.Context"
 }

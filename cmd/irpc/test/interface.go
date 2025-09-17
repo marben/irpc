@@ -22,11 +22,12 @@ type interfaceTest interface {
 		Age() int
 	}) string
 
-	// todo: unsomment and implement proper type naming
-	// passAnonInterfaceWithNamedParams(input interface {
-	// 	a() out.Uint8
-	// 	b() out2.Uint8
-	// }) string
+	// todo: uncomment and implement proper type naming
+	passAnonInterfaceWithNamedParams(input interface {
+		a() (out.Uint8, int)
+		b() out2.Uint8
+		c() (out2.Uint8, error)
+	}) string
 }
 
 var _ interfaceTest = interfaceTestImpl{}
@@ -36,8 +37,9 @@ type interfaceTestImpl struct {
 
 // passAnonInterfaceWithNamedParams implements interfaceTest.
 func (i interfaceTestImpl) passAnonInterfaceWithNamedParams(input interface {
-	a() out.Uint8
+	a() (out.Uint8, int)
 	b() out2.Uint8
+	c() (out2.Uint8, error)
 }) string {
 	panic("unimplemented")
 }
