@@ -91,7 +91,6 @@ func newGenerator(filename string) (*generator, error) {
 	gen := &generator{
 		inputPkg: targetPkg,
 		allPkgs:  allPackages,
-		// imports:  newOrderedSet[importSpec](),
 	}
 
 	tr, err := newTypeResolver(gen, targetPkg, allPackages)
@@ -99,7 +98,7 @@ func newGenerator(filename string) (*generator, error) {
 		return nil, fmt.Errorf("newTypeResolver(): %w", err)
 	}
 
-	gen.qual = newQualifier(gen, tr, srcImports) // todo: ugly and wrong
+	gen.qual = newQualifier(tr, srcImports) // todo: ugly and wrong
 
 	gen.tr = tr
 
