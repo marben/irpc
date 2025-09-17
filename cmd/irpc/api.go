@@ -12,24 +12,24 @@ type apiGenerator struct {
 	methods []methodGenerator
 }
 
-func newApiGenerator(g *generator, tr *typeResolver, apiName string, astIface *ast.InterfaceType) (*apiGenerator, error) {
+func newApiGenerator(tr typeResolver, apiName string, astIface *ast.InterfaceType) (apiGenerator, error) {
 	log.Printf("creating apiGenerator with apiName %q", apiName)
 	methods := []methodGenerator{}
 	for i, methodField := range astIface.Methods.List {
-		method, err := newMethodGenerator(g, tr, apiName, methodField, i)
+		method, err := newMethodGenerator(tr, apiName, methodField, i)
 		if err != nil {
-			return nil, fmt.Errorf("newMethodGenerator(): %w", err)
+			return apiGenerator{}, fmt.Errorf("newMethodGenerator(): %w", err)
 		}
 		methods = append(methods, method)
 	}
 
-	return &apiGenerator{
+	return apiGenerator{
 		apiName: apiName,
 		methods: methods,
 	}, nil
 }
 
-func (ag *apiGenerator) paramStructs() []paramStructGenerator {
+func (ag apiGenerator) paramStructs() []paramStructGenerator {
 	paramStructs := make([]paramStructGenerator, 0, len(ag.methods)*2)
 	for _, method := range ag.methods {
 		paramStructs = append(paramStructs, method.req, method.resp)
@@ -37,7 +37,7 @@ func (ag *apiGenerator) paramStructs() []paramStructGenerator {
 	return paramStructs
 }
 
-func (ag *apiGenerator) clientCode(hash []byte, q *qualifier) string {
+func (ag apiGenerator) clientCode(hash []byte, q *qualifier) string {
 	clientTypeName := ag.apiName + "IRpcClient"
 	fncReceiverName := "_c" // todo: must not collide with any of fnc variable names
 
@@ -134,9 +134,10 @@ func (ag *apiGenerator) clientCode(hash []byte, q *qualifier) string {
 	return b.String()
 }
 
-func (ag *apiGenerator) serviceCode(hash []byte, q *qualifier) string {
-	serviceTypeName := ag.apiName + "IRpcService"
+func (ag apiGenerator) serviceCode(hash []byte, q *qualifier) string {
 	w := &strings.Builder{}
+
+	serviceTypeName := ag.apiName + "IRpcService"
 
 	// type definition
 	fmt.Fprintf(w, `type %s struct{
@@ -183,7 +184,7 @@ func (ag *apiGenerator) serviceCode(hash []byte, q *qualifier) string {
 
 		fmt.Fprintf(w, `return %s, nil
 		}, nil
-		 `, m.executorFuncCode())
+		 `, m.executorFuncCode(q))
 	}
 	fmt.Fprintf(w, `default:
 			return nil, fmt.Errorf("function '%%d' doesn't exist on service '%%s'", funcId, s.Id())
@@ -193,7 +194,7 @@ func (ag *apiGenerator) serviceCode(hash []byte, q *qualifier) string {
 	return w.String()
 }
 
-func (ag *apiGenerator) serviceId(hash []byte) []byte {
+func (ag apiGenerator) serviceId(hash []byte) []byte {
 	// we use empty hash when file hash was not provided - during the dry run
 	// this allows us to change idLen while keeping the common part of hash the same - not really useful but nice to have
 	if hash == nil {

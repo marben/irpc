@@ -3,27 +3,91 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/importer"
 	"go/types"
+	"path/filepath"
+	"strconv"
 
 	"golang.org/x/tools/go/packages"
 )
 
 type typeResolver struct {
-	g        *generator // todo: get rid of
-	inputPkg *packages.Package
-	allPkgs  []*packages.Package
+	inputPkg   *packages.Package
+	allPkgs    []*packages.Package
+	srcFileAst *ast.File
+	srcImports orderedSet[importSpec] // imports from the src file
 }
 
 // todo: make value type?
-func newTypeResolver(g *generator, inputPkg *packages.Package, allPkgs []*packages.Package) (*typeResolver, error) {
-	return &typeResolver{
-		g:        g,
-		inputPkg: inputPkg,
-		allPkgs:  allPkgs,
+func newTypeResolver(filename string /*, inputPkg *packages.Package, allPkgs []*packages.Package*/) (typeResolver, error) {
+	absFilePath, err := filepath.Abs(filename)
+	if err != nil {
+		return typeResolver{}, fmt.Errorf("filepath.Abs(): %w", err)
+	}
+
+	dir := filepath.Dir(absFilePath)
+
+	cfg := &packages.Config{
+		Mode: packages.NeedTypes | packages.NeedDeps | packages.NeedImports | packages.NeedSyntax | packages.NeedTypesInfo |
+			packages.NeedFiles | packages.NeedName | packages.NeedCompiledGoFiles | packages.NeedExportFile | packages.NeedSyntax |
+			packages.NeedModule,
+		Dir: dir,
+	}
+
+	allPackages, err := packages.Load(cfg, "./...") // todo: start at module root
+	if err != nil {
+		return typeResolver{}, fmt.Errorf("packages.Load(): %w", err)
+	}
+
+	targetPkg, err := findPackageForFile(allPackages, filename)
+	if err != nil {
+		return typeResolver{}, err
+	}
+
+	fileAst, err := findASTForFile(targetPkg, filename)
+	if err != nil {
+		return typeResolver{}, fmt.Errorf("couldn't find ast for given file %s", filename)
+	}
+
+	srcImports := newOrderedSet[importSpec]()
+	for _, is := range fileAst.Imports {
+		// log.Printf("file import spec: %q  %q", is.Name, is.Path.Value)
+		var alias string
+		if is.Name != nil {
+			alias = is.Name.Name
+		}
+		path, err := strconv.Unquote(is.Path.Value)
+		if err != nil {
+			return typeResolver{}, fmt.Errorf("strconv.Unquote(%q): %w", is.Path.Value, err)
+		}
+
+		if pkg, ok := findPackageForPackagePath(allPackages, path); ok {
+			// package was parsed by go/packages library
+			spec := importSpec{alias, path, pkg.Name}
+			srcImports.add(spec)
+			// log.Printf("added src import: %+v", spec)
+		} else {
+			// must be from stdlib, which isn't provided by the packages lib
+			imp := importer.Default()
+			pkg, err := imp.Import(path)
+			if err != nil {
+				return typeResolver{}, fmt.Errorf("importer.Import(%q): %w", path, err)
+			}
+			spec := importSpec{alias: alias, path: pkg.Path(), pkgName: pkg.Name()}
+			srcImports.add(spec)
+			// log.Printf("added src import: %+v", spec)
+		}
+	}
+
+	return typeResolver{
+		inputPkg:   targetPkg,
+		allPkgs:    allPackages,
+		srcFileAst: fileAst,
+		srcImports: srcImports,
 	}, nil
 }
 
-func (tr *typeResolver) findTypeAndValueForAst(expr ast.Expr) (types.TypeAndValue, error) {
+func (tr typeResolver) findTypeAndValueForAst(expr ast.Expr) (types.TypeAndValue, error) {
 	for _, pkg := range tr.allPkgs {
 		if tv, ok := pkg.TypesInfo.Types[expr]; ok {
 			return tv, nil
@@ -32,7 +96,7 @@ func (tr *typeResolver) findTypeAndValueForAst(expr ast.Expr) (types.TypeAndValu
 	return types.TypeAndValue{}, fmt.Errorf("typeAndValue for expr %T:%v not found", expr, expr)
 }
 
-func (tr *typeResolver) loadRpcParamList(apiName string, list []*ast.Field) ([]rpcParam, error) {
+func (tr typeResolver) loadRpcParamList(apiName string, list []*ast.Field) ([]rpcParam, error) {
 	params := []rpcParam{}
 	for pos, field := range list {
 		astExpr := field.Type
@@ -51,7 +115,6 @@ func (tr *typeResolver) loadRpcParamList(apiName string, list []*ast.Field) ([]r
 			if err != nil {
 				return nil, fmt.Errorf("newRpcParam on pos %d: %w", pos, err)
 			}
-			// tr.addImport(param.typ.ImportSpecs()) // todo: remove?
 			params = append(params, param)
 		} else {
 			for _, name := range field.Names {
@@ -59,7 +122,6 @@ func (tr *typeResolver) loadRpcParamList(apiName string, list []*ast.Field) ([]r
 				if err != nil {
 					return nil, fmt.Errorf("newRpcParam on pos %d: %w", pos, err)
 				}
-				// tr.addImport(param.typ.ImportSpecs()) // todo: remove?
 				params = append(params, param)
 			}
 		}
@@ -67,7 +129,7 @@ func (tr *typeResolver) loadRpcParamList(apiName string, list []*ast.Field) ([]r
 	return params, nil
 }
 
-func (tr *typeResolver) newType(apiName string, t types.Type, astExpr ast.Expr) (Type, error) {
+func (tr typeResolver) newType(apiName string, t types.Type, astExpr ast.Expr) (Type, error) {
 	ni, utAst, err := tr.unwrapNamedOrPassThrough(t, astExpr)
 	if err != nil {
 		return nil, fmt.Errorf("unwrapNamedOrPassThrough(): %w", err)
@@ -89,7 +151,7 @@ func (tr *typeResolver) newType(apiName string, t types.Type, astExpr ast.Expr) 
 	}
 }
 
-func (tr *typeResolver) unwrapNamedOrPassThrough(t types.Type, astExpr ast.Expr) (*namedInfo, ast.Expr, error) {
+func (tr typeResolver) unwrapNamedOrPassThrough(t types.Type, astExpr ast.Expr) (*namedInfo, ast.Expr, error) {
 	var is importSpec
 	// var namedInfo namedInfo
 	named, isNamed := t.(*types.Named)
@@ -119,21 +181,6 @@ func (tr *typeResolver) unwrapNamedOrPassThrough(t types.Type, astExpr ast.Expr)
 
 	// pass through
 	return nil, astExpr, nil
-}
-
-// if type is named, it tries to find it's ast in the package. returns nil if not found
-// if type is not named, it assumes passed in astExpr is valid astExpr of type and returns it
-// todo: maybe we can squeee it inside typeNameAndImport() ?
-func (tr *typeResolver) unwrapTypeAst(t types.Type, astExpr ast.Expr) ast.Expr {
-	named, isNamed := t.(*types.Named)
-	if isNamed {
-		typeSpec, err := tr.g.findAstTypeSpec(named)
-		if err != nil {
-			return nil
-		}
-		return typeSpec.Type
-	}
-	return astExpr
 }
 
 // returns ex: "time" if ast.Expr is at "time.Time". otherwise ""

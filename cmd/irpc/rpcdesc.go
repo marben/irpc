@@ -47,27 +47,6 @@ func findPackageForFile(pkgs []*packages.Package, file string) (*packages.Packag
 	return nil, fmt.Errorf("couldn't find *packages.Package for file %q", abs)
 }
 
-func (g *generator) findPackageForPackagePath(pkgPath string) (*packages.Package, error) {
-	/*
-		log.Printf("looking for package with path %q", pkgPath)
-		for _, pkg := range g.allPkgs {
-			param := pkg.PkgPath
-			log.Printf("looking at pkg %q", param)
-			if param == pkgPath {
-				log.Printf("and the winner is!: %q", pkg.PkgPath)
-				return pkg, nil
-			}
-		}
-
-		return nil, fmt.Errorf("package with path %q not found", pkgPath)
-	*/
-	pkg, ok := findPackageForPackagePath(g.allPkgs, pkgPath)
-	if !ok {
-		return nil, fmt.Errorf("couldn't find type's package")
-	}
-	return pkg, nil
-}
-
 func findPackageForPackagePath(pkgs []*packages.Package, pkgPath string) (*packages.Package, bool) {
 	// log.Printf("looking for package with path %q", pkgPath)
 	for _, pkg := range pkgs {

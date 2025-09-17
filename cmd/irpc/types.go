@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"go/ast"
-	"go/token"
 	"go/types"
 )
 
@@ -111,36 +109,6 @@ type sliceType struct {
 	elem   Type
 	lenEnc encoder
 	ni     *namedInfo
-}
-
-func (g *generator) findAstTypeSpec(named *types.Named) (*ast.TypeSpec, error) {
-	obj := named.Obj()
-	if obj.Pkg() == nil {
-		return nil, fmt.Errorf("no obj.Pkg() for named type %q", named)
-	}
-	pkg, err := g.findPackageForPackagePath(obj.Pkg().Path())
-	if err != nil {
-		return nil, fmt.Errorf("no pkg for file path: %q", obj.Pkg().Path())
-	}
-	for _, f := range pkg.Syntax {
-		for _, decl := range f.Decls {
-			gen, ok := decl.(*ast.GenDecl)
-			if !ok || gen.Tok != token.TYPE {
-				continue
-			}
-
-			// log.Printf("current genDecl: %v", gen.Specs)
-			for _, spec := range gen.Specs {
-				ts := spec.(*ast.TypeSpec)
-				// log.Printf("looking at typespec: %v", ts.Name)
-				if pkg.TypesInfo.Defs[ts.Name] == obj {
-					return ts, nil
-				}
-			}
-		}
-	}
-
-	return nil, fmt.Errorf("findTypeSpec(): found no spec for obj: %#v", obj)
 }
 
 // todo: use field for signatures too?

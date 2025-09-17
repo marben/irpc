@@ -3,14 +3,14 @@ package main
 type qualifier struct {
 	srcFileImports orderedSet[importSpec]
 	usedImports    orderedSet[importSpec]
-	tr             *typeResolver
+	inputPkgPath   string
 }
 
-func newQualifier(tr *typeResolver, srcFileImports orderedSet[importSpec]) *qualifier {
+func newQualifier(tr typeResolver) *qualifier {
 	return &qualifier{
-		srcFileImports: srcFileImports,
+		srcFileImports: tr.srcImports,
 		usedImports:    newOrderedSet[importSpec](),
-		tr:             tr,
+		inputPkgPath:   tr.inputPkg.PkgPath,
 	}
 }
 
@@ -31,7 +31,7 @@ func (q *qualifier) qualifierForImportSpec(is importSpec) string {
 	}
 
 	// types from our own package
-	if is.path == q.tr.inputPkg.PkgPath {
+	if is.path == q.inputPkgPath {
 		return ""
 	}
 

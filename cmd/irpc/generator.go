@@ -4,15 +4,10 @@ import (
 	"fmt"
 	"go/ast"
 	"go/format"
-	"go/importer"
 	"go/token"
 	"io"
 	"log"
-	"path/filepath"
-	"strconv"
 	"strings"
-
-	"golang.org/x/tools/go/packages"
 )
 
 // id len specifies how long our service's id will be. currently the max is 32 bytes as we are using sha256 to generate them
@@ -20,90 +15,20 @@ import (
 const idLen = 32
 
 type generator struct {
-	inputPkg *packages.Package   // todo:remove
-	allPkgs  []*packages.Package // todo:remove
-	services []*apiGenerator
-	qual     *qualifier
-	tr       *typeResolver
+	services []apiGenerator
+	tr       typeResolver
 }
 
-func newGenerator(filename string) (*generator, error) {
-	absFilePath, err := filepath.Abs(filename)
+func newGenerator(filename string) (generator, error) {
+	var services []apiGenerator
+
+	tr, err := newTypeResolver(filename)
 	if err != nil {
-		return nil, fmt.Errorf("filepath.Abs(): %w", err)
+		return generator{}, fmt.Errorf("newTypeResolver(): %w", err)
 	}
-
-	dir := filepath.Dir(absFilePath)
-
-	cfg := &packages.Config{
-		Mode: packages.NeedTypes | packages.NeedDeps | packages.NeedImports | packages.NeedSyntax | packages.NeedTypesInfo |
-			packages.NeedFiles | packages.NeedName | packages.NeedCompiledGoFiles | packages.NeedExportFile | packages.NeedSyntax |
-			packages.NeedModule,
-		Dir: dir,
-	}
-
-	allPackages, err := packages.Load(cfg, "./...") // todo: start at module root
-	if err != nil {
-		return nil, fmt.Errorf("packages.Load(): %w", err)
-	}
-
-	targetPkg, err := findPackageForFile(allPackages, filename)
-	if err != nil {
-		return nil, err
-	}
-
-	fileAst, err := findASTForFile(targetPkg, filename)
-	if err != nil {
-		return nil, fmt.Errorf("couldn't find ast for given file %s", filename)
-	}
-
-	// IMPORTS
-	srcImports := newOrderedSet[importSpec]()
-	for _, is := range fileAst.Imports {
-		// log.Printf("file import spec: %q  %q", is.Name, is.Path.Value)
-		var alias string
-		if is.Name != nil {
-			alias = is.Name.Name
-		}
-		path, err := strconv.Unquote(is.Path.Value)
-		if err != nil {
-			return nil, fmt.Errorf("strconv.Unquote(%q): %w", is.Path.Value, err)
-		}
-
-		if pkg, ok := findPackageForPackagePath(allPackages, path); ok {
-			// package was parsed by go/packages library
-			spec := importSpec{alias, path, pkg.Name}
-			srcImports.add(spec)
-			// log.Printf("added import: %+v", spec)
-		} else {
-			// must be from stdlib, which isn't provided by the packages lib
-			imp := importer.Default()
-			pkg, err := imp.Import(path)
-			if err != nil {
-				return nil, fmt.Errorf("importer.Import(%q): %w", path, err)
-			}
-			spec := importSpec{alias: alias, path: pkg.Path(), pkgName: pkg.Name()}
-			srcImports.add(spec)
-			// log.Printf("added import: %+v", spec)
-		}
-	}
-
-	gen := &generator{
-		inputPkg: targetPkg,
-		allPkgs:  allPackages,
-	}
-
-	tr, err := newTypeResolver(gen, targetPkg, allPackages)
-	if err != nil {
-		return nil, fmt.Errorf("newTypeResolver(): %w", err)
-	}
-
-	gen.qual = newQualifier(tr, srcImports) // todo: ugly and wrong
-
-	gen.tr = tr
 
 	// INTERFACES
-	for _, decl := range fileAst.Decls {
+	for _, decl := range tr.srcFileAst.Decls {
 		genDecl, ok := decl.(*ast.GenDecl)
 		if !ok {
 			continue
@@ -117,24 +42,20 @@ func newGenerator(filename string) (*generator, error) {
 				continue
 			}
 			if iface, ok := ts.Type.(*ast.InterfaceType); ok {
-				api, err := newApiGenerator(gen, tr, ts.Name.String(), iface)
+				api, err := newApiGenerator(tr, ts.Name.String(), iface)
 				if err != nil {
-					return nil, fmt.Errorf("new apiGenerator: %w", err)
+					return generator{}, fmt.Errorf("new apiGenerator: %w", err)
 				}
 
-				// todo: this way of adding imports is not cool
-				// gen.addImport(fmtImport, irpcGenImport)
-				// if len(api.methods) > 0 {
-				// every FuncExecutor uses context
-				// gen.addImport(contextImport)
-				// }
-
-				gen.services = append(gen.services, api)
+				services = append(services, api)
 			}
 		}
 	}
 
-	return gen, nil
+	return generator{
+		tr:       tr,
+		services: services,
+	}, nil
 }
 
 func newRpcParam(position int, name string, t Type) (rpcParam, error) {
@@ -147,7 +68,8 @@ func newRpcParam(position int, name string, t Type) (rpcParam, error) {
 
 // if hash is nil, we generate service id with empty hash
 //   - this is used during first run of generator
-func (g *generator) generate(w io.Writer, hash []byte) error {
+func (g generator) generate(w io.Writer, hash []byte) error {
+	q := newQualifier(g.tr)
 	codeBlocks := newOrderedSet[string]()
 
 	// todo: service/client code is weirdly separated from each other
@@ -157,13 +79,13 @@ func (g *generator) generate(w io.Writer, hash []byte) error {
 
 	// SERVICES
 	for _, service := range g.services {
-		codeBlocks.add(service.serviceCode(hash, g.qual))
+		codeBlocks.add(service.serviceCode(hash, q))
 		paramStructs = append(paramStructs, service.paramStructs()...)
 	}
 
 	// CLIENTS
 	for _, service := range g.services {
-		codeBlocks.add(service.clientCode(hash, g.qual))
+		codeBlocks.add(service.clientCode(hash, q))
 	}
 
 	// PARAM STRUCTS
@@ -171,15 +93,15 @@ func (g *generator) generate(w io.Writer, hash []byte) error {
 		// we don't generate empty types (even though the generator is capable of generating them)
 		// we use irpcgen.Empty(Ser/Deser) instead
 		if !p.isEmpty() {
-			codeBlocks.add(p.code(g.qual))
+			codeBlocks.add(p.code(q))
 			for _, e := range p.encoders() {
-				codeBlocks.add(e.codeblock(g.qual))
+				codeBlocks.add(e.codeblock(q))
 			}
 		}
 	}
 
 	// GENERATE
-	rawOutput := g.genRaw(codeBlocks)
+	rawOutput := g.genRaw(codeBlocks, q)
 
 	// FORMAT
 	formatted, err := format.Source([]byte(rawOutput))
@@ -197,17 +119,17 @@ func (g *generator) generate(w io.Writer, hash []byte) error {
 	return nil
 }
 
-func (g *generator) genRaw(codeBlocks orderedSet[string]) string {
+func (g generator) genRaw(codeBlocks orderedSet[string], q *qualifier) string {
 	sb := &strings.Builder{}
 	// HEADER
 	headerStr := `// Code generated by irpc generator; DO NOT EDIT
 	package %s
 	`
-	fmt.Fprintf(sb, headerStr, g.inputPkg.Name)
+	fmt.Fprintf(sb, headerStr, g.tr.inputPkg.Name)
 
-	if g.qual.usedImports.len() != 0 {
+	if q.usedImports.len() != 0 {
 		sb.WriteString("import(\n")
-		for _, imp := range g.qual.usedImports.ordered {
+		for _, imp := range q.usedImports.ordered {
 			fmt.Fprintf(sb, "%s \"%s\"\n", imp.alias, imp.path)
 		}
 		sb.WriteString("\n)\n")

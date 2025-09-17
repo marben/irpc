@@ -10,12 +10,10 @@ type methodGenerator struct {
 	name      string
 	index     int
 	req, resp paramStructGenerator
-	ctxVar    string     // context used for method call (either there is context param, or we use context.Background() )
-	g         *generator // todo: get rid of
+	ctxVar    string // context used for method call (either there is context param, or we use context.Background() )
 }
 
-// todo: remove qualifier
-func newMethodGenerator(g *generator, tr *typeResolver, apiName string, methodField *ast.Field, index int) (methodGenerator, error) {
+func newMethodGenerator(tr typeResolver, apiName string, methodField *ast.Field, index int) (methodGenerator, error) {
 	if len(methodField.Names) == 0 {
 		return methodGenerator{}, fmt.Errorf("method of interface %q has no name", apiName)
 	}
@@ -105,7 +103,6 @@ func newMethodGenerator(g *generator, tr *typeResolver, apiName string, methodFi
 		req:    req,
 		resp:   resp,
 		ctxVar: ctxVarName,
-		g:      g,
 	}, nil
 }
 
@@ -126,8 +123,8 @@ func (mg methodGenerator) requestParamsListPrefixed(prefix, ctxVarName string) s
 	return sb.String()
 }
 
-func (mg methodGenerator) executorFuncCode() string {
-	mg.g.qual.addUsedImport(contextImport)
+func (mg methodGenerator) executorFuncCode(q *qualifier) string {
+	q.addUsedImport(contextImport)
 	if mg.resp.isEmpty() {
 		return fmt.Sprintf(`func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
