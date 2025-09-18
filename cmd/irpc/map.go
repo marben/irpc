@@ -59,7 +59,7 @@ func (m mapType) codeblock(q *qualifier) string {
 }
 
 // decode implements Type.
-func (m mapType) decode(varId string, existingVars varNameList, q *qualifier) string {
+func (m mapType) decode(varId string, existingVars varNames, q *qualifier) string {
 	sb := &strings.Builder{}
 
 	// length
@@ -88,7 +88,7 @@ func (m mapType) decode(varId string, existingVars varNameList, q *qualifier) st
 }
 
 // encode implements Type.
-func (m mapType) encode(varId string, existingVars varNameList, q *qualifier) string {
+func (m mapType) encode(varId string, existingVars varNames, q *qualifier) string {
 	sb := &strings.Builder{}
 	// length
 	fmt.Fprintf(sb, "{ // %s %s\n", varId, m.Name(q))

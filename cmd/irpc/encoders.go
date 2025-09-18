@@ -1,9 +1,9 @@
 package main
 
 type encoder interface {
-	encode(varId string, existingVars varNameList, q *qualifier) string // inline variable encode
-	decode(varId string, existingVars varNameList, q *qualifier) string // inline variable decode
-	codeblock(q *qualifier) string                                      // requested encoder's code block at top level
+	encode(varId string, existingVars varNames, q *qualifier) string // inline variable encode
+	decode(varId string, existingVars varNames, q *qualifier) string // inline variable decode
+	codeblock(q *qualifier) string                                   // requested encoder's code block at top level
 }
 
 /*

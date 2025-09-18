@@ -39,7 +39,7 @@ func (st sliceType) Name(q *qualifier) string {
 }
 
 // encode implements encoder.
-func (st sliceType) encode(varId string, existingVars varNameList, q *qualifier) string {
+func (st sliceType) encode(varId string, existingVars varNames, q *qualifier) string {
 	sb := &strings.Builder{}
 
 	// length
@@ -59,7 +59,7 @@ func (st sliceType) encode(varId string, existingVars varNameList, q *qualifier)
 }
 
 // decode implements encoder.
-func (st sliceType) decode(varId string, existingVars varNameList, q *qualifier) string {
+func (st sliceType) decode(varId string, existingVars varNames, q *qualifier) string {
 	sb := &strings.Builder{}
 
 	// length

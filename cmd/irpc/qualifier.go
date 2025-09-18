@@ -67,7 +67,7 @@ func (q *qualifier) qualifierForImportSpec(is importSpec) string {
 	// need to be careful not to use already existing  alias/pkg name
 	requestedQualifier := is.packageQualifier()
 	for {
-		if !q.qualifierUsedInSrcImports(requestedQualifier) && !q.qualifierUsedInUsedImports(requestedQualifier) {
+		if !q.pkgQualifierUsedInSrcImports(requestedQualifier) && !q.pkgQualifierUsedInUsedImports(requestedQualifier) {
 			if requestedQualifier == is.pkgName {
 				q.addUsedImport(is)
 			} else {
@@ -91,7 +91,7 @@ func (q *qualifier) addUsedImport(specs ...importSpec) {
 	}
 }
 
-func (q *qualifier) qualifierUsedInUsedImports(qualifier string) bool {
+func (q *qualifier) pkgQualifierUsedInUsedImports(qualifier string) bool {
 	for _, srcImport := range q.srcFileImports.ordered {
 		if srcImport.packageQualifier() == qualifier {
 			return true
@@ -100,7 +100,8 @@ func (q *qualifier) qualifierUsedInUsedImports(qualifier string) bool {
 	return false
 }
 
-func (q *qualifier) qualifierUsedInSrcImports(qualifier string) bool {
+// pkg qualifier is alias or actual package name
+func (q *qualifier) pkgQualifierUsedInSrcImports(qualifier string) bool {
 	for _, usedImport := range q.usedImports.ordered {
 		if usedImport.packageQualifier() == qualifier {
 			return true

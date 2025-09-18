@@ -98,7 +98,7 @@ func (s structType) codeblock(q *qualifier) string {
 }
 
 // decode implements Type.
-func (s structType) decode(varId string, existingVars varNameList, q *qualifier) string {
+func (s structType) decode(varId string, existingVars varNames, q *qualifier) string {
 	sb := &strings.Builder{}
 	for _, f := range s.fields {
 		sb.WriteString(f.t.decode(varId+"."+f.name, existingVars, q))
@@ -107,7 +107,7 @@ func (s structType) decode(varId string, existingVars varNameList, q *qualifier)
 }
 
 // encode implements Type.
-func (s structType) encode(varId string, existingVars varNameList, q *qualifier) string {
+func (s structType) encode(varId string, existingVars varNames, q *qualifier) string {
 	sb := strings.Builder{}
 	for _, f := range s.fields {
 		sb.WriteString(f.t.encode(varId+"."+f.name, existingVars, q))

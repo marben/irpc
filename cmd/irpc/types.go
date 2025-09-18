@@ -93,11 +93,11 @@ func (bt basicType) codeblock(q *qualifier) string {
 	return bt.enc.codeblock(q)
 }
 
-func (bt basicType) decode(varId string, existingVars varNameList, q *qualifier) string {
+func (bt basicType) decode(varId string, existingVars varNames, q *qualifier) string {
 	return bt.enc.decode(varId, existingVars, q)
 }
 
-func (bt basicType) encode(varId string, existingVars varNameList, q *qualifier) string {
+func (bt basicType) encode(varId string, existingVars varNames, q *qualifier) string {
 	return bt.enc.encode(varId, existingVars, q)
 }
 

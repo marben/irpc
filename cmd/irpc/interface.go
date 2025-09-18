@@ -149,7 +149,7 @@ func (i interfaceType) codeblock(q *qualifier) string {
 }
 
 // decode implements Type.
-func (i interfaceType) decode(varId string, existingVars varNameList, q *qualifier) string {
+func (i interfaceType) decode(varId string, existingVars varNames, q *qualifier) string {
 	log.Println("adding varname: ", varId)
 	existingVars.addVarName(varId)
 	sb := &strings.Builder{}
@@ -181,7 +181,7 @@ func (i interfaceType) decode(varId string, existingVars varNameList, q *qualifi
 }
 
 // encode implements Type.
-func (i interfaceType) encode(varId string, existingVars varNameList, q *qualifier) string {
+func (i interfaceType) encode(varId string, existingVars varNames, q *qualifier) string {
 	sb := &strings.Builder{}
 	sb.WriteString("{\n") // separate block
 	fmt.Fprintf(sb, `var isNil bool

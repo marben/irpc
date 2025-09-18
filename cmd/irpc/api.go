@@ -64,7 +64,7 @@ func (ag apiGenerator) clientCode(hash []byte, q *qualifier) string {
 		// func header
 		fmt.Fprintf(b, "func(%s *%s)%s(%s)(%s){\n", fncReceiverName, clientTypeName, m.name, m.req.funcCallParams(q), m.resp.funcCallParams(q))
 
-		var allVarIds varNameList
+		var allVarIds varNames
 		for _, p := range m.req.params {
 			allVarIds.addVarName(p.identifier)
 		}

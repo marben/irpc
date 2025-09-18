@@ -42,10 +42,10 @@ func generateStructConstructorName(structName string) string {
 	return string(rtn)
 }
 
-// not a pointer type!
-type varNameList []string
+// not a pointer type! - passing down the stack doesn't alter caller
+type varNames []string
 
-func (l *varNameList) generateUniqueVarName(idealName string) string {
+func (l *varNames) generateUniqueVarName(idealName string) string {
 	if !l.contains(idealName) {
 		l.addVarName(idealName)
 		return idealName
@@ -59,15 +59,15 @@ func (l *varNameList) generateUniqueVarName(idealName string) string {
 	}
 }
 
-func (l *varNameList) addVarName(vn ...string) {
+func (l *varNames) addVarName(vn ...string) {
 	*l = append(*l, vn...)
 }
 
-func (l varNameList) contains(vn string) bool {
+func (l varNames) contains(vn string) bool {
 	return slices.Contains(l, vn)
 }
 
-func (l *varNameList) generateIteratorName() string {
+func (l *varNames) generateIteratorName() string {
 	possibleNames := []string{"i", "j", "k", "l", "m", "n"}
 	appendix := 2
 	for {
@@ -82,7 +82,7 @@ func (l *varNameList) generateIteratorName() string {
 	}
 }
 
-func (l *varNameList) generateKeyValueIteratorNames() (kIt, vIt string) {
+func (l *varNames) generateKeyValueIteratorNames() (kIt, vIt string) {
 	// start with k, v ; if those are taken, continue to k2, v2; k3, v3 etc
 
 	if !l.contains("k") && !l.contains("v") {

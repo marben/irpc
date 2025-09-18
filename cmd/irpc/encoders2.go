@@ -16,6 +16,7 @@ type importSpec struct {
 	pkgName string // the "context" in "context.Context"
 }
 
+// packageQualifier is import alias if defined, otherwise simply the package name
 func (is importSpec) packageQualifier() string {
 	if is.alias != "" {
 		return is.alias
@@ -38,7 +39,7 @@ type directCallEncoder struct {
 	needsCasting       bool // if named, otherwise ""
 }
 
-func (e directCallEncoder) encode(varId string, existingVars varNameList, q *qualifier) string {
+func (e directCallEncoder) encode(varId string, existingVars varNames, q *qualifier) string {
 	var varParam string
 	if e.needsCasting {
 		varParam = fmt.Sprintf("%s(%s)", e.underlyingTypeName, varId)
@@ -52,7 +53,7 @@ func (e directCallEncoder) encode(varId string, existingVars varNameList, q *qua
 	`, e.encFuncName, varParam, varId, e.underlyingTypeName)
 }
 
-func (e directCallEncoder) decode(varId string, existingVars varNameList, _ *qualifier) string {
+func (e directCallEncoder) decode(varId string, existingVars varNames, _ *qualifier) string {
 	var varParam string
 	if e.needsCasting {
 		varParam = fmt.Sprintf("(*%s)(&%s)", e.underlyingTypeName, varId)
