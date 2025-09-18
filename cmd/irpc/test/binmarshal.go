@@ -26,15 +26,25 @@ func (mt myTime) Compare(u myTime) int {
 	return time.Time(mt).Compare(time.Time(u))
 }
 
+type structContainingBinMarshallable struct {
+	t time.Time
+}
+
 //go:generate go run ../
 type binMarshal interface {
 	reflect(t time.Time) time.Time
 	addHour(t time.Time) time.Time
 	addMyHour(t myTime) myTime
 	addMyStructHour(t myStructTime) myStructTime
+	structPass(st structContainingBinMarshallable) structContainingBinMarshallable
 }
 
 type binMarshalImpl struct{}
+
+// structPass implements binMarshal.
+func (b binMarshalImpl) structPass(st structContainingBinMarshallable) structContainingBinMarshallable {
+	panic("unimplemented")
+}
 
 var _ binMarshal = binMarshalImpl{}
 

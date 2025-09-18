@@ -15,7 +15,7 @@ type tcpTestApiIRpcService struct {
 func newTcpTestApiIRpcService(impl tcpTestApi) *tcpTestApiIRpcService {
 	return &tcpTestApiIRpcService{
 		impl: impl,
-		id:   []byte{187, 128, 94, 187, 198, 169, 92, 34, 16, 247, 193, 158, 147, 199, 252, 126, 22, 255, 8, 252, 108, 54, 45, 159, 8, 184, 251, 150, 167, 184, 44, 72},
+		id:   []byte{52, 181, 225, 60, 113, 122, 240, 146, 62, 198, 195, 202, 146, 158, 6, 251, 159, 10, 83, 105, 159, 78, 153, 197, 134, 103, 222, 16, 97, 150, 21, 38},
 	}
 }
 func (s *tcpTestApiIRpcService) Id() []byte {
@@ -48,7 +48,7 @@ type tcpTestApiIRpcClient struct {
 }
 
 func newTcpTestApiIRpcClient(endpoint irpcgen.Endpoint) (*tcpTestApiIRpcClient, error) {
-	id := []byte{187, 128, 94, 187, 198, 169, 92, 34, 16, 247, 193, 158, 147, 199, 252, 126, 22, 255, 8, 252, 108, 54, 45, 159, 8, 184, 251, 150, 167, 184, 44, 72}
+	id := []byte{52, 181, 225, 60, 113, 122, 240, 146, 62, 198, 195, 202, 146, 158, 6, 251, 159, 10, 83, 105, 159, 78, 153, 197, 134, 103, 222, 16, 97, 150, 21, 38}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -133,7 +133,7 @@ func (s *_Irpc_tcpTestApiDivResp) Deserialize(d *irpcgen.Decoder) error {
 		if isNil {
 			s.Param1 = nil
 		} else {
-			var impl _error_tcpTestApi_irpcInterfaceImpl
+			var impl _error_tcpTestApi_impl
 			{ // Error()
 				if err := d.String(&impl._Error_0_); err != nil {
 					return fmt.Errorf("deserialize impl._Error_0_ of type 'string': %w", err)
@@ -145,10 +145,10 @@ func (s *_Irpc_tcpTestApiDivResp) Deserialize(d *irpcgen.Decoder) error {
 	return nil
 }
 
-type _error_tcpTestApi_irpcInterfaceImpl struct {
+type _error_tcpTestApi_impl struct {
 	_Error_0_ string
 }
 
-func (i _error_tcpTestApi_irpcInterfaceImpl) Error() string {
+func (i _error_tcpTestApi_impl) Error() string {
 	return i._Error_0_
 }

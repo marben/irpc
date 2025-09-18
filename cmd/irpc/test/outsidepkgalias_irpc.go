@@ -5,6 +5,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/marben/irpc/cmd/irpc/test/out"
+	out1 "github.com/marben/irpc/cmd/irpc/test/out"
+	out2 "github.com/marben/irpc/cmd/irpc/test/out"
 	"github.com/marben/irpc/irpcgen"
 )
 
@@ -16,7 +18,7 @@ type outsidepkgaliasIRpcService struct {
 func newOutsidepkgaliasIRpcService(impl outsidepkgalias) *outsidepkgaliasIRpcService {
 	return &outsidepkgaliasIRpcService{
 		impl: impl,
-		id:   []byte{160, 100, 47, 15, 53, 98, 236, 226, 84, 186, 208, 154, 129, 40, 227, 242, 153, 46, 42, 123, 23, 5, 152, 247, 85, 129, 62, 182, 194, 236, 67, 81},
+		id:   []byte{55, 33, 190, 73, 6, 59, 177, 200, 34, 127, 4, 224, 216, 172, 63, 107, 85, 7, 159, 7, 249, 244, 250, 115, 61, 39, 229, 235, 172, 47, 241, 31},
 	}
 }
 func (s *outsidepkgaliasIRpcService) Id() []byte {
@@ -91,13 +93,13 @@ type outsidepkgaliasIRpcClient struct {
 }
 
 func newOutsidepkgaliasIRpcClient(endpoint irpcgen.Endpoint) (*outsidepkgaliasIRpcClient, error) {
-	id := []byte{160, 100, 47, 15, 53, 98, 236, 226, 84, 186, 208, 154, 129, 40, 227, 242, 153, 46, 42, 123, 23, 5, 152, 247, 85, 129, 62, 182, 194, 236, 67, 81}
+	id := []byte{55, 33, 190, 73, 6, 59, 177, 200, 34, 127, 4, 224, 216, 172, 63, 107, 85, 7, 159, 7, 249, 244, 250, 115, 61, 39, 229, 235, 172, 47, 241, 31}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
 	return &outsidepkgaliasIRpcClient{endpoint: endpoint, id: id}, nil
 }
-func (_c *outsidepkgaliasIRpcClient) add(a out.Uint8, b out.Uint8) int {
+func (_c *outsidepkgaliasIRpcClient) add(a out1.Uint8, b out1.Uint8) int {
 	var req = _Irpc_outsidepkgaliasaddReq{
 		Param0_a: a,
 		Param1_b: b,
@@ -108,7 +110,7 @@ func (_c *outsidepkgaliasIRpcClient) add(a out.Uint8, b out.Uint8) int {
 	}
 	return resp.Param0
 }
-func (_c *outsidepkgaliasIRpcClient) add2(a out.Uint8, b out.Uint8) int {
+func (_c *outsidepkgaliasIRpcClient) add2(a out1.Uint8, b out.Uint8) int {
 	var req = _Irpc_outsidepkgaliasadd2Req{
 		Param0_a: a,
 		Param1_b: b,
@@ -119,7 +121,7 @@ func (_c *outsidepkgaliasIRpcClient) add2(a out.Uint8, b out.Uint8) int {
 	}
 	return resp.Param0
 }
-func (_c *outsidepkgaliasIRpcClient) add3(a int, b out.Uint8) out.Uint8 {
+func (_c *outsidepkgaliasIRpcClient) add3(a int, b out.Uint8) out2.Uint8 {
 	var req = _Irpc_outsidepkgaliasadd3Req{
 		Param0_a: a,
 		Param1_b: b,
@@ -130,7 +132,7 @@ func (_c *outsidepkgaliasIRpcClient) add3(a int, b out.Uint8) out.Uint8 {
 	}
 	return resp.Param0
 }
-func (_c *outsidepkgaliasIRpcClient) sum(inSlice out.AliasedByteSlice) int {
+func (_c *outsidepkgaliasIRpcClient) sum(inSlice out1.AliasedByteSlice) int {
 	var req = _Irpc_outsidepkgaliassumReq{
 		Param0_inSlice: inSlice,
 	}
@@ -142,8 +144,8 @@ func (_c *outsidepkgaliasIRpcClient) sum(inSlice out.AliasedByteSlice) int {
 }
 
 type _Irpc_outsidepkgaliasaddReq struct {
-	Param0_a out.Uint8
-	Param1_b out.Uint8
+	Param0_a out1.Uint8
+	Param1_b out1.Uint8
 }
 
 func (s _Irpc_outsidepkgaliasaddReq) Serialize(e *irpcgen.Encoder) error {
@@ -183,7 +185,7 @@ func (s *_Irpc_outsidepkgaliasaddResp) Deserialize(d *irpcgen.Decoder) error {
 }
 
 type _Irpc_outsidepkgaliasadd2Req struct {
-	Param0_a out.Uint8
+	Param0_a out1.Uint8
 	Param1_b out.Uint8
 }
 
@@ -248,7 +250,7 @@ func (s *_Irpc_outsidepkgaliasadd3Req) Deserialize(d *irpcgen.Decoder) error {
 }
 
 type _Irpc_outsidepkgaliasadd3Resp struct {
-	Param0 out.Uint8
+	Param0 out2.Uint8
 }
 
 func (s _Irpc_outsidepkgaliasadd3Resp) Serialize(e *irpcgen.Encoder) error {
@@ -265,11 +267,11 @@ func (s *_Irpc_outsidepkgaliasadd3Resp) Deserialize(d *irpcgen.Decoder) error {
 }
 
 type _Irpc_outsidepkgaliassumReq struct {
-	Param0_inSlice out.AliasedByteSlice
+	Param0_inSlice out1.AliasedByteSlice
 }
 
 func (s _Irpc_outsidepkgaliassumReq) Serialize(e *irpcgen.Encoder) error {
-	{ // s.Param0_inSlice AliasedByteSlice
+	{ // s.Param0_inSlice out1.AliasedByteSlice
 		var l int = len(s.Param0_inSlice)
 		if err := e.UvarInt64(uint64(l)); err != nil {
 			return fmt.Errorf("serialize uint64(l) of type 'uint64': %w", err)
@@ -283,13 +285,13 @@ func (s _Irpc_outsidepkgaliassumReq) Serialize(e *irpcgen.Encoder) error {
 	return nil
 }
 func (s *_Irpc_outsidepkgaliassumReq) Deserialize(d *irpcgen.Decoder) error {
-	{ // s.Param0_inSlice out.AliasedByteSlice
+	{ // s.Param0_inSlice out1.AliasedByteSlice
 		var ul uint64
 		if err := d.UvarInt64(&ul); err != nil {
 			return fmt.Errorf("deserialize ul of type 'uint64': %w", err)
 		}
 		var l int = int(ul)
-		s.Param0_inSlice = make(out.AliasedByteSlice, l)
+		s.Param0_inSlice = make(out1.AliasedByteSlice, l)
 		for i := range l {
 			if err := d.Uint8((*uint8)(&s.Param0_inSlice[i])); err != nil {
 				return fmt.Errorf("deserialize s.Param0_inSlice[i] of type 'uint8': %w", err)

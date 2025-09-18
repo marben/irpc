@@ -16,7 +16,7 @@ type binMarshalIRpcService struct {
 func newBinMarshalIRpcService(impl binMarshal) *binMarshalIRpcService {
 	return &binMarshalIRpcService{
 		impl: impl,
-		id:   []byte{33, 93, 65, 145, 171, 94, 185, 5, 77, 252, 239, 155, 61, 96, 13, 22, 138, 42, 82, 191, 186, 109, 148, 63, 181, 207, 84, 8, 73, 186, 3, 48},
+		id:   []byte{164, 65, 4, 56, 218, 31, 93, 126, 75, 180, 49, 204, 94, 71, 121, 12, 200, 70, 170, 238, 145, 211, 216, 108, 46, 128, 44, 156, 56, 118, 255, 229},
 	}
 }
 func (s *binMarshalIRpcService) Id() []byte {
@@ -80,6 +80,20 @@ func (s *binMarshalIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgD
 				return resp
 			}, nil
 		}, nil
+	case 4: // structPass
+		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_binMarshalstructPassReq
+			if err := args.Deserialize(d); err != nil {
+				return nil, err
+			}
+			return func(ctx context.Context) irpcgen.Serializable {
+				// EXECUTE
+				var resp _Irpc_binMarshalstructPassResp
+				resp.Param0 = s.impl.structPass(args.Param0_st)
+				return resp
+			}, nil
+		}, nil
 	default:
 		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, s.Id())
 	}
@@ -91,7 +105,7 @@ type binMarshalIRpcClient struct {
 }
 
 func newBinMarshalIRpcClient(endpoint irpcgen.Endpoint) (*binMarshalIRpcClient, error) {
-	id := []byte{33, 93, 65, 145, 171, 94, 185, 5, 77, 252, 239, 155, 61, 96, 13, 22, 138, 42, 82, 191, 186, 109, 148, 63, 181, 207, 84, 8, 73, 186, 3, 48}
+	id := []byte{164, 65, 4, 56, 218, 31, 93, 126, 75, 180, 49, 204, 94, 71, 121, 12, 200, 70, 170, 238, 145, 211, 216, 108, 46, 128, 44, 156, 56, 118, 255, 229}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -133,6 +147,16 @@ func (_c *binMarshalIRpcClient) addMyStructHour(t myStructTime) myStructTime {
 	}
 	var resp _Irpc_binMarshaladdMyStructHourResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 3, req, &resp); err != nil {
+		panic(err) // to avoid panic, make your func return error and regenerate the code
+	}
+	return resp.Param0
+}
+func (_c *binMarshalIRpcClient) structPass(st structContainingBinMarshallable) structContainingBinMarshallable {
+	var req = _Irpc_binMarshalstructPassReq{
+		Param0_st: st,
+	}
+	var resp _Irpc_binMarshalstructPassResp
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 4, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate the code
 	}
 	return resp.Param0
@@ -270,6 +294,40 @@ func (s _Irpc_binMarshaladdMyStructHourResp) Serialize(e *irpcgen.Encoder) error
 func (s *_Irpc_binMarshaladdMyStructHourResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.BinaryUnmarshaler(&s.Param0); err != nil {
 		return fmt.Errorf("deserialize s.Param0 of type 'encoding.BinaryUnmarshaler': %w", err)
+	}
+	return nil
+}
+
+type _Irpc_binMarshalstructPassReq struct {
+	Param0_st structContainingBinMarshallable
+}
+
+func (s _Irpc_binMarshalstructPassReq) Serialize(e *irpcgen.Encoder) error {
+	if err := e.BinaryMarshaler(s.Param0_st.t); err != nil {
+		return fmt.Errorf("serialize s.Param0_st.t of type 'encoding.BinaryUnmarshaler': %w", err)
+	}
+	return nil
+}
+func (s *_Irpc_binMarshalstructPassReq) Deserialize(d *irpcgen.Decoder) error {
+	if err := d.BinaryUnmarshaler(&s.Param0_st.t); err != nil {
+		return fmt.Errorf("deserialize s.Param0_st.t of type 'encoding.BinaryUnmarshaler': %w", err)
+	}
+	return nil
+}
+
+type _Irpc_binMarshalstructPassResp struct {
+	Param0 structContainingBinMarshallable
+}
+
+func (s _Irpc_binMarshalstructPassResp) Serialize(e *irpcgen.Encoder) error {
+	if err := e.BinaryMarshaler(s.Param0.t); err != nil {
+		return fmt.Errorf("serialize s.Param0.t of type 'encoding.BinaryUnmarshaler': %w", err)
+	}
+	return nil
+}
+func (s *_Irpc_binMarshalstructPassResp) Deserialize(d *irpcgen.Decoder) error {
+	if err := d.BinaryUnmarshaler(&s.Param0.t); err != nil {
+		return fmt.Errorf("deserialize s.Param0.t of type 'encoding.BinaryUnmarshaler': %w", err)
 	}
 	return nil
 }

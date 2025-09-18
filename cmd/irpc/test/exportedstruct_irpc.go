@@ -15,7 +15,7 @@ type FileServerIRpcService struct {
 func NewFileServerIRpcService(impl FileServer) *FileServerIRpcService {
 	return &FileServerIRpcService{
 		impl: impl,
-		id:   []byte{83, 0, 80, 88, 202, 82, 54, 71, 253, 10, 55, 186, 170, 136, 219, 164, 6, 135, 73, 215, 116, 218, 213, 242, 93, 77, 236, 113, 213, 247, 247, 238},
+		id:   []byte{240, 211, 238, 142, 52, 118, 169, 196, 229, 34, 52, 100, 224, 199, 62, 1, 182, 137, 57, 57, 239, 222, 120, 2, 244, 64, 145, 161, 183, 87, 103, 33},
 	}
 }
 func (s *FileServerIRpcService) Id() []byte {
@@ -43,7 +43,7 @@ type FileServerIRpcClient struct {
 }
 
 func NewFileServerIRpcClient(endpoint irpcgen.Endpoint) (*FileServerIRpcClient, error) {
-	id := []byte{83, 0, 80, 88, 202, 82, 54, 71, 253, 10, 55, 186, 170, 136, 219, 164, 6, 135, 73, 215, 116, 218, 213, 242, 93, 77, 236, 113, 213, 247, 247, 238}
+	id := []byte{240, 211, 238, 142, 52, 118, 169, 196, 229, 34, 52, 100, 224, 199, 62, 1, 182, 137, 57, 57, 239, 222, 120, 2, 244, 64, 145, 161, 183, 87, 103, 33}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -118,7 +118,7 @@ func (s *_Irpc_FileServerListFilesResp) Deserialize(d *irpcgen.Decoder) error {
 		if isNil {
 			s.Param1 = nil
 		} else {
-			var impl _error_FileServer_irpcInterfaceImpl
+			var impl _error_FileServer_impl
 			{ // Error()
 				if err := d.String(&impl._Error_0_); err != nil {
 					return fmt.Errorf("deserialize impl._Error_0_ of type 'string': %w", err)
@@ -130,10 +130,10 @@ func (s *_Irpc_FileServerListFilesResp) Deserialize(d *irpcgen.Decoder) error {
 	return nil
 }
 
-type _error_FileServer_irpcInterfaceImpl struct {
+type _error_FileServer_impl struct {
 	_Error_0_ string
 }
 
-func (i _error_FileServer_irpcInterfaceImpl) Error() string {
+func (i _error_FileServer_impl) Error() string {
 	return i._Error_0_
 }

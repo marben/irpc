@@ -15,7 +15,7 @@ type namedTestIRpcService struct {
 func newNamedTestIRpcService(impl namedTest) *namedTestIRpcService {
 	return &namedTestIRpcService{
 		impl: impl,
-		id:   []byte{158, 128, 103, 103, 108, 106, 155, 56, 224, 39, 212, 240, 67, 180, 122, 58, 245, 199, 49, 202, 231, 55, 8, 24, 154, 202, 161, 204, 98, 53, 171, 248},
+		id:   []byte{199, 41, 68, 158, 127, 249, 73, 189, 5, 189, 143, 127, 44, 172, 116, 179, 171, 45, 25, 113, 193, 221, 8, 204, 155, 124, 25, 204, 9, 254, 134, 248},
 	}
 }
 func (s *namedTestIRpcService) Id() []byte {
@@ -118,7 +118,7 @@ type namedTestIRpcClient struct {
 }
 
 func newNamedTestIRpcClient(endpoint irpcgen.Endpoint) (*namedTestIRpcClient, error) {
-	id := []byte{158, 128, 103, 103, 108, 106, 155, 56, 224, 39, 212, 240, 67, 180, 122, 58, 245, 199, 49, 202, 231, 55, 8, 24, 154, 202, 161, 204, 98, 53, 171, 248}
+	id := []byte{199, 41, 68, 158, 127, 249, 73, 189, 5, 189, 143, 127, 44, 172, 116, 179, 171, 45, 25, 113, 193, 221, 8, 204, 155, 124, 25, 204, 9, 254, 134, 248}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -431,7 +431,7 @@ func (s _Irpc_namedTestnamedMapSumReq) Serialize(e *irpcgen.Encoder) error {
 	return nil
 }
 func (s *_Irpc_namedTestnamedMapSumReq) Deserialize(d *irpcgen.Decoder) error {
-	{ // s.Param0_p0
+	{ // s.Param0_p0 namedMap
 		var ul uint64
 		if err := d.UvarInt64(&ul); err != nil {
 			return fmt.Errorf("deserialize ul of type 'uint64': %w", err)

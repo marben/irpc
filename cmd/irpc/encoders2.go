@@ -6,8 +6,14 @@ import (
 )
 
 var (
-	uint64Encoder = newSymmetricDirectCallEncoder("UvarInt64", "uint64")
-	boolEncoder   = newSymmetricDirectCallEncoder("Bool", "bool")
+	uint64Encoder        = newSymmetricDirectCallEncoder("UvarInt64", "uint64")
+	boolEncoder          = newSymmetricDirectCallEncoder("Bool", "bool")
+	binMarshallerEncoder = directCallEncoder{
+		encFuncName:        "BinaryMarshaler",
+		decFuncName:        "BinaryUnmarshaler",
+		underlyingTypeName: "encoding.BinaryUnmarshaler", // todo: needed?
+		needsCasting:       false,
+	}
 )
 
 type importSpec struct {

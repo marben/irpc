@@ -12,10 +12,11 @@ import (
 )
 
 type typeResolver struct {
-	inputPkg   *packages.Package
-	allPkgs    []*packages.Package
-	srcFileAst *ast.File
-	srcImports orderedSet[importSpec] // imports from the src file
+	inputPkg                     *packages.Package
+	allPkgs                      []*packages.Package
+	srcFileAst                   *ast.File
+	srcImports                   orderedSet[importSpec] // imports from the src file
+	binMarshaler, binUnmarshaler *types.Interface
 }
 
 // todo: make value type?
@@ -79,11 +80,27 @@ func newTypeResolver(filename string /*, inputPkg *packages.Package, allPkgs []*
 		}
 	}
 
+	imp := importer.Default()
+	encodingPkg, err := imp.Import("encoding")
+	if err != nil {
+		return typeResolver{}, fmt.Errorf("importer.Import(\"encoding\"): %w", err)
+	}
+	binMarshaler, ok := encodingPkg.Scope().Lookup("BinaryMarshaler").Type().Underlying().(*types.Interface)
+	if !ok {
+		return typeResolver{}, fmt.Errorf("failed to find encoding.BinaryMarshaller type")
+	}
+	binUnmarshaler, ok := encodingPkg.Scope().Lookup("BinaryUnmarshaler").Type().Underlying().(*types.Interface)
+	if !ok {
+		return typeResolver{}, fmt.Errorf("failed to find encoding.BinaryUnmarshaller type")
+	}
+
 	return typeResolver{
-		inputPkg:   targetPkg,
-		allPkgs:    allPackages,
-		srcFileAst: fileAst,
-		srcImports: srcImports,
+		inputPkg:       targetPkg,
+		allPkgs:        allPackages,
+		srcFileAst:     fileAst,
+		srcImports:     srcImports,
+		binMarshaler:   binMarshaler,
+		binUnmarshaler: binUnmarshaler,
 	}, nil
 }
 
@@ -133,6 +150,10 @@ func (tr typeResolver) newType(apiName string, t types.Type, astExpr ast.Expr) (
 	ni, utAst, err := tr.unwrapNamedOrPassThrough(t, astExpr)
 	if err != nil {
 		return nil, fmt.Errorf("unwrapNamedOrPassThrough(): %w", err)
+	}
+
+	if types.Implements(t, tr.binMarshaler) && types.Implements(types.NewPointer(t), tr.binUnmarshaler) {
+		return tr.newBinaryMarshalerType(ni)
 	}
 
 	switch ut := t.Underlying().(type) {

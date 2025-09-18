@@ -105,10 +105,12 @@ func (bt basicType) Encoder() encoder {
 	return bt.enc
 }
 
-type sliceType struct {
-	elem   Type
-	lenEnc encoder
-	ni     *namedInfo
+func (tr typeResolver) newBinaryMarshalerType(ni *namedInfo) (Type, error) {
+	// todo: basicType has unfitting name. this is not a 'basic' type
+	return basicType{
+		enc:       binMarshallerEncoder,
+		namedInfo: ni,
+	}, nil
 }
 
 // todo: use field for signatures too?

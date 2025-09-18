@@ -9,6 +9,12 @@ import (
 
 var _ Type = sliceType{}
 
+type sliceType struct {
+	elem   Type
+	lenEnc encoder
+	ni     *namedInfo
+}
+
 func (tr *typeResolver) newSliceType(apiName string, ni *namedInfo, st *types.Slice, astExpr ast.Expr) (sliceType, error) {
 	var elemAst ast.Expr
 	if astExpr != nil {

@@ -15,7 +15,7 @@ type MathIRpcService struct {
 func NewMathIRpcService(impl Math) *MathIRpcService {
 	return &MathIRpcService{
 		impl: impl,
-		id:   []byte{57, 127, 141, 241, 174, 176, 72, 184, 239, 179, 118, 89, 98, 136, 19, 209, 63, 171, 134, 210, 46, 195, 95, 225, 186, 200, 44, 26, 210, 199, 175, 75},
+		id:   []byte{170, 142, 130, 182, 132, 24, 44, 231, 14, 157, 131, 238, 151, 151, 181, 98, 137, 225, 216, 29, 142, 92, 223, 75, 60, 147, 69, 29, 186, 7, 67, 245},
 	}
 }
 func (s *MathIRpcService) Id() []byte {
@@ -48,7 +48,7 @@ type MathIRpcClient struct {
 }
 
 func NewMathIRpcClient(endpoint irpcgen.Endpoint) (*MathIRpcClient, error) {
-	id := []byte{57, 127, 141, 241, 174, 176, 72, 184, 239, 179, 118, 89, 98, 136, 19, 209, 63, 171, 134, 210, 46, 195, 95, 225, 186, 200, 44, 26, 210, 199, 175, 75}
+	id := []byte{170, 142, 130, 182, 132, 24, 44, 231, 14, 157, 131, 238, 151, 151, 181, 98, 137, 225, 216, 29, 142, 92, 223, 75, 60, 147, 69, 29, 186, 7, 67, 245}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -133,7 +133,7 @@ func (s *_Irpc_MathAddResp) Deserialize(d *irpcgen.Decoder) error {
 		if isNil {
 			s.Param1 = nil
 		} else {
-			var impl _error_Math_irpcInterfaceImpl
+			var impl _error_Math_impl
 			{ // Error()
 				if err := d.String(&impl._Error_0_); err != nil {
 					return fmt.Errorf("deserialize impl._Error_0_ of type 'string': %w", err)
@@ -145,10 +145,10 @@ func (s *_Irpc_MathAddResp) Deserialize(d *irpcgen.Decoder) error {
 	return nil
 }
 
-type _error_Math_irpcInterfaceImpl struct {
+type _error_Math_impl struct {
 	_Error_0_ string
 }
 
-func (i _error_Math_irpcInterfaceImpl) Error() string {
+func (i _error_Math_impl) Error() string {
 	return i._Error_0_
 }
