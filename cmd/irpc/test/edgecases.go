@@ -11,6 +11,10 @@ type edgeCases interface {
 	mixedParamIds(_ int, p0 uint8, _ struct{ a int }) // todo: should work too
 }
 
+type anotherInterface interface {
+	anotherAdd(a, b int) int
+}
+
 var _ edgeCases = edgeCasesImpl{}
 
 type edgeCasesImpl struct {

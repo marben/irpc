@@ -199,5 +199,5 @@ func (ag apiGenerator) serviceId(hash []byte) []byte {
 		return nil
 	}
 
-	return generateServiceIdHash(hash, ag.apiName, idLen)
+	return generateServiceIdHash(hash, ag.apiName, generatedIdLen)
 }

@@ -11,8 +11,8 @@ import (
 )
 
 // id len specifies how long our service's id will be. currently the max is 32 bytes as we are using sha256 to generate them
-// actual id to negotiate between endpoints desn't have to be full lenght (currently it's only 4 bytes)
-const idLen = 32
+// actual id to negotiate between endpoints doesn't have to be full lenght (currently it's only 4 bytes)
+const generatedIdLen = 32
 
 type generator struct {
 	services []apiGenerator
@@ -72,30 +72,18 @@ func (g generator) generate(w io.Writer, hash []byte) error {
 	q := newQualifier(g.tr)
 	codeBlocks := newOrderedSet[string]()
 
-	// todo: service/client code is weirdly separated from each other
-	// todo: should interwine them, make only one loop. but only after major refactor i am working on now....
-
-	paramStructs := []paramStructGenerator{}
-
-	// SERVICES
 	for _, service := range g.services {
 		codeBlocks.add(service.serviceCode(hash, q))
-		paramStructs = append(paramStructs, service.paramStructs()...)
-	}
-
-	// CLIENTS
-	for _, service := range g.services {
 		codeBlocks.add(service.clientCode(hash, q))
-	}
 
-	// PARAM STRUCTS
-	for _, p := range paramStructs {
-		// we don't generate empty types (even though the generator is capable of generating them)
-		// we use irpcgen.Empty(Ser/Deser) instead
-		if !p.isEmpty() {
-			codeBlocks.add(p.code(q))
-			for _, e := range p.encoders() {
-				codeBlocks.add(e.codeblock(q))
+		for _, p := range service.paramStructs() {
+			// we don't generate empty types (even though the generator is capable of generating them)
+			// we use irpcgen.Empty(Ser/Deser) instead
+			if !p.isEmpty() {
+				codeBlocks.add(p.code(q))
+				for _, e := range p.encoders() {
+					codeBlocks.add(e.codeblock(q))
+				}
 			}
 		}
 	}
