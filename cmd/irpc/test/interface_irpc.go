@@ -17,7 +17,12 @@ type interfaceTestIRpcService struct {
 func newInterfaceTestIRpcService(impl interfaceTest) *interfaceTestIRpcService {
 	return &interfaceTestIRpcService{
 		impl: impl,
-		id:   []byte{86, 227, 247, 136, 86, 170, 197, 88, 139, 109, 179, 41, 16, 211, 140, 228, 208, 49, 28, 230, 5, 226, 40, 168, 158, 116, 55, 240, 51, 2, 77, 158},
+		id: []byte{
+			0x56, 0xe3, 0xf7, 0x88, 0x56, 0xaa, 0xc5, 0x58,
+			0x8b, 0x6d, 0xb3, 0x29, 0x10, 0xd3, 0x8c, 0xe4,
+			0xd0, 0x31, 0x1c, 0xe6, 0x05, 0xe2, 0x28, 0xa8,
+			0x9e, 0x74, 0x37, 0xf0, 0x33, 0x02, 0x4d, 0x9e,
+		},
 	}
 }
 func (s *interfaceTestIRpcService) Id() []byte {
@@ -140,7 +145,12 @@ type customInterfaceIRpcService struct {
 func newCustomInterfaceIRpcService(impl customInterface) *customInterfaceIRpcService {
 	return &customInterfaceIRpcService{
 		impl: impl,
-		id:   []byte{51, 1, 171, 16, 21, 190, 80, 119, 145, 192, 35, 4, 231, 85, 180, 42, 84, 87, 187, 71, 146, 43, 8, 223, 173, 79, 15, 146, 204, 228, 246, 77},
+		id: []byte{
+			0x33, 0x01, 0xab, 0x10, 0x15, 0xbe, 0x50, 0x77,
+			0x91, 0xc0, 0x23, 0x04, 0xe7, 0x55, 0xb4, 0x2a,
+			0x54, 0x57, 0xbb, 0x47, 0x92, 0x2b, 0x08, 0xdf,
+			0xad, 0x4f, 0x0f, 0x92, 0xcc, 0xe4, 0xf6, 0x4d,
+		},
 	}
 }
 func (s *customInterfaceIRpcService) Id() []byte {
@@ -177,7 +187,12 @@ type interfaceTestIRpcClient struct {
 }
 
 func newInterfaceTestIRpcClient(endpoint irpcgen.Endpoint) (*interfaceTestIRpcClient, error) {
-	id := []byte{86, 227, 247, 136, 86, 170, 197, 88, 139, 109, 179, 41, 16, 211, 140, 228, 208, 49, 28, 230, 5, 226, 40, 168, 158, 116, 55, 240, 51, 2, 77, 158}
+	id := []byte{
+		0x56, 0xe3, 0xf7, 0x88, 0x56, 0xaa, 0xc5, 0x58,
+		0x8b, 0x6d, 0xb3, 0x29, 0x10, 0xd3, 0x8c, 0xe4,
+		0xd0, 0x31, 0x1c, 0xe6, 0x05, 0xe2, 0x28, 0xa8,
+		0x9e, 0x74, 0x37, 0xf0, 0x33, 0x02, 0x4d, 0x9e,
+	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -274,7 +289,12 @@ type customInterfaceIRpcClient struct {
 }
 
 func newCustomInterfaceIRpcClient(endpoint irpcgen.Endpoint) (*customInterfaceIRpcClient, error) {
-	id := []byte{51, 1, 171, 16, 21, 190, 80, 119, 145, 192, 35, 4, 231, 85, 180, 42, 84, 87, 187, 71, 146, 43, 8, 223, 173, 79, 15, 146, 204, 228, 246, 77}
+	id := []byte{
+		0x33, 0x01, 0xab, 0x10, 0x15, 0xbe, 0x50, 0x77,
+		0x91, 0xc0, 0x23, 0x04, 0xe7, 0x55, 0xb4, 0x2a,
+		0x54, 0x57, 0xbb, 0x47, 0x92, 0x2b, 0x08, 0xdf,
+		0xad, 0x4f, 0x0f, 0x92, 0xcc, 0xe4, 0xf6, 0x4d,
+	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}

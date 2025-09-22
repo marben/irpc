@@ -18,7 +18,12 @@ type outsidepkgaliasIRpcService struct {
 func newOutsidepkgaliasIRpcService(impl outsidepkgalias) *outsidepkgaliasIRpcService {
 	return &outsidepkgaliasIRpcService{
 		impl: impl,
-		id:   []byte{55, 33, 190, 73, 6, 59, 177, 200, 34, 127, 4, 224, 216, 172, 63, 107, 85, 7, 159, 7, 249, 244, 250, 115, 61, 39, 229, 235, 172, 47, 241, 31},
+		id: []byte{
+			0x37, 0x21, 0xbe, 0x49, 0x06, 0x3b, 0xb1, 0xc8,
+			0x22, 0x7f, 0x04, 0xe0, 0xd8, 0xac, 0x3f, 0x6b,
+			0x55, 0x07, 0x9f, 0x07, 0xf9, 0xf4, 0xfa, 0x73,
+			0x3d, 0x27, 0xe5, 0xeb, 0xac, 0x2f, 0xf1, 0x1f,
+		},
 	}
 }
 func (s *outsidepkgaliasIRpcService) Id() []byte {
@@ -93,7 +98,12 @@ type outsidepkgaliasIRpcClient struct {
 }
 
 func newOutsidepkgaliasIRpcClient(endpoint irpcgen.Endpoint) (*outsidepkgaliasIRpcClient, error) {
-	id := []byte{55, 33, 190, 73, 6, 59, 177, 200, 34, 127, 4, 224, 216, 172, 63, 107, 85, 7, 159, 7, 249, 244, 250, 115, 61, 39, 229, 235, 172, 47, 241, 31}
+	id := []byte{
+		0x37, 0x21, 0xbe, 0x49, 0x06, 0x3b, 0xb1, 0xc8,
+		0x22, 0x7f, 0x04, 0xe0, 0xd8, 0xac, 0x3f, 0x6b,
+		0x55, 0x07, 0x9f, 0x07, 0xf9, 0xf4, 0xfa, 0x73,
+		0x3d, 0x27, 0xe5, 0xeb, 0xac, 0x2f, 0xf1, 0x1f,
+	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}

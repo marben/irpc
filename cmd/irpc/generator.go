@@ -73,7 +73,7 @@ func (g generator) generate(w io.Writer, hash []byte) error {
 	codeBlocks := newOrderedSet[string]()
 
 	// todo: service/client code is weirdly separated from each other
-	// todo: shoul interwine them, make only one loop. but only after major refactor i am working on now....
+	// todo: should interwine them, make only one loop. but only after major refactor i am working on now....
 
 	paramStructs := []paramStructGenerator{}
 

@@ -16,7 +16,12 @@ type sliceNamedApiIRpcService struct {
 func newSliceNamedApiIRpcService(impl sliceNamedApi) *sliceNamedApiIRpcService {
 	return &sliceNamedApiIRpcService{
 		impl: impl,
-		id:   []byte{31, 182, 149, 230, 74, 169, 143, 0, 163, 45, 106, 221, 180, 23, 220, 88, 225, 85, 134, 246, 91, 60, 246, 8, 172, 51, 6, 107, 135, 196, 55, 104},
+		id: []byte{
+			0x1f, 0xb6, 0x95, 0xe6, 0x4a, 0xa9, 0x8f, 0x00,
+			0xa3, 0x2d, 0x6a, 0xdd, 0xb4, 0x17, 0xdc, 0x58,
+			0xe1, 0x55, 0x86, 0xf6, 0x5b, 0x3c, 0xf6, 0x08,
+			0xac, 0x33, 0x06, 0x6b, 0x87, 0xc4, 0x37, 0x68,
+		},
 	}
 }
 func (s *sliceNamedApiIRpcService) Id() []byte {
@@ -77,7 +82,12 @@ type sliceNamedApiIRpcClient struct {
 }
 
 func newSliceNamedApiIRpcClient(endpoint irpcgen.Endpoint) (*sliceNamedApiIRpcClient, error) {
-	id := []byte{31, 182, 149, 230, 74, 169, 143, 0, 163, 45, 106, 221, 180, 23, 220, 88, 225, 85, 134, 246, 91, 60, 246, 8, 172, 51, 6, 107, 135, 196, 55, 104}
+	id := []byte{
+		0x1f, 0xb6, 0x95, 0xe6, 0x4a, 0xa9, 0x8f, 0x00,
+		0xa3, 0x2d, 0x6a, 0xdd, 0xb4, 0x17, 0xdc, 0x58,
+		0xe1, 0x55, 0x86, 0xf6, 0x5b, 0x3c, 0xf6, 0x08,
+		0xac, 0x33, 0x06, 0x6b, 0x87, 0xc4, 0x37, 0x68,
+	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}

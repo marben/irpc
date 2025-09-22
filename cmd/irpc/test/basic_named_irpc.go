@@ -16,7 +16,12 @@ type basicNamedAPIIRpcService struct {
 func newBasicNamedAPIIRpcService(impl basicNamedAPI) *basicNamedAPIIRpcService {
 	return &basicNamedAPIIRpcService{
 		impl: impl,
-		id:   []byte{60, 146, 84, 85, 194, 244, 168, 231, 238, 247, 248, 189, 205, 170, 117, 208, 69, 34, 235, 63, 216, 135, 20, 85, 179, 229, 194, 136, 78, 204, 21, 4},
+		id: []byte{
+			0x3c, 0x92, 0x54, 0x55, 0xc2, 0xf4, 0xa8, 0xe7,
+			0xee, 0xf7, 0xf8, 0xbd, 0xcd, 0xaa, 0x75, 0xd0,
+			0x45, 0x22, 0xeb, 0x3f, 0xd8, 0x87, 0x14, 0x55,
+			0xb3, 0xe5, 0xc2, 0x88, 0x4e, 0xcc, 0x15, 0x04,
+		},
 	}
 }
 func (s *basicNamedAPIIRpcService) Id() []byte {
@@ -77,7 +82,12 @@ type basicNamedAPIIRpcClient struct {
 }
 
 func newBasicNamedAPIIRpcClient(endpoint irpcgen.Endpoint) (*basicNamedAPIIRpcClient, error) {
-	id := []byte{60, 146, 84, 85, 194, 244, 168, 231, 238, 247, 248, 189, 205, 170, 117, 208, 69, 34, 235, 63, 216, 135, 20, 85, 179, 229, 194, 136, 78, 204, 21, 4}
+	id := []byte{
+		0x3c, 0x92, 0x54, 0x55, 0xc2, 0xf4, 0xa8, 0xe7,
+		0xee, 0xf7, 0xf8, 0xbd, 0xcd, 0xaa, 0x75, 0xd0,
+		0x45, 0x22, 0xeb, 0x3f, 0xd8, 0x87, 0x14, 0x55,
+		0xb3, 0xe5, 0xc2, 0x88, 0x4e, 0xcc, 0x15, 0x04,
+	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}

@@ -1,9 +1,6 @@
-- alias imports (test on outside pkg test)
-- try basic and nonbasic types derived from outside package
 - aliases?
 - dot imports
 - BinaryAppender
-- can we encode unnamed interfaces?
 - indent service hash so it's in one nice block?
 - test named types outside of module
 - support aliases

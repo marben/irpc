@@ -11,7 +11,7 @@ import (
 
 var (
 	irpcGenImport = importSpec{path: "github.com/marben/irpc/irpcgen", pkgName: "irpcgen"}
-	fmtImport     = importSpec{path: "fmt", pkgName: "fmt"} // todo: figure out the imports with importer, like we do with binmarshaller?
+	fmtImport     = importSpec{path: "fmt", pkgName: "fmt"}
 	contextImport = importSpec{path: "context", pkgName: "context"}
 )
 
@@ -101,14 +101,27 @@ func (l *varNames) generateKeyValueIteratorNames() (kIt, vIt string) {
 	}
 }
 
-// returns byte slice definition ex: "[]byte{127, 3, 255}"
+// returns byte slice definition in hex with max of 8 words pe line
+// ex: "[]byte{0x12,0x03,0xfe}"
 func byteSliceLiteral(in []byte) string {
 	sb := strings.Builder{}
-	for i, b := range in {
-		sb.WriteString(fmt.Sprintf("%d", b))
-		if i != len(in)-1 {
-			sb.WriteString(", ")
+	if len(in) <= 8 {
+		// all in just one line
+		for i, v := range in {
+			fmt.Fprintf(&sb, "%#02x", v)
+			if i != len(in)-1 {
+				sb.WriteString(",")
+			}
 		}
+		return fmt.Sprintf("[]byte{%s}", sb.String())
+	} else {
+		// we make a block of max 8 nums
+		for i, v := range in {
+			fmt.Fprintf(&sb, "%#02x,", v)
+			if (i+1)%8 == 0 {
+				sb.WriteByte('\n')
+			}
+		}
+		return fmt.Sprintf("[]byte{\n%s\n}", sb.String())
 	}
-	return fmt.Sprintf("[]byte{%s}", sb.String())
 }
