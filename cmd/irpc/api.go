@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"go/ast"
-	"log"
 	"strings"
 )
 
@@ -13,7 +12,6 @@ type apiGenerator struct {
 }
 
 func newApiGenerator(tr typeResolver, apiName string, astIface *ast.InterfaceType) (apiGenerator, error) {
-	log.Printf("creating apiGenerator with apiName %q", apiName)
 	methods := []methodGenerator{}
 	for i, methodField := range astIface.Methods.List {
 		method, err := newMethodGenerator(tr, apiName, methodField, i)

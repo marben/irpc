@@ -46,10 +46,13 @@ func run() error {
 }
 
 func processInputFile(inputFile string) error {
+	fmt.Printf("%q", inputFile)
+
 	gen, err := newGenerator(inputFile)
 	if err != nil {
 		return fmt.Errorf("newGenerator(): %w", err)
 	}
+	fmt.Printf("  =>  ")
 
 	// calculate hash of generated file
 	hasher := sha256.New()
@@ -63,7 +66,7 @@ func processInputFile(inputFile string) error {
 	if err != nil {
 		return fmt.Errorf("figure out generated file name: %w", err)
 	}
-	fmt.Println("generating file:", genFileName)
+	fmt.Printf("%q\n", genFileName)
 	outFile, err := os.Create(genFileName)
 	if err != nil {
 		return fmt.Errorf("create generated file '%s': %w", genFileName, err)

@@ -22,7 +22,7 @@ var _ TestService = NewTestServiceImpl(0)
 
 var ErrDivByZero = errors.New("cannot divide by zero")
 
-// fonctions can be redefined as needed
+// functions can be redefined as needed
 type TestServiceImpl struct {
 	Skew          int
 	DivFunc       func(a, b int) int

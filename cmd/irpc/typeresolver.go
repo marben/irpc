@@ -94,6 +94,15 @@ func newTypeResolver(filename string /*, inputPkg *packages.Package, allPkgs []*
 		return typeResolver{}, fmt.Errorf("failed to find encoding.BinaryUnmarshaller type")
 	}
 
+	// contextPkg, err := imp.Import("context")
+	// if err != nil {
+	// 	return typeResolver{}, fmt.Errorf("importer.Import(\"context\"): %w", err)
+	// }
+	// contextObj := contextPkg.Scope().Lookup("Context")
+	// if contextObj == nil {
+	// 	return typeResolver{}, fmt.Errorf("failed to find context.Context object")
+	// }
+
 	return typeResolver{
 		inputPkg:       targetPkg,
 		allPkgs:        allPackages,
@@ -146,10 +155,35 @@ func (tr typeResolver) loadRpcParamList(apiName string, list []*ast.Field) ([]rp
 	return params, nil
 }
 
+func (tr typeResolver) typeIsContext(t types.Type) bool {
+	named, ok := t.(*types.Named)
+	if !ok {
+		return false
+	}
+
+	if named.Obj().Name() != "Context" {
+		return false
+	}
+
+	pkg := named.Obj().Pkg()
+	if pkg == nil || pkg.Path() != "context" {
+		return false
+	}
+
+	return true
+}
+
 func (tr typeResolver) newType(apiName string, t types.Type, astExpr ast.Expr) (Type, error) {
 	ni, utAst, err := tr.unwrapNamedOrPassThrough(t, astExpr)
 	if err != nil {
 		return nil, fmt.Errorf("unwrapNamedOrPassThrough(): %w", err)
+	}
+
+	if tr.typeIsContext(t) {
+		if ni == nil {
+			return nil, fmt.Errorf("namedInfo for context is nil")
+		}
+		return newContextType(*ni), nil
 	}
 
 	if types.Implements(t, tr.binMarshaler) && types.Implements(types.NewPointer(t), tr.binUnmarshaler) {
@@ -174,7 +208,6 @@ func (tr typeResolver) newType(apiName string, t types.Type, astExpr ast.Expr) (
 
 func (tr typeResolver) unwrapNamedOrPassThrough(t types.Type, astExpr ast.Expr) (*namedInfo, ast.Expr, error) {
 	var is importSpec
-	// var namedInfo namedInfo
 	named, isNamed := t.(*types.Named)
 	if isNamed {
 		obj := named.Obj()
@@ -186,7 +219,7 @@ func (tr typeResolver) unwrapNamedOrPassThrough(t types.Type, astExpr ast.Expr) 
 			is.path = pkg.Path()
 			is.pkgName = pkg.Name()
 		}
-		// we try to find the "pkgName"  int pkgName.VarType
+		// we try to find the "pkgName"  in pkgName.VarType
 		// it can differ from pkg.Name() in case of alias and we would like to honour it
 		if astExpr != nil {
 			packagePrefix := packagePrefixFromAst(astExpr)

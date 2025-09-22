@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"go/ast"
 	"go/types"
-	"log"
 	"regexp"
 	"strings"
 )
@@ -13,18 +12,14 @@ import (
 var _ Type = interfaceType{}
 
 type interfaceType struct {
-	// name         string
 	fncs         []ifaceFunc
 	implTypeName string
-	// importSpec   importSpec
-	ni      *namedInfo
-	apiName string
-	t       *types.Interface
+	ni           *namedInfo
+	apiName      string
+	t            *types.Interface
 }
 
 func (tr *typeResolver) newInterfaceType(apiName string, ni *namedInfo, t *types.Interface, astExpr ast.Expr) (interfaceType, error) {
-	// name, importSpec := tr.typeNameAndImport(t, astExpr)
-
 	var ifaceAst *ast.InterfaceType
 	if astExpr != nil {
 		var ok bool
@@ -33,8 +28,6 @@ func (tr *typeResolver) newInterfaceType(apiName string, ni *namedInfo, t *types
 			return interfaceType{}, fmt.Errorf("provided ast is not *ast.InterfaceType, but %T", astExpr)
 		}
 	}
-
-	log.Printf("iface ast: %v", ifaceAst)
 
 	fncs := []ifaceFunc{}
 	for i := 0; i < t.NumMethods(); i++ {
@@ -56,14 +49,9 @@ func (tr *typeResolver) newInterfaceType(apiName string, ni *namedInfo, t *types
 			}
 		}
 
-		log.Printf("funcAst: %#v", funcAst)
-
 		results := make([]ifaceImplVar, 0, sig.Results().Len())
 		for i := 0; i < sig.Results().Len(); i++ {
 			v := sig.Results().At(i)
-			// fieldAst := interfaceMethodFieldOrNil(ifaceAst, i)
-			// log.Printf("v.Type(): %#v %q", v.Type(), v.Type())
-			// log.Printf("fieldAst: %#v", fieldAst)
 			var typeAst ast.Expr
 			if funcAst != nil {
 				typeAst = astTypeFieldFromFieldList(funcAst.Results, i)
@@ -94,7 +82,6 @@ func (tr *typeResolver) newInterfaceType(apiName string, ni *namedInfo, t *types
 		n = sanitizeInterfaceName(t)
 	}
 	implTypeName := "_" + n + "_" + apiName + "_impl"
-	log.Printf("implTypeName: %q", implTypeName)
 
 	return interfaceType{
 		implTypeName: implTypeName,
@@ -150,7 +137,6 @@ func (i interfaceType) codeblock(q *qualifier) string {
 
 // decode implements Type.
 func (i interfaceType) decode(varId string, existingVars varNames, q *qualifier) string {
-	log.Println("adding varname: ", varId)
 	existingVars.addVarName(varId)
 	sb := &strings.Builder{}
 	sb.WriteString("{\n") // separate block
@@ -162,8 +148,6 @@ func (i interfaceType) decode(varId string, existingVars varNames, q *qualifier)
 	`, boolEncoder.decode("isNil", existingVars, q), varId)
 
 	implVarName := existingVars.generateUniqueVarName("impl")
-	log.Println("obrained varname: ", implVarName)
-	log.Println("while the list is: ", existingVars)
 
 	fmt.Fprintf(sb, "var %s %s\n", implVarName, i.implTypeNam())
 	for _, f := range i.fncs {
@@ -247,8 +231,7 @@ func (ifnc ifaceFunc) listImplNamesPrefixed(prefix string) string {
 
 type ifaceImplVar struct {
 	implStructParamName string // name as used within interface's implementation struct // todo: get rid of?
-	// t                   Type   // todo: type is inside field
-	f field // the field as present in the function
+	f                   field  // the field as present in the function
 }
 
 // sanitizeInterfaceName builds a readable identifier for an inline interface.
@@ -275,12 +258,4 @@ func sanitizeInterfaceName(iface *types.Interface) string {
 	name = re.ReplaceAllString(name, "_")
 
 	return name
-}
-
-func interfaceMethodFieldOrNil(ast *ast.InterfaceType, i int) ast.Expr {
-	if ast == nil {
-		return nil
-	}
-
-	return astTypeFieldFromFieldList(ast.Methods, i)
 }

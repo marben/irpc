@@ -20,7 +20,7 @@ func (ni namedInfo) qualifiedName(q *qualifier) string {
 }
 
 type basicType struct {
-	enc            directCallEncoder
+	enc            encoder
 	underlyingName string
 	namedInfo      *namedInfo
 }

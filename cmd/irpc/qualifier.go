@@ -15,11 +15,14 @@ func newQualifier(tr typeResolver) *qualifier {
 }
 
 func (q *qualifier) qualifyNamedInfo(ni namedInfo) string {
+	// log.Printf("qualifying ni: %#v", ni)
 	// log.Printf("qualifying for importspec: %#v", ni.importSpec)
 	qual := q.qualifierForImportSpec(ni.importSpec)
+	// log.Printf("got qualifier: %q", qual)
 	if qual == "" {
 		return ni.namedName
 	}
+	// log.Printf("returning %s.%s", qual, ni.namedName)
 	return qual + "." + ni.namedName
 }
 

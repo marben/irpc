@@ -15,7 +15,7 @@ type TestServiceIRpcService struct {
 func NewTestServiceIRpcService(impl TestService) *TestServiceIRpcService {
 	return &TestServiceIRpcService{
 		impl: impl,
-		id:   []byte{253, 211, 22, 103, 51, 138, 238, 41, 169, 73, 195, 141, 70, 56, 59, 164, 190, 14, 93, 162, 95, 92, 66, 151, 72, 158, 197, 247, 167, 14, 53, 222},
+		id:   []byte{25, 128, 232, 141, 156, 12, 112, 66, 181, 238, 222, 67, 105, 115, 45, 229, 120, 7, 193, 204, 133, 251, 78, 221, 1, 133, 223, 79, 240, 28, 77, 115},
 	}
 }
 func (s *TestServiceIRpcService) Id() []byte {
@@ -76,7 +76,7 @@ type TestServiceIRpcClient struct {
 }
 
 func NewTestServiceIRpcClient(endpoint irpcgen.Endpoint) (*TestServiceIRpcClient, error) {
-	id := []byte{253, 211, 22, 103, 51, 138, 238, 41, 169, 73, 195, 141, 70, 56, 59, 164, 190, 14, 93, 162, 95, 92, 66, 151, 72, 158, 197, 247, 167, 14, 53, 222}
+	id := []byte{25, 128, 232, 141, 156, 12, 112, 66, 181, 238, 222, 67, 105, 115, 45, 229, 120, 7, 193, 204, 133, 251, 78, 221, 1, 133, 223, 79, 240, 28, 77, 115}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
@@ -226,7 +226,7 @@ func (s *_Irpc_TestServiceDivErrResp) Deserialize(d *irpcgen.Decoder) error {
 		if isNil {
 			s.Param1 = nil
 		} else {
-			var impl _error_TestService_irpcInterfaceImpl
+			var impl _error_TestService_impl
 			{ // Error()
 				if err := d.String(&impl._Error_0_); err != nil {
 					return fmt.Errorf("deserialize impl._Error_0_ of type 'string': %w", err)
@@ -238,11 +238,11 @@ func (s *_Irpc_TestServiceDivErrResp) Deserialize(d *irpcgen.Decoder) error {
 	return nil
 }
 
-type _error_TestService_irpcInterfaceImpl struct {
+type _error_TestService_impl struct {
 	_Error_0_ string
 }
 
-func (i _error_TestService_irpcInterfaceImpl) Error() string {
+func (i _error_TestService_impl) Error() string {
 	return i._Error_0_
 }
 
@@ -315,7 +315,7 @@ func (s *_Irpc_TestServiceDivCtxErrResp) Deserialize(d *irpcgen.Decoder) error {
 		if isNil {
 			s.Param1 = nil
 		} else {
-			var impl _error_TestService_irpcInterfaceImpl
+			var impl _error_TestService_impl
 			{ // Error()
 				if err := d.String(&impl._Error_0_); err != nil {
 					return fmt.Errorf("deserialize impl._Error_0_ of type 'string': %w", err)
