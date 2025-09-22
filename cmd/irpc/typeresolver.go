@@ -94,15 +94,6 @@ func newTypeResolver(filename string /*, inputPkg *packages.Package, allPkgs []*
 		return typeResolver{}, fmt.Errorf("failed to find encoding.BinaryUnmarshaller type")
 	}
 
-	// contextPkg, err := imp.Import("context")
-	// if err != nil {
-	// 	return typeResolver{}, fmt.Errorf("importer.Import(\"context\"): %w", err)
-	// }
-	// contextObj := contextPkg.Scope().Lookup("Context")
-	// if contextObj == nil {
-	// 	return typeResolver{}, fmt.Errorf("failed to find context.Context object")
-	// }
-
 	return typeResolver{
 		inputPkg:       targetPkg,
 		allPkgs:        allPackages,
