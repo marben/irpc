@@ -17,10 +17,10 @@ func newBasicNamedAPIIRpcService(impl basicNamedAPI) *basicNamedAPIIRpcService {
 	return &basicNamedAPIIRpcService{
 		impl: impl,
 		id: []byte{
-			0x60, 0xb9, 0x80, 0x05, 0xb0, 0x83, 0x95, 0x6e,
-			0x0e, 0xb1, 0x50, 0x57, 0x08, 0x47, 0xe8, 0x63,
-			0x60, 0xcf, 0x98, 0xd7, 0x71, 0x92, 0x6d, 0x3e,
-			0xc1, 0xae, 0x9a, 0x5e, 0x89, 0x72, 0x2b, 0xf3,
+			0x48, 0x9d, 0x42, 0xbd, 0xc6, 0xf9, 0x8a, 0x80,
+			0xb6, 0xe7, 0x1d, 0xe4, 0x08, 0x6c, 0x17, 0xd0,
+			0xbd, 0x87, 0x83, 0xe7, 0xf4, 0x1b, 0xfd, 0x57,
+			0x4f, 0x1c, 0x61, 0x4a, 0x55, 0x72, 0x90, 0x88,
 		},
 	}
 }
@@ -83,10 +83,10 @@ type basicNamedAPIIRpcClient struct {
 
 func newBasicNamedAPIIRpcClient(endpoint irpcgen.Endpoint) (*basicNamedAPIIRpcClient, error) {
 	id := []byte{
-		0x60, 0xb9, 0x80, 0x05, 0xb0, 0x83, 0x95, 0x6e,
-		0x0e, 0xb1, 0x50, 0x57, 0x08, 0x47, 0xe8, 0x63,
-		0x60, 0xcf, 0x98, 0xd7, 0x71, 0x92, 0x6d, 0x3e,
-		0xc1, 0xae, 0x9a, 0x5e, 0x89, 0x72, 0x2b, 0xf3,
+		0x48, 0x9d, 0x42, 0xbd, 0xc6, 0xf9, 0x8a, 0x80,
+		0xb6, 0xe7, 0x1d, 0xe4, 0x08, 0x6c, 0x17, 0xd0,
+		0xbd, 0x87, 0x83, 0xe7, 0xf4, 0x1b, 0xfd, 0x57,
+		0x4f, 0x1c, 0x61, 0x4a, 0x55, 0x72, 0x90, 0x88,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
@@ -100,7 +100,7 @@ func (_c *basicNamedAPIIRpcClient) addFakeUint8(a out2.Uint8, b out2.Uint8) Fake
 	}
 	var resp _Irpc_basicNamedAPIaddFakeUint8Resp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
-		panic(err) // to avoid panic, make your func return error and regenerate the code
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
@@ -111,7 +111,7 @@ func (_c *basicNamedAPIIRpcClient) addUint8(a uint8, b uint8) uint8 {
 	}
 	var resp _Irpc_basicNamedAPIaddUint8Resp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 1, req, &resp); err != nil {
-		panic(err) // to avoid panic, make your func return error and regenerate the code
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
@@ -122,7 +122,7 @@ func (_c *basicNamedAPIIRpcClient) addByte(a byte, b byte) byte {
 	}
 	var resp _Irpc_basicNamedAPIaddByteResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 2, req, &resp); err != nil {
-		panic(err) // to avoid panic, make your func return error and regenerate the code
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }

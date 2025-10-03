@@ -19,10 +19,10 @@ func newOutsidepkgaliasIRpcService(impl outsidepkgalias) *outsidepkgaliasIRpcSer
 	return &outsidepkgaliasIRpcService{
 		impl: impl,
 		id: []byte{
-			0xfb, 0xc9, 0xbd, 0x1c, 0xb2, 0x06, 0x1e, 0x5a,
-			0x53, 0x4b, 0x61, 0x57, 0x69, 0x56, 0xdb, 0x89,
-			0x70, 0xf3, 0xf4, 0xe6, 0xf8, 0xb8, 0xed, 0x1c,
-			0x69, 0x83, 0x72, 0x42, 0xda, 0x26, 0x6a, 0x5c,
+			0x63, 0x81, 0xde, 0xc3, 0xc2, 0x27, 0x7b, 0xbb,
+			0x3a, 0x67, 0xf7, 0x8d, 0x93, 0xaa, 0xab, 0xf8,
+			0x5e, 0xc4, 0x19, 0x60, 0x85, 0xf1, 0xfa, 0x13,
+			0x60, 0xed, 0x77, 0x49, 0x70, 0x80, 0x53, 0x79,
 		},
 	}
 }
@@ -99,10 +99,10 @@ type outsidepkgaliasIRpcClient struct {
 
 func newOutsidepkgaliasIRpcClient(endpoint irpcgen.Endpoint) (*outsidepkgaliasIRpcClient, error) {
 	id := []byte{
-		0xfb, 0xc9, 0xbd, 0x1c, 0xb2, 0x06, 0x1e, 0x5a,
-		0x53, 0x4b, 0x61, 0x57, 0x69, 0x56, 0xdb, 0x89,
-		0x70, 0xf3, 0xf4, 0xe6, 0xf8, 0xb8, 0xed, 0x1c,
-		0x69, 0x83, 0x72, 0x42, 0xda, 0x26, 0x6a, 0x5c,
+		0x63, 0x81, 0xde, 0xc3, 0xc2, 0x27, 0x7b, 0xbb,
+		0x3a, 0x67, 0xf7, 0x8d, 0x93, 0xaa, 0xab, 0xf8,
+		0x5e, 0xc4, 0x19, 0x60, 0x85, 0xf1, 0xfa, 0x13,
+		0x60, 0xed, 0x77, 0x49, 0x70, 0x80, 0x53, 0x79,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
@@ -116,7 +116,7 @@ func (_c *outsidepkgaliasIRpcClient) add(a out1.Uint8, b out1.Uint8) int {
 	}
 	var resp _Irpc_outsidepkgaliasaddResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
-		panic(err) // to avoid panic, make your func return error and regenerate the code
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
@@ -127,7 +127,7 @@ func (_c *outsidepkgaliasIRpcClient) add2(a out1.Uint8, b out.Uint8) int {
 	}
 	var resp _Irpc_outsidepkgaliasadd2Resp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 1, req, &resp); err != nil {
-		panic(err) // to avoid panic, make your func return error and regenerate the code
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
@@ -138,7 +138,7 @@ func (_c *outsidepkgaliasIRpcClient) add3(a int, b out.Uint8) out2.Uint8 {
 	}
 	var resp _Irpc_outsidepkgaliasadd3Resp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 2, req, &resp); err != nil {
-		panic(err) // to avoid panic, make your func return error and regenerate the code
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
@@ -148,7 +148,7 @@ func (_c *outsidepkgaliasIRpcClient) sum(inSlice out1.AliasedByteSlice) int {
 	}
 	var resp _Irpc_outsidepkgaliassumResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 3, req, &resp); err != nil {
-		panic(err) // to avoid panic, make your func return error and regenerate the code
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }

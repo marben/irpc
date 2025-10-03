@@ -17,10 +17,10 @@ func newSliceNamedApiIRpcService(impl sliceNamedApi) *sliceNamedApiIRpcService {
 	return &sliceNamedApiIRpcService{
 		impl: impl,
 		id: []byte{
-			0x53, 0xa2, 0x4f, 0xb7, 0xfa, 0xf7, 0x78, 0x86,
-			0x88, 0x1a, 0x13, 0x8a, 0x57, 0xb3, 0xa3, 0xea,
-			0x2f, 0xbf, 0x69, 0xf9, 0x7e, 0x93, 0x1e, 0x05,
-			0x2c, 0x72, 0x98, 0xd0, 0x37, 0xad, 0x67, 0x88,
+			0xfd, 0x5c, 0x19, 0x80, 0xbf, 0xae, 0xed, 0x24,
+			0x23, 0x43, 0xa4, 0x5e, 0x18, 0x44, 0x9c, 0x64,
+			0xba, 0x3a, 0x40, 0x8c, 0x6b, 0x65, 0x18, 0x9c,
+			0x70, 0xb8, 0x6e, 0x84, 0xb5, 0xe4, 0x7a, 0xb2,
 		},
 	}
 }
@@ -83,10 +83,10 @@ type sliceNamedApiIRpcClient struct {
 
 func newSliceNamedApiIRpcClient(endpoint irpcgen.Endpoint) (*sliceNamedApiIRpcClient, error) {
 	id := []byte{
-		0x53, 0xa2, 0x4f, 0xb7, 0xfa, 0xf7, 0x78, 0x86,
-		0x88, 0x1a, 0x13, 0x8a, 0x57, 0xb3, 0xa3, 0xea,
-		0x2f, 0xbf, 0x69, 0xf9, 0x7e, 0x93, 0x1e, 0x05,
-		0x2c, 0x72, 0x98, 0xd0, 0x37, 0xad, 0x67, 0x88,
+		0xfd, 0x5c, 0x19, 0x80, 0xbf, 0xae, 0xed, 0x24,
+		0x23, 0x43, 0xa4, 0x5e, 0x18, 0x44, 0x9c, 0x64,
+		0xba, 0x3a, 0x40, 0x8c, 0x6b, 0x65, 0x18, 0x9c,
+		0x70, 0xb8, 0x6e, 0x84, 0xb5, 0xe4, 0x7a, 0xb2,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
@@ -99,7 +99,7 @@ func (_c *sliceNamedApiIRpcClient) sumNamedInts(vec namedSliceOfInts) int {
 	}
 	var resp _Irpc_sliceNamedApisumNamedIntsResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
-		panic(err) // to avoid panic, make your func return error and regenerate the code
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
@@ -109,7 +109,7 @@ func (_c *sliceNamedApiIRpcClient) sumOutsideNamedInts(vec out.AliasedByteSlice)
 	}
 	var resp _Irpc_sliceNamedApisumOutsideNamedIntsResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 1, req, &resp); err != nil {
-		panic(err) // to avoid panic, make your func return error and regenerate the code
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
@@ -119,7 +119,7 @@ func (_c *sliceNamedApiIRpcClient) sumSliceOfNamedInts(vec []out.Uint8) out.Uint
 	}
 	var resp _Irpc_sliceNamedApisumSliceOfNamedIntsResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 2, req, &resp); err != nil {
-		panic(err) // to avoid panic, make your func return error and regenerate the code
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }

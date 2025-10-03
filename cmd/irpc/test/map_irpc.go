@@ -16,10 +16,10 @@ func newMapTestIRpcService(impl mapTest) *mapTestIRpcService {
 	return &mapTestIRpcService{
 		impl: impl,
 		id: []byte{
-			0xd8, 0xa9, 0x68, 0xe6, 0x9d, 0x00, 0xab, 0xa5,
-			0x93, 0xdb, 0x41, 0x39, 0x29, 0x19, 0x4a, 0x58,
-			0x8d, 0xa9, 0x1d, 0x13, 0x0b, 0x10, 0xd3, 0x2d,
-			0xc4, 0x3a, 0xb6, 0x30, 0x97, 0x46, 0xb1, 0xff,
+			0xe6, 0x0d, 0x1a, 0xa0, 0x1e, 0x87, 0x6f, 0x1b,
+			0x66, 0xcd, 0xdc, 0x0e, 0x13, 0x20, 0xe4, 0x08,
+			0xed, 0xa4, 0x76, 0x2a, 0xdb, 0x0a, 0xda, 0x44,
+			0xd0, 0x02, 0x95, 0x25, 0x0a, 0x4c, 0xc1, 0xb4,
 		},
 	}
 }
@@ -110,10 +110,10 @@ type mapTestIRpcClient struct {
 
 func newMapTestIRpcClient(endpoint irpcgen.Endpoint) (*mapTestIRpcClient, error) {
 	id := []byte{
-		0xd8, 0xa9, 0x68, 0xe6, 0x9d, 0x00, 0xab, 0xa5,
-		0x93, 0xdb, 0x41, 0x39, 0x29, 0x19, 0x4a, 0x58,
-		0x8d, 0xa9, 0x1d, 0x13, 0x0b, 0x10, 0xd3, 0x2d,
-		0xc4, 0x3a, 0xb6, 0x30, 0x97, 0x46, 0xb1, 0xff,
+		0xe6, 0x0d, 0x1a, 0xa0, 0x1e, 0x87, 0x6f, 0x1b,
+		0x66, 0xcd, 0xdc, 0x0e, 0x13, 0x20, 0xe4, 0x08,
+		0xed, 0xa4, 0x76, 0x2a, 0xdb, 0x0a, 0xda, 0x44,
+		0xd0, 0x02, 0x95, 0x25, 0x0a, 0x4c, 0xc1, 0xb4,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
@@ -126,7 +126,7 @@ func (_c *mapTestIRpcClient) mapSum(in map[int]float64) (keysSum int, valsSum fl
 	}
 	var resp _Irpc_mapTestmapSumResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
-		panic(err) // to avoid panic, make your func return error and regenerate the code
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0_keysSum, resp.Param1_valsSum
 }
@@ -136,7 +136,7 @@ func (_c *mapTestIRpcClient) sumStructs(in map[intStruct]intStruct) (keysSum int
 	}
 	var resp _Irpc_mapTestsumStructsResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 1, req, &resp); err != nil {
-		panic(err) // to avoid panic, make your func return error and regenerate the code
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0_keysSum, resp.Param0_valsSum
 }
@@ -146,7 +146,7 @@ func (_c *mapTestIRpcClient) sumSlices(in map[intStruct][]intStruct) (keysSum in
 	}
 	var resp _Irpc_mapTestsumSlicesResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 2, req, &resp); err != nil {
-		panic(err) // to avoid panic, make your func return error and regenerate the code
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0_keysSum, resp.Param0_valsSum
 }
@@ -156,7 +156,7 @@ func (_c *mapTestIRpcClient) namedMapInc(in namedIntFloatMap) namedIntFloatMap {
 	}
 	var resp _Irpc_mapTestnamedMapIncResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 3, req, &resp); err != nil {
-		panic(err) // to avoid panic, make your func return error and regenerate the code
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
@@ -166,7 +166,7 @@ func (_c *mapTestIRpcClient) namedKeySum(in map[mapNamedInt]mapNamedFloat64) map
 	}
 	var resp _Irpc_mapTestnamedKeySumResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 4, req, &resp); err != nil {
-		panic(err) // to avoid panic, make your func return error and regenerate the code
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }

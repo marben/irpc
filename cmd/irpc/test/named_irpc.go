@@ -16,10 +16,10 @@ func newNamedTestIRpcService(impl namedTest) *namedTestIRpcService {
 	return &namedTestIRpcService{
 		impl: impl,
 		id: []byte{
-			0xac, 0xe4, 0x4f, 0x8c, 0x15, 0xeb, 0x38, 0x72,
-			0x6f, 0x2f, 0xfc, 0xbf, 0xe8, 0xaf, 0xb6, 0xbc,
-			0x98, 0xd7, 0xfa, 0xac, 0x57, 0x5a, 0x3c, 0xc6,
-			0x9e, 0xce, 0x02, 0xd8, 0xdf, 0x1a, 0x63, 0xb6,
+			0xb7, 0xd1, 0x3e, 0x97, 0xa1, 0x62, 0xc2, 0x03,
+			0x2a, 0x2c, 0x8b, 0x57, 0x75, 0x34, 0x4a, 0xba,
+			0xfd, 0x2b, 0xd5, 0x4a, 0xd5, 0x62, 0xe3, 0x16,
+			0x9c, 0xfe, 0xe9, 0x1b, 0xba, 0x9e, 0x6f, 0xab,
 		},
 	}
 }
@@ -124,10 +124,10 @@ type namedTestIRpcClient struct {
 
 func newNamedTestIRpcClient(endpoint irpcgen.Endpoint) (*namedTestIRpcClient, error) {
 	id := []byte{
-		0xac, 0xe4, 0x4f, 0x8c, 0x15, 0xeb, 0x38, 0x72,
-		0x6f, 0x2f, 0xfc, 0xbf, 0xe8, 0xaf, 0xb6, 0xbc,
-		0x98, 0xd7, 0xfa, 0xac, 0x57, 0x5a, 0x3c, 0xc6,
-		0x9e, 0xce, 0x02, 0xd8, 0xdf, 0x1a, 0x63, 0xb6,
+		0xb7, 0xd1, 0x3e, 0x97, 0xa1, 0x62, 0xc2, 0x03,
+		0x2a, 0x2c, 0x8b, 0x57, 0x75, 0x34, 0x4a, 0xba,
+		0xfd, 0x2b, 0xd5, 0x4a, 0xd5, 0x62, 0xe3, 0x16,
+		0x9c, 0xfe, 0xe9, 0x1b, 0xba, 0x9e, 0x6f, 0xab,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
@@ -140,7 +140,7 @@ func (_c *namedTestIRpcClient) isWeekend(wd weekDay) bool {
 	}
 	var resp _Irpc_namedTestisWeekendResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
-		panic(err) // to avoid panic, make your func return error and regenerate the code
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
@@ -150,7 +150,7 @@ func (_c *namedTestIRpcClient) isWeekend2(wd weekDay2) bool {
 	}
 	var resp _Irpc_namedTestisWeekend2Resp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 1, req, &resp); err != nil {
-		panic(err) // to avoid panic, make your func return error and regenerate the code
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
@@ -160,7 +160,7 @@ func (_c *namedTestIRpcClient) containsSaturday(wds []weekDay) bool {
 	}
 	var resp _Irpc_namedTestcontainsSaturdayResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 2, req, &resp); err != nil {
-		panic(err) // to avoid panic, make your func return error and regenerate the code
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
@@ -170,7 +170,7 @@ func (_c *namedTestIRpcClient) containsSaturday2(wds namedWeekDaysSliceType) boo
 	}
 	var resp _Irpc_namedTestcontainsSaturday2Resp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 3, req, &resp); err != nil {
-		panic(err) // to avoid panic, make your func return error and regenerate the code
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
@@ -180,7 +180,7 @@ func (_c *namedTestIRpcClient) namedBytesSum(nb namedByteSliceType) int {
 	}
 	var resp _Irpc_namedTestnamedBytesSumResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 4, req, &resp); err != nil {
-		panic(err) // to avoid panic, make your func return error and regenerate the code
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
@@ -190,7 +190,7 @@ func (_c *namedTestIRpcClient) namedMapSum(p0 namedMap) float64 {
 	}
 	var resp _Irpc_namedTestnamedMapSumResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 5, req, &resp); err != nil {
-		panic(err) // to avoid panic, make your func return error and regenerate the code
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }

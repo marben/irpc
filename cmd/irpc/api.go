@@ -112,7 +112,7 @@ func (ag apiGenerator) clientCode(hash []byte, q *qualifier) string {
 			}
 			fmt.Fprintf(b, "err\n")
 		} else {
-			fmt.Fprintf(b, "panic(err) // to avoid panic, make your func return error and regenerate the code\n")
+			fmt.Fprintf(b, "panic(err) // to avoid panic, make your func return error and regenerate irpc code\n")
 		}
 		fmt.Fprintf(b, "}\n")
 

@@ -19,10 +19,10 @@ func newStructAPIIRpcService(impl structAPI) *structAPIIRpcService {
 	return &structAPIIRpcService{
 		impl: impl,
 		id: []byte{
-			0x58, 0x92, 0x85, 0x77, 0x23, 0xc9, 0x24, 0x1c,
-			0x13, 0x0d, 0xdc, 0xe2, 0x23, 0xbb, 0x01, 0x04,
-			0x67, 0x7c, 0xf7, 0x62, 0x79, 0xff, 0x06, 0xfb,
-			0x11, 0x61, 0x05, 0xac, 0x0b, 0x14, 0x79, 0x77,
+			0x32, 0x8e, 0x15, 0x18, 0xaf, 0x54, 0xd6, 0x80,
+			0xa5, 0xf1, 0xc8, 0xd7, 0x98, 0x7a, 0xa3, 0xa2,
+			0x39, 0xdc, 0x56, 0x1b, 0xca, 0x11, 0x0c, 0x13,
+			0x5f, 0xa0, 0xb1, 0x56, 0x01, 0x45, 0xe5, 0x7c,
 		},
 	}
 }
@@ -154,10 +154,10 @@ type structAPIIRpcClient struct {
 
 func newStructAPIIRpcClient(endpoint irpcgen.Endpoint) (*structAPIIRpcClient, error) {
 	id := []byte{
-		0x58, 0x92, 0x85, 0x77, 0x23, 0xc9, 0x24, 0x1c,
-		0x13, 0x0d, 0xdc, 0xe2, 0x23, 0xbb, 0x01, 0x04,
-		0x67, 0x7c, 0xf7, 0x62, 0x79, 0xff, 0x06, 0xfb,
-		0x11, 0x61, 0x05, 0xac, 0x0b, 0x14, 0x79, 0x77,
+		0x32, 0x8e, 0x15, 0x18, 0xaf, 0x54, 0xd6, 0x80,
+		0xa5, 0xf1, 0xc8, 0xd7, 0x98, 0x7a, 0xa3, 0xa2,
+		0x39, 0xdc, 0x56, 0x1b, 0xca, 0x11, 0x0c, 0x13,
+		0x5f, 0xa0, 0xb1, 0x56, 0x01, 0x45, 0xe5, 0x7c,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
@@ -170,7 +170,7 @@ func (_c *structAPIIRpcClient) VectSum(v vect3) int {
 	}
 	var resp _Irpc_structAPIVectSumResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
-		panic(err) // to avoid panic, make your func return error and regenerate the code
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
@@ -180,7 +180,7 @@ func (_c *structAPIIRpcClient) Vect3x3Sum(v vect3x3) vect3 {
 	}
 	var resp _Irpc_structAPIVect3x3SumResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 1, req, &resp); err != nil {
-		panic(err) // to avoid panic, make your func return error and regenerate the code
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
@@ -190,7 +190,7 @@ func (_c *structAPIIRpcClient) SumSliceStruct(s sliceStruct) int {
 	}
 	var resp _Irpc_structAPISumSliceStructResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 2, req, &resp); err != nil {
-		panic(err) // to avoid panic, make your func return error and regenerate the code
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
@@ -200,7 +200,7 @@ func (_c *structAPIIRpcClient) InlineParams(s struct{ a int }) int {
 	}
 	var resp _Irpc_structAPIInlineParamsResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 3, req, &resp); err != nil {
-		panic(err) // to avoid panic, make your func return error and regenerate the code
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
@@ -212,7 +212,7 @@ func (_c *structAPIIRpcClient) InlineParamsNamed(s struct {
 		Param0_s: s,
 	}
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 4, req, &irpcgen.EmptyDeserializable{}); err != nil {
-		panic(err) // to avoid panic, make your func return error and regenerate the code
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 }
 func (_c *structAPIIRpcClient) InlineInlineParams(s struct{ a struct{ b int } }) int {
@@ -221,7 +221,7 @@ func (_c *structAPIIRpcClient) InlineInlineParams(s struct{ a struct{ b int } })
 	}
 	var resp _Irpc_structAPIInlineInlineParamsResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 5, req, &resp); err != nil {
-		panic(err) // to avoid panic, make your func return error and regenerate the code
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
@@ -231,7 +231,7 @@ func (_c *structAPIIRpcClient) InlineReturn(a int) struct{ b int } {
 	}
 	var resp _Irpc_structAPIInlineReturnResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 6, req, &resp); err != nil {
-		panic(err) // to avoid panic, make your func return error and regenerate the code
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
@@ -241,7 +241,7 @@ func (_c *structAPIIRpcClient) PointNeg(p image.Point) image.Point {
 	}
 	var resp _Irpc_structAPIPointNegResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 7, req, &resp); err != nil {
-		panic(err) // to avoid panic, make your func return error and regenerate the code
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
