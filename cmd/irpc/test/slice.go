@@ -2,16 +2,23 @@ package irpctestpkg
 
 //go:generate go run ../
 
+type namedByteSlice []byte
+
 type sliceTest interface {
 	SliceSum(slice []int) int
 	VectMult(vect []int, s int) []int
 	SliceOfFloat64Sum(slice []float64) float64
 	SliceOfSlicesSum(slice [][]int) int
 	SliceOfBytesSum(slice []byte) int
+	namedByteSlice(slice namedByteSlice) int
 }
 
 type sliceTestImpl struct {
 	skew int
+}
+
+func (st sliceTestImpl) namedByteSlice(slice namedByteSlice) int {
+	panic("unimplemented")
 }
 
 func (st sliceTestImpl) SliceSum(slice []int) int {

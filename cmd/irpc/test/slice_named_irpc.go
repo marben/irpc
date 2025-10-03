@@ -17,10 +17,10 @@ func newSliceNamedApiIRpcService(impl sliceNamedApi) *sliceNamedApiIRpcService {
 	return &sliceNamedApiIRpcService{
 		impl: impl,
 		id: []byte{
-			0x1f, 0xb6, 0x95, 0xe6, 0x4a, 0xa9, 0x8f, 0x00,
-			0xa3, 0x2d, 0x6a, 0xdd, 0xb4, 0x17, 0xdc, 0x58,
-			0xe1, 0x55, 0x86, 0xf6, 0x5b, 0x3c, 0xf6, 0x08,
-			0xac, 0x33, 0x06, 0x6b, 0x87, 0xc4, 0x37, 0x68,
+			0x53, 0xa2, 0x4f, 0xb7, 0xfa, 0xf7, 0x78, 0x86,
+			0x88, 0x1a, 0x13, 0x8a, 0x57, 0xb3, 0xa3, 0xea,
+			0x2f, 0xbf, 0x69, 0xf9, 0x7e, 0x93, 0x1e, 0x05,
+			0x2c, 0x72, 0x98, 0xd0, 0x37, 0xad, 0x67, 0x88,
 		},
 	}
 }
@@ -83,10 +83,10 @@ type sliceNamedApiIRpcClient struct {
 
 func newSliceNamedApiIRpcClient(endpoint irpcgen.Endpoint) (*sliceNamedApiIRpcClient, error) {
 	id := []byte{
-		0x1f, 0xb6, 0x95, 0xe6, 0x4a, 0xa9, 0x8f, 0x00,
-		0xa3, 0x2d, 0x6a, 0xdd, 0xb4, 0x17, 0xdc, 0x58,
-		0xe1, 0x55, 0x86, 0xf6, 0x5b, 0x3c, 0xf6, 0x08,
-		0xac, 0x33, 0x06, 0x6b, 0x87, 0xc4, 0x37, 0x68,
+		0x53, 0xa2, 0x4f, 0xb7, 0xfa, 0xf7, 0x78, 0x86,
+		0x88, 0x1a, 0x13, 0x8a, 0x57, 0xb3, 0xa3, 0xea,
+		0x2f, 0xbf, 0x69, 0xf9, 0x7e, 0x93, 0x1e, 0x05,
+		0x2c, 0x72, 0x98, 0xd0, 0x37, 0xad, 0x67, 0x88,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
@@ -132,11 +132,11 @@ func (s _Irpc_sliceNamedApisumNamedIntsReq) Serialize(e *irpcgen.Encoder) error 
 	{ // s.Param0_vec namedSliceOfInts
 		var l int = len(s.Param0_vec)
 		if err := e.UvarInt64(uint64(l)); err != nil {
-			return fmt.Errorf("serialize uint64(l) of type 'uint64': %w", err)
+			return fmt.Errorf("serialize uint64(l) of type \"uint64\": %w", err)
 		}
 		for _, v := range s.Param0_vec {
 			if err := e.VarInt(v); err != nil {
-				return fmt.Errorf("serialize v of type 'int': %w", err)
+				return fmt.Errorf("serialize v of type \"int\": %w", err)
 			}
 		}
 	}
@@ -146,13 +146,13 @@ func (s *_Irpc_sliceNamedApisumNamedIntsReq) Deserialize(d *irpcgen.Decoder) err
 	{ // s.Param0_vec namedSliceOfInts
 		var ul uint64
 		if err := d.UvarInt64(&ul); err != nil {
-			return fmt.Errorf("deserialize ul of type 'uint64': %w", err)
+			return fmt.Errorf("deserialize ul of type \"uint64\": %w", err)
 		}
 		var l int = int(ul)
 		s.Param0_vec = make(namedSliceOfInts, l)
 		for i := range l {
 			if err := d.VarInt(&s.Param0_vec[i]); err != nil {
-				return fmt.Errorf("deserialize s.Param0_vec[i] of type 'int': %w", err)
+				return fmt.Errorf("deserialize s.Param0_vec[i] of type \"int\": %w", err)
 			}
 		}
 	}
@@ -165,13 +165,13 @@ type _Irpc_sliceNamedApisumNamedIntsResp struct {
 
 func (s _Irpc_sliceNamedApisumNamedIntsResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0); err != nil {
-		return fmt.Errorf("serialize s.Param0 of type 'int': %w", err)
+		return fmt.Errorf("serialize s.Param0 of type \"int\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_sliceNamedApisumNamedIntsResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0); err != nil {
-		return fmt.Errorf("deserialize s.Param0 of type 'int': %w", err)
+		return fmt.Errorf("deserialize s.Param0 of type \"int\": %w", err)
 	}
 	return nil
 }
@@ -184,11 +184,11 @@ func (s _Irpc_sliceNamedApisumOutsideNamedIntsReq) Serialize(e *irpcgen.Encoder)
 	{ // s.Param0_vec out.AliasedByteSlice
 		var l int = len(s.Param0_vec)
 		if err := e.UvarInt64(uint64(l)); err != nil {
-			return fmt.Errorf("serialize uint64(l) of type 'uint64': %w", err)
+			return fmt.Errorf("serialize uint64(l) of type \"uint64\": %w", err)
 		}
 		for _, v := range s.Param0_vec {
 			if err := e.Uint8(uint8(v)); err != nil {
-				return fmt.Errorf("serialize v of type 'uint8': %w", err)
+				return fmt.Errorf("serialize v of type \"uint8\": %w", err)
 			}
 		}
 	}
@@ -198,13 +198,13 @@ func (s *_Irpc_sliceNamedApisumOutsideNamedIntsReq) Deserialize(d *irpcgen.Decod
 	{ // s.Param0_vec out.AliasedByteSlice
 		var ul uint64
 		if err := d.UvarInt64(&ul); err != nil {
-			return fmt.Errorf("deserialize ul of type 'uint64': %w", err)
+			return fmt.Errorf("deserialize ul of type \"uint64\": %w", err)
 		}
 		var l int = int(ul)
 		s.Param0_vec = make(out.AliasedByteSlice, l)
 		for i := range l {
 			if err := d.Uint8((*uint8)(&s.Param0_vec[i])); err != nil {
-				return fmt.Errorf("deserialize s.Param0_vec[i] of type 'uint8': %w", err)
+				return fmt.Errorf("deserialize s.Param0_vec[i] of type \"uint8\": %w", err)
 			}
 		}
 	}
@@ -217,13 +217,13 @@ type _Irpc_sliceNamedApisumOutsideNamedIntsResp struct {
 
 func (s _Irpc_sliceNamedApisumOutsideNamedIntsResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0); err != nil {
-		return fmt.Errorf("serialize s.Param0 of type 'int': %w", err)
+		return fmt.Errorf("serialize s.Param0 of type \"int\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_sliceNamedApisumOutsideNamedIntsResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0); err != nil {
-		return fmt.Errorf("deserialize s.Param0 of type 'int': %w", err)
+		return fmt.Errorf("deserialize s.Param0 of type \"int\": %w", err)
 	}
 	return nil
 }
@@ -236,11 +236,11 @@ func (s _Irpc_sliceNamedApisumSliceOfNamedIntsReq) Serialize(e *irpcgen.Encoder)
 	{ // s.Param0_vec []out.Uint8
 		var l int = len(s.Param0_vec)
 		if err := e.UvarInt64(uint64(l)); err != nil {
-			return fmt.Errorf("serialize uint64(l) of type 'uint64': %w", err)
+			return fmt.Errorf("serialize uint64(l) of type \"uint64\": %w", err)
 		}
 		for _, v := range s.Param0_vec {
 			if err := e.Uint8(uint8(v)); err != nil {
-				return fmt.Errorf("serialize v of type 'uint8': %w", err)
+				return fmt.Errorf("serialize v of type \"uint8\": %w", err)
 			}
 		}
 	}
@@ -250,13 +250,13 @@ func (s *_Irpc_sliceNamedApisumSliceOfNamedIntsReq) Deserialize(d *irpcgen.Decod
 	{ // s.Param0_vec []out.Uint8
 		var ul uint64
 		if err := d.UvarInt64(&ul); err != nil {
-			return fmt.Errorf("deserialize ul of type 'uint64': %w", err)
+			return fmt.Errorf("deserialize ul of type \"uint64\": %w", err)
 		}
 		var l int = int(ul)
 		s.Param0_vec = make([]out.Uint8, l)
 		for i := range l {
 			if err := d.Uint8((*uint8)(&s.Param0_vec[i])); err != nil {
-				return fmt.Errorf("deserialize s.Param0_vec[i] of type 'uint8': %w", err)
+				return fmt.Errorf("deserialize s.Param0_vec[i] of type \"uint8\": %w", err)
 			}
 		}
 	}
@@ -269,13 +269,13 @@ type _Irpc_sliceNamedApisumSliceOfNamedIntsResp struct {
 
 func (s _Irpc_sliceNamedApisumSliceOfNamedIntsResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.Uint8(uint8(s.Param0)); err != nil {
-		return fmt.Errorf("serialize s.Param0 of type 'uint8': %w", err)
+		return fmt.Errorf("serialize s.Param0 of type \"uint8\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_sliceNamedApisumSliceOfNamedIntsResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.Uint8((*uint8)(&s.Param0)); err != nil {
-		return fmt.Errorf("deserialize s.Param0 of type 'uint8': %w", err)
+		return fmt.Errorf("deserialize s.Param0 of type \"uint8\": %w", err)
 	}
 	return nil
 }

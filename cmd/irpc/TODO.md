@@ -1,4 +1,3 @@
-- resurface byteslice encoder
 - aliases?
 - dot imports
 - BinaryAppender

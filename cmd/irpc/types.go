@@ -70,16 +70,11 @@ func (tr *typeResolver) newBasicType(bt *types.Basic, ni *namedInfo) (Type, erro
 		return basicType{}, fmt.Errorf("unsupported basic type %q", bt.Name())
 	}
 
-	var needsCasting bool
-	if ni != nil {
-		needsCasting = true
-	}
-
 	enc := directCallEncoder{
-		encFuncName:        irpcFuncName,
-		decFuncName:        irpcFuncName,
-		underlyingTypeName: bt.Name(),
-		needsCasting:       needsCasting,
+		encFuncName: irpcFuncName,
+		decFuncName: irpcFuncName,
+		typeName:    bt.Name(),
+		ni:          ni,
 	}
 
 	return basicType{

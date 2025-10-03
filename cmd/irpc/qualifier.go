@@ -14,6 +14,8 @@ func newQualifier(tr typeResolver) *qualifier {
 	}
 }
 
+// returns type name with package/alias name
+// if import was not yet used, modifies the qualifier to mark import as use
 func (q *qualifier) qualifyNamedInfo(ni namedInfo) string {
 	// log.Printf("qualifying ni: %#v", ni)
 	// log.Printf("qualifying for importspec: %#v", ni.importSpec)

@@ -12,13 +12,12 @@ type encoder interface {
 }
 
 var (
-	uint64Encoder        = newSymmetricDirectCallEncoder("UvarInt64", "uint64")
-	boolEncoder          = newSymmetricDirectCallEncoder("Bool", "bool")
+	uint64Encoder        = newSymmetricDirectCallEncoder("UvarInt64", "uint64", nil)
+	boolEncoder          = newSymmetricDirectCallEncoder("Bool", "bool", nil)
 	binMarshallerEncoder = directCallEncoder{
-		encFuncName:        "BinaryMarshaler",
-		decFuncName:        "BinaryUnmarshaler",
-		underlyingTypeName: "encoding.BinaryUnmarshaler", // todo: needed?
-		needsCasting:       false,
+		encFuncName: "BinaryMarshaler",
+		decFuncName: "BinaryUnmarshaler",
+		typeName:    "encoding.BinaryUnmarshaler",
 	}
 )
 
@@ -36,47 +35,55 @@ func (is importSpec) packageQualifier() string {
 	return is.pkgName
 }
 
-func newSymmetricDirectCallEncoder(encDecFunc string, underlyingTypeName string) directCallEncoder {
+func newSymmetricDirectCallEncoder(encDecFunc string, typeName string, ni *namedInfo) directCallEncoder {
 	return directCallEncoder{
-		encFuncName:        encDecFunc,
-		decFuncName:        encDecFunc,
-		underlyingTypeName: underlyingTypeName,
+		encFuncName: encDecFunc,
+		decFuncName: encDecFunc,
+		typeName:    typeName,
+		ni:          ni,
 	}
 }
 
 type directCallEncoder struct {
-	encFuncName        string
-	decFuncName        string
-	underlyingTypeName string
-	needsCasting       bool // if named, otherwise ""
+	encFuncName string
+	decFuncName string
+	typeName    string // the actual type name as in int, []byte, etc
+	ni          *namedInfo
 }
 
-func (e directCallEncoder) encode(varId string, existingVars varNames, q *qualifier) string {
+func (e directCallEncoder) needsCasting() bool {
+	if e.ni != nil && e.ni.namedName != e.typeName {
+		return true
+	}
+	return false
+}
+
+func (e directCallEncoder) encode(varId string, existingVars varNames, _ *qualifier) string {
 	var varParam string
-	if e.needsCasting {
-		varParam = fmt.Sprintf("%s(%s)", e.underlyingTypeName, varId)
+	if e.needsCasting() {
+		varParam = fmt.Sprintf("%s(%s)", e.typeName, varId)
 	} else {
 		varParam = varId
 	}
 
 	return fmt.Sprintf(`if err := e.%s(%s); err != nil {
-		return fmt.Errorf("serialize %s of type '%s': %%w", err)
+		return fmt.Errorf("serialize %s of type \"%s\": %%w", err)
 	}
-	`, e.encFuncName, varParam, varId, e.underlyingTypeName)
+	`, e.encFuncName, varParam, varId, e.typeName)
 }
 
 func (e directCallEncoder) decode(varId string, existingVars varNames, _ *qualifier) string {
 	var varParam string
-	if e.needsCasting {
-		varParam = fmt.Sprintf("(*%s)(&%s)", e.underlyingTypeName, varId)
+	if e.needsCasting() {
+		varParam = fmt.Sprintf("(*%s)(&%s)", e.typeName, varId)
 	} else {
 		varParam = "&" + varId
 	}
 	sb := &strings.Builder{}
 	fmt.Fprintf(sb, `if err := d.%s(%s); err != nil{
-		return fmt.Errorf("deserialize %s of type '%s': %%w",err)
+		return fmt.Errorf("deserialize %s of type \"%s\": %%w",err)
 	}
-	`, e.decFuncName, varParam, varId, e.underlyingTypeName)
+	`, e.decFuncName, varParam, varId, e.typeName)
 	return sb.String()
 }
 

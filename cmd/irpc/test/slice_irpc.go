@@ -16,10 +16,10 @@ func newSliceTestIRpcService(impl sliceTest) *sliceTestIRpcService {
 	return &sliceTestIRpcService{
 		impl: impl,
 		id: []byte{
-			0x35, 0xcd, 0xfc, 0x1f, 0x12, 0x0f, 0x4e, 0x23,
-			0xe0, 0xa0, 0xf7, 0xe7, 0x17, 0x1c, 0x3f, 0x22,
-			0xc1, 0xf6, 0x29, 0xe0, 0x1a, 0x5a, 0x61, 0xdd,
-			0x72, 0xde, 0x7e, 0x70, 0xfa, 0x45, 0x2e, 0x8b,
+			0x50, 0x22, 0xd3, 0xd8, 0x2a, 0xec, 0x7e, 0x4b,
+			0x8f, 0xa0, 0xe7, 0x2b, 0x2c, 0x4e, 0xdf, 0x86,
+			0xa0, 0xfb, 0x27, 0x0c, 0x02, 0x16, 0xac, 0xb4,
+			0xf0, 0x3f, 0xa2, 0x14, 0x22, 0x70, 0xfa, 0xd2,
 		},
 	}
 }
@@ -98,6 +98,20 @@ func (s *sliceTestIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 				return resp
 			}, nil
 		}, nil
+	case 5: // namedByteSlice
+		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_sliceTestnamedByteSliceReq
+			if err := args.Deserialize(d); err != nil {
+				return nil, err
+			}
+			return func(ctx context.Context) irpcgen.Serializable {
+				// EXECUTE
+				var resp _Irpc_sliceTestnamedByteSliceResp
+				resp.Param0 = s.impl.namedByteSlice(args.Param0_slice)
+				return resp
+			}, nil
+		}, nil
 	default:
 		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, s.Id())
 	}
@@ -110,10 +124,10 @@ type sliceTestIRpcClient struct {
 
 func newSliceTestIRpcClient(endpoint irpcgen.Endpoint) (*sliceTestIRpcClient, error) {
 	id := []byte{
-		0x35, 0xcd, 0xfc, 0x1f, 0x12, 0x0f, 0x4e, 0x23,
-		0xe0, 0xa0, 0xf7, 0xe7, 0x17, 0x1c, 0x3f, 0x22,
-		0xc1, 0xf6, 0x29, 0xe0, 0x1a, 0x5a, 0x61, 0xdd,
-		0x72, 0xde, 0x7e, 0x70, 0xfa, 0x45, 0x2e, 0x8b,
+		0x50, 0x22, 0xd3, 0xd8, 0x2a, 0xec, 0x7e, 0x4b,
+		0x8f, 0xa0, 0xe7, 0x2b, 0x2c, 0x4e, 0xdf, 0x86,
+		0xa0, 0xfb, 0x27, 0x0c, 0x02, 0x16, 0xac, 0xb4,
+		0xf0, 0x3f, 0xa2, 0x14, 0x22, 0x70, 0xfa, 0xd2,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
@@ -171,6 +185,16 @@ func (_c *sliceTestIRpcClient) SliceOfBytesSum(slice []byte) int {
 	}
 	return resp.Param0
 }
+func (_c *sliceTestIRpcClient) namedByteSlice(slice namedByteSlice) int {
+	var req = _Irpc_sliceTestnamedByteSliceReq{
+		Param0_slice: slice,
+	}
+	var resp _Irpc_sliceTestnamedByteSliceResp
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 5, req, &resp); err != nil {
+		panic(err) // to avoid panic, make your func return error and regenerate the code
+	}
+	return resp.Param0
+}
 
 type _Irpc_sliceTestSliceSumReq struct {
 	Param0_slice []int
@@ -180,11 +204,11 @@ func (s _Irpc_sliceTestSliceSumReq) Serialize(e *irpcgen.Encoder) error {
 	{ // s.Param0_slice []int
 		var l int = len(s.Param0_slice)
 		if err := e.UvarInt64(uint64(l)); err != nil {
-			return fmt.Errorf("serialize uint64(l) of type 'uint64': %w", err)
+			return fmt.Errorf("serialize uint64(l) of type \"uint64\": %w", err)
 		}
 		for _, v := range s.Param0_slice {
 			if err := e.VarInt(v); err != nil {
-				return fmt.Errorf("serialize v of type 'int': %w", err)
+				return fmt.Errorf("serialize v of type \"int\": %w", err)
 			}
 		}
 	}
@@ -194,13 +218,13 @@ func (s *_Irpc_sliceTestSliceSumReq) Deserialize(d *irpcgen.Decoder) error {
 	{ // s.Param0_slice []int
 		var ul uint64
 		if err := d.UvarInt64(&ul); err != nil {
-			return fmt.Errorf("deserialize ul of type 'uint64': %w", err)
+			return fmt.Errorf("deserialize ul of type \"uint64\": %w", err)
 		}
 		var l int = int(ul)
 		s.Param0_slice = make([]int, l)
 		for i := range l {
 			if err := d.VarInt(&s.Param0_slice[i]); err != nil {
-				return fmt.Errorf("deserialize s.Param0_slice[i] of type 'int': %w", err)
+				return fmt.Errorf("deserialize s.Param0_slice[i] of type \"int\": %w", err)
 			}
 		}
 	}
@@ -213,13 +237,13 @@ type _Irpc_sliceTestSliceSumResp struct {
 
 func (s _Irpc_sliceTestSliceSumResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0); err != nil {
-		return fmt.Errorf("serialize s.Param0 of type 'int': %w", err)
+		return fmt.Errorf("serialize s.Param0 of type \"int\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_sliceTestSliceSumResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0); err != nil {
-		return fmt.Errorf("deserialize s.Param0 of type 'int': %w", err)
+		return fmt.Errorf("deserialize s.Param0 of type \"int\": %w", err)
 	}
 	return nil
 }
@@ -233,16 +257,16 @@ func (s _Irpc_sliceTestVectMultReq) Serialize(e *irpcgen.Encoder) error {
 	{ // s.Param0_vect []int
 		var l int = len(s.Param0_vect)
 		if err := e.UvarInt64(uint64(l)); err != nil {
-			return fmt.Errorf("serialize uint64(l) of type 'uint64': %w", err)
+			return fmt.Errorf("serialize uint64(l) of type \"uint64\": %w", err)
 		}
 		for _, v := range s.Param0_vect {
 			if err := e.VarInt(v); err != nil {
-				return fmt.Errorf("serialize v of type 'int': %w", err)
+				return fmt.Errorf("serialize v of type \"int\": %w", err)
 			}
 		}
 	}
 	if err := e.VarInt(s.Param1_s); err != nil {
-		return fmt.Errorf("serialize s.Param1_s of type 'int': %w", err)
+		return fmt.Errorf("serialize s.Param1_s of type \"int\": %w", err)
 	}
 	return nil
 }
@@ -250,18 +274,18 @@ func (s *_Irpc_sliceTestVectMultReq) Deserialize(d *irpcgen.Decoder) error {
 	{ // s.Param0_vect []int
 		var ul uint64
 		if err := d.UvarInt64(&ul); err != nil {
-			return fmt.Errorf("deserialize ul of type 'uint64': %w", err)
+			return fmt.Errorf("deserialize ul of type \"uint64\": %w", err)
 		}
 		var l int = int(ul)
 		s.Param0_vect = make([]int, l)
 		for i := range l {
 			if err := d.VarInt(&s.Param0_vect[i]); err != nil {
-				return fmt.Errorf("deserialize s.Param0_vect[i] of type 'int': %w", err)
+				return fmt.Errorf("deserialize s.Param0_vect[i] of type \"int\": %w", err)
 			}
 		}
 	}
 	if err := d.VarInt(&s.Param1_s); err != nil {
-		return fmt.Errorf("deserialize s.Param1_s of type 'int': %w", err)
+		return fmt.Errorf("deserialize s.Param1_s of type \"int\": %w", err)
 	}
 	return nil
 }
@@ -274,11 +298,11 @@ func (s _Irpc_sliceTestVectMultResp) Serialize(e *irpcgen.Encoder) error {
 	{ // s.Param0 []int
 		var l int = len(s.Param0)
 		if err := e.UvarInt64(uint64(l)); err != nil {
-			return fmt.Errorf("serialize uint64(l) of type 'uint64': %w", err)
+			return fmt.Errorf("serialize uint64(l) of type \"uint64\": %w", err)
 		}
 		for _, v := range s.Param0 {
 			if err := e.VarInt(v); err != nil {
-				return fmt.Errorf("serialize v of type 'int': %w", err)
+				return fmt.Errorf("serialize v of type \"int\": %w", err)
 			}
 		}
 	}
@@ -288,13 +312,13 @@ func (s *_Irpc_sliceTestVectMultResp) Deserialize(d *irpcgen.Decoder) error {
 	{ // s.Param0 []int
 		var ul uint64
 		if err := d.UvarInt64(&ul); err != nil {
-			return fmt.Errorf("deserialize ul of type 'uint64': %w", err)
+			return fmt.Errorf("deserialize ul of type \"uint64\": %w", err)
 		}
 		var l int = int(ul)
 		s.Param0 = make([]int, l)
 		for i := range l {
 			if err := d.VarInt(&s.Param0[i]); err != nil {
-				return fmt.Errorf("deserialize s.Param0[i] of type 'int': %w", err)
+				return fmt.Errorf("deserialize s.Param0[i] of type \"int\": %w", err)
 			}
 		}
 	}
@@ -309,11 +333,11 @@ func (s _Irpc_sliceTestSliceOfFloat64SumReq) Serialize(e *irpcgen.Encoder) error
 	{ // s.Param0_slice []float64
 		var l int = len(s.Param0_slice)
 		if err := e.UvarInt64(uint64(l)); err != nil {
-			return fmt.Errorf("serialize uint64(l) of type 'uint64': %w", err)
+			return fmt.Errorf("serialize uint64(l) of type \"uint64\": %w", err)
 		}
 		for _, v := range s.Param0_slice {
 			if err := e.Float64le(v); err != nil {
-				return fmt.Errorf("serialize v of type 'float64': %w", err)
+				return fmt.Errorf("serialize v of type \"float64\": %w", err)
 			}
 		}
 	}
@@ -323,13 +347,13 @@ func (s *_Irpc_sliceTestSliceOfFloat64SumReq) Deserialize(d *irpcgen.Decoder) er
 	{ // s.Param0_slice []float64
 		var ul uint64
 		if err := d.UvarInt64(&ul); err != nil {
-			return fmt.Errorf("deserialize ul of type 'uint64': %w", err)
+			return fmt.Errorf("deserialize ul of type \"uint64\": %w", err)
 		}
 		var l int = int(ul)
 		s.Param0_slice = make([]float64, l)
 		for i := range l {
 			if err := d.Float64le(&s.Param0_slice[i]); err != nil {
-				return fmt.Errorf("deserialize s.Param0_slice[i] of type 'float64': %w", err)
+				return fmt.Errorf("deserialize s.Param0_slice[i] of type \"float64\": %w", err)
 			}
 		}
 	}
@@ -342,13 +366,13 @@ type _Irpc_sliceTestSliceOfFloat64SumResp struct {
 
 func (s _Irpc_sliceTestSliceOfFloat64SumResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.Float64le(s.Param0); err != nil {
-		return fmt.Errorf("serialize s.Param0 of type 'float64': %w", err)
+		return fmt.Errorf("serialize s.Param0 of type \"float64\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_sliceTestSliceOfFloat64SumResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.Float64le(&s.Param0); err != nil {
-		return fmt.Errorf("deserialize s.Param0 of type 'float64': %w", err)
+		return fmt.Errorf("deserialize s.Param0 of type \"float64\": %w", err)
 	}
 	return nil
 }
@@ -361,17 +385,17 @@ func (s _Irpc_sliceTestSliceOfSlicesSumReq) Serialize(e *irpcgen.Encoder) error 
 	{ // s.Param0_slice [][]int
 		var l int = len(s.Param0_slice)
 		if err := e.UvarInt64(uint64(l)); err != nil {
-			return fmt.Errorf("serialize uint64(l) of type 'uint64': %w", err)
+			return fmt.Errorf("serialize uint64(l) of type \"uint64\": %w", err)
 		}
 		for _, v := range s.Param0_slice {
 			{ // v []int
 				var l int = len(v)
 				if err := e.UvarInt64(uint64(l)); err != nil {
-					return fmt.Errorf("serialize uint64(l) of type 'uint64': %w", err)
+					return fmt.Errorf("serialize uint64(l) of type \"uint64\": %w", err)
 				}
 				for _, v := range v {
 					if err := e.VarInt(v); err != nil {
-						return fmt.Errorf("serialize v of type 'int': %w", err)
+						return fmt.Errorf("serialize v of type \"int\": %w", err)
 					}
 				}
 			}
@@ -383,7 +407,7 @@ func (s *_Irpc_sliceTestSliceOfSlicesSumReq) Deserialize(d *irpcgen.Decoder) err
 	{ // s.Param0_slice [][]int
 		var ul uint64
 		if err := d.UvarInt64(&ul); err != nil {
-			return fmt.Errorf("deserialize ul of type 'uint64': %w", err)
+			return fmt.Errorf("deserialize ul of type \"uint64\": %w", err)
 		}
 		var l int = int(ul)
 		s.Param0_slice = make([][]int, l)
@@ -391,13 +415,13 @@ func (s *_Irpc_sliceTestSliceOfSlicesSumReq) Deserialize(d *irpcgen.Decoder) err
 			{ // s.Param0_slice[i] []int
 				var ul uint64
 				if err := d.UvarInt64(&ul); err != nil {
-					return fmt.Errorf("deserialize ul of type 'uint64': %w", err)
+					return fmt.Errorf("deserialize ul of type \"uint64\": %w", err)
 				}
 				var l int = int(ul)
 				s.Param0_slice[i] = make([]int, l)
 				for j := range l {
 					if err := d.VarInt(&s.Param0_slice[i][j]); err != nil {
-						return fmt.Errorf("deserialize s.Param0_slice[i][j] of type 'int': %w", err)
+						return fmt.Errorf("deserialize s.Param0_slice[i][j] of type \"int\": %w", err)
 					}
 				}
 			}
@@ -412,13 +436,13 @@ type _Irpc_sliceTestSliceOfSlicesSumResp struct {
 
 func (s _Irpc_sliceTestSliceOfSlicesSumResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0); err != nil {
-		return fmt.Errorf("serialize s.Param0 of type 'int': %w", err)
+		return fmt.Errorf("serialize s.Param0 of type \"int\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_sliceTestSliceOfSlicesSumResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0); err != nil {
-		return fmt.Errorf("deserialize s.Param0 of type 'int': %w", err)
+		return fmt.Errorf("deserialize s.Param0 of type \"int\": %w", err)
 	}
 	return nil
 }
@@ -428,32 +452,14 @@ type _Irpc_sliceTestSliceOfBytesSumReq struct {
 }
 
 func (s _Irpc_sliceTestSliceOfBytesSumReq) Serialize(e *irpcgen.Encoder) error {
-	{ // s.Param0_slice []byte
-		var l int = len(s.Param0_slice)
-		if err := e.UvarInt64(uint64(l)); err != nil {
-			return fmt.Errorf("serialize uint64(l) of type 'uint64': %w", err)
-		}
-		for _, v := range s.Param0_slice {
-			if err := e.Uint8(v); err != nil {
-				return fmt.Errorf("serialize v of type 'byte': %w", err)
-			}
-		}
+	if err := e.ByteSlice(s.Param0_slice); err != nil {
+		return fmt.Errorf("serialize s.Param0_slice of type \"[]byte\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_sliceTestSliceOfBytesSumReq) Deserialize(d *irpcgen.Decoder) error {
-	{ // s.Param0_slice []byte
-		var ul uint64
-		if err := d.UvarInt64(&ul); err != nil {
-			return fmt.Errorf("deserialize ul of type 'uint64': %w", err)
-		}
-		var l int = int(ul)
-		s.Param0_slice = make([]byte, l)
-		for i := range l {
-			if err := d.Uint8(&s.Param0_slice[i]); err != nil {
-				return fmt.Errorf("deserialize s.Param0_slice[i] of type 'byte': %w", err)
-			}
-		}
+	if err := d.ByteSlice(&s.Param0_slice); err != nil {
+		return fmt.Errorf("deserialize s.Param0_slice of type \"[]byte\": %w", err)
 	}
 	return nil
 }
@@ -464,13 +470,47 @@ type _Irpc_sliceTestSliceOfBytesSumResp struct {
 
 func (s _Irpc_sliceTestSliceOfBytesSumResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0); err != nil {
-		return fmt.Errorf("serialize s.Param0 of type 'int': %w", err)
+		return fmt.Errorf("serialize s.Param0 of type \"int\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_sliceTestSliceOfBytesSumResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0); err != nil {
-		return fmt.Errorf("deserialize s.Param0 of type 'int': %w", err)
+		return fmt.Errorf("deserialize s.Param0 of type \"int\": %w", err)
+	}
+	return nil
+}
+
+type _Irpc_sliceTestnamedByteSliceReq struct {
+	Param0_slice namedByteSlice
+}
+
+func (s _Irpc_sliceTestnamedByteSliceReq) Serialize(e *irpcgen.Encoder) error {
+	if err := e.ByteSlice([]byte(s.Param0_slice)); err != nil {
+		return fmt.Errorf("serialize s.Param0_slice of type \"[]byte\": %w", err)
+	}
+	return nil
+}
+func (s *_Irpc_sliceTestnamedByteSliceReq) Deserialize(d *irpcgen.Decoder) error {
+	if err := d.ByteSlice((*[]byte)(&s.Param0_slice)); err != nil {
+		return fmt.Errorf("deserialize s.Param0_slice of type \"[]byte\": %w", err)
+	}
+	return nil
+}
+
+type _Irpc_sliceTestnamedByteSliceResp struct {
+	Param0 int
+}
+
+func (s _Irpc_sliceTestnamedByteSliceResp) Serialize(e *irpcgen.Encoder) error {
+	if err := e.VarInt(s.Param0); err != nil {
+		return fmt.Errorf("serialize s.Param0 of type \"int\": %w", err)
+	}
+	return nil
+}
+func (s *_Irpc_sliceTestnamedByteSliceResp) Deserialize(d *irpcgen.Decoder) error {
+	if err := d.VarInt(&s.Param0); err != nil {
+		return fmt.Errorf("deserialize s.Param0 of type \"int\": %w", err)
 	}
 	return nil
 }

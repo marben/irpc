@@ -17,10 +17,10 @@ func newBinMarshalIRpcService(impl binMarshal) *binMarshalIRpcService {
 	return &binMarshalIRpcService{
 		impl: impl,
 		id: []byte{
-			0xa4, 0x41, 0x04, 0x38, 0xda, 0x1f, 0x5d, 0x7e,
-			0x4b, 0xb4, 0x31, 0xcc, 0x5e, 0x47, 0x79, 0x0c,
-			0xc8, 0x46, 0xaa, 0xee, 0x91, 0xd3, 0xd8, 0x6c,
-			0x2e, 0x80, 0x2c, 0x9c, 0x38, 0x76, 0xff, 0xe5,
+			0x9d, 0xab, 0x18, 0xc0, 0x2d, 0x78, 0xfd, 0xef,
+			0x7a, 0x9b, 0x0d, 0xb7, 0xe8, 0x9a, 0x2f, 0x17,
+			0xaf, 0x18, 0xc4, 0x2e, 0x81, 0x57, 0xad, 0x6d,
+			0x41, 0x91, 0x8d, 0xdf, 0xfc, 0x1a, 0x8f, 0xca,
 		},
 	}
 }
@@ -111,10 +111,10 @@ type binMarshalIRpcClient struct {
 
 func newBinMarshalIRpcClient(endpoint irpcgen.Endpoint) (*binMarshalIRpcClient, error) {
 	id := []byte{
-		0xa4, 0x41, 0x04, 0x38, 0xda, 0x1f, 0x5d, 0x7e,
-		0x4b, 0xb4, 0x31, 0xcc, 0x5e, 0x47, 0x79, 0x0c,
-		0xc8, 0x46, 0xaa, 0xee, 0x91, 0xd3, 0xd8, 0x6c,
-		0x2e, 0x80, 0x2c, 0x9c, 0x38, 0x76, 0xff, 0xe5,
+		0x9d, 0xab, 0x18, 0xc0, 0x2d, 0x78, 0xfd, 0xef,
+		0x7a, 0x9b, 0x0d, 0xb7, 0xe8, 0x9a, 0x2f, 0x17,
+		0xaf, 0x18, 0xc4, 0x2e, 0x81, 0x57, 0xad, 0x6d,
+		0x41, 0x91, 0x8d, 0xdf, 0xfc, 0x1a, 0x8f, 0xca,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
@@ -178,13 +178,13 @@ type _Irpc_binMarshalreflectReq struct {
 
 func (s _Irpc_binMarshalreflectReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.BinaryMarshaler(s.Param0_t); err != nil {
-		return fmt.Errorf("serialize s.Param0_t of type 'encoding.BinaryUnmarshaler': %w", err)
+		return fmt.Errorf("serialize s.Param0_t of type \"encoding.BinaryUnmarshaler\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_binMarshalreflectReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.BinaryUnmarshaler(&s.Param0_t); err != nil {
-		return fmt.Errorf("deserialize s.Param0_t of type 'encoding.BinaryUnmarshaler': %w", err)
+		return fmt.Errorf("deserialize s.Param0_t of type \"encoding.BinaryUnmarshaler\": %w", err)
 	}
 	return nil
 }
@@ -195,13 +195,13 @@ type _Irpc_binMarshalreflectResp struct {
 
 func (s _Irpc_binMarshalreflectResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.BinaryMarshaler(s.Param0); err != nil {
-		return fmt.Errorf("serialize s.Param0 of type 'encoding.BinaryUnmarshaler': %w", err)
+		return fmt.Errorf("serialize s.Param0 of type \"encoding.BinaryUnmarshaler\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_binMarshalreflectResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.BinaryUnmarshaler(&s.Param0); err != nil {
-		return fmt.Errorf("deserialize s.Param0 of type 'encoding.BinaryUnmarshaler': %w", err)
+		return fmt.Errorf("deserialize s.Param0 of type \"encoding.BinaryUnmarshaler\": %w", err)
 	}
 	return nil
 }
@@ -212,13 +212,13 @@ type _Irpc_binMarshaladdHourReq struct {
 
 func (s _Irpc_binMarshaladdHourReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.BinaryMarshaler(s.Param0_t); err != nil {
-		return fmt.Errorf("serialize s.Param0_t of type 'encoding.BinaryUnmarshaler': %w", err)
+		return fmt.Errorf("serialize s.Param0_t of type \"encoding.BinaryUnmarshaler\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_binMarshaladdHourReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.BinaryUnmarshaler(&s.Param0_t); err != nil {
-		return fmt.Errorf("deserialize s.Param0_t of type 'encoding.BinaryUnmarshaler': %w", err)
+		return fmt.Errorf("deserialize s.Param0_t of type \"encoding.BinaryUnmarshaler\": %w", err)
 	}
 	return nil
 }
@@ -229,13 +229,13 @@ type _Irpc_binMarshaladdHourResp struct {
 
 func (s _Irpc_binMarshaladdHourResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.BinaryMarshaler(s.Param0); err != nil {
-		return fmt.Errorf("serialize s.Param0 of type 'encoding.BinaryUnmarshaler': %w", err)
+		return fmt.Errorf("serialize s.Param0 of type \"encoding.BinaryUnmarshaler\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_binMarshaladdHourResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.BinaryUnmarshaler(&s.Param0); err != nil {
-		return fmt.Errorf("deserialize s.Param0 of type 'encoding.BinaryUnmarshaler': %w", err)
+		return fmt.Errorf("deserialize s.Param0 of type \"encoding.BinaryUnmarshaler\": %w", err)
 	}
 	return nil
 }
@@ -246,13 +246,13 @@ type _Irpc_binMarshaladdMyHourReq struct {
 
 func (s _Irpc_binMarshaladdMyHourReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.BinaryMarshaler(s.Param0_t); err != nil {
-		return fmt.Errorf("serialize s.Param0_t of type 'encoding.BinaryUnmarshaler': %w", err)
+		return fmt.Errorf("serialize s.Param0_t of type \"encoding.BinaryUnmarshaler\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_binMarshaladdMyHourReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.BinaryUnmarshaler(&s.Param0_t); err != nil {
-		return fmt.Errorf("deserialize s.Param0_t of type 'encoding.BinaryUnmarshaler': %w", err)
+		return fmt.Errorf("deserialize s.Param0_t of type \"encoding.BinaryUnmarshaler\": %w", err)
 	}
 	return nil
 }
@@ -263,13 +263,13 @@ type _Irpc_binMarshaladdMyHourResp struct {
 
 func (s _Irpc_binMarshaladdMyHourResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.BinaryMarshaler(s.Param0); err != nil {
-		return fmt.Errorf("serialize s.Param0 of type 'encoding.BinaryUnmarshaler': %w", err)
+		return fmt.Errorf("serialize s.Param0 of type \"encoding.BinaryUnmarshaler\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_binMarshaladdMyHourResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.BinaryUnmarshaler(&s.Param0); err != nil {
-		return fmt.Errorf("deserialize s.Param0 of type 'encoding.BinaryUnmarshaler': %w", err)
+		return fmt.Errorf("deserialize s.Param0 of type \"encoding.BinaryUnmarshaler\": %w", err)
 	}
 	return nil
 }
@@ -280,13 +280,13 @@ type _Irpc_binMarshaladdMyStructHourReq struct {
 
 func (s _Irpc_binMarshaladdMyStructHourReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.BinaryMarshaler(s.Param0_t); err != nil {
-		return fmt.Errorf("serialize s.Param0_t of type 'encoding.BinaryUnmarshaler': %w", err)
+		return fmt.Errorf("serialize s.Param0_t of type \"encoding.BinaryUnmarshaler\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_binMarshaladdMyStructHourReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.BinaryUnmarshaler(&s.Param0_t); err != nil {
-		return fmt.Errorf("deserialize s.Param0_t of type 'encoding.BinaryUnmarshaler': %w", err)
+		return fmt.Errorf("deserialize s.Param0_t of type \"encoding.BinaryUnmarshaler\": %w", err)
 	}
 	return nil
 }
@@ -297,13 +297,13 @@ type _Irpc_binMarshaladdMyStructHourResp struct {
 
 func (s _Irpc_binMarshaladdMyStructHourResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.BinaryMarshaler(s.Param0); err != nil {
-		return fmt.Errorf("serialize s.Param0 of type 'encoding.BinaryUnmarshaler': %w", err)
+		return fmt.Errorf("serialize s.Param0 of type \"encoding.BinaryUnmarshaler\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_binMarshaladdMyStructHourResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.BinaryUnmarshaler(&s.Param0); err != nil {
-		return fmt.Errorf("deserialize s.Param0 of type 'encoding.BinaryUnmarshaler': %w", err)
+		return fmt.Errorf("deserialize s.Param0 of type \"encoding.BinaryUnmarshaler\": %w", err)
 	}
 	return nil
 }
@@ -314,13 +314,13 @@ type _Irpc_binMarshalstructPassReq struct {
 
 func (s _Irpc_binMarshalstructPassReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.BinaryMarshaler(s.Param0_st.t); err != nil {
-		return fmt.Errorf("serialize s.Param0_st.t of type 'encoding.BinaryUnmarshaler': %w", err)
+		return fmt.Errorf("serialize s.Param0_st.t of type \"encoding.BinaryUnmarshaler\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_binMarshalstructPassReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.BinaryUnmarshaler(&s.Param0_st.t); err != nil {
-		return fmt.Errorf("deserialize s.Param0_st.t of type 'encoding.BinaryUnmarshaler': %w", err)
+		return fmt.Errorf("deserialize s.Param0_st.t of type \"encoding.BinaryUnmarshaler\": %w", err)
 	}
 	return nil
 }
@@ -331,13 +331,13 @@ type _Irpc_binMarshalstructPassResp struct {
 
 func (s _Irpc_binMarshalstructPassResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.BinaryMarshaler(s.Param0.t); err != nil {
-		return fmt.Errorf("serialize s.Param0.t of type 'encoding.BinaryUnmarshaler': %w", err)
+		return fmt.Errorf("serialize s.Param0.t of type \"encoding.BinaryUnmarshaler\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_binMarshalstructPassResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.BinaryUnmarshaler(&s.Param0.t); err != nil {
-		return fmt.Errorf("deserialize s.Param0.t of type 'encoding.BinaryUnmarshaler': %w", err)
+		return fmt.Errorf("deserialize s.Param0.t of type \"encoding.BinaryUnmarshaler\": %w", err)
 	}
 	return nil
 }

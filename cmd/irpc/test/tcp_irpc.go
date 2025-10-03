@@ -16,10 +16,10 @@ func newTcpTestApiIRpcService(impl tcpTestApi) *tcpTestApiIRpcService {
 	return &tcpTestApiIRpcService{
 		impl: impl,
 		id: []byte{
-			0x34, 0xb5, 0xe1, 0x3c, 0x71, 0x7a, 0xf0, 0x92,
-			0x3e, 0xc6, 0xc3, 0xca, 0x92, 0x9e, 0x06, 0xfb,
-			0x9f, 0x0a, 0x53, 0x69, 0x9f, 0x4e, 0x99, 0xc5,
-			0x86, 0x67, 0xde, 0x10, 0x61, 0x96, 0x15, 0x26,
+			0xba, 0x4a, 0xb2, 0x23, 0xe4, 0xb5, 0x24, 0x21,
+			0xfb, 0x97, 0x62, 0x56, 0xc7, 0xbd, 0xb2, 0xe6,
+			0x74, 0x7e, 0xe2, 0x26, 0x6e, 0x30, 0xe6, 0x3d,
+			0x0b, 0xa3, 0xfd, 0x80, 0xa7, 0x69, 0x66, 0xff,
 		},
 	}
 }
@@ -54,10 +54,10 @@ type tcpTestApiIRpcClient struct {
 
 func newTcpTestApiIRpcClient(endpoint irpcgen.Endpoint) (*tcpTestApiIRpcClient, error) {
 	id := []byte{
-		0x34, 0xb5, 0xe1, 0x3c, 0x71, 0x7a, 0xf0, 0x92,
-		0x3e, 0xc6, 0xc3, 0xca, 0x92, 0x9e, 0x06, 0xfb,
-		0x9f, 0x0a, 0x53, 0x69, 0x9f, 0x4e, 0x99, 0xc5,
-		0x86, 0x67, 0xde, 0x10, 0x61, 0x96, 0x15, 0x26,
+		0xba, 0x4a, 0xb2, 0x23, 0xe4, 0xb5, 0x24, 0x21,
+		0xfb, 0x97, 0x62, 0x56, 0xc7, 0xbd, 0xb2, 0xe6,
+		0x74, 0x7e, 0xe2, 0x26, 0x6e, 0x30, 0xe6, 0x3d,
+		0x0b, 0xa3, 0xfd, 0x80, 0xa7, 0x69, 0x66, 0xff,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
@@ -84,19 +84,19 @@ type _Irpc_tcpTestApiDivReq struct {
 
 func (s _Irpc_tcpTestApiDivReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.Float64le(s.Param0_a); err != nil {
-		return fmt.Errorf("serialize s.Param0_a of type 'float64': %w", err)
+		return fmt.Errorf("serialize s.Param0_a of type \"float64\": %w", err)
 	}
 	if err := e.Float64le(s.Param0_b); err != nil {
-		return fmt.Errorf("serialize s.Param0_b of type 'float64': %w", err)
+		return fmt.Errorf("serialize s.Param0_b of type \"float64\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_tcpTestApiDivReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.Float64le(&s.Param0_a); err != nil {
-		return fmt.Errorf("deserialize s.Param0_a of type 'float64': %w", err)
+		return fmt.Errorf("deserialize s.Param0_a of type \"float64\": %w", err)
 	}
 	if err := d.Float64le(&s.Param0_b); err != nil {
-		return fmt.Errorf("deserialize s.Param0_b of type 'float64': %w", err)
+		return fmt.Errorf("deserialize s.Param0_b of type \"float64\": %w", err)
 	}
 	return nil
 }
@@ -108,7 +108,7 @@ type _Irpc_tcpTestApiDivResp struct {
 
 func (s _Irpc_tcpTestApiDivResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.Float64le(s.Param0); err != nil {
-		return fmt.Errorf("serialize s.Param0 of type 'float64': %w", err)
+		return fmt.Errorf("serialize s.Param0 of type \"float64\": %w", err)
 	}
 	{
 		var isNil bool
@@ -116,14 +116,14 @@ func (s _Irpc_tcpTestApiDivResp) Serialize(e *irpcgen.Encoder) error {
 			isNil = true
 		}
 		if err := e.Bool(isNil); err != nil {
-			return fmt.Errorf("serialize isNil of type 'bool': %w", err)
+			return fmt.Errorf("serialize isNil of type \"bool\": %w", err)
 		}
 
 		if !isNil {
 			{ // Error()
 				_Error_0_ := s.Param1.Error()
 				if err := e.String(_Error_0_); err != nil {
-					return fmt.Errorf("serialize _Error_0_ of type 'string': %w", err)
+					return fmt.Errorf("serialize _Error_0_ of type \"string\": %w", err)
 				}
 			}
 		}
@@ -132,12 +132,12 @@ func (s _Irpc_tcpTestApiDivResp) Serialize(e *irpcgen.Encoder) error {
 }
 func (s *_Irpc_tcpTestApiDivResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.Float64le(&s.Param0); err != nil {
-		return fmt.Errorf("deserialize s.Param0 of type 'float64': %w", err)
+		return fmt.Errorf("deserialize s.Param0 of type \"float64\": %w", err)
 	}
 	{
 		var isNil bool
 		if err := d.Bool(&isNil); err != nil {
-			return fmt.Errorf("deserialize isNil of type 'bool': %w", err)
+			return fmt.Errorf("deserialize isNil of type \"bool\": %w", err)
 		}
 
 		if isNil {
@@ -146,7 +146,7 @@ func (s *_Irpc_tcpTestApiDivResp) Deserialize(d *irpcgen.Decoder) error {
 			var impl _error_tcpTestApi_impl
 			{ // Error()
 				if err := d.String(&impl._Error_0_); err != nil {
-					return fmt.Errorf("deserialize impl._Error_0_ of type 'string': %w", err)
+					return fmt.Errorf("deserialize impl._Error_0_ of type \"string\": %w", err)
 				}
 			}
 			s.Param1 = impl

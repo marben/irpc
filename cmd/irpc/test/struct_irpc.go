@@ -19,10 +19,10 @@ func newStructAPIIRpcService(impl structAPI) *structAPIIRpcService {
 	return &structAPIIRpcService{
 		impl: impl,
 		id: []byte{
-			0x1f, 0x62, 0xe3, 0x09, 0xc3, 0xb4, 0xba, 0xb1,
-			0x74, 0x57, 0xd8, 0x3a, 0x39, 0x55, 0x84, 0x23,
-			0x72, 0xdb, 0x4d, 0xe2, 0x79, 0xc8, 0x0b, 0x0f,
-			0xcd, 0x3c, 0x19, 0x0b, 0x51, 0x86, 0x8c, 0x82,
+			0xd2, 0xb3, 0x1d, 0x3d, 0xe9, 0x97, 0x41, 0xb3,
+			0xb0, 0x05, 0xe2, 0x23, 0x84, 0x11, 0x86, 0xa1,
+			0x3b, 0xc4, 0x54, 0x7f, 0xd4, 0x95, 0x36, 0xb2,
+			0xd9, 0xee, 0x59, 0x57, 0xfa, 0x38, 0x4d, 0x6e,
 		},
 	}
 }
@@ -154,10 +154,10 @@ type structAPIIRpcClient struct {
 
 func newStructAPIIRpcClient(endpoint irpcgen.Endpoint) (*structAPIIRpcClient, error) {
 	id := []byte{
-		0x1f, 0x62, 0xe3, 0x09, 0xc3, 0xb4, 0xba, 0xb1,
-		0x74, 0x57, 0xd8, 0x3a, 0x39, 0x55, 0x84, 0x23,
-		0x72, 0xdb, 0x4d, 0xe2, 0x79, 0xc8, 0x0b, 0x0f,
-		0xcd, 0x3c, 0x19, 0x0b, 0x51, 0x86, 0x8c, 0x82,
+		0xd2, 0xb3, 0x1d, 0x3d, 0xe9, 0x97, 0x41, 0xb3,
+		0xb0, 0x05, 0xe2, 0x23, 0x84, 0x11, 0x86, 0xa1,
+		0x3b, 0xc4, 0x54, 0x7f, 0xd4, 0x95, 0x36, 0xb2,
+		0xd9, 0xee, 0x59, 0x57, 0xfa, 0x38, 0x4d, 0x6e,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
@@ -253,25 +253,25 @@ type _Irpc_structAPIVectSumReq struct {
 
 func (s _Irpc_structAPIVectSumReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0_v.a); err != nil {
-		return fmt.Errorf("serialize s.Param0_v.a of type 'int': %w", err)
+		return fmt.Errorf("serialize s.Param0_v.a of type \"int\": %w", err)
 	}
 	if err := e.VarInt(s.Param0_v.b); err != nil {
-		return fmt.Errorf("serialize s.Param0_v.b of type 'int': %w", err)
+		return fmt.Errorf("serialize s.Param0_v.b of type \"int\": %w", err)
 	}
 	if err := e.VarInt(s.Param0_v.c); err != nil {
-		return fmt.Errorf("serialize s.Param0_v.c of type 'int': %w", err)
+		return fmt.Errorf("serialize s.Param0_v.c of type \"int\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_structAPIVectSumReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0_v.a); err != nil {
-		return fmt.Errorf("deserialize s.Param0_v.a of type 'int': %w", err)
+		return fmt.Errorf("deserialize s.Param0_v.a of type \"int\": %w", err)
 	}
 	if err := d.VarInt(&s.Param0_v.b); err != nil {
-		return fmt.Errorf("deserialize s.Param0_v.b of type 'int': %w", err)
+		return fmt.Errorf("deserialize s.Param0_v.b of type \"int\": %w", err)
 	}
 	if err := d.VarInt(&s.Param0_v.c); err != nil {
-		return fmt.Errorf("deserialize s.Param0_v.c of type 'int': %w", err)
+		return fmt.Errorf("deserialize s.Param0_v.c of type \"int\": %w", err)
 	}
 	return nil
 }
@@ -282,13 +282,13 @@ type _Irpc_structAPIVectSumResp struct {
 
 func (s _Irpc_structAPIVectSumResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0); err != nil {
-		return fmt.Errorf("serialize s.Param0 of type 'int': %w", err)
+		return fmt.Errorf("serialize s.Param0 of type \"int\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_structAPIVectSumResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0); err != nil {
-		return fmt.Errorf("deserialize s.Param0 of type 'int': %w", err)
+		return fmt.Errorf("deserialize s.Param0 of type \"int\": %w", err)
 	}
 	return nil
 }
@@ -299,61 +299,61 @@ type _Irpc_structAPIVect3x3SumReq struct {
 
 func (s _Irpc_structAPIVect3x3SumReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0_v.v1.a); err != nil {
-		return fmt.Errorf("serialize s.Param0_v.v1.a of type 'int': %w", err)
+		return fmt.Errorf("serialize s.Param0_v.v1.a of type \"int\": %w", err)
 	}
 	if err := e.VarInt(s.Param0_v.v1.b); err != nil {
-		return fmt.Errorf("serialize s.Param0_v.v1.b of type 'int': %w", err)
+		return fmt.Errorf("serialize s.Param0_v.v1.b of type \"int\": %w", err)
 	}
 	if err := e.VarInt(s.Param0_v.v1.c); err != nil {
-		return fmt.Errorf("serialize s.Param0_v.v1.c of type 'int': %w", err)
+		return fmt.Errorf("serialize s.Param0_v.v1.c of type \"int\": %w", err)
 	}
 	if err := e.VarInt(s.Param0_v.v2.a); err != nil {
-		return fmt.Errorf("serialize s.Param0_v.v2.a of type 'int': %w", err)
+		return fmt.Errorf("serialize s.Param0_v.v2.a of type \"int\": %w", err)
 	}
 	if err := e.VarInt(s.Param0_v.v2.b); err != nil {
-		return fmt.Errorf("serialize s.Param0_v.v2.b of type 'int': %w", err)
+		return fmt.Errorf("serialize s.Param0_v.v2.b of type \"int\": %w", err)
 	}
 	if err := e.VarInt(s.Param0_v.v2.c); err != nil {
-		return fmt.Errorf("serialize s.Param0_v.v2.c of type 'int': %w", err)
+		return fmt.Errorf("serialize s.Param0_v.v2.c of type \"int\": %w", err)
 	}
 	if err := e.VarInt(s.Param0_v.v3.a); err != nil {
-		return fmt.Errorf("serialize s.Param0_v.v3.a of type 'int': %w", err)
+		return fmt.Errorf("serialize s.Param0_v.v3.a of type \"int\": %w", err)
 	}
 	if err := e.VarInt(s.Param0_v.v3.b); err != nil {
-		return fmt.Errorf("serialize s.Param0_v.v3.b of type 'int': %w", err)
+		return fmt.Errorf("serialize s.Param0_v.v3.b of type \"int\": %w", err)
 	}
 	if err := e.VarInt(s.Param0_v.v3.c); err != nil {
-		return fmt.Errorf("serialize s.Param0_v.v3.c of type 'int': %w", err)
+		return fmt.Errorf("serialize s.Param0_v.v3.c of type \"int\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_structAPIVect3x3SumReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0_v.v1.a); err != nil {
-		return fmt.Errorf("deserialize s.Param0_v.v1.a of type 'int': %w", err)
+		return fmt.Errorf("deserialize s.Param0_v.v1.a of type \"int\": %w", err)
 	}
 	if err := d.VarInt(&s.Param0_v.v1.b); err != nil {
-		return fmt.Errorf("deserialize s.Param0_v.v1.b of type 'int': %w", err)
+		return fmt.Errorf("deserialize s.Param0_v.v1.b of type \"int\": %w", err)
 	}
 	if err := d.VarInt(&s.Param0_v.v1.c); err != nil {
-		return fmt.Errorf("deserialize s.Param0_v.v1.c of type 'int': %w", err)
+		return fmt.Errorf("deserialize s.Param0_v.v1.c of type \"int\": %w", err)
 	}
 	if err := d.VarInt(&s.Param0_v.v2.a); err != nil {
-		return fmt.Errorf("deserialize s.Param0_v.v2.a of type 'int': %w", err)
+		return fmt.Errorf("deserialize s.Param0_v.v2.a of type \"int\": %w", err)
 	}
 	if err := d.VarInt(&s.Param0_v.v2.b); err != nil {
-		return fmt.Errorf("deserialize s.Param0_v.v2.b of type 'int': %w", err)
+		return fmt.Errorf("deserialize s.Param0_v.v2.b of type \"int\": %w", err)
 	}
 	if err := d.VarInt(&s.Param0_v.v2.c); err != nil {
-		return fmt.Errorf("deserialize s.Param0_v.v2.c of type 'int': %w", err)
+		return fmt.Errorf("deserialize s.Param0_v.v2.c of type \"int\": %w", err)
 	}
 	if err := d.VarInt(&s.Param0_v.v3.a); err != nil {
-		return fmt.Errorf("deserialize s.Param0_v.v3.a of type 'int': %w", err)
+		return fmt.Errorf("deserialize s.Param0_v.v3.a of type \"int\": %w", err)
 	}
 	if err := d.VarInt(&s.Param0_v.v3.b); err != nil {
-		return fmt.Errorf("deserialize s.Param0_v.v3.b of type 'int': %w", err)
+		return fmt.Errorf("deserialize s.Param0_v.v3.b of type \"int\": %w", err)
 	}
 	if err := d.VarInt(&s.Param0_v.v3.c); err != nil {
-		return fmt.Errorf("deserialize s.Param0_v.v3.c of type 'int': %w", err)
+		return fmt.Errorf("deserialize s.Param0_v.v3.c of type \"int\": %w", err)
 	}
 	return nil
 }
@@ -364,25 +364,25 @@ type _Irpc_structAPIVect3x3SumResp struct {
 
 func (s _Irpc_structAPIVect3x3SumResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0.a); err != nil {
-		return fmt.Errorf("serialize s.Param0.a of type 'int': %w", err)
+		return fmt.Errorf("serialize s.Param0.a of type \"int\": %w", err)
 	}
 	if err := e.VarInt(s.Param0.b); err != nil {
-		return fmt.Errorf("serialize s.Param0.b of type 'int': %w", err)
+		return fmt.Errorf("serialize s.Param0.b of type \"int\": %w", err)
 	}
 	if err := e.VarInt(s.Param0.c); err != nil {
-		return fmt.Errorf("serialize s.Param0.c of type 'int': %w", err)
+		return fmt.Errorf("serialize s.Param0.c of type \"int\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_structAPIVect3x3SumResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0.a); err != nil {
-		return fmt.Errorf("deserialize s.Param0.a of type 'int': %w", err)
+		return fmt.Errorf("deserialize s.Param0.a of type \"int\": %w", err)
 	}
 	if err := d.VarInt(&s.Param0.b); err != nil {
-		return fmt.Errorf("deserialize s.Param0.b of type 'int': %w", err)
+		return fmt.Errorf("deserialize s.Param0.b of type \"int\": %w", err)
 	}
 	if err := d.VarInt(&s.Param0.c); err != nil {
-		return fmt.Errorf("deserialize s.Param0.c of type 'int': %w", err)
+		return fmt.Errorf("deserialize s.Param0.c of type \"int\": %w", err)
 	}
 	return nil
 }
@@ -395,22 +395,22 @@ func (s _Irpc_structAPISumSliceStructReq) Serialize(e *irpcgen.Encoder) error {
 	{ // s.Param0_s.s1 []int
 		var l int = len(s.Param0_s.s1)
 		if err := e.UvarInt64(uint64(l)); err != nil {
-			return fmt.Errorf("serialize uint64(l) of type 'uint64': %w", err)
+			return fmt.Errorf("serialize uint64(l) of type \"uint64\": %w", err)
 		}
 		for _, v := range s.Param0_s.s1 {
 			if err := e.VarInt(v); err != nil {
-				return fmt.Errorf("serialize v of type 'int': %w", err)
+				return fmt.Errorf("serialize v of type \"int\": %w", err)
 			}
 		}
 	}
 	{ // s.Param0_s.s2 []int
 		var l int = len(s.Param0_s.s2)
 		if err := e.UvarInt64(uint64(l)); err != nil {
-			return fmt.Errorf("serialize uint64(l) of type 'uint64': %w", err)
+			return fmt.Errorf("serialize uint64(l) of type \"uint64\": %w", err)
 		}
 		for _, v := range s.Param0_s.s2 {
 			if err := e.VarInt(v); err != nil {
-				return fmt.Errorf("serialize v of type 'int': %w", err)
+				return fmt.Errorf("serialize v of type \"int\": %w", err)
 			}
 		}
 	}
@@ -420,26 +420,26 @@ func (s *_Irpc_structAPISumSliceStructReq) Deserialize(d *irpcgen.Decoder) error
 	{ // s.Param0_s.s1 []int
 		var ul uint64
 		if err := d.UvarInt64(&ul); err != nil {
-			return fmt.Errorf("deserialize ul of type 'uint64': %w", err)
+			return fmt.Errorf("deserialize ul of type \"uint64\": %w", err)
 		}
 		var l int = int(ul)
 		s.Param0_s.s1 = make([]int, l)
 		for i := range l {
 			if err := d.VarInt(&s.Param0_s.s1[i]); err != nil {
-				return fmt.Errorf("deserialize s.Param0_s.s1[i] of type 'int': %w", err)
+				return fmt.Errorf("deserialize s.Param0_s.s1[i] of type \"int\": %w", err)
 			}
 		}
 	}
 	{ // s.Param0_s.s2 []int
 		var ul uint64
 		if err := d.UvarInt64(&ul); err != nil {
-			return fmt.Errorf("deserialize ul of type 'uint64': %w", err)
+			return fmt.Errorf("deserialize ul of type \"uint64\": %w", err)
 		}
 		var l int = int(ul)
 		s.Param0_s.s2 = make([]int, l)
 		for i := range l {
 			if err := d.VarInt(&s.Param0_s.s2[i]); err != nil {
-				return fmt.Errorf("deserialize s.Param0_s.s2[i] of type 'int': %w", err)
+				return fmt.Errorf("deserialize s.Param0_s.s2[i] of type \"int\": %w", err)
 			}
 		}
 	}
@@ -452,13 +452,13 @@ type _Irpc_structAPISumSliceStructResp struct {
 
 func (s _Irpc_structAPISumSliceStructResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0); err != nil {
-		return fmt.Errorf("serialize s.Param0 of type 'int': %w", err)
+		return fmt.Errorf("serialize s.Param0 of type \"int\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_structAPISumSliceStructResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0); err != nil {
-		return fmt.Errorf("deserialize s.Param0 of type 'int': %w", err)
+		return fmt.Errorf("deserialize s.Param0 of type \"int\": %w", err)
 	}
 	return nil
 }
@@ -469,13 +469,13 @@ type _Irpc_structAPIInlineParamsReq struct {
 
 func (s _Irpc_structAPIInlineParamsReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0_s.a); err != nil {
-		return fmt.Errorf("serialize s.Param0_s.a of type 'int': %w", err)
+		return fmt.Errorf("serialize s.Param0_s.a of type \"int\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_structAPIInlineParamsReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0_s.a); err != nil {
-		return fmt.Errorf("deserialize s.Param0_s.a of type 'int': %w", err)
+		return fmt.Errorf("deserialize s.Param0_s.a of type \"int\": %w", err)
 	}
 	return nil
 }
@@ -486,13 +486,13 @@ type _Irpc_structAPIInlineParamsResp struct {
 
 func (s _Irpc_structAPIInlineParamsResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0); err != nil {
-		return fmt.Errorf("serialize s.Param0 of type 'int': %w", err)
+		return fmt.Errorf("serialize s.Param0 of type \"int\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_structAPIInlineParamsResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0); err != nil {
-		return fmt.Errorf("deserialize s.Param0 of type 'int': %w", err)
+		return fmt.Errorf("deserialize s.Param0 of type \"int\": %w", err)
 	}
 	return nil
 }
@@ -506,19 +506,19 @@ type _Irpc_structAPIInlineParamsNamedReq struct {
 
 func (s _Irpc_structAPIInlineParamsNamedReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.Uint8(uint8(s.Param0_s.a)); err != nil {
-		return fmt.Errorf("serialize s.Param0_s.a of type 'uint8': %w", err)
+		return fmt.Errorf("serialize s.Param0_s.a of type \"uint8\": %w", err)
 	}
 	if err := e.Uint8(uint8(s.Param0_s.b)); err != nil {
-		return fmt.Errorf("serialize s.Param0_s.b of type 'uint8': %w", err)
+		return fmt.Errorf("serialize s.Param0_s.b of type \"uint8\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_structAPIInlineParamsNamedReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.Uint8((*uint8)(&s.Param0_s.a)); err != nil {
-		return fmt.Errorf("deserialize s.Param0_s.a of type 'uint8': %w", err)
+		return fmt.Errorf("deserialize s.Param0_s.a of type \"uint8\": %w", err)
 	}
 	if err := d.Uint8((*uint8)(&s.Param0_s.b)); err != nil {
-		return fmt.Errorf("deserialize s.Param0_s.b of type 'uint8': %w", err)
+		return fmt.Errorf("deserialize s.Param0_s.b of type \"uint8\": %w", err)
 	}
 	return nil
 }
@@ -529,13 +529,13 @@ type _Irpc_structAPIInlineInlineParamsReq struct {
 
 func (s _Irpc_structAPIInlineInlineParamsReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0_s.a.b); err != nil {
-		return fmt.Errorf("serialize s.Param0_s.a.b of type 'int': %w", err)
+		return fmt.Errorf("serialize s.Param0_s.a.b of type \"int\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_structAPIInlineInlineParamsReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0_s.a.b); err != nil {
-		return fmt.Errorf("deserialize s.Param0_s.a.b of type 'int': %w", err)
+		return fmt.Errorf("deserialize s.Param0_s.a.b of type \"int\": %w", err)
 	}
 	return nil
 }
@@ -546,13 +546,13 @@ type _Irpc_structAPIInlineInlineParamsResp struct {
 
 func (s _Irpc_structAPIInlineInlineParamsResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0); err != nil {
-		return fmt.Errorf("serialize s.Param0 of type 'int': %w", err)
+		return fmt.Errorf("serialize s.Param0 of type \"int\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_structAPIInlineInlineParamsResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0); err != nil {
-		return fmt.Errorf("deserialize s.Param0 of type 'int': %w", err)
+		return fmt.Errorf("deserialize s.Param0 of type \"int\": %w", err)
 	}
 	return nil
 }
@@ -563,13 +563,13 @@ type _Irpc_structAPIInlineReturnReq struct {
 
 func (s _Irpc_structAPIInlineReturnReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0_a); err != nil {
-		return fmt.Errorf("serialize s.Param0_a of type 'int': %w", err)
+		return fmt.Errorf("serialize s.Param0_a of type \"int\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_structAPIInlineReturnReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0_a); err != nil {
-		return fmt.Errorf("deserialize s.Param0_a of type 'int': %w", err)
+		return fmt.Errorf("deserialize s.Param0_a of type \"int\": %w", err)
 	}
 	return nil
 }
@@ -580,13 +580,13 @@ type _Irpc_structAPIInlineReturnResp struct {
 
 func (s _Irpc_structAPIInlineReturnResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0.b); err != nil {
-		return fmt.Errorf("serialize s.Param0.b of type 'int': %w", err)
+		return fmt.Errorf("serialize s.Param0.b of type \"int\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_structAPIInlineReturnResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0.b); err != nil {
-		return fmt.Errorf("deserialize s.Param0.b of type 'int': %w", err)
+		return fmt.Errorf("deserialize s.Param0.b of type \"int\": %w", err)
 	}
 	return nil
 }
@@ -597,19 +597,19 @@ type _Irpc_structAPIPointNegReq struct {
 
 func (s _Irpc_structAPIPointNegReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0_p.X); err != nil {
-		return fmt.Errorf("serialize s.Param0_p.X of type 'int': %w", err)
+		return fmt.Errorf("serialize s.Param0_p.X of type \"int\": %w", err)
 	}
 	if err := e.VarInt(s.Param0_p.Y); err != nil {
-		return fmt.Errorf("serialize s.Param0_p.Y of type 'int': %w", err)
+		return fmt.Errorf("serialize s.Param0_p.Y of type \"int\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_structAPIPointNegReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0_p.X); err != nil {
-		return fmt.Errorf("deserialize s.Param0_p.X of type 'int': %w", err)
+		return fmt.Errorf("deserialize s.Param0_p.X of type \"int\": %w", err)
 	}
 	if err := d.VarInt(&s.Param0_p.Y); err != nil {
-		return fmt.Errorf("deserialize s.Param0_p.Y of type 'int': %w", err)
+		return fmt.Errorf("deserialize s.Param0_p.Y of type \"int\": %w", err)
 	}
 	return nil
 }
@@ -620,19 +620,19 @@ type _Irpc_structAPIPointNegResp struct {
 
 func (s _Irpc_structAPIPointNegResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0.X); err != nil {
-		return fmt.Errorf("serialize s.Param0.X of type 'int': %w", err)
+		return fmt.Errorf("serialize s.Param0.X of type \"int\": %w", err)
 	}
 	if err := e.VarInt(s.Param0.Y); err != nil {
-		return fmt.Errorf("serialize s.Param0.Y of type 'int': %w", err)
+		return fmt.Errorf("serialize s.Param0.Y of type \"int\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_structAPIPointNegResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0.X); err != nil {
-		return fmt.Errorf("deserialize s.Param0.X of type 'int': %w", err)
+		return fmt.Errorf("deserialize s.Param0.X of type \"int\": %w", err)
 	}
 	if err := d.VarInt(&s.Param0.Y); err != nil {
-		return fmt.Errorf("deserialize s.Param0.Y of type 'int': %w", err)
+		return fmt.Errorf("deserialize s.Param0.Y of type \"int\": %w", err)
 	}
 	return nil
 }

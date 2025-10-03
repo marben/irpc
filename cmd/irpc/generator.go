@@ -76,12 +76,12 @@ func (g generator) generate(w io.Writer, hash []byte) error {
 		codeBlocks.add(service.serviceCode(hash, q))
 		codeBlocks.add(service.clientCode(hash, q))
 
-		for _, p := range service.paramStructs() {
+		for _, ps := range service.paramStructs() {
 			// we don't generate empty types (even though the generator is capable of generating them)
 			// we use irpcgen.Empty(Ser/Deser) instead
-			if !p.isEmpty() {
-				codeBlocks.add(p.code(q))
-				for _, e := range p.encoders() {
+			if !ps.isEmpty() {
+				codeBlocks.add(ps.code(q))
+				for _, e := range ps.encoders() {
 					codeBlocks.add(e.codeblock(q))
 				}
 			}

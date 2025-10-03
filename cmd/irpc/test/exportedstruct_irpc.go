@@ -16,10 +16,10 @@ func NewFileServerIRpcService(impl FileServer) *FileServerIRpcService {
 	return &FileServerIRpcService{
 		impl: impl,
 		id: []byte{
-			0xf0, 0xd3, 0xee, 0x8e, 0x34, 0x76, 0xa9, 0xc4,
-			0xe5, 0x22, 0x34, 0x64, 0xe0, 0xc7, 0x3e, 0x01,
-			0xb6, 0x89, 0x39, 0x39, 0xef, 0xde, 0x78, 0x02,
-			0xf4, 0x40, 0x91, 0xa1, 0xb7, 0x57, 0x67, 0x21,
+			0xa9, 0xa3, 0xde, 0x7b, 0x64, 0xd1, 0x0f, 0xd7,
+			0x98, 0x0e, 0xb5, 0xe7, 0x8b, 0xbb, 0xc6, 0x41,
+			0x65, 0xca, 0x84, 0xde, 0x2b, 0xe8, 0x20, 0xe6,
+			0xa4, 0x22, 0x7b, 0xd4, 0x34, 0x74, 0x1d, 0xd3,
 		},
 	}
 }
@@ -49,10 +49,10 @@ type FileServerIRpcClient struct {
 
 func NewFileServerIRpcClient(endpoint irpcgen.Endpoint) (*FileServerIRpcClient, error) {
 	id := []byte{
-		0xf0, 0xd3, 0xee, 0x8e, 0x34, 0x76, 0xa9, 0xc4,
-		0xe5, 0x22, 0x34, 0x64, 0xe0, 0xc7, 0x3e, 0x01,
-		0xb6, 0x89, 0x39, 0x39, 0xef, 0xde, 0x78, 0x02,
-		0xf4, 0x40, 0x91, 0xa1, 0xb7, 0x57, 0x67, 0x21,
+		0xa9, 0xa3, 0xde, 0x7b, 0x64, 0xd1, 0x0f, 0xd7,
+		0x98, 0x0e, 0xb5, 0xe7, 0x8b, 0xbb, 0xc6, 0x41,
+		0x65, 0xca, 0x84, 0xde, 0x2b, 0xe8, 0x20, 0xe6,
+		0xa4, 0x22, 0x7b, 0xd4, 0x34, 0x74, 0x1d, 0xd3,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
@@ -77,11 +77,11 @@ func (s _Irpc_FileServerListFilesResp) Serialize(e *irpcgen.Encoder) error {
 	{ // s.Param0 []FileInfo
 		var l int = len(s.Param0)
 		if err := e.UvarInt64(uint64(l)); err != nil {
-			return fmt.Errorf("serialize uint64(l) of type 'uint64': %w", err)
+			return fmt.Errorf("serialize uint64(l) of type \"uint64\": %w", err)
 		}
 		for _, v := range s.Param0 {
 			if err := e.UvarInt64(v.FileSize); err != nil {
-				return fmt.Errorf("serialize v.FileSize of type 'uint64': %w", err)
+				return fmt.Errorf("serialize v.FileSize of type \"uint64\": %w", err)
 			}
 		}
 	}
@@ -91,14 +91,14 @@ func (s _Irpc_FileServerListFilesResp) Serialize(e *irpcgen.Encoder) error {
 			isNil = true
 		}
 		if err := e.Bool(isNil); err != nil {
-			return fmt.Errorf("serialize isNil of type 'bool': %w", err)
+			return fmt.Errorf("serialize isNil of type \"bool\": %w", err)
 		}
 
 		if !isNil {
 			{ // Error()
 				_Error_0_ := s.Param1.Error()
 				if err := e.String(_Error_0_); err != nil {
-					return fmt.Errorf("serialize _Error_0_ of type 'string': %w", err)
+					return fmt.Errorf("serialize _Error_0_ of type \"string\": %w", err)
 				}
 			}
 		}
@@ -109,20 +109,20 @@ func (s *_Irpc_FileServerListFilesResp) Deserialize(d *irpcgen.Decoder) error {
 	{ // s.Param0 []FileInfo
 		var ul uint64
 		if err := d.UvarInt64(&ul); err != nil {
-			return fmt.Errorf("deserialize ul of type 'uint64': %w", err)
+			return fmt.Errorf("deserialize ul of type \"uint64\": %w", err)
 		}
 		var l int = int(ul)
 		s.Param0 = make([]FileInfo, l)
 		for i := range l {
 			if err := d.UvarInt64(&s.Param0[i].FileSize); err != nil {
-				return fmt.Errorf("deserialize s.Param0[i].FileSize of type 'uint64': %w", err)
+				return fmt.Errorf("deserialize s.Param0[i].FileSize of type \"uint64\": %w", err)
 			}
 		}
 	}
 	{
 		var isNil bool
 		if err := d.Bool(&isNil); err != nil {
-			return fmt.Errorf("deserialize isNil of type 'bool': %w", err)
+			return fmt.Errorf("deserialize isNil of type \"bool\": %w", err)
 		}
 
 		if isNil {
@@ -131,7 +131,7 @@ func (s *_Irpc_FileServerListFilesResp) Deserialize(d *irpcgen.Decoder) error {
 			var impl _error_FileServer_impl
 			{ // Error()
 				if err := d.String(&impl._Error_0_); err != nil {
-					return fmt.Errorf("deserialize impl._Error_0_ of type 'string': %w", err)
+					return fmt.Errorf("deserialize impl._Error_0_ of type \"string\": %w", err)
 				}
 			}
 			s.Param1 = impl

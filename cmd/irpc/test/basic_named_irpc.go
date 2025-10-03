@@ -17,10 +17,10 @@ func newBasicNamedAPIIRpcService(impl basicNamedAPI) *basicNamedAPIIRpcService {
 	return &basicNamedAPIIRpcService{
 		impl: impl,
 		id: []byte{
-			0x3c, 0x92, 0x54, 0x55, 0xc2, 0xf4, 0xa8, 0xe7,
-			0xee, 0xf7, 0xf8, 0xbd, 0xcd, 0xaa, 0x75, 0xd0,
-			0x45, 0x22, 0xeb, 0x3f, 0xd8, 0x87, 0x14, 0x55,
-			0xb3, 0xe5, 0xc2, 0x88, 0x4e, 0xcc, 0x15, 0x04,
+			0x60, 0xb9, 0x80, 0x05, 0xb0, 0x83, 0x95, 0x6e,
+			0x0e, 0xb1, 0x50, 0x57, 0x08, 0x47, 0xe8, 0x63,
+			0x60, 0xcf, 0x98, 0xd7, 0x71, 0x92, 0x6d, 0x3e,
+			0xc1, 0xae, 0x9a, 0x5e, 0x89, 0x72, 0x2b, 0xf3,
 		},
 	}
 }
@@ -83,10 +83,10 @@ type basicNamedAPIIRpcClient struct {
 
 func newBasicNamedAPIIRpcClient(endpoint irpcgen.Endpoint) (*basicNamedAPIIRpcClient, error) {
 	id := []byte{
-		0x3c, 0x92, 0x54, 0x55, 0xc2, 0xf4, 0xa8, 0xe7,
-		0xee, 0xf7, 0xf8, 0xbd, 0xcd, 0xaa, 0x75, 0xd0,
-		0x45, 0x22, 0xeb, 0x3f, 0xd8, 0x87, 0x14, 0x55,
-		0xb3, 0xe5, 0xc2, 0x88, 0x4e, 0xcc, 0x15, 0x04,
+		0x60, 0xb9, 0x80, 0x05, 0xb0, 0x83, 0x95, 0x6e,
+		0x0e, 0xb1, 0x50, 0x57, 0x08, 0x47, 0xe8, 0x63,
+		0x60, 0xcf, 0x98, 0xd7, 0x71, 0x92, 0x6d, 0x3e,
+		0xc1, 0xae, 0x9a, 0x5e, 0x89, 0x72, 0x2b, 0xf3,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
@@ -134,19 +134,19 @@ type _Irpc_basicNamedAPIaddFakeUint8Req struct {
 
 func (s _Irpc_basicNamedAPIaddFakeUint8Req) Serialize(e *irpcgen.Encoder) error {
 	if err := e.Uint8(uint8(s.Param0_a)); err != nil {
-		return fmt.Errorf("serialize s.Param0_a of type 'uint8': %w", err)
+		return fmt.Errorf("serialize s.Param0_a of type \"uint8\": %w", err)
 	}
 	if err := e.Uint8(uint8(s.Param0_b)); err != nil {
-		return fmt.Errorf("serialize s.Param0_b of type 'uint8': %w", err)
+		return fmt.Errorf("serialize s.Param0_b of type \"uint8\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicNamedAPIaddFakeUint8Req) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.Uint8((*uint8)(&s.Param0_a)); err != nil {
-		return fmt.Errorf("deserialize s.Param0_a of type 'uint8': %w", err)
+		return fmt.Errorf("deserialize s.Param0_a of type \"uint8\": %w", err)
 	}
 	if err := d.Uint8((*uint8)(&s.Param0_b)); err != nil {
-		return fmt.Errorf("deserialize s.Param0_b of type 'uint8': %w", err)
+		return fmt.Errorf("deserialize s.Param0_b of type \"uint8\": %w", err)
 	}
 	return nil
 }
@@ -157,13 +157,13 @@ type _Irpc_basicNamedAPIaddFakeUint8Resp struct {
 
 func (s _Irpc_basicNamedAPIaddFakeUint8Resp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.Uint8(uint8(s.Param0)); err != nil {
-		return fmt.Errorf("serialize s.Param0 of type 'uint8': %w", err)
+		return fmt.Errorf("serialize s.Param0 of type \"uint8\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicNamedAPIaddFakeUint8Resp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.Uint8((*uint8)(&s.Param0)); err != nil {
-		return fmt.Errorf("deserialize s.Param0 of type 'uint8': %w", err)
+		return fmt.Errorf("deserialize s.Param0 of type \"uint8\": %w", err)
 	}
 	return nil
 }
@@ -175,19 +175,19 @@ type _Irpc_basicNamedAPIaddUint8Req struct {
 
 func (s _Irpc_basicNamedAPIaddUint8Req) Serialize(e *irpcgen.Encoder) error {
 	if err := e.Uint8(s.Param0_a); err != nil {
-		return fmt.Errorf("serialize s.Param0_a of type 'uint8': %w", err)
+		return fmt.Errorf("serialize s.Param0_a of type \"uint8\": %w", err)
 	}
 	if err := e.Uint8(s.Param0_b); err != nil {
-		return fmt.Errorf("serialize s.Param0_b of type 'uint8': %w", err)
+		return fmt.Errorf("serialize s.Param0_b of type \"uint8\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicNamedAPIaddUint8Req) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.Uint8(&s.Param0_a); err != nil {
-		return fmt.Errorf("deserialize s.Param0_a of type 'uint8': %w", err)
+		return fmt.Errorf("deserialize s.Param0_a of type \"uint8\": %w", err)
 	}
 	if err := d.Uint8(&s.Param0_b); err != nil {
-		return fmt.Errorf("deserialize s.Param0_b of type 'uint8': %w", err)
+		return fmt.Errorf("deserialize s.Param0_b of type \"uint8\": %w", err)
 	}
 	return nil
 }
@@ -198,13 +198,13 @@ type _Irpc_basicNamedAPIaddUint8Resp struct {
 
 func (s _Irpc_basicNamedAPIaddUint8Resp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.Uint8(s.Param0); err != nil {
-		return fmt.Errorf("serialize s.Param0 of type 'uint8': %w", err)
+		return fmt.Errorf("serialize s.Param0 of type \"uint8\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicNamedAPIaddUint8Resp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.Uint8(&s.Param0); err != nil {
-		return fmt.Errorf("deserialize s.Param0 of type 'uint8': %w", err)
+		return fmt.Errorf("deserialize s.Param0 of type \"uint8\": %w", err)
 	}
 	return nil
 }
@@ -216,19 +216,19 @@ type _Irpc_basicNamedAPIaddByteReq struct {
 
 func (s _Irpc_basicNamedAPIaddByteReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.Uint8(s.Param0_a); err != nil {
-		return fmt.Errorf("serialize s.Param0_a of type 'byte': %w", err)
+		return fmt.Errorf("serialize s.Param0_a of type \"byte\": %w", err)
 	}
 	if err := e.Uint8(s.Param0_b); err != nil {
-		return fmt.Errorf("serialize s.Param0_b of type 'byte': %w", err)
+		return fmt.Errorf("serialize s.Param0_b of type \"byte\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicNamedAPIaddByteReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.Uint8(&s.Param0_a); err != nil {
-		return fmt.Errorf("deserialize s.Param0_a of type 'byte': %w", err)
+		return fmt.Errorf("deserialize s.Param0_a of type \"byte\": %w", err)
 	}
 	if err := d.Uint8(&s.Param0_b); err != nil {
-		return fmt.Errorf("deserialize s.Param0_b of type 'byte': %w", err)
+		return fmt.Errorf("deserialize s.Param0_b of type \"byte\": %w", err)
 	}
 	return nil
 }
@@ -239,13 +239,13 @@ type _Irpc_basicNamedAPIaddByteResp struct {
 
 func (s _Irpc_basicNamedAPIaddByteResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.Uint8(s.Param0); err != nil {
-		return fmt.Errorf("serialize s.Param0 of type 'byte': %w", err)
+		return fmt.Errorf("serialize s.Param0 of type \"byte\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_basicNamedAPIaddByteResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.Uint8(&s.Param0); err != nil {
-		return fmt.Errorf("deserialize s.Param0 of type 'byte': %w", err)
+		return fmt.Errorf("deserialize s.Param0 of type \"byte\": %w", err)
 	}
 	return nil
 }
