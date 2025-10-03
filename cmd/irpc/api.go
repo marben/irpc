@@ -117,14 +117,16 @@ func (ag apiGenerator) clientCode(hash []byte, q *qualifier) string {
 		fmt.Fprintf(b, "}\n")
 
 		// return values
-		fmt.Fprintf(b, "return ")
-		for i, f := range m.resp.params {
-			fmt.Fprintf(b, "%s.%s", respVarName, f.structFieldName)
-			if i != len(m.resp.params)-1 {
-				fmt.Fprintf(b, ",")
+		if !m.resp.isEmpty() {
+			fmt.Fprintf(b, "return ")
+			for i, f := range m.resp.params {
+				fmt.Fprintf(b, "%s.%s", respVarName, f.structFieldName)
+				if i != len(m.resp.params)-1 {
+					fmt.Fprintf(b, ",")
+				}
 			}
+			fmt.Fprintf(b, "\n")
 		}
-		fmt.Fprintf(b, "\n")
 
 		fmt.Fprintf(b, "}\n") // end of func
 	}
