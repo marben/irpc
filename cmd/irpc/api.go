@@ -93,7 +93,6 @@ func (ag apiGenerator) clientCode(hash []byte, q *qualifier) string {
 		if m.resp.isEmpty() {
 			respVarName = "irpcgen.EmptyDeserializable{}"
 		} else {
-			// respVarName = generateUniqueVarnameForFuncParams("resp", allVarIds)
 			respVarName = allVarIds.generateUniqueVarName("resp")
 			fmt.Fprintf(b, "var %s %s\n", respVarName, m.resp.typeName)
 		}
