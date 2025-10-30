@@ -7,26 +7,26 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-type tcpTestApiIRpcService struct {
+type tcpTestApiIrpcService struct {
 	impl tcpTestApi
 	id   []byte
 }
 
-func newTcpTestApiIRpcService(impl tcpTestApi) *tcpTestApiIRpcService {
-	return &tcpTestApiIRpcService{
+func newTcpTestApiIrpcService(impl tcpTestApi) *tcpTestApiIrpcService {
+	return &tcpTestApiIrpcService{
 		impl: impl,
 		id: []byte{
-			0xba, 0x4a, 0xb2, 0x23, 0xe4, 0xb5, 0x24, 0x21,
-			0xfb, 0x97, 0x62, 0x56, 0xc7, 0xbd, 0xb2, 0xe6,
-			0x74, 0x7e, 0xe2, 0x26, 0x6e, 0x30, 0xe6, 0x3d,
-			0x0b, 0xa3, 0xfd, 0x80, 0xa7, 0x69, 0x66, 0xff,
+			0x82, 0xe7, 0x92, 0xa2, 0xd8, 0xb5, 0x9c, 0xe3,
+			0x44, 0x75, 0x3b, 0x88, 0x21, 0xe8, 0x65, 0x8f,
+			0xef, 0x85, 0xdd, 0x6d, 0x0e, 0xb5, 0xb9, 0xec,
+			0xcd, 0xec, 0x14, 0x01, 0xaa, 0x6f, 0x12, 0x1d,
 		},
 	}
 }
-func (s *tcpTestApiIRpcService) Id() []byte {
+func (s *tcpTestApiIrpcService) Id() []byte {
 	return s.id
 }
-func (s *tcpTestApiIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
+func (s *tcpTestApiIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // Div
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
@@ -47,24 +47,24 @@ func (s *tcpTestApiIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgD
 	}
 }
 
-type tcpTestApiIRpcClient struct {
+type tcpTestApiIrpcClient struct {
 	endpoint irpcgen.Endpoint
 	id       []byte
 }
 
-func newTcpTestApiIRpcClient(endpoint irpcgen.Endpoint) (*tcpTestApiIRpcClient, error) {
+func newTcpTestApiIrpcClient(endpoint irpcgen.Endpoint) (*tcpTestApiIrpcClient, error) {
 	id := []byte{
-		0xba, 0x4a, 0xb2, 0x23, 0xe4, 0xb5, 0x24, 0x21,
-		0xfb, 0x97, 0x62, 0x56, 0xc7, 0xbd, 0xb2, 0xe6,
-		0x74, 0x7e, 0xe2, 0x26, 0x6e, 0x30, 0xe6, 0x3d,
-		0x0b, 0xa3, 0xfd, 0x80, 0xa7, 0x69, 0x66, 0xff,
+		0x82, 0xe7, 0x92, 0xa2, 0xd8, 0xb5, 0x9c, 0xe3,
+		0x44, 0x75, 0x3b, 0x88, 0x21, 0xe8, 0x65, 0x8f,
+		0xef, 0x85, 0xdd, 0x6d, 0x0e, 0xb5, 0xb9, 0xec,
+		0xcd, 0xec, 0x14, 0x01, 0xaa, 0x6f, 0x12, 0x1d,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &tcpTestApiIRpcClient{endpoint: endpoint, id: id}, nil
+	return &tcpTestApiIrpcClient{endpoint: endpoint, id: id}, nil
 }
-func (_c *tcpTestApiIRpcClient) Div(a float64, b float64) (float64, error) {
+func (_c *tcpTestApiIrpcClient) Div(a float64, b float64) (float64, error) {
 	var req = _Irpc_tcpTestApiDivReq{
 		Param0_a: a,
 		Param0_b: b,

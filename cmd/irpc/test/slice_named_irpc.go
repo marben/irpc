@@ -8,26 +8,26 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-type sliceNamedApiIRpcService struct {
+type sliceNamedApiIrpcService struct {
 	impl sliceNamedApi
 	id   []byte
 }
 
-func newSliceNamedApiIRpcService(impl sliceNamedApi) *sliceNamedApiIRpcService {
-	return &sliceNamedApiIRpcService{
+func newSliceNamedApiIrpcService(impl sliceNamedApi) *sliceNamedApiIrpcService {
+	return &sliceNamedApiIrpcService{
 		impl: impl,
 		id: []byte{
-			0xfd, 0x5c, 0x19, 0x80, 0xbf, 0xae, 0xed, 0x24,
-			0x23, 0x43, 0xa4, 0x5e, 0x18, 0x44, 0x9c, 0x64,
-			0xba, 0x3a, 0x40, 0x8c, 0x6b, 0x65, 0x18, 0x9c,
-			0x70, 0xb8, 0x6e, 0x84, 0xb5, 0xe4, 0x7a, 0xb2,
+			0x33, 0x06, 0xae, 0x81, 0xa6, 0x40, 0x06, 0x4b,
+			0xee, 0xbd, 0x83, 0x62, 0x6d, 0x69, 0xd4, 0xbf,
+			0xd9, 0x7f, 0xdb, 0x09, 0xcc, 0x76, 0xb6, 0x4b,
+			0x93, 0xed, 0x99, 0xa7, 0x50, 0x3e, 0x28, 0x99,
 		},
 	}
 }
-func (s *sliceNamedApiIRpcService) Id() []byte {
+func (s *sliceNamedApiIrpcService) Id() []byte {
 	return s.id
 }
-func (s *sliceNamedApiIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
+func (s *sliceNamedApiIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // sumNamedInts
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
@@ -76,24 +76,24 @@ func (s *sliceNamedApiIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.A
 	}
 }
 
-type sliceNamedApiIRpcClient struct {
+type sliceNamedApiIrpcClient struct {
 	endpoint irpcgen.Endpoint
 	id       []byte
 }
 
-func newSliceNamedApiIRpcClient(endpoint irpcgen.Endpoint) (*sliceNamedApiIRpcClient, error) {
+func newSliceNamedApiIrpcClient(endpoint irpcgen.Endpoint) (*sliceNamedApiIrpcClient, error) {
 	id := []byte{
-		0xfd, 0x5c, 0x19, 0x80, 0xbf, 0xae, 0xed, 0x24,
-		0x23, 0x43, 0xa4, 0x5e, 0x18, 0x44, 0x9c, 0x64,
-		0xba, 0x3a, 0x40, 0x8c, 0x6b, 0x65, 0x18, 0x9c,
-		0x70, 0xb8, 0x6e, 0x84, 0xb5, 0xe4, 0x7a, 0xb2,
+		0x33, 0x06, 0xae, 0x81, 0xa6, 0x40, 0x06, 0x4b,
+		0xee, 0xbd, 0x83, 0x62, 0x6d, 0x69, 0xd4, 0xbf,
+		0xd9, 0x7f, 0xdb, 0x09, 0xcc, 0x76, 0xb6, 0x4b,
+		0x93, 0xed, 0x99, 0xa7, 0x50, 0x3e, 0x28, 0x99,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &sliceNamedApiIRpcClient{endpoint: endpoint, id: id}, nil
+	return &sliceNamedApiIrpcClient{endpoint: endpoint, id: id}, nil
 }
-func (_c *sliceNamedApiIRpcClient) sumNamedInts(vec namedSliceOfInts) int {
+func (_c *sliceNamedApiIrpcClient) sumNamedInts(vec namedSliceOfInts) int {
 	var req = _Irpc_sliceNamedApisumNamedIntsReq{
 		Param0_vec: vec,
 	}
@@ -103,7 +103,7 @@ func (_c *sliceNamedApiIRpcClient) sumNamedInts(vec namedSliceOfInts) int {
 	}
 	return resp.Param0
 }
-func (_c *sliceNamedApiIRpcClient) sumOutsideNamedInts(vec out.AliasedByteSlice) int {
+func (_c *sliceNamedApiIrpcClient) sumOutsideNamedInts(vec out.AliasedByteSlice) int {
 	var req = _Irpc_sliceNamedApisumOutsideNamedIntsReq{
 		Param0_vec: vec,
 	}
@@ -113,7 +113,7 @@ func (_c *sliceNamedApiIRpcClient) sumOutsideNamedInts(vec out.AliasedByteSlice)
 	}
 	return resp.Param0
 }
-func (_c *sliceNamedApiIRpcClient) sumSliceOfNamedInts(vec []out.Uint8) out.Uint8 {
+func (_c *sliceNamedApiIrpcClient) sumSliceOfNamedInts(vec []out.Uint8) out.Uint8 {
 	var req = _Irpc_sliceNamedApisumSliceOfNamedIntsReq{
 		Param0_vec: vec,
 	}

@@ -43,15 +43,15 @@ func (mh testServiceImpl) DivErr(a int, b int) (int, error) {
 }
 
 var _ testServiceIface = testServiceImpl{}
-var _ irpcgen.Service = &testIRpcService{}
+var _ irpcgen.Service = &testIrpcService{}
 
-type testIRpcService struct {
+type testIrpcService struct {
 	impl testServiceIface
 }
 
-func newTestIRpcService(impl testServiceIface) *testIRpcService { return &testIRpcService{impl: impl} }
+func newTestIrpcService(impl testServiceIface) *testIrpcService { return &testIrpcService{impl: impl} }
 
-func (ms *testIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
+func (ms *testIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case mathIrpcFuncAddId:
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
@@ -74,30 +74,30 @@ func (ms *testIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeseri
 
 var mathIrpcServiceId = []byte("MathServiceHash")
 
-func (*testIRpcService) Id() []byte {
+func (*testIrpcService) Id() []byte {
 	return mathIrpcServiceId
 }
 
-var _ testServiceIface = &MathIRpcClient{}
+var _ testServiceIface = &MathIrpcClient{}
 
 const (
 	mathIrpcFuncAddId irpcgen.FuncId = iota
 )
 
-type MathIRpcClient struct {
+type MathIrpcClient struct {
 	ep *Endpoint
 }
 
-func NewMathIrpcClient(ep *Endpoint) (*MathIRpcClient, error) {
+func NewMathIrpcClient(ep *Endpoint) (*MathIrpcClient, error) {
 	if err := ep.RegisterClient(mathIrpcServiceId); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
 
-	return &MathIRpcClient{ep}, nil
+	return &MathIrpcClient{ep}, nil
 }
 
 // todo: maybe we request error return from rpc functions?
-func (mc *MathIRpcClient) Add(a int, b int) int {
+func (mc *MathIrpcClient) Add(a int, b int) int {
 	var params = addParams{A: a, B: b}
 	var resp addRtnVals
 

@@ -8,26 +8,26 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-type outsideTestIRpcService struct {
+type outsideTestIrpcService struct {
 	impl outsideTest
 	id   []byte
 }
 
-func newOutsideTestIRpcService(impl outsideTest) *outsideTestIRpcService {
-	return &outsideTestIRpcService{
+func newOutsideTestIrpcService(impl outsideTest) *outsideTestIrpcService {
+	return &outsideTestIrpcService{
 		impl: impl,
 		id: []byte{
-			0x88, 0x24, 0xa2, 0x36, 0xfd, 0x6b, 0x6e, 0xbd,
-			0x26, 0x11, 0x4a, 0x4a, 0x23, 0xf2, 0x78, 0x1e,
-			0xf2, 0xd2, 0xb5, 0x58, 0xe4, 0x94, 0x98, 0xd0,
-			0x56, 0x8e, 0xf5, 0x0a, 0xa9, 0xfd, 0x7c, 0xae,
+			0xcd, 0x8a, 0x15, 0xfd, 0xb1, 0x7a, 0x3d, 0x74,
+			0xa8, 0xe8, 0xfb, 0xb7, 0xf5, 0x8e, 0xdb, 0x5e,
+			0x2c, 0x9d, 0x7b, 0xd6, 0x6f, 0x20, 0x30, 0x84,
+			0x0a, 0x6d, 0x46, 0x06, 0xa0, 0x63, 0xf4, 0x26,
 		},
 	}
 }
-func (s *outsideTestIRpcService) Id() []byte {
+func (s *outsideTestIrpcService) Id() []byte {
 	return s.id
 }
-func (s *outsideTestIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
+func (s *outsideTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // addUint8
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
@@ -48,24 +48,24 @@ func (s *outsideTestIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.Arg
 	}
 }
 
-type outsideTestIRpcClient struct {
+type outsideTestIrpcClient struct {
 	endpoint irpcgen.Endpoint
 	id       []byte
 }
 
-func newOutsideTestIRpcClient(endpoint irpcgen.Endpoint) (*outsideTestIRpcClient, error) {
+func newOutsideTestIrpcClient(endpoint irpcgen.Endpoint) (*outsideTestIrpcClient, error) {
 	id := []byte{
-		0x88, 0x24, 0xa2, 0x36, 0xfd, 0x6b, 0x6e, 0xbd,
-		0x26, 0x11, 0x4a, 0x4a, 0x23, 0xf2, 0x78, 0x1e,
-		0xf2, 0xd2, 0xb5, 0x58, 0xe4, 0x94, 0x98, 0xd0,
-		0x56, 0x8e, 0xf5, 0x0a, 0xa9, 0xfd, 0x7c, 0xae,
+		0xcd, 0x8a, 0x15, 0xfd, 0xb1, 0x7a, 0x3d, 0x74,
+		0xa8, 0xe8, 0xfb, 0xb7, 0xf5, 0x8e, 0xdb, 0x5e,
+		0x2c, 0x9d, 0x7b, 0xd6, 0x6f, 0x20, 0x30, 0x84,
+		0x0a, 0x6d, 0x46, 0x06, 0xa0, 0x63, 0xf4, 0x26,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &outsideTestIRpcClient{endpoint: endpoint, id: id}, nil
+	return &outsideTestIrpcClient{endpoint: endpoint, id: id}, nil
 }
-func (_c *outsideTestIRpcClient) addUint8(a out.Uint8, b out.Uint8) out.Uint8 {
+func (_c *outsideTestIrpcClient) addUint8(a out.Uint8, b out.Uint8) out.Uint8 {
 	var req = _Irpc_outsideTestaddUint8Req{
 		Param0_a: a,
 		Param0_b: b,

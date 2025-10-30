@@ -8,26 +8,26 @@ import (
 	"time"
 )
 
-type binMarshalIRpcService struct {
+type binMarshalIrpcService struct {
 	impl binMarshal
 	id   []byte
 }
 
-func newBinMarshalIRpcService(impl binMarshal) *binMarshalIRpcService {
-	return &binMarshalIRpcService{
+func newBinMarshalIrpcService(impl binMarshal) *binMarshalIrpcService {
+	return &binMarshalIrpcService{
 		impl: impl,
 		id: []byte{
-			0x26, 0xe4, 0x45, 0xef, 0x7a, 0xce, 0x80, 0xc9,
-			0x3d, 0xd6, 0x36, 0x79, 0xf3, 0x92, 0xa7, 0x22,
-			0x1c, 0xbe, 0xf7, 0x80, 0xad, 0xfa, 0x01, 0xa7,
-			0x82, 0x7f, 0x18, 0x4a, 0x0f, 0xe9, 0x9f, 0xf2,
+			0x56, 0x65, 0xe6, 0x8a, 0xc9, 0x6b, 0x7d, 0xa3,
+			0x89, 0x7a, 0xc9, 0x49, 0x69, 0x59, 0x04, 0xb3,
+			0x78, 0x3e, 0x86, 0xbd, 0x43, 0x2e, 0xb4, 0xa2,
+			0x3a, 0xc0, 0x8b, 0x28, 0xf0, 0xea, 0x46, 0x6c,
 		},
 	}
 }
-func (s *binMarshalIRpcService) Id() []byte {
+func (s *binMarshalIrpcService) Id() []byte {
 	return s.id
 }
-func (s *binMarshalIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
+func (s *binMarshalIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // reflect
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
@@ -104,24 +104,24 @@ func (s *binMarshalIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgD
 	}
 }
 
-type binMarshalIRpcClient struct {
+type binMarshalIrpcClient struct {
 	endpoint irpcgen.Endpoint
 	id       []byte
 }
 
-func newBinMarshalIRpcClient(endpoint irpcgen.Endpoint) (*binMarshalIRpcClient, error) {
+func newBinMarshalIrpcClient(endpoint irpcgen.Endpoint) (*binMarshalIrpcClient, error) {
 	id := []byte{
-		0x26, 0xe4, 0x45, 0xef, 0x7a, 0xce, 0x80, 0xc9,
-		0x3d, 0xd6, 0x36, 0x79, 0xf3, 0x92, 0xa7, 0x22,
-		0x1c, 0xbe, 0xf7, 0x80, 0xad, 0xfa, 0x01, 0xa7,
-		0x82, 0x7f, 0x18, 0x4a, 0x0f, 0xe9, 0x9f, 0xf2,
+		0x56, 0x65, 0xe6, 0x8a, 0xc9, 0x6b, 0x7d, 0xa3,
+		0x89, 0x7a, 0xc9, 0x49, 0x69, 0x59, 0x04, 0xb3,
+		0x78, 0x3e, 0x86, 0xbd, 0x43, 0x2e, 0xb4, 0xa2,
+		0x3a, 0xc0, 0x8b, 0x28, 0xf0, 0xea, 0x46, 0x6c,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &binMarshalIRpcClient{endpoint: endpoint, id: id}, nil
+	return &binMarshalIrpcClient{endpoint: endpoint, id: id}, nil
 }
-func (_c *binMarshalIRpcClient) reflect(t time.Time) time.Time {
+func (_c *binMarshalIrpcClient) reflect(t time.Time) time.Time {
 	var req = _Irpc_binMarshalreflectReq{
 		Param0_t: t,
 	}
@@ -131,7 +131,7 @@ func (_c *binMarshalIRpcClient) reflect(t time.Time) time.Time {
 	}
 	return resp.Param0
 }
-func (_c *binMarshalIRpcClient) addHour(t time.Time) time.Time {
+func (_c *binMarshalIrpcClient) addHour(t time.Time) time.Time {
 	var req = _Irpc_binMarshaladdHourReq{
 		Param0_t: t,
 	}
@@ -141,7 +141,7 @@ func (_c *binMarshalIRpcClient) addHour(t time.Time) time.Time {
 	}
 	return resp.Param0
 }
-func (_c *binMarshalIRpcClient) addMyHour(t myTime) myTime {
+func (_c *binMarshalIrpcClient) addMyHour(t myTime) myTime {
 	var req = _Irpc_binMarshaladdMyHourReq{
 		Param0_t: t,
 	}
@@ -151,7 +151,7 @@ func (_c *binMarshalIRpcClient) addMyHour(t myTime) myTime {
 	}
 	return resp.Param0
 }
-func (_c *binMarshalIRpcClient) addMyStructHour(t myStructTime) myStructTime {
+func (_c *binMarshalIrpcClient) addMyStructHour(t myStructTime) myStructTime {
 	var req = _Irpc_binMarshaladdMyStructHourReq{
 		Param0_t: t,
 	}
@@ -161,7 +161,7 @@ func (_c *binMarshalIRpcClient) addMyStructHour(t myStructTime) myStructTime {
 	}
 	return resp.Param0
 }
-func (_c *binMarshalIRpcClient) structPass(st structContainingBinMarshallable) structContainingBinMarshallable {
+func (_c *binMarshalIrpcClient) structPass(st structContainingBinMarshallable) structContainingBinMarshallable {
 	var req = _Irpc_binMarshalstructPassReq{
 		Param0_st: st,
 	}

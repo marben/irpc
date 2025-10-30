@@ -18,7 +18,7 @@ func TestEdgecases(t *testing.T) {
 	nothingAtAllC := make(chan int, 1)
 	unnamedIntParamC := make(chan int, 1)
 	mixedParamIdsC := make(chan int, 1)
-	remoteEp.RegisterService(newEdgeCasesIRpcService(edgeCasesImpl{
+	remoteEp.RegisterService(newEdgeCasesIrpcService(edgeCasesImpl{
 		noReturnFunc:        func(i int) { noReturnC <- i },
 		noParamsFunc:        func() int { return 9 },
 		nothingAtAllFunc:    func() { nothingAtAllC <- 12 },
@@ -26,7 +26,7 @@ func TestEdgecases(t *testing.T) {
 		mixedParamIdsFunc:   func(i int) { mixedParamIdsC <- i },
 	}))
 
-	c, err := newEdgeCasesIRpcClient(localEp)
+	c, err := newEdgeCasesIrpcClient(localEp)
 	if err != nil {
 		t.Fatalf("failed to create client: %+v", err)
 	}

@@ -19,10 +19,10 @@ func TestBasic(t *testing.T) {
 	serviceEp := irpc.NewEndpoint(p2)
 
 	skew := 2
-	service := newBasicAPIIRpcService(basicApiImpl{skew: skew})
+	service := newBasicAPIIrpcService(basicApiImpl{skew: skew})
 	serviceEp.RegisterService(service)
 
-	c, err := newBasicAPIIRpcClient(clientEp)
+	c, err := newBasicAPIIrpcClient(clientEp)
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
 	}

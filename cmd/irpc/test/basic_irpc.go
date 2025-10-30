@@ -7,26 +7,26 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-type basicAPIIRpcService struct {
+type basicAPIIrpcService struct {
 	impl basicAPI
 	id   []byte
 }
 
-func newBasicAPIIRpcService(impl basicAPI) *basicAPIIRpcService {
-	return &basicAPIIRpcService{
+func newBasicAPIIrpcService(impl basicAPI) *basicAPIIrpcService {
+	return &basicAPIIrpcService{
 		impl: impl,
 		id: []byte{
-			0x5f, 0x48, 0xca, 0xb7, 0x16, 0x7a, 0x1a, 0x46,
-			0x76, 0x1a, 0x3e, 0xcc, 0x64, 0xf4, 0x84, 0xcf,
-			0x63, 0x5d, 0x7c, 0xeb, 0xc3, 0xf8, 0xaa, 0x96,
-			0xe9, 0x81, 0x7d, 0x3b, 0x48, 0xb9, 0x0c, 0xc2,
+			0x31, 0xdc, 0x67, 0x5e, 0x24, 0xd1, 0xf7, 0x1d,
+			0x2f, 0x0f, 0xe1, 0x8c, 0xe2, 0x10, 0xa0, 0x24,
+			0x26, 0x56, 0x97, 0x7f, 0xfc, 0x7a, 0x27, 0x86,
+			0x0f, 0xe3, 0x2a, 0x46, 0x05, 0x25, 0xec, 0x27,
 		},
 	}
 }
-func (s *basicAPIIRpcService) Id() []byte {
+func (s *basicAPIIrpcService) Id() []byte {
 	return s.id
 }
-func (s *basicAPIIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
+func (s *basicAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // addByte
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
@@ -271,24 +271,24 @@ func (s *basicAPIIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 	}
 }
 
-type basicAPIIRpcClient struct {
+type basicAPIIrpcClient struct {
 	endpoint irpcgen.Endpoint
 	id       []byte
 }
 
-func newBasicAPIIRpcClient(endpoint irpcgen.Endpoint) (*basicAPIIRpcClient, error) {
+func newBasicAPIIrpcClient(endpoint irpcgen.Endpoint) (*basicAPIIrpcClient, error) {
 	id := []byte{
-		0x5f, 0x48, 0xca, 0xb7, 0x16, 0x7a, 0x1a, 0x46,
-		0x76, 0x1a, 0x3e, 0xcc, 0x64, 0xf4, 0x84, 0xcf,
-		0x63, 0x5d, 0x7c, 0xeb, 0xc3, 0xf8, 0xaa, 0x96,
-		0xe9, 0x81, 0x7d, 0x3b, 0x48, 0xb9, 0x0c, 0xc2,
+		0x31, 0xdc, 0x67, 0x5e, 0x24, 0xd1, 0xf7, 0x1d,
+		0x2f, 0x0f, 0xe1, 0x8c, 0xe2, 0x10, 0xa0, 0x24,
+		0x26, 0x56, 0x97, 0x7f, 0xfc, 0x7a, 0x27, 0x86,
+		0x0f, 0xe3, 0x2a, 0x46, 0x05, 0x25, 0xec, 0x27,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &basicAPIIRpcClient{endpoint: endpoint, id: id}, nil
+	return &basicAPIIrpcClient{endpoint: endpoint, id: id}, nil
 }
-func (_c *basicAPIIRpcClient) addByte(a byte, b byte) byte {
+func (_c *basicAPIIrpcClient) addByte(a byte, b byte) byte {
 	var req = _Irpc_basicAPIaddByteReq{
 		Param0_a: a,
 		Param1_b: b,
@@ -299,7 +299,7 @@ func (_c *basicAPIIRpcClient) addByte(a byte, b byte) byte {
 	}
 	return resp.Param0
 }
-func (_c *basicAPIIRpcClient) addInt(a int, b int) int {
+func (_c *basicAPIIrpcClient) addInt(a int, b int) int {
 	var req = _Irpc_basicAPIaddIntReq{
 		Param0_a: a,
 		Param1_b: b,
@@ -310,7 +310,7 @@ func (_c *basicAPIIRpcClient) addInt(a int, b int) int {
 	}
 	return resp.Param0
 }
-func (_c *basicAPIIRpcClient) swapInt(a int, b int) (int, int) {
+func (_c *basicAPIIrpcClient) swapInt(a int, b int) (int, int) {
 	var req = _Irpc_basicAPIswapIntReq{
 		Param0_a: a,
 		Param1_b: b,
@@ -321,7 +321,7 @@ func (_c *basicAPIIRpcClient) swapInt(a int, b int) (int, int) {
 	}
 	return resp.Param0, resp.Param1
 }
-func (_c *basicAPIIRpcClient) subUint(a uint, b uint) uint {
+func (_c *basicAPIIrpcClient) subUint(a uint, b uint) uint {
 	var req = _Irpc_basicAPIsubUintReq{
 		Param0_a: a,
 		Param0_b: b,
@@ -332,7 +332,7 @@ func (_c *basicAPIIRpcClient) subUint(a uint, b uint) uint {
 	}
 	return resp.Param0
 }
-func (_c *basicAPIIRpcClient) addInt8(a int8, b int8) int8 {
+func (_c *basicAPIIrpcClient) addInt8(a int8, b int8) int8 {
 	var req = _Irpc_basicAPIaddInt8Req{
 		Param0_a: a,
 		Param0_b: b,
@@ -343,7 +343,7 @@ func (_c *basicAPIIRpcClient) addInt8(a int8, b int8) int8 {
 	}
 	return resp.Param0
 }
-func (_c *basicAPIIRpcClient) addUint8(a uint8, b uint8) uint8 {
+func (_c *basicAPIIrpcClient) addUint8(a uint8, b uint8) uint8 {
 	var req = _Irpc_basicAPIaddUint8Req{
 		Param0_a: a,
 		Param0_b: b,
@@ -354,7 +354,7 @@ func (_c *basicAPIIRpcClient) addUint8(a uint8, b uint8) uint8 {
 	}
 	return resp.Param0
 }
-func (_c *basicAPIIRpcClient) addInt16(a int16, b int16) int16 {
+func (_c *basicAPIIrpcClient) addInt16(a int16, b int16) int16 {
 	var req = _Irpc_basicAPIaddInt16Req{
 		Param0_a: a,
 		Param0_b: b,
@@ -365,7 +365,7 @@ func (_c *basicAPIIRpcClient) addInt16(a int16, b int16) int16 {
 	}
 	return resp.Param0
 }
-func (_c *basicAPIIRpcClient) addUint16(a uint16, b uint16) uint16 {
+func (_c *basicAPIIrpcClient) addUint16(a uint16, b uint16) uint16 {
 	var req = _Irpc_basicAPIaddUint16Req{
 		Param0_a: a,
 		Param0_b: b,
@@ -376,7 +376,7 @@ func (_c *basicAPIIRpcClient) addUint16(a uint16, b uint16) uint16 {
 	}
 	return resp.Param0
 }
-func (_c *basicAPIIRpcClient) addInt32(a int32, b int32) int32 {
+func (_c *basicAPIIrpcClient) addInt32(a int32, b int32) int32 {
 	var req = _Irpc_basicAPIaddInt32Req{
 		Param0_a: a,
 		Param0_b: b,
@@ -387,7 +387,7 @@ func (_c *basicAPIIRpcClient) addInt32(a int32, b int32) int32 {
 	}
 	return resp.Param0
 }
-func (_c *basicAPIIRpcClient) addUint32(a uint32, b uint32) uint32 {
+func (_c *basicAPIIrpcClient) addUint32(a uint32, b uint32) uint32 {
 	var req = _Irpc_basicAPIaddUint32Req{
 		Param0_a: a,
 		Param0_b: b,
@@ -398,7 +398,7 @@ func (_c *basicAPIIRpcClient) addUint32(a uint32, b uint32) uint32 {
 	}
 	return resp.Param0
 }
-func (_c *basicAPIIRpcClient) addInt64(a int64, b int64) int64 {
+func (_c *basicAPIIrpcClient) addInt64(a int64, b int64) int64 {
 	var req = _Irpc_basicAPIaddInt64Req{
 		Param0_a: a,
 		Param0_b: b,
@@ -409,7 +409,7 @@ func (_c *basicAPIIRpcClient) addInt64(a int64, b int64) int64 {
 	}
 	return resp.Param0
 }
-func (_c *basicAPIIRpcClient) addUint64(a uint64, b uint64) uint64 {
+func (_c *basicAPIIrpcClient) addUint64(a uint64, b uint64) uint64 {
 	var req = _Irpc_basicAPIaddUint64Req{
 		Param0_a: a,
 		Param0_b: b,
@@ -420,7 +420,7 @@ func (_c *basicAPIIRpcClient) addUint64(a uint64, b uint64) uint64 {
 	}
 	return resp.Param0
 }
-func (_c *basicAPIIRpcClient) addFloat64(a float64, b float64) float64 {
+func (_c *basicAPIIrpcClient) addFloat64(a float64, b float64) float64 {
 	var req = _Irpc_basicAPIaddFloat64Req{
 		Param0_a: a,
 		Param0_b: b,
@@ -431,7 +431,7 @@ func (_c *basicAPIIRpcClient) addFloat64(a float64, b float64) float64 {
 	}
 	return resp.Param0
 }
-func (_c *basicAPIIRpcClient) addFloat32(a float32, b float32) float32 {
+func (_c *basicAPIIrpcClient) addFloat32(a float32, b float32) float32 {
 	var req = _Irpc_basicAPIaddFloat32Req{
 		Param0_a: a,
 		Param0_b: b,
@@ -442,7 +442,7 @@ func (_c *basicAPIIRpcClient) addFloat32(a float32, b float32) float32 {
 	}
 	return resp.Param0
 }
-func (_c *basicAPIIRpcClient) toUpper(c rune) rune {
+func (_c *basicAPIIrpcClient) toUpper(c rune) rune {
 	var req = _Irpc_basicAPItoUpperReq{
 		Param0_c: c,
 	}
@@ -452,7 +452,7 @@ func (_c *basicAPIIRpcClient) toUpper(c rune) rune {
 	}
 	return resp.Param0
 }
-func (_c *basicAPIIRpcClient) toUpperString(s string) string {
+func (_c *basicAPIIrpcClient) toUpperString(s string) string {
 	var req = _Irpc_basicAPItoUpperStringReq{
 		Param0_s: s,
 	}
@@ -462,7 +462,7 @@ func (_c *basicAPIIRpcClient) toUpperString(s string) string {
 	}
 	return resp.Param0
 }
-func (_c *basicAPIIRpcClient) negBool(ok bool) bool {
+func (_c *basicAPIIrpcClient) negBool(ok bool) bool {
 	var req = _Irpc_basicAPInegBoolReq{
 		Param0_ok: ok,
 	}

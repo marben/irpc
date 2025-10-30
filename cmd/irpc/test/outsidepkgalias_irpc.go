@@ -10,26 +10,26 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-type outsidepkgaliasIRpcService struct {
+type outsidepkgaliasIrpcService struct {
 	impl outsidepkgalias
 	id   []byte
 }
 
-func newOutsidepkgaliasIRpcService(impl outsidepkgalias) *outsidepkgaliasIRpcService {
-	return &outsidepkgaliasIRpcService{
+func newOutsidepkgaliasIrpcService(impl outsidepkgalias) *outsidepkgaliasIrpcService {
+	return &outsidepkgaliasIrpcService{
 		impl: impl,
 		id: []byte{
-			0x63, 0x81, 0xde, 0xc3, 0xc2, 0x27, 0x7b, 0xbb,
-			0x3a, 0x67, 0xf7, 0x8d, 0x93, 0xaa, 0xab, 0xf8,
-			0x5e, 0xc4, 0x19, 0x60, 0x85, 0xf1, 0xfa, 0x13,
-			0x60, 0xed, 0x77, 0x49, 0x70, 0x80, 0x53, 0x79,
+			0xf7, 0x75, 0x90, 0xf2, 0xea, 0x57, 0x8c, 0xbe,
+			0xd6, 0x33, 0xd3, 0x16, 0x10, 0xfb, 0x18, 0x72,
+			0x6f, 0x90, 0xfd, 0x1b, 0x7d, 0x52, 0x23, 0xce,
+			0x4e, 0x0e, 0x67, 0x01, 0xd0, 0x2e, 0xe3, 0x69,
 		},
 	}
 }
-func (s *outsidepkgaliasIRpcService) Id() []byte {
+func (s *outsidepkgaliasIrpcService) Id() []byte {
 	return s.id
 }
-func (s *outsidepkgaliasIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
+func (s *outsidepkgaliasIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // add
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
@@ -92,24 +92,24 @@ func (s *outsidepkgaliasIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen
 	}
 }
 
-type outsidepkgaliasIRpcClient struct {
+type outsidepkgaliasIrpcClient struct {
 	endpoint irpcgen.Endpoint
 	id       []byte
 }
 
-func newOutsidepkgaliasIRpcClient(endpoint irpcgen.Endpoint) (*outsidepkgaliasIRpcClient, error) {
+func newOutsidepkgaliasIrpcClient(endpoint irpcgen.Endpoint) (*outsidepkgaliasIrpcClient, error) {
 	id := []byte{
-		0x63, 0x81, 0xde, 0xc3, 0xc2, 0x27, 0x7b, 0xbb,
-		0x3a, 0x67, 0xf7, 0x8d, 0x93, 0xaa, 0xab, 0xf8,
-		0x5e, 0xc4, 0x19, 0x60, 0x85, 0xf1, 0xfa, 0x13,
-		0x60, 0xed, 0x77, 0x49, 0x70, 0x80, 0x53, 0x79,
+		0xf7, 0x75, 0x90, 0xf2, 0xea, 0x57, 0x8c, 0xbe,
+		0xd6, 0x33, 0xd3, 0x16, 0x10, 0xfb, 0x18, 0x72,
+		0x6f, 0x90, 0xfd, 0x1b, 0x7d, 0x52, 0x23, 0xce,
+		0x4e, 0x0e, 0x67, 0x01, 0xd0, 0x2e, 0xe3, 0x69,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &outsidepkgaliasIRpcClient{endpoint: endpoint, id: id}, nil
+	return &outsidepkgaliasIrpcClient{endpoint: endpoint, id: id}, nil
 }
-func (_c *outsidepkgaliasIRpcClient) add(a out1.Uint8, b out1.Uint8) int {
+func (_c *outsidepkgaliasIrpcClient) add(a out1.Uint8, b out1.Uint8) int {
 	var req = _Irpc_outsidepkgaliasaddReq{
 		Param0_a: a,
 		Param1_b: b,
@@ -120,7 +120,7 @@ func (_c *outsidepkgaliasIRpcClient) add(a out1.Uint8, b out1.Uint8) int {
 	}
 	return resp.Param0
 }
-func (_c *outsidepkgaliasIRpcClient) add2(a out1.Uint8, b out.Uint8) int {
+func (_c *outsidepkgaliasIrpcClient) add2(a out1.Uint8, b out.Uint8) int {
 	var req = _Irpc_outsidepkgaliasadd2Req{
 		Param0_a: a,
 		Param1_b: b,
@@ -131,7 +131,7 @@ func (_c *outsidepkgaliasIRpcClient) add2(a out1.Uint8, b out.Uint8) int {
 	}
 	return resp.Param0
 }
-func (_c *outsidepkgaliasIRpcClient) add3(a int, b out.Uint8) out2.Uint8 {
+func (_c *outsidepkgaliasIrpcClient) add3(a int, b out.Uint8) out2.Uint8 {
 	var req = _Irpc_outsidepkgaliasadd3Req{
 		Param0_a: a,
 		Param1_b: b,
@@ -142,7 +142,7 @@ func (_c *outsidepkgaliasIRpcClient) add3(a int, b out.Uint8) out2.Uint8 {
 	}
 	return resp.Param0
 }
-func (_c *outsidepkgaliasIRpcClient) sum(inSlice out1.AliasedByteSlice) int {
+func (_c *outsidepkgaliasIrpcClient) sum(inSlice out1.AliasedByteSlice) int {
 	var req = _Irpc_outsidepkgaliassumReq{
 		Param0_inSlice: inSlice,
 	}

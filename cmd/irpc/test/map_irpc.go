@@ -7,26 +7,26 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-type mapTestIRpcService struct {
+type mapTestIrpcService struct {
 	impl mapTest
 	id   []byte
 }
 
-func newMapTestIRpcService(impl mapTest) *mapTestIRpcService {
-	return &mapTestIRpcService{
+func newMapTestIrpcService(impl mapTest) *mapTestIrpcService {
+	return &mapTestIrpcService{
 		impl: impl,
 		id: []byte{
-			0xe6, 0x0d, 0x1a, 0xa0, 0x1e, 0x87, 0x6f, 0x1b,
-			0x66, 0xcd, 0xdc, 0x0e, 0x13, 0x20, 0xe4, 0x08,
-			0xed, 0xa4, 0x76, 0x2a, 0xdb, 0x0a, 0xda, 0x44,
-			0xd0, 0x02, 0x95, 0x25, 0x0a, 0x4c, 0xc1, 0xb4,
+			0x46, 0x14, 0x5b, 0x17, 0x84, 0x64, 0xd4, 0x71,
+			0xb3, 0x51, 0xdb, 0x65, 0x0d, 0x54, 0x95, 0xdc,
+			0xad, 0x85, 0xc9, 0x17, 0xfd, 0xb0, 0x85, 0x61,
+			0x18, 0x14, 0x5a, 0x62, 0x73, 0x31, 0x76, 0x74,
 		},
 	}
 }
-func (s *mapTestIRpcService) Id() []byte {
+func (s *mapTestIrpcService) Id() []byte {
 	return s.id
 }
-func (s *mapTestIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
+func (s *mapTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // mapSum
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
@@ -103,24 +103,24 @@ func (s *mapTestIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDese
 	}
 }
 
-type mapTestIRpcClient struct {
+type mapTestIrpcClient struct {
 	endpoint irpcgen.Endpoint
 	id       []byte
 }
 
-func newMapTestIRpcClient(endpoint irpcgen.Endpoint) (*mapTestIRpcClient, error) {
+func newMapTestIrpcClient(endpoint irpcgen.Endpoint) (*mapTestIrpcClient, error) {
 	id := []byte{
-		0xe6, 0x0d, 0x1a, 0xa0, 0x1e, 0x87, 0x6f, 0x1b,
-		0x66, 0xcd, 0xdc, 0x0e, 0x13, 0x20, 0xe4, 0x08,
-		0xed, 0xa4, 0x76, 0x2a, 0xdb, 0x0a, 0xda, 0x44,
-		0xd0, 0x02, 0x95, 0x25, 0x0a, 0x4c, 0xc1, 0xb4,
+		0x46, 0x14, 0x5b, 0x17, 0x84, 0x64, 0xd4, 0x71,
+		0xb3, 0x51, 0xdb, 0x65, 0x0d, 0x54, 0x95, 0xdc,
+		0xad, 0x85, 0xc9, 0x17, 0xfd, 0xb0, 0x85, 0x61,
+		0x18, 0x14, 0x5a, 0x62, 0x73, 0x31, 0x76, 0x74,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &mapTestIRpcClient{endpoint: endpoint, id: id}, nil
+	return &mapTestIrpcClient{endpoint: endpoint, id: id}, nil
 }
-func (_c *mapTestIRpcClient) mapSum(in map[int]float64) (keysSum int, valsSum float64) {
+func (_c *mapTestIrpcClient) mapSum(in map[int]float64) (keysSum int, valsSum float64) {
 	var req = _Irpc_mapTestmapSumReq{
 		Param0_in: in,
 	}
@@ -130,7 +130,7 @@ func (_c *mapTestIRpcClient) mapSum(in map[int]float64) (keysSum int, valsSum fl
 	}
 	return resp.Param0_keysSum, resp.Param1_valsSum
 }
-func (_c *mapTestIRpcClient) sumStructs(in map[intStruct]intStruct) (keysSum int, valsSum int) {
+func (_c *mapTestIrpcClient) sumStructs(in map[intStruct]intStruct) (keysSum int, valsSum int) {
 	var req = _Irpc_mapTestsumStructsReq{
 		Param0_in: in,
 	}
@@ -140,7 +140,7 @@ func (_c *mapTestIRpcClient) sumStructs(in map[intStruct]intStruct) (keysSum int
 	}
 	return resp.Param0_keysSum, resp.Param0_valsSum
 }
-func (_c *mapTestIRpcClient) sumSlices(in map[intStruct][]intStruct) (keysSum int, valsSum int) {
+func (_c *mapTestIrpcClient) sumSlices(in map[intStruct][]intStruct) (keysSum int, valsSum int) {
 	var req = _Irpc_mapTestsumSlicesReq{
 		Param0_in: in,
 	}
@@ -150,7 +150,7 @@ func (_c *mapTestIRpcClient) sumSlices(in map[intStruct][]intStruct) (keysSum in
 	}
 	return resp.Param0_keysSum, resp.Param0_valsSum
 }
-func (_c *mapTestIRpcClient) namedMapInc(in namedIntFloatMap) namedIntFloatMap {
+func (_c *mapTestIrpcClient) namedMapInc(in namedIntFloatMap) namedIntFloatMap {
 	var req = _Irpc_mapTestnamedMapIncReq{
 		Param0_in: in,
 	}
@@ -160,7 +160,7 @@ func (_c *mapTestIRpcClient) namedMapInc(in namedIntFloatMap) namedIntFloatMap {
 	}
 	return resp.Param0
 }
-func (_c *mapTestIRpcClient) namedKeySum(in map[mapNamedInt]mapNamedFloat64) mapNamedFloat64 {
+func (_c *mapTestIrpcClient) namedKeySum(in map[mapNamedInt]mapNamedFloat64) mapNamedFloat64 {
 	var req = _Irpc_mapTestnamedKeySumReq{
 		Param0_in: in,
 	}

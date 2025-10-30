@@ -9,26 +9,26 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-type interfaceTestIRpcService struct {
+type interfaceTestIrpcService struct {
 	impl interfaceTest
 	id   []byte
 }
 
-func newInterfaceTestIRpcService(impl interfaceTest) *interfaceTestIRpcService {
-	return &interfaceTestIRpcService{
+func newInterfaceTestIrpcService(impl interfaceTest) *interfaceTestIrpcService {
+	return &interfaceTestIrpcService{
 		impl: impl,
 		id: []byte{
-			0xcf, 0x25, 0x86, 0xc8, 0x62, 0x67, 0xff, 0xb0,
-			0x43, 0xc8, 0x2e, 0xf3, 0x3f, 0x7f, 0x28, 0x8a,
-			0xb1, 0x20, 0xbe, 0x0b, 0xd3, 0xb3, 0x8a, 0xfd,
-			0xe5, 0x91, 0x53, 0x15, 0x26, 0xc0, 0x85, 0x7b,
+			0x3e, 0xba, 0x1d, 0xe6, 0xff, 0xd3, 0x3a, 0xb9,
+			0xb9, 0x4d, 0xa3, 0xf6, 0x92, 0xe2, 0x3e, 0xa2,
+			0x63, 0x92, 0x85, 0xde, 0x7a, 0x43, 0x75, 0x8d,
+			0xf9, 0xcb, 0x2e, 0x64, 0x55, 0x42, 0xd2, 0x72,
 		},
 	}
 }
-func (s *interfaceTestIRpcService) Id() []byte {
+func (s *interfaceTestIrpcService) Id() []byte {
 	return s.id
 }
-func (s *interfaceTestIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
+func (s *interfaceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // rtnErrorWithMessage
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
@@ -137,24 +137,24 @@ func (s *interfaceTestIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.A
 	}
 }
 
-type interfaceTestIRpcClient struct {
+type interfaceTestIrpcClient struct {
 	endpoint irpcgen.Endpoint
 	id       []byte
 }
 
-func newInterfaceTestIRpcClient(endpoint irpcgen.Endpoint) (*interfaceTestIRpcClient, error) {
+func newInterfaceTestIrpcClient(endpoint irpcgen.Endpoint) (*interfaceTestIrpcClient, error) {
 	id := []byte{
-		0xcf, 0x25, 0x86, 0xc8, 0x62, 0x67, 0xff, 0xb0,
-		0x43, 0xc8, 0x2e, 0xf3, 0x3f, 0x7f, 0x28, 0x8a,
-		0xb1, 0x20, 0xbe, 0x0b, 0xd3, 0xb3, 0x8a, 0xfd,
-		0xe5, 0x91, 0x53, 0x15, 0x26, 0xc0, 0x85, 0x7b,
+		0x3e, 0xba, 0x1d, 0xe6, 0xff, 0xd3, 0x3a, 0xb9,
+		0xb9, 0x4d, 0xa3, 0xf6, 0x92, 0xe2, 0x3e, 0xa2,
+		0x63, 0x92, 0x85, 0xde, 0x7a, 0x43, 0x75, 0x8d,
+		0xf9, 0xcb, 0x2e, 0x64, 0x55, 0x42, 0xd2, 0x72,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &interfaceTestIRpcClient{endpoint: endpoint, id: id}, nil
+	return &interfaceTestIrpcClient{endpoint: endpoint, id: id}, nil
 }
-func (_c *interfaceTestIRpcClient) rtnErrorWithMessage(msg string) error {
+func (_c *interfaceTestIrpcClient) rtnErrorWithMessage(msg string) error {
 	var req = _Irpc_interfaceTestrtnErrorWithMessageReq{
 		Param0_msg: msg,
 	}
@@ -164,14 +164,14 @@ func (_c *interfaceTestIRpcClient) rtnErrorWithMessage(msg string) error {
 	}
 	return resp.Param0
 }
-func (_c *interfaceTestIRpcClient) rtnNilError() error {
+func (_c *interfaceTestIrpcClient) rtnNilError() error {
 	var resp _Irpc_interfaceTestrtnNilErrorResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 1, irpcgen.EmptySerializable{}, &resp); err != nil {
 		return err
 	}
 	return resp.Param0
 }
-func (_c *interfaceTestIRpcClient) rtnTwoErrors() (error, error) {
+func (_c *interfaceTestIrpcClient) rtnTwoErrors() (error, error) {
 	var resp _Irpc_interfaceTestrtnTwoErrorsResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 2, irpcgen.EmptySerializable{}, &resp); err != nil {
 		var zero _Irpc_interfaceTestrtnTwoErrorsResp
@@ -179,7 +179,7 @@ func (_c *interfaceTestIRpcClient) rtnTwoErrors() (error, error) {
 	}
 	return resp.Param0, resp.Param1
 }
-func (_c *interfaceTestIRpcClient) rtnStringAndError(msg string) (s string, err error) {
+func (_c *interfaceTestIrpcClient) rtnStringAndError(msg string) (s string, err error) {
 	var req = _Irpc_interfaceTestrtnStringAndErrorReq{
 		Param0_msg: msg,
 	}
@@ -190,7 +190,7 @@ func (_c *interfaceTestIRpcClient) rtnStringAndError(msg string) (s string, err 
 	}
 	return resp.Param0_s, resp.Param1_err
 }
-func (_c *interfaceTestIRpcClient) passCustomInterfaceAndReturnItModified(ci customInterface) (customInterface, error) {
+func (_c *interfaceTestIrpcClient) passCustomInterfaceAndReturnItModified(ci customInterface) (customInterface, error) {
 	var req = _Irpc_interfaceTestpassCustomInterfaceAndReturnItModifiedReq{
 		Param0_ci: ci,
 	}
@@ -201,7 +201,7 @@ func (_c *interfaceTestIRpcClient) passCustomInterfaceAndReturnItModified(ci cus
 	}
 	return resp.Param0, resp.Param1
 }
-func (_c *interfaceTestIRpcClient) passJustCustomInterfaceWithoutError(ci customInterface) customInterface {
+func (_c *interfaceTestIrpcClient) passJustCustomInterfaceWithoutError(ci customInterface) customInterface {
 	var req = _Irpc_interfaceTestpassJustCustomInterfaceWithoutErrorReq{
 		Param0_ci: ci,
 	}
@@ -211,7 +211,7 @@ func (_c *interfaceTestIRpcClient) passJustCustomInterfaceWithoutError(ci custom
 	}
 	return resp.Param0
 }
-func (_c *interfaceTestIRpcClient) passAnonInterface(input interface {
+func (_c *interfaceTestIrpcClient) passAnonInterface(input interface {
 	Age() int
 	Name() string
 }) string {
@@ -224,7 +224,7 @@ func (_c *interfaceTestIRpcClient) passAnonInterface(input interface {
 	}
 	return resp.Param0
 }
-func (_c *interfaceTestIRpcClient) passAnonInterfaceWithNamedParams(input interface {
+func (_c *interfaceTestIrpcClient) passAnonInterfaceWithNamedParams(input interface {
 	a() (out.Uint8, int)
 	b() out2.Uint8
 	c() (out2.Uint8, error)
@@ -1034,26 +1034,26 @@ func (s *_Irpc_interfaceTestpassAnonInterfaceWithNamedParamsResp) Deserialize(d 
 	return nil
 }
 
-type customInterfaceIRpcService struct {
+type customInterfaceIrpcService struct {
 	impl customInterface
 	id   []byte
 }
 
-func newCustomInterfaceIRpcService(impl customInterface) *customInterfaceIRpcService {
-	return &customInterfaceIRpcService{
+func newCustomInterfaceIrpcService(impl customInterface) *customInterfaceIrpcService {
+	return &customInterfaceIrpcService{
 		impl: impl,
 		id: []byte{
-			0x98, 0x77, 0xf7, 0x29, 0xf7, 0x61, 0x03, 0xce,
-			0x85, 0xad, 0xe3, 0x58, 0xa0, 0x93, 0x52, 0xaa,
-			0x12, 0x05, 0x92, 0x7c, 0xed, 0x30, 0x42, 0x2d,
-			0xd1, 0x86, 0x9b, 0xf7, 0x92, 0xc1, 0xf9, 0x25,
+			0xdf, 0x24, 0xe6, 0x7e, 0x4f, 0xd0, 0xc7, 0x84,
+			0x4a, 0xe6, 0x8a, 0x7c, 0xf3, 0x2f, 0xf7, 0x03,
+			0x8e, 0x81, 0x85, 0x3e, 0xf8, 0xcb, 0xe8, 0x76,
+			0x23, 0x42, 0xbc, 0x61, 0x04, 0x10, 0x61, 0x36,
 		},
 	}
 }
-func (s *customInterfaceIRpcService) Id() []byte {
+func (s *customInterfaceIrpcService) Id() []byte {
 	return s.id
 }
-func (s *customInterfaceIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
+func (s *customInterfaceIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // IntFunc
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
@@ -1078,31 +1078,31 @@ func (s *customInterfaceIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen
 	}
 }
 
-type customInterfaceIRpcClient struct {
+type customInterfaceIrpcClient struct {
 	endpoint irpcgen.Endpoint
 	id       []byte
 }
 
-func newCustomInterfaceIRpcClient(endpoint irpcgen.Endpoint) (*customInterfaceIRpcClient, error) {
+func newCustomInterfaceIrpcClient(endpoint irpcgen.Endpoint) (*customInterfaceIrpcClient, error) {
 	id := []byte{
-		0x98, 0x77, 0xf7, 0x29, 0xf7, 0x61, 0x03, 0xce,
-		0x85, 0xad, 0xe3, 0x58, 0xa0, 0x93, 0x52, 0xaa,
-		0x12, 0x05, 0x92, 0x7c, 0xed, 0x30, 0x42, 0x2d,
-		0xd1, 0x86, 0x9b, 0xf7, 0x92, 0xc1, 0xf9, 0x25,
+		0xdf, 0x24, 0xe6, 0x7e, 0x4f, 0xd0, 0xc7, 0x84,
+		0x4a, 0xe6, 0x8a, 0x7c, 0xf3, 0x2f, 0xf7, 0x03,
+		0x8e, 0x81, 0x85, 0x3e, 0xf8, 0xcb, 0xe8, 0x76,
+		0x23, 0x42, 0xbc, 0x61, 0x04, 0x10, 0x61, 0x36,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &customInterfaceIRpcClient{endpoint: endpoint, id: id}, nil
+	return &customInterfaceIrpcClient{endpoint: endpoint, id: id}, nil
 }
-func (_c *customInterfaceIRpcClient) IntFunc() int {
+func (_c *customInterfaceIrpcClient) IntFunc() int {
 	var resp _Irpc_customInterfaceIntFuncResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, irpcgen.EmptySerializable{}, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
-func (_c *customInterfaceIRpcClient) StringFunc() string {
+func (_c *customInterfaceIrpcClient) StringFunc() string {
 	var resp _Irpc_customInterfaceStringFuncResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 1, irpcgen.EmptySerializable{}, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code

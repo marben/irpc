@@ -13,9 +13,9 @@ func TestMap(t *testing.T) {
 	}
 	defer localEp.Close()
 
-	remoteEp.RegisterService(newMapTestIRpcService(&mapTestImpl{}))
+	remoteEp.RegisterService(newMapTestIrpcService(&mapTestImpl{}))
 
-	c, err := newMapTestIRpcClient(localEp)
+	c, err := newMapTestIrpcClient(localEp)
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
 	}
@@ -38,9 +38,9 @@ func TestSumStructs(t *testing.T) {
 	}
 	defer localEp.Close()
 
-	remoteEp.RegisterService(newMapTestIRpcService(&mapTestImpl{}))
+	remoteEp.RegisterService(newMapTestIrpcService(&mapTestImpl{}))
 
-	c, err := newMapTestIRpcClient(localEp)
+	c, err := newMapTestIrpcClient(localEp)
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
 	}
@@ -66,9 +66,9 @@ func TestSumMapSlices(t *testing.T) {
 	}
 	defer localEp.Close()
 
-	remoteEp.RegisterService(newMapTestIRpcService(&mapTestImpl{}))
+	remoteEp.RegisterService(newMapTestIrpcService(&mapTestImpl{}))
 
-	c, err := newMapTestIRpcClient(localEp)
+	c, err := newMapTestIrpcClient(localEp)
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
 	}

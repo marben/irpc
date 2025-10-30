@@ -22,11 +22,11 @@ Running IRPC command tool`irpc math.go` generates file `math_irpc.go` with clien
 A working client, that implements Math interface, meaning we can directly call Add(1,2) on it
 ```go
 // inside math_irpc.go
-func NewMathIRpcClient(endpoint *irpc.Endpoint) (*MathIRpcClient, error) {...}
+func NewMathIrpcClient(endpoint *irpc.Endpoint) (*MathIrpcClient, error) {...}
 ```
 ```go
 // example use:
-client, err := NewMathIRpcClient(ep)
+client, err := NewMathIrpcClient(ep)
 result, err := client.Add(1,2) // a network call
 fmt.Println(result)    // "3"  (presuming our implementation did a simple addition)
 ```
@@ -35,7 +35,7 @@ fmt.Println(result)    // "3"  (presuming our implementation did a simple additi
 Service that takes `Math` interface implementation and forward incoming network requests to it, returning the results back over network
 ```go
 // inside math_irpc.go
-func NewMathIRpcService(impl Math) *MathIRpcService
+func NewMathIrpcService(impl Math) *MathIrpcService
 ```
 
 

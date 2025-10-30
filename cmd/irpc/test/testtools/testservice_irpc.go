@@ -7,26 +7,26 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-type TestServiceIRpcService struct {
+type TestServiceIrpcService struct {
 	impl TestService
 	id   []byte
 }
 
-func NewTestServiceIRpcService(impl TestService) *TestServiceIRpcService {
-	return &TestServiceIRpcService{
+func NewTestServiceIrpcService(impl TestService) *TestServiceIrpcService {
+	return &TestServiceIrpcService{
 		impl: impl,
 		id: []byte{
-			0xb0, 0x7c, 0x98, 0x73, 0x8c, 0x34, 0x9f, 0xdf,
-			0x07, 0x36, 0xcc, 0x32, 0x02, 0x4d, 0xec, 0x47,
-			0x29, 0x12, 0x81, 0xf8, 0x4c, 0x3e, 0x42, 0x46,
-			0x66, 0xe4, 0xa9, 0x80, 0xfe, 0x4f, 0x7d, 0x9c,
+			0x95, 0x79, 0x95, 0xfe, 0x34, 0x00, 0x15, 0xae,
+			0xca, 0x4d, 0x2a, 0xad, 0x5a, 0x90, 0x7e, 0x64,
+			0xfc, 0xbc, 0x67, 0xd7, 0xb7, 0xbe, 0x8a, 0x28,
+			0x2b, 0x5f, 0x79, 0x99, 0xbf, 0x63, 0xf6, 0xea,
 		},
 	}
 }
-func (s *TestServiceIRpcService) Id() []byte {
+func (s *TestServiceIrpcService) Id() []byte {
 	return s.id
 }
-func (s *TestServiceIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
+func (s *TestServiceIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // Div
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
@@ -75,24 +75,24 @@ func (s *TestServiceIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.Arg
 	}
 }
 
-type TestServiceIRpcClient struct {
+type TestServiceIrpcClient struct {
 	endpoint irpcgen.Endpoint
 	id       []byte
 }
 
-func NewTestServiceIRpcClient(endpoint irpcgen.Endpoint) (*TestServiceIRpcClient, error) {
+func NewTestServiceIrpcClient(endpoint irpcgen.Endpoint) (*TestServiceIrpcClient, error) {
 	id := []byte{
-		0xb0, 0x7c, 0x98, 0x73, 0x8c, 0x34, 0x9f, 0xdf,
-		0x07, 0x36, 0xcc, 0x32, 0x02, 0x4d, 0xec, 0x47,
-		0x29, 0x12, 0x81, 0xf8, 0x4c, 0x3e, 0x42, 0x46,
-		0x66, 0xe4, 0xa9, 0x80, 0xfe, 0x4f, 0x7d, 0x9c,
+		0x95, 0x79, 0x95, 0xfe, 0x34, 0x00, 0x15, 0xae,
+		0xca, 0x4d, 0x2a, 0xad, 0x5a, 0x90, 0x7e, 0x64,
+		0xfc, 0xbc, 0x67, 0xd7, 0xb7, 0xbe, 0x8a, 0x28,
+		0x2b, 0x5f, 0x79, 0x99, 0xbf, 0x63, 0xf6, 0xea,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &TestServiceIRpcClient{endpoint: endpoint, id: id}, nil
+	return &TestServiceIrpcClient{endpoint: endpoint, id: id}, nil
 }
-func (_c *TestServiceIRpcClient) Div(a int, b int) int {
+func (_c *TestServiceIrpcClient) Div(a int, b int) int {
 	var req = _Irpc_TestServiceDivReq{
 		Param0_a: a,
 		Param0_b: b,
@@ -103,7 +103,7 @@ func (_c *TestServiceIRpcClient) Div(a int, b int) int {
 	}
 	return resp.Param0
 }
-func (_c *TestServiceIRpcClient) DivErr(a int, b int) (int, error) {
+func (_c *TestServiceIrpcClient) DivErr(a int, b int) (int, error) {
 	var req = _Irpc_TestServiceDivErrReq{
 		Param0_a: a,
 		Param0_b: b,
@@ -115,7 +115,7 @@ func (_c *TestServiceIRpcClient) DivErr(a int, b int) (int, error) {
 	}
 	return resp.Param0, resp.Param1
 }
-func (_c *TestServiceIRpcClient) DivCtxErr(ctx context.Context, a int, b int) (int, error) {
+func (_c *TestServiceIrpcClient) DivCtxErr(ctx context.Context, a int, b int) (int, error) {
 	var req = _Irpc_TestServiceDivCtxErrReq{
 		// Param0_ctx: ctx,
 		Param1_a: a,

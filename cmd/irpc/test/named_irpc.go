@@ -7,26 +7,26 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-type namedTestIRpcService struct {
+type namedTestIrpcService struct {
 	impl namedTest
 	id   []byte
 }
 
-func newNamedTestIRpcService(impl namedTest) *namedTestIRpcService {
-	return &namedTestIRpcService{
+func newNamedTestIrpcService(impl namedTest) *namedTestIrpcService {
+	return &namedTestIrpcService{
 		impl: impl,
 		id: []byte{
-			0xb7, 0xd1, 0x3e, 0x97, 0xa1, 0x62, 0xc2, 0x03,
-			0x2a, 0x2c, 0x8b, 0x57, 0x75, 0x34, 0x4a, 0xba,
-			0xfd, 0x2b, 0xd5, 0x4a, 0xd5, 0x62, 0xe3, 0x16,
-			0x9c, 0xfe, 0xe9, 0x1b, 0xba, 0x9e, 0x6f, 0xab,
+			0xd7, 0xd5, 0xdd, 0x73, 0x68, 0x3d, 0x3e, 0xe5,
+			0x40, 0xbf, 0x44, 0xea, 0x4a, 0x17, 0x32, 0x47,
+			0xaf, 0x26, 0x3a, 0xd2, 0xb5, 0x0b, 0x49, 0xc7,
+			0x59, 0xc6, 0x34, 0x4e, 0x62, 0xeb, 0xc6, 0xe1,
 		},
 	}
 }
-func (s *namedTestIRpcService) Id() []byte {
+func (s *namedTestIrpcService) Id() []byte {
 	return s.id
 }
-func (s *namedTestIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
+func (s *namedTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // isWeekend
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
@@ -117,24 +117,24 @@ func (s *namedTestIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 	}
 }
 
-type namedTestIRpcClient struct {
+type namedTestIrpcClient struct {
 	endpoint irpcgen.Endpoint
 	id       []byte
 }
 
-func newNamedTestIRpcClient(endpoint irpcgen.Endpoint) (*namedTestIRpcClient, error) {
+func newNamedTestIrpcClient(endpoint irpcgen.Endpoint) (*namedTestIrpcClient, error) {
 	id := []byte{
-		0xb7, 0xd1, 0x3e, 0x97, 0xa1, 0x62, 0xc2, 0x03,
-		0x2a, 0x2c, 0x8b, 0x57, 0x75, 0x34, 0x4a, 0xba,
-		0xfd, 0x2b, 0xd5, 0x4a, 0xd5, 0x62, 0xe3, 0x16,
-		0x9c, 0xfe, 0xe9, 0x1b, 0xba, 0x9e, 0x6f, 0xab,
+		0xd7, 0xd5, 0xdd, 0x73, 0x68, 0x3d, 0x3e, 0xe5,
+		0x40, 0xbf, 0x44, 0xea, 0x4a, 0x17, 0x32, 0x47,
+		0xaf, 0x26, 0x3a, 0xd2, 0xb5, 0x0b, 0x49, 0xc7,
+		0x59, 0xc6, 0x34, 0x4e, 0x62, 0xeb, 0xc6, 0xe1,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &namedTestIRpcClient{endpoint: endpoint, id: id}, nil
+	return &namedTestIrpcClient{endpoint: endpoint, id: id}, nil
 }
-func (_c *namedTestIRpcClient) isWeekend(wd weekDay) bool {
+func (_c *namedTestIrpcClient) isWeekend(wd weekDay) bool {
 	var req = _Irpc_namedTestisWeekendReq{
 		Param0_wd: wd,
 	}
@@ -144,7 +144,7 @@ func (_c *namedTestIRpcClient) isWeekend(wd weekDay) bool {
 	}
 	return resp.Param0
 }
-func (_c *namedTestIRpcClient) isWeekend2(wd weekDay2) bool {
+func (_c *namedTestIrpcClient) isWeekend2(wd weekDay2) bool {
 	var req = _Irpc_namedTestisWeekend2Req{
 		Param0_wd: wd,
 	}
@@ -154,7 +154,7 @@ func (_c *namedTestIRpcClient) isWeekend2(wd weekDay2) bool {
 	}
 	return resp.Param0
 }
-func (_c *namedTestIRpcClient) containsSaturday(wds []weekDay) bool {
+func (_c *namedTestIrpcClient) containsSaturday(wds []weekDay) bool {
 	var req = _Irpc_namedTestcontainsSaturdayReq{
 		Param0_wds: wds,
 	}
@@ -164,7 +164,7 @@ func (_c *namedTestIRpcClient) containsSaturday(wds []weekDay) bool {
 	}
 	return resp.Param0
 }
-func (_c *namedTestIRpcClient) containsSaturday2(wds namedWeekDaysSliceType) bool {
+func (_c *namedTestIrpcClient) containsSaturday2(wds namedWeekDaysSliceType) bool {
 	var req = _Irpc_namedTestcontainsSaturday2Req{
 		Param0_wds: wds,
 	}
@@ -174,7 +174,7 @@ func (_c *namedTestIRpcClient) containsSaturday2(wds namedWeekDaysSliceType) boo
 	}
 	return resp.Param0
 }
-func (_c *namedTestIRpcClient) namedBytesSum(nb namedByteSliceType) int {
+func (_c *namedTestIrpcClient) namedBytesSum(nb namedByteSliceType) int {
 	var req = _Irpc_namedTestnamedBytesSumReq{
 		Param0_nb: nb,
 	}
@@ -184,7 +184,7 @@ func (_c *namedTestIRpcClient) namedBytesSum(nb namedByteSliceType) int {
 	}
 	return resp.Param0
 }
-func (_c *namedTestIRpcClient) namedMapSum(p0 namedMap) float64 {
+func (_c *namedTestIrpcClient) namedMapSum(p0 namedMap) float64 {
 	var req = _Irpc_namedTestnamedMapSumReq{
 		Param0_p0: p0,
 	}

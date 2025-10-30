@@ -22,11 +22,11 @@ func BenchmarkBinaryMarshal(b *testing.B) {
 	crw := &CountingReadWriteCloser{rwc: p1}
 	clientEp := irpc.NewEndpoint(crw)
 
-	serviceEp.RegisterService(newBinMarshalIRpcService(binMarshalImpl{}))
+	serviceEp.RegisterService(newBinMarshalIrpcService(binMarshalImpl{}))
 
-	c, err := newBinMarshalIRpcClient(clientEp)
+	c, err := newBinMarshalIrpcClient(clientEp)
 	if err != nil {
-		b.Fatalf("newBinMarshalIRpcClient: %+v", err)
+		b.Fatalf("newBinMarshalIrpcClient: %+v", err)
 	}
 
 	callsN := []int{1, 10, 100}
@@ -69,12 +69,12 @@ func BenchmarkAddInt64(b *testing.B) {
 	clientEp := irpc.NewEndpoint(crw)
 
 	skew := 2
-	service := newBasicAPIIRpcService(basicApiImpl{skew: skew})
+	service := newBasicAPIIrpcService(basicApiImpl{skew: skew})
 	serviceEp.RegisterService(service)
 
 	callsN := []int{1, 10, 100}
 
-	c, err := newBasicAPIIRpcClient(clientEp)
+	c, err := newBasicAPIIrpcClient(clientEp)
 	if err != nil {
 		b.Fatalf("failed to create client: %v", err)
 	}

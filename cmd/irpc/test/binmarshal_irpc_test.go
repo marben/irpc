@@ -15,9 +15,9 @@ func TestTime(t *testing.T) {
 	defer localEp.Close()
 	defer remoteEp.Close()
 
-	remoteEp.RegisterService(newBinMarshalIRpcService(binMarshalImpl{}))
+	remoteEp.RegisterService(newBinMarshalIrpcService(binMarshalImpl{}))
 
-	c, err := newBinMarshalIRpcClient(localEp)
+	c, err := newBinMarshalIrpcClient(localEp)
 	if err != nil {
 		t.Fatalf("new client(): %+v", err)
 	}

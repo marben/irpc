@@ -36,7 +36,7 @@ func (ag apiGenerator) paramStructs() []paramStructGenerator {
 }
 
 func (ag apiGenerator) clientCode(hash []byte, q *qualifier) string {
-	clientTypeName := ag.apiName + "IRpcClient"
+	clientTypeName := ag.apiName + "IrpcClient"
 	fncReceiverName := "_c" // todo: must not collide with any of fnc variable names
 
 	q.addUsedImport(irpcGenImport, fmtImport) // todo: remove
@@ -136,7 +136,7 @@ func (ag apiGenerator) clientCode(hash []byte, q *qualifier) string {
 func (ag apiGenerator) serviceCode(hash []byte, q *qualifier) string {
 	w := &strings.Builder{}
 
-	serviceTypeName := ag.apiName + "IRpcService"
+	serviceTypeName := ag.apiName + "IrpcService"
 
 	// type definition
 	fmt.Fprintf(w, `type %s struct{

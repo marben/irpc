@@ -15,7 +15,7 @@ import (
 func TestServeOnMultipleListeners(t *testing.T) {
 	// SERVER
 	skew := 3
-	service := testtools.NewTestServiceIRpcService(testtools.NewTestServiceImpl(skew))
+	service := testtools.NewTestServiceIrpcService(testtools.NewTestServiceImpl(skew))
 	server := irpc.NewServer(service)
 
 	l1, err := net.Listen("tcp", ":")
@@ -45,7 +45,7 @@ func TestServeOnMultipleListeners(t *testing.T) {
 
 	c1Ep := irpc.NewEndpoint(conn1)
 
-	client1, err := testtools.NewTestServiceIRpcClient(c1Ep)
+	client1, err := testtools.NewTestServiceIrpcClient(c1Ep)
 	if err != nil {
 		t.Fatalf("NewMathIrpcClient(): %v", err)
 	}
@@ -59,7 +59,7 @@ func TestServeOnMultipleListeners(t *testing.T) {
 
 	c2Ep := irpc.NewEndpoint(conn2)
 
-	client2, err := testtools.NewTestServiceIRpcClient(c2Ep)
+	client2, err := testtools.NewTestServiceIrpcClient(c2Ep)
 	if err != nil {
 		t.Fatalf("NewMathIrpcClient(): %v", err)
 	}
@@ -136,7 +136,7 @@ func TestServeOnMultipleListeners(t *testing.T) {
 func TestTcpServerDialClose(t *testing.T) {
 	// SERVER
 	skew := 2
-	service := testtools.NewTestServiceIRpcService(testtools.NewTestServiceImpl(skew))
+	service := testtools.NewTestServiceIrpcService(testtools.NewTestServiceImpl(skew))
 	server := irpc.NewServer(service)
 
 	l, err := net.Listen("tcp", ":")
@@ -157,7 +157,7 @@ func TestTcpServerDialClose(t *testing.T) {
 
 	cEp := irpc.NewEndpoint(conn)
 
-	client, err := testtools.NewTestServiceIRpcClient(cEp)
+	client, err := testtools.NewTestServiceIrpcClient(cEp)
 	if err != nil {
 		t.Fatalf("NewMathIrpcClient(): %v", err)
 	}
@@ -180,7 +180,7 @@ func TestTcpServerDialClose(t *testing.T) {
 func TestClientClosesOnServerClose(t *testing.T) {
 	// SERVER
 	skew := 2
-	service := testtools.NewTestServiceIRpcService(testtools.NewTestServiceImpl(skew))
+	service := testtools.NewTestServiceIrpcService(testtools.NewTestServiceImpl(skew))
 	server := irpc.NewServer(service)
 
 	l, err := net.Listen("tcp", ":")
@@ -201,7 +201,7 @@ func TestClientClosesOnServerClose(t *testing.T) {
 
 	cEp := irpc.NewEndpoint(conn)
 
-	client, err := testtools.NewTestServiceIRpcClient(cEp)
+	client, err := testtools.NewTestServiceIrpcClient(cEp)
 	if err != nil {
 		t.Fatalf("NewMathIrpcClient(): %v", err)
 	}
@@ -234,7 +234,7 @@ func TestIrpcServerSimpleCall(t *testing.T) {
 	}
 
 	skew := 8
-	mathService := irpctestpkg.NewMathIRpcService(irpctestpkg.MathImpl{Skew: skew})
+	mathService := irpctestpkg.NewMathIrpcService(irpctestpkg.MathImpl{Skew: skew})
 	server := irpc.NewServer(mathService)
 
 	localAddr := l.Addr().String()
@@ -248,9 +248,9 @@ func TestIrpcServerSimpleCall(t *testing.T) {
 	serveC := make(chan error)
 	go func() { serveC <- server.Serve(l) }()
 
-	client, err := irpctestpkg.NewMathIRpcClient(clientEp)
+	client, err := irpctestpkg.NewMathIrpcClient(clientEp)
 	if err != nil {
-		t.Fatalf("NewMathIRpcClient(): %+v", err)
+		t.Fatalf("NewMathIrpcClient(): %+v", err)
 	}
 
 	res, err := client.Add(1, 2)

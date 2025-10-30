@@ -14,9 +14,9 @@ func TestNamed(t *testing.T) {
 	defer localEp.Close()
 	defer remoteEp.Close()
 
-	remoteEp.RegisterService(newNamedTestIRpcService(namedTestImpl{}))
+	remoteEp.RegisterService(newNamedTestIrpcService(namedTestImpl{}))
 
-	c, err := newNamedTestIRpcClient(localEp)
+	c, err := newNamedTestIrpcClient(localEp)
 	if err != nil {
 		t.Fatalf("failed to create client: %+v", err)
 	}

@@ -7,26 +7,26 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-type FileServerIRpcService struct {
+type FileServerIrpcService struct {
 	impl FileServer
 	id   []byte
 }
 
-func NewFileServerIRpcService(impl FileServer) *FileServerIRpcService {
-	return &FileServerIRpcService{
+func NewFileServerIrpcService(impl FileServer) *FileServerIrpcService {
+	return &FileServerIrpcService{
 		impl: impl,
 		id: []byte{
-			0xa9, 0xa3, 0xde, 0x7b, 0x64, 0xd1, 0x0f, 0xd7,
-			0x98, 0x0e, 0xb5, 0xe7, 0x8b, 0xbb, 0xc6, 0x41,
-			0x65, 0xca, 0x84, 0xde, 0x2b, 0xe8, 0x20, 0xe6,
-			0xa4, 0x22, 0x7b, 0xd4, 0x34, 0x74, 0x1d, 0xd3,
+			0xa1, 0x02, 0xdc, 0x53, 0xc3, 0x0e, 0x99, 0x0c,
+			0x11, 0x00, 0x47, 0x68, 0x8c, 0x55, 0x30, 0x3b,
+			0x80, 0x9a, 0x48, 0x5f, 0x90, 0xc8, 0xa9, 0x5e,
+			0xa2, 0x98, 0x57, 0xf9, 0xc9, 0xd1, 0x99, 0x02,
 		},
 	}
 }
-func (s *FileServerIRpcService) Id() []byte {
+func (s *FileServerIrpcService) Id() []byte {
 	return s.id
 }
-func (s *FileServerIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
+func (s *FileServerIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // ListFiles
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
@@ -42,24 +42,24 @@ func (s *FileServerIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgD
 	}
 }
 
-type FileServerIRpcClient struct {
+type FileServerIrpcClient struct {
 	endpoint irpcgen.Endpoint
 	id       []byte
 }
 
-func NewFileServerIRpcClient(endpoint irpcgen.Endpoint) (*FileServerIRpcClient, error) {
+func NewFileServerIrpcClient(endpoint irpcgen.Endpoint) (*FileServerIrpcClient, error) {
 	id := []byte{
-		0xa9, 0xa3, 0xde, 0x7b, 0x64, 0xd1, 0x0f, 0xd7,
-		0x98, 0x0e, 0xb5, 0xe7, 0x8b, 0xbb, 0xc6, 0x41,
-		0x65, 0xca, 0x84, 0xde, 0x2b, 0xe8, 0x20, 0xe6,
-		0xa4, 0x22, 0x7b, 0xd4, 0x34, 0x74, 0x1d, 0xd3,
+		0xa1, 0x02, 0xdc, 0x53, 0xc3, 0x0e, 0x99, 0x0c,
+		0x11, 0x00, 0x47, 0x68, 0x8c, 0x55, 0x30, 0x3b,
+		0x80, 0x9a, 0x48, 0x5f, 0x90, 0xc8, 0xa9, 0x5e,
+		0xa2, 0x98, 0x57, 0xf9, 0xc9, 0xd1, 0x99, 0x02,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &FileServerIRpcClient{endpoint: endpoint, id: id}, nil
+	return &FileServerIrpcClient{endpoint: endpoint, id: id}, nil
 }
-func (_c *FileServerIRpcClient) ListFiles() ([]FileInfo, error) {
+func (_c *FileServerIrpcClient) ListFiles() ([]FileInfo, error) {
 	var resp _Irpc_FileServerListFilesResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, irpcgen.EmptySerializable{}, &resp); err != nil {
 		var zero _Irpc_FileServerListFilesResp

@@ -10,26 +10,26 @@ import (
 	"image"
 )
 
-type structAPIIRpcService struct {
+type structAPIIrpcService struct {
 	impl structAPI
 	id   []byte
 }
 
-func newStructAPIIRpcService(impl structAPI) *structAPIIRpcService {
-	return &structAPIIRpcService{
+func newStructAPIIrpcService(impl structAPI) *structAPIIrpcService {
+	return &structAPIIrpcService{
 		impl: impl,
 		id: []byte{
-			0x32, 0x8e, 0x15, 0x18, 0xaf, 0x54, 0xd6, 0x80,
-			0xa5, 0xf1, 0xc8, 0xd7, 0x98, 0x7a, 0xa3, 0xa2,
-			0x39, 0xdc, 0x56, 0x1b, 0xca, 0x11, 0x0c, 0x13,
-			0x5f, 0xa0, 0xb1, 0x56, 0x01, 0x45, 0xe5, 0x7c,
+			0x2b, 0x42, 0xf1, 0x71, 0x65, 0x9d, 0x6e, 0x10,
+			0x22, 0x88, 0x67, 0x81, 0xa0, 0x96, 0x99, 0xfa,
+			0x8c, 0xc4, 0xc0, 0x90, 0xc2, 0x8b, 0x02, 0xdb,
+			0x65, 0xf5, 0xbd, 0x21, 0xd8, 0xe9, 0x9f, 0x0d,
 		},
 	}
 }
-func (s *structAPIIRpcService) Id() []byte {
+func (s *structAPIIrpcService) Id() []byte {
 	return s.id
 }
-func (s *structAPIIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
+func (s *structAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // VectSum
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
@@ -147,24 +147,24 @@ func (s *structAPIIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 	}
 }
 
-type structAPIIRpcClient struct {
+type structAPIIrpcClient struct {
 	endpoint irpcgen.Endpoint
 	id       []byte
 }
 
-func newStructAPIIRpcClient(endpoint irpcgen.Endpoint) (*structAPIIRpcClient, error) {
+func newStructAPIIrpcClient(endpoint irpcgen.Endpoint) (*structAPIIrpcClient, error) {
 	id := []byte{
-		0x32, 0x8e, 0x15, 0x18, 0xaf, 0x54, 0xd6, 0x80,
-		0xa5, 0xf1, 0xc8, 0xd7, 0x98, 0x7a, 0xa3, 0xa2,
-		0x39, 0xdc, 0x56, 0x1b, 0xca, 0x11, 0x0c, 0x13,
-		0x5f, 0xa0, 0xb1, 0x56, 0x01, 0x45, 0xe5, 0x7c,
+		0x2b, 0x42, 0xf1, 0x71, 0x65, 0x9d, 0x6e, 0x10,
+		0x22, 0x88, 0x67, 0x81, 0xa0, 0x96, 0x99, 0xfa,
+		0x8c, 0xc4, 0xc0, 0x90, 0xc2, 0x8b, 0x02, 0xdb,
+		0x65, 0xf5, 0xbd, 0x21, 0xd8, 0xe9, 0x9f, 0x0d,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &structAPIIRpcClient{endpoint: endpoint, id: id}, nil
+	return &structAPIIrpcClient{endpoint: endpoint, id: id}, nil
 }
-func (_c *structAPIIRpcClient) VectSum(v vect3) int {
+func (_c *structAPIIrpcClient) VectSum(v vect3) int {
 	var req = _Irpc_structAPIVectSumReq{
 		Param0_v: v,
 	}
@@ -174,7 +174,7 @@ func (_c *structAPIIRpcClient) VectSum(v vect3) int {
 	}
 	return resp.Param0
 }
-func (_c *structAPIIRpcClient) Vect3x3Sum(v vect3x3) vect3 {
+func (_c *structAPIIrpcClient) Vect3x3Sum(v vect3x3) vect3 {
 	var req = _Irpc_structAPIVect3x3SumReq{
 		Param0_v: v,
 	}
@@ -184,7 +184,7 @@ func (_c *structAPIIRpcClient) Vect3x3Sum(v vect3x3) vect3 {
 	}
 	return resp.Param0
 }
-func (_c *structAPIIRpcClient) SumSliceStruct(s sliceStruct) int {
+func (_c *structAPIIrpcClient) SumSliceStruct(s sliceStruct) int {
 	var req = _Irpc_structAPISumSliceStructReq{
 		Param0_s: s,
 	}
@@ -194,7 +194,7 @@ func (_c *structAPIIRpcClient) SumSliceStruct(s sliceStruct) int {
 	}
 	return resp.Param0
 }
-func (_c *structAPIIRpcClient) InlineParams(s struct{ a int }) int {
+func (_c *structAPIIrpcClient) InlineParams(s struct{ a int }) int {
 	var req = _Irpc_structAPIInlineParamsReq{
 		Param0_s: s,
 	}
@@ -204,7 +204,7 @@ func (_c *structAPIIRpcClient) InlineParams(s struct{ a int }) int {
 	}
 	return resp.Param0
 }
-func (_c *structAPIIRpcClient) InlineParamsNamed(s struct {
+func (_c *structAPIIrpcClient) InlineParamsNamed(s struct {
 	a out.Uint8
 	b out2.Uint8
 }) {
@@ -215,7 +215,7 @@ func (_c *structAPIIRpcClient) InlineParamsNamed(s struct {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 }
-func (_c *structAPIIRpcClient) InlineInlineParams(s struct{ a struct{ b int } }) int {
+func (_c *structAPIIrpcClient) InlineInlineParams(s struct{ a struct{ b int } }) int {
 	var req = _Irpc_structAPIInlineInlineParamsReq{
 		Param0_s: s,
 	}
@@ -225,7 +225,7 @@ func (_c *structAPIIRpcClient) InlineInlineParams(s struct{ a struct{ b int } })
 	}
 	return resp.Param0
 }
-func (_c *structAPIIRpcClient) InlineReturn(a int) struct{ b int } {
+func (_c *structAPIIrpcClient) InlineReturn(a int) struct{ b int } {
 	var req = _Irpc_structAPIInlineReturnReq{
 		Param0_a: a,
 	}
@@ -235,7 +235,7 @@ func (_c *structAPIIRpcClient) InlineReturn(a int) struct{ b int } {
 	}
 	return resp.Param0
 }
-func (_c *structAPIIRpcClient) PointNeg(p image.Point) image.Point {
+func (_c *structAPIIrpcClient) PointNeg(p image.Point) image.Point {
 	var req = _Irpc_structAPIPointNegReq{
 		Param0_p: p,
 	}

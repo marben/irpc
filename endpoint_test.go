@@ -23,11 +23,11 @@ func TestEndpointClientRegister(t *testing.T) {
 	}
 
 	t.Logf("registering test service")
-	service := testtools.NewTestServiceIRpcService(testtools.NewTestServiceImpl(0))
+	service := testtools.NewTestServiceIrpcService(testtools.NewTestServiceImpl(0))
 	ep1.RegisterService(service)
 
 	t.Logf("creating client")
-	client, err := testtools.NewTestServiceIRpcClient(ep2)
+	client, err := testtools.NewTestServiceIrpcClient(ep2)
 	if err != nil {
 		t.Fatalf("failed to create testservice client: %+v", err)
 	}
@@ -58,10 +58,10 @@ func TestEndpointRemoteFunc(t *testing.T) {
 	clientEndpoint := irpc.NewEndpoint(pB)
 
 	skew := 8
-	service := testtools.NewTestServiceIRpcService(testtools.NewTestServiceImpl(skew))
+	service := testtools.NewTestServiceIrpcService(testtools.NewTestServiceImpl(skew))
 	serviceEndpoint.RegisterService(service)
 
-	clientA, err := testtools.NewTestServiceIRpcClient(clientEndpoint)
+	clientA, err := testtools.NewTestServiceIrpcClient(clientEndpoint)
 	if err != nil {
 		t.Fatalf("failed to register client: %+v", err)
 	}
@@ -86,20 +86,20 @@ func TestBothSidesRemoteCall(t *testing.T) {
 	pA, pB := testtools.NewDoubleEndedPipe()
 
 	skewA := 1
-	serviceA := testtools.NewTestServiceIRpcService(testtools.NewTestServiceImpl(skewA))
+	serviceA := testtools.NewTestServiceIrpcService(testtools.NewTestServiceImpl(skewA))
 	endpointA := irpc.NewEndpoint(pA, irpc.WithService(serviceA))
 
 	skewB := 2
-	serviceB := testtools.NewTestServiceIRpcService(testtools.NewTestServiceImpl(skewB))
+	serviceB := testtools.NewTestServiceIrpcService(testtools.NewTestServiceImpl(skewB))
 	endpointB := irpc.NewEndpoint(pB, irpc.WithService(serviceB))
 
 	t.Log("creating client a")
-	clientA, err := testtools.NewTestServiceIRpcClient(endpointA)
+	clientA, err := testtools.NewTestServiceIrpcClient(endpointA)
 	if err != nil {
 		t.Fatalf("new clientA: %+v", err)
 	}
 
-	clientB, err := testtools.NewTestServiceIRpcClient(endpointB)
+	clientB, err := testtools.NewTestServiceIrpcClient(endpointB)
 	if err != nil {
 		t.Fatalf("new clientB: %+v", err)
 	}
@@ -126,13 +126,13 @@ func TestLocalEndpointClose(t *testing.T) {
 	}
 
 	serviceImpl := testtools.NewTestServiceImpl(99)
-	serviceBackend := testtools.NewTestServiceIRpcService(serviceImpl)
+	serviceBackend := testtools.NewTestServiceIrpcService(serviceImpl)
 	epService := irpc.NewEndpoint(conn1, irpc.WithService(serviceBackend))
 	defer epService.Close()
 
 	epClient := irpc.NewEndpoint(conn2)
 
-	client, err := testtools.NewTestServiceIRpcClient(epClient)
+	client, err := testtools.NewTestServiceIrpcClient(epClient)
 	if err != nil {
 		t.Fatalf("NewClient(): %+v", err)
 	}
@@ -180,9 +180,9 @@ func TestClosingServiceEpWithWaitingFuncCalls(t *testing.T) {
 		return a / b, nil
 	}
 
-	serviceEp.RegisterService(testtools.NewTestServiceIRpcService(service))
+	serviceEp.RegisterService(testtools.NewTestServiceIrpcService(service))
 
-	client, err := testtools.NewTestServiceIRpcClient(clientEp)
+	client, err := testtools.NewTestServiceIrpcClient(clientEp)
 	if err != nil {
 		t.Fatalf("new client: %+v", err)
 	}
@@ -230,9 +230,9 @@ func TestClosingClientEpWithWaitingFuncCalls(t *testing.T) {
 		return a / b, nil
 	}
 
-	serviceEp.RegisterService(testtools.NewTestServiceIRpcService(service))
+	serviceEp.RegisterService(testtools.NewTestServiceIrpcService(service))
 
-	client, err := testtools.NewTestServiceIRpcClient(clientEp)
+	client, err := testtools.NewTestServiceIrpcClient(clientEp)
 	if err != nil {
 		t.Fatalf("new client: %+v", err)
 	}
@@ -282,9 +282,9 @@ func TestMaxWorkersNumber(t *testing.T) {
 		return a + b
 	}
 
-	serviceEp.RegisterService(testtools.NewTestServiceIRpcService(service))
+	serviceEp.RegisterService(testtools.NewTestServiceIrpcService(service))
 
-	client, err := testtools.NewTestServiceIRpcClient(clientEp)
+	client, err := testtools.NewTestServiceIrpcClient(clientEp)
 	if err != nil {
 		t.Fatalf("new client: %+v", err)
 	}
@@ -330,9 +330,9 @@ func TestContextCancel(t *testing.T) {
 
 	service := testtools.NewTestServiceImpl(0)
 
-	serviceEp.RegisterService(testtools.NewTestServiceIRpcService(service))
+	serviceEp.RegisterService(testtools.NewTestServiceIrpcService(service))
 
-	client, err := testtools.NewTestServiceIRpcClient(clientEp)
+	client, err := testtools.NewTestServiceIrpcClient(clientEp)
 	if err != nil {
 		t.Fatalf("new client: %+v", err)
 	}
@@ -416,9 +416,9 @@ func TestServiceEndpointClosingEndsRunningWorkers(t *testing.T) {
 
 	service := testtools.NewTestServiceImpl(0)
 
-	serviceEp.RegisterService(testtools.NewTestServiceIRpcService(service))
+	serviceEp.RegisterService(testtools.NewTestServiceIrpcService(service))
 
-	client, err := testtools.NewTestServiceIRpcClient(clientEp)
+	client, err := testtools.NewTestServiceIrpcClient(clientEp)
 	if err != nil {
 		t.Fatalf("new client: %+v", err)
 	}
@@ -501,9 +501,9 @@ func TestClientEndpointClosingEndsRunningWorkers(t *testing.T) {
 
 	service := testtools.NewTestServiceImpl(0)
 
-	serviceEp.RegisterService(testtools.NewTestServiceIRpcService(service))
+	serviceEp.RegisterService(testtools.NewTestServiceIrpcService(service))
 
-	client, err := testtools.NewTestServiceIRpcClient(clientEp)
+	client, err := testtools.NewTestServiceIrpcClient(clientEp)
 	if err != nil {
 		t.Fatalf("new client: %+v", err)
 	}
@@ -587,9 +587,9 @@ func TestWaitingClientCallGetsCanceledOnContextTimeout(t *testing.T) {
 
 	service := testtools.NewTestServiceImpl(0)
 
-	serviceEp.RegisterService(testtools.NewTestServiceIRpcService(service))
+	serviceEp.RegisterService(testtools.NewTestServiceIrpcService(service))
 
-	client, err := testtools.NewTestServiceIRpcClient(clientEp)
+	client, err := testtools.NewTestServiceIrpcClient(clientEp)
 	if err != nil {
 		t.Fatalf("new client: %+v", err)
 	}
@@ -675,7 +675,7 @@ func TestOutsideConnectionClose(t *testing.T) {
 		<-callBlockC
 		return 0, errors.New("service1 shouldn't have returned")
 	}
-	ep1.RegisterService(testtools.NewTestServiceIRpcService(service1))
+	ep1.RegisterService(testtools.NewTestServiceIrpcService(service1))
 
 	t.Log("starting service 2")
 	service2 := testtools.NewTestServiceImpl(2)
@@ -684,12 +684,12 @@ func TestOutsideConnectionClose(t *testing.T) {
 		<-callBlockC
 		return 0, errors.New("service2 shouldn't have returned")
 	}
-	ep2.RegisterService(testtools.NewTestServiceIRpcService(service2))
+	ep2.RegisterService(testtools.NewTestServiceIrpcService(service2))
 
 	clientErrs := make(chan error)
 
 	t.Log("starting client1")
-	client1, err := testtools.NewTestServiceIRpcClient(ep1)
+	client1, err := testtools.NewTestServiceIrpcClient(ep1)
 	if err != nil {
 		t.Fatalf("new client1: %v", err)
 	}
@@ -699,7 +699,7 @@ func TestOutsideConnectionClose(t *testing.T) {
 	}()
 
 	t.Log("starting client2")
-	client2, err := testtools.NewTestServiceIRpcClient(ep2)
+	client2, err := testtools.NewTestServiceIrpcClient(ep2)
 	if err != nil {
 		t.Fatalf("new client2: %v", err)
 	}
@@ -752,7 +752,7 @@ func TestCallingUnregisteredService(t *testing.T) {
 		t.Fatalf("failed to create local tcp endpoints: %+v", err)
 	}
 
-	client, err := testtools.NewTestServiceIRpcClient(clientEp)
+	client, err := testtools.NewTestServiceIrpcClient(clientEp)
 	if err != nil {
 		t.Fatalf("failed to create client: %+v", err)
 	}
@@ -781,11 +781,11 @@ func TestCallingNonexistentFunction(t *testing.T) {
 	}
 
 	t.Logf("registering test service")
-	service := testtools.NewTestServiceIRpcService(testtools.NewTestServiceImpl(0))
+	service := testtools.NewTestServiceIrpcService(testtools.NewTestServiceImpl(0))
 	serviceEp.RegisterService(service)
 
 	t.Logf("creating client")
-	client, err := testtools.NewTestServiceIRpcClient(clientEp)
+	client, err := testtools.NewTestServiceIrpcClient(clientEp)
 	if err != nil {
 		t.Fatalf("failed to create client: %+v", err)
 	}

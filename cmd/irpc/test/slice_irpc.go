@@ -7,26 +7,26 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-type sliceTestIRpcService struct {
+type sliceTestIrpcService struct {
 	impl sliceTest
 	id   []byte
 }
 
-func newSliceTestIRpcService(impl sliceTest) *sliceTestIRpcService {
-	return &sliceTestIRpcService{
+func newSliceTestIrpcService(impl sliceTest) *sliceTestIrpcService {
+	return &sliceTestIrpcService{
 		impl: impl,
 		id: []byte{
-			0x04, 0x68, 0x77, 0x08, 0xd4, 0x33, 0x7d, 0x0b,
-			0x13, 0x5d, 0x5a, 0x82, 0x26, 0x56, 0xe2, 0xb1,
-			0xf8, 0x0a, 0xe1, 0xf3, 0x29, 0x4b, 0x07, 0x5f,
-			0x1c, 0xd0, 0x20, 0x77, 0xc6, 0x1d, 0x3b, 0x8c,
+			0xd6, 0x26, 0xc0, 0xc8, 0xe9, 0xd9, 0x7b, 0x4b,
+			0x20, 0xe8, 0xb1, 0xe8, 0xd2, 0x3b, 0x8c, 0xc9,
+			0xba, 0xf0, 0xf5, 0xd3, 0x1f, 0x5c, 0x4e, 0xea,
+			0xf6, 0x1d, 0xd8, 0xec, 0x99, 0x67, 0x42, 0x03,
 		},
 	}
 }
-func (s *sliceTestIRpcService) Id() []byte {
+func (s *sliceTestIrpcService) Id() []byte {
 	return s.id
 }
-func (s *sliceTestIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
+func (s *sliceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // SliceSum
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
@@ -117,24 +117,24 @@ func (s *sliceTestIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 	}
 }
 
-type sliceTestIRpcClient struct {
+type sliceTestIrpcClient struct {
 	endpoint irpcgen.Endpoint
 	id       []byte
 }
 
-func newSliceTestIRpcClient(endpoint irpcgen.Endpoint) (*sliceTestIRpcClient, error) {
+func newSliceTestIrpcClient(endpoint irpcgen.Endpoint) (*sliceTestIrpcClient, error) {
 	id := []byte{
-		0x04, 0x68, 0x77, 0x08, 0xd4, 0x33, 0x7d, 0x0b,
-		0x13, 0x5d, 0x5a, 0x82, 0x26, 0x56, 0xe2, 0xb1,
-		0xf8, 0x0a, 0xe1, 0xf3, 0x29, 0x4b, 0x07, 0x5f,
-		0x1c, 0xd0, 0x20, 0x77, 0xc6, 0x1d, 0x3b, 0x8c,
+		0xd6, 0x26, 0xc0, 0xc8, 0xe9, 0xd9, 0x7b, 0x4b,
+		0x20, 0xe8, 0xb1, 0xe8, 0xd2, 0x3b, 0x8c, 0xc9,
+		0xba, 0xf0, 0xf5, 0xd3, 0x1f, 0x5c, 0x4e, 0xea,
+		0xf6, 0x1d, 0xd8, 0xec, 0x99, 0x67, 0x42, 0x03,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &sliceTestIRpcClient{endpoint: endpoint, id: id}, nil
+	return &sliceTestIrpcClient{endpoint: endpoint, id: id}, nil
 }
-func (_c *sliceTestIRpcClient) SliceSum(slice []int) int {
+func (_c *sliceTestIrpcClient) SliceSum(slice []int) int {
 	var req = _Irpc_sliceTestSliceSumReq{
 		Param0_slice: slice,
 	}
@@ -144,7 +144,7 @@ func (_c *sliceTestIRpcClient) SliceSum(slice []int) int {
 	}
 	return resp.Param0
 }
-func (_c *sliceTestIRpcClient) VectMult(vect []int, s int) []int {
+func (_c *sliceTestIrpcClient) VectMult(vect []int, s int) []int {
 	var req = _Irpc_sliceTestVectMultReq{
 		Param0_vect: vect,
 		Param1_s:    s,
@@ -155,7 +155,7 @@ func (_c *sliceTestIRpcClient) VectMult(vect []int, s int) []int {
 	}
 	return resp.Param0
 }
-func (_c *sliceTestIRpcClient) SliceOfFloat64Sum(slice []float64) float64 {
+func (_c *sliceTestIrpcClient) SliceOfFloat64Sum(slice []float64) float64 {
 	var req = _Irpc_sliceTestSliceOfFloat64SumReq{
 		Param0_slice: slice,
 	}
@@ -165,7 +165,7 @@ func (_c *sliceTestIRpcClient) SliceOfFloat64Sum(slice []float64) float64 {
 	}
 	return resp.Param0
 }
-func (_c *sliceTestIRpcClient) SliceOfSlicesSum(slice [][]int) int {
+func (_c *sliceTestIrpcClient) SliceOfSlicesSum(slice [][]int) int {
 	var req = _Irpc_sliceTestSliceOfSlicesSumReq{
 		Param0_slice: slice,
 	}
@@ -175,7 +175,7 @@ func (_c *sliceTestIRpcClient) SliceOfSlicesSum(slice [][]int) int {
 	}
 	return resp.Param0
 }
-func (_c *sliceTestIRpcClient) SliceOfBytesSum(slice []byte) int {
+func (_c *sliceTestIrpcClient) SliceOfBytesSum(slice []byte) int {
 	var req = _Irpc_sliceTestSliceOfBytesSumReq{
 		Param0_slice: slice,
 	}
@@ -185,7 +185,7 @@ func (_c *sliceTestIRpcClient) SliceOfBytesSum(slice []byte) int {
 	}
 	return resp.Param0
 }
-func (_c *sliceTestIRpcClient) namedByteSlice(slice namedByteSlice) int {
+func (_c *sliceTestIrpcClient) namedByteSlice(slice namedByteSlice) int {
 	var req = _Irpc_sliceTestnamedByteSliceReq{
 		Param0_slice: slice,
 	}

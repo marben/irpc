@@ -16,10 +16,10 @@ func TestStructParam(t *testing.T) {
 	defer remoteEp.Close()
 
 	skew := 8
-	service := newStructAPIIRpcService(structImpl{skew: skew})
+	service := newStructAPIIrpcService(structImpl{skew: skew})
 	remoteEp.RegisterService(service)
 
-	c, err := newStructAPIIRpcClient(localEp)
+	c, err := newStructAPIIrpcClient(localEp)
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
 	}

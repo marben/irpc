@@ -15,11 +15,11 @@ func TestOutsidePkg(t *testing.T) {
 	defer localEp.Close()
 	defer remoteEp.Close()
 
-	remoteEp.RegisterService(newOutsideTestIRpcService(outsideTestImpl{}))
+	remoteEp.RegisterService(newOutsideTestIrpcService(outsideTestImpl{}))
 
-	c, err := newOutsideTestIRpcClient(localEp)
+	c, err := newOutsideTestIrpcClient(localEp)
 	if err != nil {
-		t.Fatalf("newOutsideTestIRpcClient(): %+v", err)
+		t.Fatalf("newOutsideTestIrpcClient(): %+v", err)
 	}
 
 	v3 := 3

@@ -8,26 +8,26 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-type basicNamedAPIIRpcService struct {
+type basicNamedAPIIrpcService struct {
 	impl basicNamedAPI
 	id   []byte
 }
 
-func newBasicNamedAPIIRpcService(impl basicNamedAPI) *basicNamedAPIIRpcService {
-	return &basicNamedAPIIRpcService{
+func newBasicNamedAPIIrpcService(impl basicNamedAPI) *basicNamedAPIIrpcService {
+	return &basicNamedAPIIrpcService{
 		impl: impl,
 		id: []byte{
-			0x48, 0x9d, 0x42, 0xbd, 0xc6, 0xf9, 0x8a, 0x80,
-			0xb6, 0xe7, 0x1d, 0xe4, 0x08, 0x6c, 0x17, 0xd0,
-			0xbd, 0x87, 0x83, 0xe7, 0xf4, 0x1b, 0xfd, 0x57,
-			0x4f, 0x1c, 0x61, 0x4a, 0x55, 0x72, 0x90, 0x88,
+			0x48, 0xa3, 0x9d, 0xc9, 0xa0, 0xf7, 0x3d, 0xb6,
+			0x77, 0xc5, 0x32, 0x2f, 0x61, 0xbe, 0xa9, 0x22,
+			0x8e, 0x88, 0xbd, 0x49, 0x3b, 0xf7, 0x1a, 0xef,
+			0x64, 0xc5, 0x14, 0xd6, 0x5a, 0xa6, 0xc1, 0xc3,
 		},
 	}
 }
-func (s *basicNamedAPIIRpcService) Id() []byte {
+func (s *basicNamedAPIIrpcService) Id() []byte {
 	return s.id
 }
-func (s *basicNamedAPIIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
+func (s *basicNamedAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // addFakeUint8
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
@@ -76,24 +76,24 @@ func (s *basicNamedAPIIRpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.A
 	}
 }
 
-type basicNamedAPIIRpcClient struct {
+type basicNamedAPIIrpcClient struct {
 	endpoint irpcgen.Endpoint
 	id       []byte
 }
 
-func newBasicNamedAPIIRpcClient(endpoint irpcgen.Endpoint) (*basicNamedAPIIRpcClient, error) {
+func newBasicNamedAPIIrpcClient(endpoint irpcgen.Endpoint) (*basicNamedAPIIrpcClient, error) {
 	id := []byte{
-		0x48, 0x9d, 0x42, 0xbd, 0xc6, 0xf9, 0x8a, 0x80,
-		0xb6, 0xe7, 0x1d, 0xe4, 0x08, 0x6c, 0x17, 0xd0,
-		0xbd, 0x87, 0x83, 0xe7, 0xf4, 0x1b, 0xfd, 0x57,
-		0x4f, 0x1c, 0x61, 0x4a, 0x55, 0x72, 0x90, 0x88,
+		0x48, 0xa3, 0x9d, 0xc9, 0xa0, 0xf7, 0x3d, 0xb6,
+		0x77, 0xc5, 0x32, 0x2f, 0x61, 0xbe, 0xa9, 0x22,
+		0x8e, 0x88, 0xbd, 0x49, 0x3b, 0xf7, 0x1a, 0xef,
+		0x64, 0xc5, 0x14, 0xd6, 0x5a, 0xa6, 0xc1, 0xc3,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &basicNamedAPIIRpcClient{endpoint: endpoint, id: id}, nil
+	return &basicNamedAPIIrpcClient{endpoint: endpoint, id: id}, nil
 }
-func (_c *basicNamedAPIIRpcClient) addFakeUint8(a out2.Uint8, b out2.Uint8) FakeUint8 {
+func (_c *basicNamedAPIIrpcClient) addFakeUint8(a out2.Uint8, b out2.Uint8) FakeUint8 {
 	var req = _Irpc_basicNamedAPIaddFakeUint8Req{
 		Param0_a: a,
 		Param0_b: b,
@@ -104,7 +104,7 @@ func (_c *basicNamedAPIIRpcClient) addFakeUint8(a out2.Uint8, b out2.Uint8) Fake
 	}
 	return resp.Param0
 }
-func (_c *basicNamedAPIIRpcClient) addUint8(a uint8, b uint8) uint8 {
+func (_c *basicNamedAPIIrpcClient) addUint8(a uint8, b uint8) uint8 {
 	var req = _Irpc_basicNamedAPIaddUint8Req{
 		Param0_a: a,
 		Param0_b: b,
@@ -115,7 +115,7 @@ func (_c *basicNamedAPIIRpcClient) addUint8(a uint8, b uint8) uint8 {
 	}
 	return resp.Param0
 }
-func (_c *basicNamedAPIIRpcClient) addByte(a byte, b byte) byte {
+func (_c *basicNamedAPIIrpcClient) addByte(a byte, b byte) byte {
 	var req = _Irpc_basicNamedAPIaddByteReq{
 		Param0_a: a,
 		Param0_b: b,

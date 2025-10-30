@@ -15,11 +15,11 @@ func TestOutsidePkgAlias(t *testing.T) {
 	defer localEp.Close()
 	defer remoteEp.Close()
 
-	remoteEp.RegisterService(newOutsidepkgaliasIRpcService(&outsidepkgaliasImpl{}))
+	remoteEp.RegisterService(newOutsidepkgaliasIrpcService(&outsidepkgaliasImpl{}))
 
-	c, err := newOutsidepkgaliasIRpcClient(localEp)
+	c, err := newOutsidepkgaliasIrpcClient(localEp)
 	if err != nil {
-		t.Fatalf("newOutsidepkgaliasIRpcClient(): %+v", err)
+		t.Fatalf("newOutsidepkgaliasIrpcClient(): %+v", err)
 	}
 
 	if res := c.add(out.Uint8(1), out.Uint8(2)); res != 3 {
