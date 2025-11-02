@@ -154,6 +154,15 @@ func (d *Decoder) UvarInt64(dst *uint64) error {
 	return nil
 }
 
+func (d *Decoder) Len(l *int) error {
+	var l64 uint64
+	if err := d.UvarInt64(&l64); err != nil {
+		return fmt.Errorf("slice len: %w", err)
+	}
+	*l = int(l64)
+	return nil
+}
+
 func (d *Decoder) Float32le(dst *float32) error {
 	if _, err := io.ReadFull(d.r, d.buf[:4]); err != nil {
 		return err
@@ -173,8 +182,8 @@ func (d *Decoder) Float64le(dst *float64) error {
 }
 
 func (d *Decoder) ByteSlice(dst *[]byte) error {
-	var l int64
-	if err := d.VarInt64(&l); err != nil {
+	var l int
+	if err := d.Len(&l); err != nil {
 		return fmt.Errorf("slice len: %w", err)
 	}
 	s := make([]byte, l)
@@ -201,4 +210,28 @@ func (d *Decoder) BinaryUnmarshaler(dst encoding.BinaryUnmarshaler) error {
 		return err
 	}
 	return dst.UnmarshalBinary(data)
+}
+
+func (d *Decoder) BoolSlice(dst *[]bool) error {
+	var l int
+	if err := d.Len(&l); err != nil {
+		return fmt.Errorf("slice len: %w", err)
+	}
+
+	s := make([]bool, 0, l)
+
+	for len(s) < l {
+		b, err := d.r.ReadByte()
+		if err != nil {
+			return err
+		}
+
+		// extract 8 bits MSB-first.
+		for i := 0; i < 8 && len(s) < l; i++ {
+			mask := byte(1 << (7 - i))
+			s = append(s, b&mask != 0)
+		}
+	}
+	*dst = s
+	return nil
 }

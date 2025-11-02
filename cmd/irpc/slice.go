@@ -32,7 +32,7 @@ func (tr *typeResolver) newSliceType(apiName string, ni *namedInfo, st *types.Sl
 
 	return sliceType{
 		elem:   elemT,
-		lenEnc: uint64Encoder,
+		lenEnc: lenEncoder,
 		ni:     ni,
 	}, nil
 }
@@ -50,9 +50,7 @@ func (st sliceType) encode(varId string, existingVars varNames, q *qualifier) st
 
 	// length
 	fmt.Fprintf(sb, "{ // %s %s\n", varId, st.Name(q))
-	fmt.Fprintf(sb, "var l int = len(%s)\n", varId)
-	sb.WriteString(st.lenEnc.encode("uint64(l)", existingVars, q))
-	existingVars = append(existingVars, "l")
+	sb.WriteString(st.lenEnc.encode("len("+varId+")", existingVars, q))
 
 	// for loop
 	existingVars = append(existingVars, "v")
@@ -70,10 +68,9 @@ func (st sliceType) decode(varId string, existingVars varNames, q *qualifier) st
 
 	// length
 	fmt.Fprintf(sb, "{ // %s %s\n", varId, st.Name(q))
-	sb.WriteString("var ul uint64\n")
-	sb.WriteString(st.lenEnc.decode("ul", existingVars, q))
-	sb.WriteString("var l int = int(ul)\n")
-	existingVars = append(existingVars, "l", "ul")
+	sb.WriteString("var l int\n")
+	sb.WriteString(st.lenEnc.decode("l", existingVars, q))
+	existingVars = append(existingVars, "l")
 
 	// for loop
 	itName := existingVars.generateIteratorName()

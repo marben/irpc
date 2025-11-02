@@ -16,10 +16,10 @@ func newNamedTestIrpcService(impl namedTest) *namedTestIrpcService {
 	return &namedTestIrpcService{
 		impl: impl,
 		id: []byte{
-			0xd7, 0xd5, 0xdd, 0x73, 0x68, 0x3d, 0x3e, 0xe5,
-			0x40, 0xbf, 0x44, 0xea, 0x4a, 0x17, 0x32, 0x47,
-			0xaf, 0x26, 0x3a, 0xd2, 0xb5, 0x0b, 0x49, 0xc7,
-			0x59, 0xc6, 0x34, 0x4e, 0x62, 0xeb, 0xc6, 0xe1,
+			0xa2, 0xcf, 0x86, 0x3b, 0x78, 0x93, 0xe9, 0x1a,
+			0x29, 0xfb, 0x58, 0xa9, 0xc7, 0x79, 0x38, 0xfa,
+			0x6e, 0x88, 0xd1, 0x26, 0x34, 0x95, 0xde, 0xde,
+			0x2d, 0x9f, 0xaa, 0x82, 0x57, 0x04, 0xa5, 0x11,
 		},
 	}
 }
@@ -124,10 +124,10 @@ type namedTestIrpcClient struct {
 
 func newNamedTestIrpcClient(endpoint irpcgen.Endpoint) (*namedTestIrpcClient, error) {
 	id := []byte{
-		0xd7, 0xd5, 0xdd, 0x73, 0x68, 0x3d, 0x3e, 0xe5,
-		0x40, 0xbf, 0x44, 0xea, 0x4a, 0x17, 0x32, 0x47,
-		0xaf, 0x26, 0x3a, 0xd2, 0xb5, 0x0b, 0x49, 0xc7,
-		0x59, 0xc6, 0x34, 0x4e, 0x62, 0xeb, 0xc6, 0xe1,
+		0xa2, 0xcf, 0x86, 0x3b, 0x78, 0x93, 0xe9, 0x1a,
+		0x29, 0xfb, 0x58, 0xa9, 0xc7, 0x79, 0x38, 0xfa,
+		0x6e, 0x88, 0xd1, 0x26, 0x34, 0x95, 0xde, 0xde,
+		0x2d, 0x9f, 0xaa, 0x82, 0x57, 0x04, 0xa5, 0x11,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
@@ -269,9 +269,8 @@ type _Irpc_namedTestcontainsSaturdayReq struct {
 
 func (s _Irpc_namedTestcontainsSaturdayReq) Serialize(e *irpcgen.Encoder) error {
 	{ // s.Param0_wds []weekDay
-		var l int = len(s.Param0_wds)
-		if err := e.UvarInt64(uint64(l)); err != nil {
-			return fmt.Errorf("serialize uint64(l) of type \"uint64\": %w", err)
+		if err := e.Len(len(s.Param0_wds)); err != nil {
+			return fmt.Errorf("serialize len(s.Param0_wds) of type \"int\": %w", err)
 		}
 		for _, v := range s.Param0_wds {
 			if err := e.Uint8(uint8(v)); err != nil {
@@ -283,11 +282,10 @@ func (s _Irpc_namedTestcontainsSaturdayReq) Serialize(e *irpcgen.Encoder) error 
 }
 func (s *_Irpc_namedTestcontainsSaturdayReq) Deserialize(d *irpcgen.Decoder) error {
 	{ // s.Param0_wds []weekDay
-		var ul uint64
-		if err := d.UvarInt64(&ul); err != nil {
-			return fmt.Errorf("deserialize ul of type \"uint64\": %w", err)
+		var l int
+		if err := d.Len(&l); err != nil {
+			return fmt.Errorf("deserialize l of type \"int\": %w", err)
 		}
-		var l int = int(ul)
 		s.Param0_wds = make([]weekDay, l)
 		for i := range l {
 			if err := d.Uint8((*uint8)(&s.Param0_wds[i])); err != nil {
@@ -321,9 +319,8 @@ type _Irpc_namedTestcontainsSaturday2Req struct {
 
 func (s _Irpc_namedTestcontainsSaturday2Req) Serialize(e *irpcgen.Encoder) error {
 	{ // s.Param0_wds namedWeekDaysSliceType
-		var l int = len(s.Param0_wds)
-		if err := e.UvarInt64(uint64(l)); err != nil {
-			return fmt.Errorf("serialize uint64(l) of type \"uint64\": %w", err)
+		if err := e.Len(len(s.Param0_wds)); err != nil {
+			return fmt.Errorf("serialize len(s.Param0_wds) of type \"int\": %w", err)
 		}
 		for _, v := range s.Param0_wds {
 			if err := e.Uint8(uint8(v)); err != nil {
@@ -335,11 +332,10 @@ func (s _Irpc_namedTestcontainsSaturday2Req) Serialize(e *irpcgen.Encoder) error
 }
 func (s *_Irpc_namedTestcontainsSaturday2Req) Deserialize(d *irpcgen.Decoder) error {
 	{ // s.Param0_wds namedWeekDaysSliceType
-		var ul uint64
-		if err := d.UvarInt64(&ul); err != nil {
-			return fmt.Errorf("deserialize ul of type \"uint64\": %w", err)
+		var l int
+		if err := d.Len(&l); err != nil {
+			return fmt.Errorf("deserialize l of type \"int\": %w", err)
 		}
-		var l int = int(ul)
 		s.Param0_wds = make(namedWeekDaysSliceType, l)
 		for i := range l {
 			if err := d.Uint8((*uint8)(&s.Param0_wds[i])); err != nil {
@@ -407,9 +403,8 @@ type _Irpc_namedTestnamedMapSumReq struct {
 
 func (s _Irpc_namedTestnamedMapSumReq) Serialize(e *irpcgen.Encoder) error {
 	{ // s.Param0_p0 namedMap
-		var l int = len(s.Param0_p0)
-		if err := e.UvarInt64(uint64(l)); err != nil {
-			return fmt.Errorf("serialize uint64(l) of type \"uint64\": %w", err)
+		if err := e.Len(len(s.Param0_p0)); err != nil {
+			return fmt.Errorf("serialize len(s.Param0_p0) of type \"int\": %w", err)
 		}
 		for k, v := range s.Param0_p0 {
 			if err := e.VarInt(k); err != nil {
@@ -424,11 +419,10 @@ func (s _Irpc_namedTestnamedMapSumReq) Serialize(e *irpcgen.Encoder) error {
 }
 func (s *_Irpc_namedTestnamedMapSumReq) Deserialize(d *irpcgen.Decoder) error {
 	{ // s.Param0_p0 namedMap
-		var ul uint64
-		if err := d.UvarInt64(&ul); err != nil {
-			return fmt.Errorf("deserialize ul of type \"uint64\": %w", err)
+		var l int
+		if err := d.Len(&l); err != nil {
+			return fmt.Errorf("deserialize l of type \"int\": %w", err)
 		}
-		var l int = int(ul)
 		s.Param0_p0 = make(namedMap, l)
 		for range l {
 			var k int

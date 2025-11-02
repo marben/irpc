@@ -3,6 +3,7 @@ package irpctestpkg
 //go:generate go run ../
 
 type namedByteSlice []byte
+type namedBoolSlice []bool
 
 type sliceTest interface {
 	SliceSum(slice []int) int
@@ -11,10 +12,16 @@ type sliceTest interface {
 	SliceOfSlicesSum(slice [][]int) int
 	SliceOfBytesSum(slice []byte) int
 	namedByteSlice(slice namedByteSlice) int
+	sliceOfBools(slice []bool) namedBoolSlice
 }
 
 type sliceTestImpl struct {
 	skew int
+}
+
+// sliceOfBools implements sliceTest.
+func (st sliceTestImpl) sliceOfBools(slice []bool) namedBoolSlice {
+	panic("unimplemented")
 }
 
 func (st sliceTestImpl) namedByteSlice(slice namedByteSlice) int {

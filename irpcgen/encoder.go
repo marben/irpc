@@ -86,6 +86,10 @@ func (e *Encoder) UvarInt64(v uint64) error {
 	return nil
 }
 
+func (e *Encoder) Len(l int) error {
+	return e.UvarInt64(uint64(l))
+}
+
 func (e *Encoder) Float32le(v float32) error {
 	binary.LittleEndian.PutUint32(e.buf, math.Float32bits(v))
 	if _, err := e.w.Write(e.buf[:4]); err != nil {
@@ -103,7 +107,7 @@ func (e *Encoder) Float64le(v float64) error {
 }
 
 func (e *Encoder) ByteSlice(v []byte) error {
-	if err := e.VarInt64(int64(len(v))); err != nil {
+	if err := e.Len(len(v)); err != nil {
 		return fmt.Errorf("slice len: %w", err)
 	}
 	if _, err := e.w.Write(v); err != nil {
@@ -122,4 +126,39 @@ func (e *Encoder) BinaryMarshaler(bm encoding.BinaryMarshaler) error {
 		return err
 	}
 	return e.ByteSlice(data)
+}
+
+func (e *Encoder) BoolSlice(vs []bool) error {
+	if err := e.Len(len(vs)); err != nil {
+		return fmt.Errorf("slice len: %w", err)
+	}
+
+	// MSB first
+	var b byte
+	bitCount := 0
+
+	for _, v := range vs {
+		b <<= 1
+		if v {
+			b |= 1
+		}
+		bitCount++
+
+		if bitCount == 8 {
+			if err := e.w.WriteByte(b); err != nil {
+				return err
+			}
+			b, bitCount = 0, 0
+		}
+	}
+
+	if bitCount > 0 {
+		// shift the last partial byte to align bits to the MSB
+		b <<= uint(8 - bitCount)
+		if err := e.w.WriteByte(b); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

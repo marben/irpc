@@ -12,13 +12,13 @@ type encoder interface {
 }
 
 var (
-	uint64Encoder        = newSymmetricDirectCallEncoder("UvarInt64", "uint64", nil)
 	boolEncoder          = newSymmetricDirectCallEncoder("Bool", "bool", nil)
 	binMarshallerEncoder = directCallEncoder{
 		encFuncName: "BinaryMarshaler",
 		decFuncName: "BinaryUnmarshaler",
 		typeName:    "encoding.BinaryUnmarshaler",
 	}
+	lenEncoder = newSymmetricDirectCallEncoder("Len", "int", nil)
 )
 
 type importSpec struct {
