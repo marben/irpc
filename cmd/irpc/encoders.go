@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// todo: is this still necessary?
 type encoder interface {
 	encode(varId string, existingVars varNames, q *qualifier) string // inline variable encode
 	decode(varId string, existingVars varNames, q *qualifier) string // inline variable decode
@@ -12,13 +13,8 @@ type encoder interface {
 }
 
 var (
-	boolEncoder          = newSymmetricDirectCallEncoder("Bool", "bool", nil)
-	binMarshallerEncoder = directCallEncoder{
-		encFuncName: "BinaryMarshaler",
-		decFuncName: "BinaryUnmarshaler",
-		typeName:    "encoding.BinaryUnmarshaler",
-	}
-	lenEncoder = newSymmetricDirectCallEncoder("Len", "int", nil)
+	boolEncoder = newDirectCallEncoder("Bool", "Bool", "bool", nil)
+	lenEncoder  = newDirectCallEncoder("Len", "Len", "int", nil)
 )
 
 type importSpec struct {
@@ -35,20 +31,20 @@ func (is importSpec) packageQualifier() string {
 	return is.pkgName
 }
 
-func newSymmetricDirectCallEncoder(encDecFunc string, typeName string, ni *namedInfo) directCallEncoder {
-	return directCallEncoder{
-		encFuncName: encDecFunc,
-		decFuncName: encDecFunc,
-		typeName:    typeName,
-		ni:          ni,
-	}
-}
-
 type directCallEncoder struct {
 	encFuncName string
 	decFuncName string
 	typeName    string // the actual type name as in int, []byte, etc
 	ni          *namedInfo
+}
+
+func newDirectCallEncoder(encFunc, decFunc string, typeName string, ni *namedInfo) directCallEncoder {
+	return directCallEncoder{
+		encFuncName: encFunc,
+		decFuncName: decFunc,
+		typeName:    typeName,
+		ni:          ni,
+	}
 }
 
 func (e directCallEncoder) needsCasting() bool {

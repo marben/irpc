@@ -30,12 +30,10 @@ func (tr *typeResolver) newMapType(apiName string, ni *namedInfo, t *types.Map, 
 	if err != nil {
 		return mapType{}, fmt.Errorf("newType() for map key %q: %w", keyAst, err)
 	}
-	// log.Printf("keyT: %q", keyT)
 	valT, err := tr.newType(apiName, t.Elem(), valAst)
 	if err != nil {
 		return mapType{}, fmt.Errorf("newType() for map value %q: %w", valAst, err)
 	}
-	// log.Printf("valT: %q", valT)
 
 	return mapType{
 		lenEnc: lenEncoder,

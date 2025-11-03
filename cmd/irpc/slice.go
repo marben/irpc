@@ -9,6 +9,17 @@ import (
 
 var _ Type = sliceType{}
 
+// []byte
+func (tr *typeResolver) newByteSliceType(ni *namedInfo) (Type, error) {
+	return tr.newDirectCallType("ByteSlice", "ByteSlice", "[]byte", ni)
+}
+
+// []bool
+func (tr *typeResolver) newBoolSliceType(ni *namedInfo) (Type, error) {
+	return tr.newDirectCallType("BoolSlice", "BoolSlice", "[]bool", ni)
+}
+
+// generic slice encoder
 type sliceType struct {
 	elem   Type
 	lenEnc encoder

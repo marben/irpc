@@ -1,4 +1,7 @@
 - dot imports
+- does encoder still make sense? there seems to be only one now - directcallencoder, no?
+ - actually i think direct call encoder should be merged into direct call type. not sure about lenEncoder and boolEncoder, but those are just 2
+- BinMarshaler enc code in err return doesn't mention "time.Time", but just "Time" in our tests. fix!
 - BinaryAppender
 - test named types outside of module
 - support/test aliases
