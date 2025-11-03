@@ -1,3 +1,6 @@
+- two interfaces in one file - are service/client hashes the same? maybe we need to add interface name to the hash?
+- can i use ByteSlice for []uint8?
+- map[int]interface{}
 - dot imports
 - does encoder still make sense? there seems to be only one now - directcallencoder, no?
  - actually i think direct call encoder should be merged into direct call type. not sure about lenEncoder and boolEncoder, but those are just 2
@@ -5,9 +8,7 @@
 - BinaryAppender
 - test named types outside of module
 - support/test aliases
-- direct slice of bools optimized encoder in irpc package
 - get rid of .codeblock() in encoders, since almost none use it - we can make a separate interface for it
-- boolslice and byteslice generators don't really differ much. merge?
 - (maybe) implement bitpacking writer. first for slice of bool, eventually perhaps
     for everything? (could use some benchmarking before that though)
 - implement and test sending big messages with different endpoint.MaxMsgLen. client should be splitting msgs etc?

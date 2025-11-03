@@ -28,6 +28,12 @@ func (q *qualifier) qualifyNamedInfo(ni namedInfo) string {
 	return qual + "." + ni.namedName
 }
 
+func (q qualifier) qualifyNamedInfoWithoutAddingImports(ni namedInfo) string {
+	// todo: if pkg is never imported by actual code, we could use full path (eg: github.com/marben/irpc/some_package.TypeName) in comments
+	// todo: this is case for example with slice_named_ircp.go in tests, which uses out_.Uint8 somewhere.
+	return q.qualifyNamedInfo(ni)
+}
+
 func (q *qualifier) qualifierForImportSpec(is importSpec) string {
 	// log.Printf("qualifying for import spec %#v", is)
 	// types with no import - int, float, string, ...

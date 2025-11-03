@@ -16,10 +16,10 @@ func newSliceTestIrpcService(impl sliceTest) *sliceTestIrpcService {
 	return &sliceTestIrpcService{
 		impl: impl,
 		id: []byte{
-			0xbd, 0x43, 0xc7, 0x2a, 0x3b, 0xb9, 0x3e, 0xd2,
-			0x16, 0x62, 0x25, 0xbe, 0x0b, 0xec, 0x3f, 0x86,
-			0xbc, 0xa2, 0xcd, 0x94, 0xdb, 0x2e, 0x2f, 0x4d,
-			0xa4, 0x0e, 0x96, 0x3e, 0xa4, 0xfc, 0x70, 0xa0,
+			0xc5, 0x17, 0x09, 0x8c, 0xc5, 0xd3, 0xc1, 0x03,
+			0xdb, 0x83, 0xc8, 0xcb, 0xcc, 0x65, 0x1f, 0x79,
+			0xc9, 0xfb, 0x61, 0xb4, 0xda, 0x9e, 0x27, 0x26,
+			0xc9, 0x0d, 0x29, 0xf3, 0x62, 0x85, 0x7e, 0x8d,
 		},
 	}
 }
@@ -138,10 +138,10 @@ type sliceTestIrpcClient struct {
 
 func newSliceTestIrpcClient(endpoint irpcgen.Endpoint) (*sliceTestIrpcClient, error) {
 	id := []byte{
-		0xbd, 0x43, 0xc7, 0x2a, 0x3b, 0xb9, 0x3e, 0xd2,
-		0x16, 0x62, 0x25, 0xbe, 0x0b, 0xec, 0x3f, 0x86,
-		0xbc, 0xa2, 0xcd, 0x94, 0xdb, 0x2e, 0x2f, 0x4d,
-		0xa4, 0x0e, 0x96, 0x3e, 0xa4, 0xfc, 0x70, 0xa0,
+		0xc5, 0x17, 0x09, 0x8c, 0xc5, 0xd3, 0xc1, 0x03,
+		0xdb, 0x83, 0xc8, 0xcb, 0xcc, 0x65, 0x1f, 0x79,
+		0xc9, 0xfb, 0x61, 0xb4, 0xda, 0x9e, 0x27, 0x26,
+		0xc9, 0x0d, 0x29, 0xf3, 0x62, 0x85, 0x7e, 0x8d,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
@@ -499,13 +499,13 @@ type _Irpc_sliceTestnamedByteSliceReq struct {
 
 func (s _Irpc_sliceTestnamedByteSliceReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.ByteSlice([]byte(s.Param0_slice)); err != nil {
-		return fmt.Errorf("serialize s.Param0_slice of type \"[]byte\": %w", err)
+		return fmt.Errorf("serialize s.Param0_slice of type \"namedByteSlice\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_sliceTestnamedByteSliceReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.ByteSlice((*[]byte)(&s.Param0_slice)); err != nil {
-		return fmt.Errorf("deserialize s.Param0_slice of type \"[]byte\": %w", err)
+		return fmt.Errorf("deserialize s.Param0_slice of type \"namedByteSlice\": %w", err)
 	}
 	return nil
 }
@@ -550,13 +550,13 @@ type _Irpc_sliceTestsliceOfBoolsResp struct {
 
 func (s _Irpc_sliceTestsliceOfBoolsResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.BoolSlice([]bool(s.Param0)); err != nil {
-		return fmt.Errorf("serialize s.Param0 of type \"[]bool\": %w", err)
+		return fmt.Errorf("serialize s.Param0 of type \"namedBoolSlice\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_sliceTestsliceOfBoolsResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.BoolSlice((*[]bool)(&s.Param0)); err != nil {
-		return fmt.Errorf("deserialize s.Param0 of type \"[]bool\": %w", err)
+		return fmt.Errorf("deserialize s.Param0 of type \"namedBoolSlice\": %w", err)
 	}
 	return nil
 }

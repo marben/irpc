@@ -16,10 +16,10 @@ func newNamedTestIrpcService(impl namedTest) *namedTestIrpcService {
 	return &namedTestIrpcService{
 		impl: impl,
 		id: []byte{
-			0xa2, 0xcf, 0x86, 0x3b, 0x78, 0x93, 0xe9, 0x1a,
-			0x29, 0xfb, 0x58, 0xa9, 0xc7, 0x79, 0x38, 0xfa,
-			0x6e, 0x88, 0xd1, 0x26, 0x34, 0x95, 0xde, 0xde,
-			0x2d, 0x9f, 0xaa, 0x82, 0x57, 0x04, 0xa5, 0x11,
+			0xcb, 0x1d, 0x43, 0x4d, 0xd1, 0x62, 0x31, 0xd3,
+			0x64, 0xa8, 0x91, 0x81, 0x6d, 0xf9, 0x51, 0x98,
+			0xf3, 0x0c, 0x3e, 0x45, 0x30, 0x6b, 0xed, 0x48,
+			0x07, 0x4e, 0xdf, 0xc1, 0x99, 0x59, 0x5a, 0x49,
 		},
 	}
 }
@@ -124,10 +124,10 @@ type namedTestIrpcClient struct {
 
 func newNamedTestIrpcClient(endpoint irpcgen.Endpoint) (*namedTestIrpcClient, error) {
 	id := []byte{
-		0xa2, 0xcf, 0x86, 0x3b, 0x78, 0x93, 0xe9, 0x1a,
-		0x29, 0xfb, 0x58, 0xa9, 0xc7, 0x79, 0x38, 0xfa,
-		0x6e, 0x88, 0xd1, 0x26, 0x34, 0x95, 0xde, 0xde,
-		0x2d, 0x9f, 0xaa, 0x82, 0x57, 0x04, 0xa5, 0x11,
+		0xcb, 0x1d, 0x43, 0x4d, 0xd1, 0x62, 0x31, 0xd3,
+		0x64, 0xa8, 0x91, 0x81, 0x6d, 0xf9, 0x51, 0x98,
+		0xf3, 0x0c, 0x3e, 0x45, 0x30, 0x6b, 0xed, 0x48,
+		0x07, 0x4e, 0xdf, 0xc1, 0x99, 0x59, 0x5a, 0x49,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
@@ -201,13 +201,13 @@ type _Irpc_namedTestisWeekendReq struct {
 
 func (s _Irpc_namedTestisWeekendReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.Uint8(uint8(s.Param0_wd)); err != nil {
-		return fmt.Errorf("serialize s.Param0_wd of type \"uint8\": %w", err)
+		return fmt.Errorf("serialize s.Param0_wd of type \"weekDay\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_namedTestisWeekendReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.Uint8((*uint8)(&s.Param0_wd)); err != nil {
-		return fmt.Errorf("deserialize s.Param0_wd of type \"uint8\": %w", err)
+		return fmt.Errorf("deserialize s.Param0_wd of type \"weekDay\": %w", err)
 	}
 	return nil
 }
@@ -235,13 +235,13 @@ type _Irpc_namedTestisWeekend2Req struct {
 
 func (s _Irpc_namedTestisWeekend2Req) Serialize(e *irpcgen.Encoder) error {
 	if err := e.Uint8(uint8(s.Param0_wd)); err != nil {
-		return fmt.Errorf("serialize s.Param0_wd of type \"uint8\": %w", err)
+		return fmt.Errorf("serialize s.Param0_wd of type \"weekDay2\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_namedTestisWeekend2Req) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.Uint8((*uint8)(&s.Param0_wd)); err != nil {
-		return fmt.Errorf("deserialize s.Param0_wd of type \"uint8\": %w", err)
+		return fmt.Errorf("deserialize s.Param0_wd of type \"weekDay2\": %w", err)
 	}
 	return nil
 }
@@ -274,7 +274,7 @@ func (s _Irpc_namedTestcontainsSaturdayReq) Serialize(e *irpcgen.Encoder) error 
 		}
 		for _, v := range s.Param0_wds {
 			if err := e.Uint8(uint8(v)); err != nil {
-				return fmt.Errorf("serialize v of type \"uint8\": %w", err)
+				return fmt.Errorf("serialize v of type \"weekDay\": %w", err)
 			}
 		}
 	}
@@ -289,7 +289,7 @@ func (s *_Irpc_namedTestcontainsSaturdayReq) Deserialize(d *irpcgen.Decoder) err
 		s.Param0_wds = make([]weekDay, l)
 		for i := range l {
 			if err := d.Uint8((*uint8)(&s.Param0_wds[i])); err != nil {
-				return fmt.Errorf("deserialize s.Param0_wds[i] of type \"uint8\": %w", err)
+				return fmt.Errorf("deserialize s.Param0_wds[i] of type \"weekDay\": %w", err)
 			}
 		}
 	}
@@ -324,7 +324,7 @@ func (s _Irpc_namedTestcontainsSaturday2Req) Serialize(e *irpcgen.Encoder) error
 		}
 		for _, v := range s.Param0_wds {
 			if err := e.Uint8(uint8(v)); err != nil {
-				return fmt.Errorf("serialize v of type \"uint8\": %w", err)
+				return fmt.Errorf("serialize v of type \"weekDay2\": %w", err)
 			}
 		}
 	}
@@ -339,7 +339,7 @@ func (s *_Irpc_namedTestcontainsSaturday2Req) Deserialize(d *irpcgen.Decoder) er
 		s.Param0_wds = make(namedWeekDaysSliceType, l)
 		for i := range l {
 			if err := d.Uint8((*uint8)(&s.Param0_wds[i])); err != nil {
-				return fmt.Errorf("deserialize s.Param0_wds[i] of type \"uint8\": %w", err)
+				return fmt.Errorf("deserialize s.Param0_wds[i] of type \"weekDay2\": %w", err)
 			}
 		}
 	}
@@ -369,13 +369,13 @@ type _Irpc_namedTestnamedBytesSumReq struct {
 
 func (s _Irpc_namedTestnamedBytesSumReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.ByteSlice([]byte(s.Param0_nb)); err != nil {
-		return fmt.Errorf("serialize s.Param0_nb of type \"[]byte\": %w", err)
+		return fmt.Errorf("serialize s.Param0_nb of type \"namedByteSliceType\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_namedTestnamedBytesSumReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.ByteSlice((*[]byte)(&s.Param0_nb)); err != nil {
-		return fmt.Errorf("deserialize s.Param0_nb of type \"[]byte\": %w", err)
+		return fmt.Errorf("deserialize s.Param0_nb of type \"namedByteSliceType\": %w", err)
 	}
 	return nil
 }

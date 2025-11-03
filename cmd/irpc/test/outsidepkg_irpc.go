@@ -17,10 +17,10 @@ func newOutsideTestIrpcService(impl outsideTest) *outsideTestIrpcService {
 	return &outsideTestIrpcService{
 		impl: impl,
 		id: []byte{
-			0xcd, 0x8a, 0x15, 0xfd, 0xb1, 0x7a, 0x3d, 0x74,
-			0xa8, 0xe8, 0xfb, 0xb7, 0xf5, 0x8e, 0xdb, 0x5e,
-			0x2c, 0x9d, 0x7b, 0xd6, 0x6f, 0x20, 0x30, 0x84,
-			0x0a, 0x6d, 0x46, 0x06, 0xa0, 0x63, 0xf4, 0x26,
+			0x0e, 0x86, 0x71, 0xa6, 0xb2, 0x72, 0x7f, 0xd8,
+			0xed, 0xc9, 0xa8, 0x45, 0x40, 0x90, 0x55, 0x08,
+			0xd2, 0xa1, 0x28, 0xd4, 0xf8, 0xd3, 0x02, 0x80,
+			0x7b, 0xe9, 0x73, 0xb0, 0x37, 0xe0, 0xda, 0xde,
 		},
 	}
 }
@@ -55,10 +55,10 @@ type outsideTestIrpcClient struct {
 
 func newOutsideTestIrpcClient(endpoint irpcgen.Endpoint) (*outsideTestIrpcClient, error) {
 	id := []byte{
-		0xcd, 0x8a, 0x15, 0xfd, 0xb1, 0x7a, 0x3d, 0x74,
-		0xa8, 0xe8, 0xfb, 0xb7, 0xf5, 0x8e, 0xdb, 0x5e,
-		0x2c, 0x9d, 0x7b, 0xd6, 0x6f, 0x20, 0x30, 0x84,
-		0x0a, 0x6d, 0x46, 0x06, 0xa0, 0x63, 0xf4, 0x26,
+		0x0e, 0x86, 0x71, 0xa6, 0xb2, 0x72, 0x7f, 0xd8,
+		0xed, 0xc9, 0xa8, 0x45, 0x40, 0x90, 0x55, 0x08,
+		0xd2, 0xa1, 0x28, 0xd4, 0xf8, 0xd3, 0x02, 0x80,
+		0x7b, 0xe9, 0x73, 0xb0, 0x37, 0xe0, 0xda, 0xde,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
@@ -84,19 +84,19 @@ type _Irpc_outsideTestaddUint8Req struct {
 
 func (s _Irpc_outsideTestaddUint8Req) Serialize(e *irpcgen.Encoder) error {
 	if err := e.Uint8(uint8(s.Param0_a)); err != nil {
-		return fmt.Errorf("serialize s.Param0_a of type \"uint8\": %w", err)
+		return fmt.Errorf("serialize s.Param0_a of type \"out.Uint8\": %w", err)
 	}
 	if err := e.Uint8(uint8(s.Param0_b)); err != nil {
-		return fmt.Errorf("serialize s.Param0_b of type \"uint8\": %w", err)
+		return fmt.Errorf("serialize s.Param0_b of type \"out.Uint8\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_outsideTestaddUint8Req) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.Uint8((*uint8)(&s.Param0_a)); err != nil {
-		return fmt.Errorf("deserialize s.Param0_a of type \"uint8\": %w", err)
+		return fmt.Errorf("deserialize s.Param0_a of type \"out.Uint8\": %w", err)
 	}
 	if err := d.Uint8((*uint8)(&s.Param0_b)); err != nil {
-		return fmt.Errorf("deserialize s.Param0_b of type \"uint8\": %w", err)
+		return fmt.Errorf("deserialize s.Param0_b of type \"out.Uint8\": %w", err)
 	}
 	return nil
 }
@@ -107,13 +107,13 @@ type _Irpc_outsideTestaddUint8Resp struct {
 
 func (s _Irpc_outsideTestaddUint8Resp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.Uint8(uint8(s.Param0)); err != nil {
-		return fmt.Errorf("serialize s.Param0 of type \"uint8\": %w", err)
+		return fmt.Errorf("serialize s.Param0 of type \"out.Uint8\": %w", err)
 	}
 	return nil
 }
 func (s *_Irpc_outsideTestaddUint8Resp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.Uint8((*uint8)(&s.Param0)); err != nil {
-		return fmt.Errorf("deserialize s.Param0 of type \"uint8\": %w", err)
+		return fmt.Errorf("deserialize s.Param0 of type \"out.Uint8\": %w", err)
 	}
 	return nil
 }
