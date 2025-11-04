@@ -1,10 +1,12 @@
 package irpctestpkg
 
 import (
+	"bytes"
 	"slices"
 	"testing"
 
 	"github.com/marben/irpc/cmd/irpc/test/testtools"
+	"github.com/marben/irpc/irpcgen"
 )
 
 func TestSlice(t *testing.T) {
@@ -51,5 +53,20 @@ func TestSlice(t *testing.T) {
 	resSB := c.SliceOfBytesSum([]byte{1, 2, 3, 4})
 	if resSB != 1+2+3+4 {
 		t.Fatalf("SliceOfBytesSum(): %d", resSB)
+	}
+}
+
+func TestUint8SliceCasting(t *testing.T) {
+	in := []uint8{4, 2, 6, 255, 0}
+	buf := bytes.NewBuffer(nil)
+	enc := irpcgen.NewEncoder(buf)
+	enc.ByteSlice(in)
+	enc.Flush()
+
+	var out []uint8
+	dec := irpcgen.NewDecoder(buf)
+	dec.ByteSlice(&out)
+	if !slices.Equal(in, out) {
+		t.Fatalf("%v != %v", in, out)
 	}
 }
