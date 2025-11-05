@@ -17,6 +17,7 @@ type interfaceType struct {
 	ni           *namedInfo
 	apiName      string
 	t            *types.Interface
+	boolT        Type
 }
 
 func (tr *typeResolver) newInterfaceType(apiName string, ni *namedInfo, t *types.Interface, astExpr ast.Expr) (interfaceType, error) {
@@ -89,6 +90,7 @@ func (tr *typeResolver) newInterfaceType(apiName string, ni *namedInfo, t *types
 		ni:           ni,
 		apiName:      apiName,
 		t:            t,
+		boolT:        tr.boolType,
 	}, nil
 }
 
@@ -96,8 +98,8 @@ func (i interfaceType) implTypeNam() string {
 	return i.implTypeName
 }
 
-// Name implements Type.
-func (i interfaceType) Name(q *qualifier) string {
+// name implements Type.
+func (i interfaceType) name(q *qualifier) string {
 	if i.ni != nil {
 		return i.ni.qualifiedName(q)
 	}
@@ -120,7 +122,7 @@ func (i interfaceType) codeblock(q *qualifier) string {
 	fmt.Fprintf(sb, "type %s struct {\n", i.implTypeNam())
 	for _, f := range i.fncs {
 		for _, v := range f.results {
-			fmt.Fprintf(sb, "%s %s\n", v.implStructParamName, v.f.t.Name(q))
+			fmt.Fprintf(sb, "%s %s\n", v.implStructParamName, v.f.t.name(q))
 		}
 	}
 	sb.WriteString("}\n")
@@ -145,7 +147,7 @@ func (i interfaceType) decode(varId string, existingVars varNames, q *qualifier)
 	if isNil {
 		%s = nil
 	} else {
-	`, boolEncoder.decode("isNil", existingVars, q), varId)
+	`, i.boolT.decode("isNil", existingVars, q), varId)
 
 	implVarName := existingVars.generateUniqueVarName("impl")
 
@@ -173,7 +175,7 @@ func (i interfaceType) encode(varId string, existingVars varNames, q *qualifier)
 		isNil = true
 	}
 	%s
-	`, varId, boolEncoder.encode("isNil", existingVars, q))
+	`, varId, i.boolT.encode("isNil", existingVars, q))
 	sb.WriteString("if !isNil{\n")
 	for _, f := range i.fncs {
 		fmt.Fprintf(sb, "{ // %s()\n", f.name)
@@ -209,7 +211,7 @@ func (ifnc ifaceFunc) listNamesWithTypes(q *qualifier) string {
 	// todo: somehow share with paramStructGenerator's funcCallParams ?
 	b := &strings.Builder{}
 	for i, v := range ifnc.results {
-		fmt.Fprintf(b, "%s %s", v.f.name, v.f.t.Name(q)) // todo: need qualified name?
+		fmt.Fprintf(b, "%s %s", v.f.name, v.f.t.name(q)) // todo: need qualified name?
 		if i != len(ifnc.results)-1 {
 			b.WriteString(",")
 		}

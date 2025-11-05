@@ -81,7 +81,7 @@ func (g generator) generate(w io.Writer, hash []byte) error {
 			// we use irpcgen.Empty(Ser/Deser) instead
 			if !ps.isEmpty() {
 				codeBlocks.add(ps.code(q))
-				for _, e := range ps.encoders() {
+				for _, e := range ps.types() {
 					codeBlocks.add(e.codeblock(q))
 				}
 			}

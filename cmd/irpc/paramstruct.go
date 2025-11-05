@@ -25,7 +25,7 @@ func (sg paramStructGenerator) code(q *qualifier) string {
 			// we comment out context var as it is not filled anyway
 			sb.WriteString("//")
 		}
-		sb.WriteString(p.structFieldName + " " + p.typ.Name(q) + "\n")
+		sb.WriteString(p.structFieldName + " " + p.typ.name(q) + "\n")
 	}
 	sb.WriteString("\n}\n")
 	sb.WriteString(sg.serializeFunc(q) + "\n")
@@ -68,7 +68,7 @@ func (sg paramStructGenerator) deserializeFunc(q *qualifier) string {
 func (sg paramStructGenerator) funcCallParams(q *qualifier) string {
 	b := &strings.Builder{}
 	for i, v := range sg.params {
-		fmt.Fprintf(b, "%s %s", v.identifier, v.typ.Name(q))
+		fmt.Fprintf(b, "%s %s", v.identifier, v.typ.name(q))
 		if i != len(sg.params)-1 {
 			b.WriteString(",")
 		}
@@ -98,15 +98,15 @@ func (sg paramStructGenerator) isLastTypeError(q *qualifier) bool {
 
 	// todo: reimplement with better error recognition?
 	last := sg.params[len(sg.params)-1]
-	return last.typ.Name(q) == "error"
+	return last.typ.name(q) == "error"
 	// log.Printf("last type: %+v", last.param.typ.String())
 }
 
-func (sg paramStructGenerator) encoders() []encoder {
-	encs := []encoder{}
+func (sg paramStructGenerator) types() []Type {
+	types := []Type{}
 	for _, p := range sg.params {
-		encs = append(encs, p.typ)
+		types = append(types, p.typ)
 	}
 
-	return encs
+	return types
 }

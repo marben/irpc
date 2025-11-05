@@ -10,9 +10,9 @@ import (
 var _ Type = mapType{}
 
 type mapType struct {
-	lenEnc   encoder
-	key, val Type
-	ni       *namedInfo
+	lenT       Type
+	keyT, valT Type
+	ni         *namedInfo
 }
 
 func (tr *typeResolver) newMapType(apiName string, ni *namedInfo, t *types.Map, astExpr ast.Expr) (mapType, error) {
@@ -36,19 +36,19 @@ func (tr *typeResolver) newMapType(apiName string, ni *namedInfo, t *types.Map, 
 	}
 
 	return mapType{
-		lenEnc: lenEncoder,
-		key:    keyT,
-		val:    valT,
-		ni:     ni,
+		lenT: tr.lenType,
+		keyT: keyT,
+		valT: valT,
+		ni:   ni,
 	}, nil
 }
 
-// Name implements Type.
-func (m mapType) Name(q *qualifier) string {
+// name implements Type.
+func (m mapType) name(q *qualifier) string {
 	if m.ni != nil {
 		return m.ni.qualifiedName(q)
 	}
-	return "map[" + m.key.Name(q) + "]" + m.val.Name(q)
+	return "map[" + m.keyT.name(q) + "]" + m.valT.name(q)
 }
 
 // codeblock implements Type.
@@ -61,21 +61,21 @@ func (m mapType) decode(varId string, existingVars varNames, q *qualifier) strin
 	sb := &strings.Builder{}
 
 	// length
-	fmt.Fprintf(sb, "{ // %s %s\n", varId, m.Name(q))
+	fmt.Fprintf(sb, "{ // %s %s\n", varId, m.name(q))
 	sb.WriteString("var l int\n")
-	sb.WriteString(m.lenEnc.decode("l", existingVars, q))
+	sb.WriteString(m.lenT.decode("l", existingVars, q))
 	existingVars = append(existingVars, "l")
 
-	fmt.Fprintf(sb, "%s = make(%s, l)\n", varId, m.Name(q))
+	fmt.Fprintf(sb, "%s = make(%s, l)\n", varId, m.name(q))
 	sb.WriteString("for range l {\n")
 
-	fmt.Fprintf(sb, "var k %s\n", m.key.Name(q))
+	fmt.Fprintf(sb, "var k %s\n", m.keyT.name(q))
 	existingVars = append(existingVars, "k")
-	fmt.Fprintf(sb, "%s\n", m.key.decode("k", existingVars, q))
+	fmt.Fprintf(sb, "%s\n", m.keyT.decode("k", existingVars, q))
 
-	fmt.Fprintf(sb, "var v %s\n", m.val.Name(q))
+	fmt.Fprintf(sb, "var v %s\n", m.valT.name(q))
 	existingVars = append(existingVars, "v")
-	fmt.Fprintf(sb, "%s\n", m.val.decode("v", existingVars, q))
+	fmt.Fprintf(sb, "%s\n", m.valT.decode("v", existingVars, q))
 
 	fmt.Fprintf(sb, "%s[k] = v", varId)
 	sb.WriteString("}\n")
@@ -87,15 +87,15 @@ func (m mapType) decode(varId string, existingVars varNames, q *qualifier) strin
 func (m mapType) encode(varId string, existingVars varNames, q *qualifier) string {
 	sb := &strings.Builder{}
 	// length
-	fmt.Fprintf(sb, "{ // %s %s\n", varId, m.Name(q))
-	sb.WriteString(m.lenEnc.encode("len("+varId+")", existingVars, q))
+	fmt.Fprintf(sb, "{ // %s %s\n", varId, m.name(q))
+	sb.WriteString(m.lenT.encode("len("+varId+")", existingVars, q))
 
 	keyIt, valIt := existingVars.generateKeyValueIteratorNames()
 
 	// for loop
 	fmt.Fprintf(sb, "for %s, %s := range %s {", keyIt, valIt, varId)
-	sb.WriteString(m.key.encode(keyIt, existingVars, q))
-	sb.WriteString(m.val.encode(valIt, existingVars, q))
+	sb.WriteString(m.keyT.encode(keyIt, existingVars, q))
+	sb.WriteString(m.valT.encode(valIt, existingVars, q))
 	sb.WriteString("}\n") // end of for loop
 
 	sb.WriteString("}\n") // end of block

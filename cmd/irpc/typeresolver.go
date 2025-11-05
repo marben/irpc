@@ -17,6 +17,8 @@ type typeResolver struct {
 	srcFileAst                   *ast.File
 	srcImports                   orderedSet[importSpec] // imports from the src file
 	binMarshaler, binUnmarshaler *types.Interface
+	lenType                      Type
+	boolType                     Type
 }
 
 // todo: make value type?
@@ -101,6 +103,8 @@ func newTypeResolver(filename string /*, inputPkg *packages.Package, allPkgs []*
 		srcImports:     srcImports,
 		binMarshaler:   binMarshaler,
 		binUnmarshaler: binUnmarshaler,
+		lenType:        newDirectCallType("Len", "Len", "int", nil),
+		boolType:       newDirectCallType("Bool", "Bool", "bool", nil),
 	}, nil
 }
 
@@ -164,6 +168,7 @@ func (tr typeResolver) typeIsContext(t types.Type) bool {
 	return true
 }
 
+// todo: do we still use the astExpr? not sure now
 func (tr typeResolver) newType(apiName string, t types.Type, astExpr ast.Expr) (Type, error) {
 	ni, utAst, err := tr.unwrapNamedOrPassThrough(t, astExpr)
 	if err != nil {

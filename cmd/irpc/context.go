@@ -10,8 +10,8 @@ func newContextType(ni namedInfo) contextType {
 	return contextType{ni: ni}
 }
 
-// Name implements Type.
-func (c contextType) Name(q *qualifier) string {
+// name implements Type.
+func (c contextType) name(q *qualifier) string {
 	return q.qualifyNamedInfo(c.ni)
 }
 

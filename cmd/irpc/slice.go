@@ -11,19 +11,19 @@ var _ Type = sliceType{}
 
 // []byte
 func (tr *typeResolver) newByteSliceType(ni *namedInfo) (Type, error) {
-	return tr.newDirectCallType("ByteSlice", "ByteSlice", "[]byte", ni)
+	return newDirectCallType("ByteSlice", "ByteSlice", "[]byte", ni), nil
 }
 
 // []bool
 func (tr *typeResolver) newBoolSliceType(ni *namedInfo) (Type, error) {
-	return tr.newDirectCallType("BoolSlice", "BoolSlice", "[]bool", ni)
+	return newDirectCallType("BoolSlice", "BoolSlice", "[]bool", ni), nil
 }
 
 // generic slice encoder
 type sliceType struct {
-	elem   Type
-	lenEnc encoder
-	ni     *namedInfo
+	elemT Type
+	lenT  Type
+	ni    *namedInfo
 }
 
 func (tr *typeResolver) newSliceType(apiName string, ni *namedInfo, st *types.Slice, astExpr ast.Expr) (sliceType, error) {
@@ -42,17 +42,17 @@ func (tr *typeResolver) newSliceType(apiName string, ni *namedInfo, st *types.Sl
 	}
 
 	return sliceType{
-		elem:   elemT,
-		lenEnc: lenEncoder,
-		ni:     ni,
+		elemT: elemT,
+		lenT:  tr.lenType,
+		ni:    ni,
 	}, nil
 }
 
-func (st sliceType) Name(q *qualifier) string {
+func (st sliceType) name(q *qualifier) string {
 	if st.ni != nil {
 		return q.qualifyNamedInfo(*st.ni)
 	}
-	return "[]" + st.elem.Name(q)
+	return "[]" + st.elemT.name(q)
 }
 
 // encode implements encoder.
@@ -60,13 +60,13 @@ func (st sliceType) encode(varId string, existingVars varNames, q *qualifier) st
 	sb := &strings.Builder{}
 
 	// length
-	fmt.Fprintf(sb, "{ // %s %s\n", varId, st.Name(q))
-	sb.WriteString(st.lenEnc.encode("len("+varId+")", existingVars, q))
+	fmt.Fprintf(sb, "{ // %s %s\n", varId, st.name(q))
+	sb.WriteString(st.lenT.encode("len("+varId+")", existingVars, q))
 
 	// for loop
 	existingVars = append(existingVars, "v")
 	fmt.Fprintf(sb, "for _, v := range %s {\n", varId)
-	sb.WriteString(st.elem.encode("v", existingVars, q))
+	sb.WriteString(st.elemT.encode("v", existingVars, q))
 	sb.WriteString("}")
 	sb.WriteString("}\n")
 
@@ -78,16 +78,16 @@ func (st sliceType) decode(varId string, existingVars varNames, q *qualifier) st
 	sb := &strings.Builder{}
 
 	// length
-	fmt.Fprintf(sb, "{ // %s %s\n", varId, st.Name(q))
+	fmt.Fprintf(sb, "{ // %s %s\n", varId, st.name(q))
 	sb.WriteString("var l int\n")
-	sb.WriteString(st.lenEnc.decode("l", existingVars, q))
+	sb.WriteString(st.lenT.decode("l", existingVars, q))
 	existingVars = append(existingVars, "l")
 
 	// for loop
 	itName := existingVars.generateIteratorName()
-	fmt.Fprintf(sb, "%s = make(%s, l)\n", varId, st.Name(q))
+	fmt.Fprintf(sb, "%s = make(%s, l)\n", varId, st.name(q))
 	fmt.Fprintf(sb, "for %s := range l {", itName)
-	sb.WriteString(st.elem.decode(varId+"["+itName+"]", existingVars, q))
+	sb.WriteString(st.elemT.decode(varId+"["+itName+"]", existingVars, q))
 	sb.WriteString("}\n")
 	sb.WriteString("}\n")
 

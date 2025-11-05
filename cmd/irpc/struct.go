@@ -76,8 +76,8 @@ func (tr *typeResolver) newStructType(apiName string, ni *namedInfo, t *types.St
 	}, nil
 }
 
-// Name implements Type.
-func (s structType) Name(q *qualifier) string {
+// name implements Type.
+func (s structType) name(q *qualifier) string {
 	if s.ni != nil {
 		return s.ni.qualifiedName(q)
 	}
@@ -85,7 +85,7 @@ func (s structType) Name(q *qualifier) string {
 	sb := strings.Builder{}
 	sb.WriteString("struct {")
 	for _, f := range s.fields {
-		sb.WriteString(f.name + " " + f.t.Name(q))
+		sb.WriteString(f.name + " " + f.t.name(q))
 		sb.WriteString(";")
 	}
 	sb.WriteString("}")

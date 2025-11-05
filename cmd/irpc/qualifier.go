@@ -1,5 +1,29 @@
 package main
 
+// namedInfo stores relevant data from "named" types
+type namedInfo struct {
+	namedName  string
+	importSpec importSpec
+}
+
+func (ni namedInfo) qualifiedName(q *qualifier) string {
+	return q.qualifyNamedInfo(ni)
+}
+
+type importSpec struct {
+	alias   string // "myCtx" in `import myCtx "context"``
+	path    string // fully qualifies the package
+	pkgName string // the "context" in "context.Context"
+}
+
+// packageQualifier is import alias if defined, otherwise simply the package name
+func (is importSpec) packageQualifier() string {
+	if is.alias != "" {
+		return is.alias
+	}
+	return is.pkgName
+}
+
 type qualifier struct {
 	srcFileImports orderedSet[importSpec]
 	usedImports    orderedSet[importSpec]
@@ -28,6 +52,7 @@ func (q *qualifier) qualifyNamedInfo(ni namedInfo) string {
 	return qual + "." + ni.namedName
 }
 
+// copy receiver - doesn't alter already existing imports
 func (q qualifier) qualifyNamedInfoWithoutAddingImports(ni namedInfo) string {
 	// todo: if pkg is never imported by actual code, we could use full path (eg: github.com/marben/irpc/some_package.TypeName) in comments
 	// todo: this is case for example with slice_named_ircp.go in tests, which uses out_.Uint8 somewhere.
