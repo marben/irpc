@@ -190,12 +190,6 @@ func (tr typeResolver) newType(apiName string, t types.Type, astExpr ast.Expr) (
 	case *types.Basic:
 		return tr.newBasicType(ut, ni)
 	case *types.Slice:
-		if ut.Elem().Underlying().String() == "byte" {
-			return tr.newByteSliceType(ni)
-		}
-		if ut.Elem().Underlying().String() == "bool" {
-			return tr.newBoolSliceType(ni)
-		}
 		return tr.newSliceType(apiName, ni, ut, utAst)
 	case *types.Map: // todo: test maps using http.Header named map (doesn't have ast etc..)
 		return tr.newMapType(apiName, ni, ut, utAst)

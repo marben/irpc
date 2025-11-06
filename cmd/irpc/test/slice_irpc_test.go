@@ -54,6 +54,12 @@ func TestSlice(t *testing.T) {
 	if resSB != 1+2+3+4 {
 		t.Fatalf("SliceOfBytesSum(): %d", resSB)
 	}
+
+	t.Log("slice of uint8")
+	resSU8 := c.sliceOfUint8([]uint8{1, 2, 3, 4})
+	if !slices.Equal(resSU8, []uint8{4, 3, 2, 1}) {
+		t.Fatalf("sliceOfUint8(): %v", resSU8)
+	}
 }
 
 func TestUint8SliceCasting(t *testing.T) {

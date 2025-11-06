@@ -64,13 +64,11 @@ type directCallType struct {
 	ni                       *namedInfo
 	typeName                 string
 	encFuncName, decFuncName string
-	// enc                      encoder
 }
 
 func newDirectCallType(encFunc, decFunc string, typeName string, ni *namedInfo) Type {
 	return directCallType{
-		ni: ni,
-		// enc:         newDirectCallEncoder(encFunc, decFunc, typeName, ni),
+		ni:          ni,
 		typeName:    typeName,
 		encFuncName: encFunc,
 		decFuncName: decFunc,
@@ -91,8 +89,6 @@ func (t directCallType) nameForComments(q *qualifier) string {
 	if t.ni == nil {
 		return t.typeName
 	}
-
-	// return e.ni.importSpec.pkgName + "." + e.ni.namedName
 
 	return q.qualifyNamedInfoWithoutAddingImports(*t.ni)
 }

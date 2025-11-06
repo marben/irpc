@@ -7,7 +7,20 @@ import (
 	"strings"
 )
 
-var _ Type = sliceType{}
+func (tr *typeResolver) newSliceType(apiName string, ni *namedInfo, st *types.Slice, astExpr ast.Expr) (Type, error) {
+	switch st.Elem().Underlying().String() {
+	case "byte":
+		return tr.newByteSliceType(ni)
+	case "bool":
+		return tr.newBoolSliceType(ni)
+	}
+	if st.String() == "[]uint8" {
+		// []uint8 is interchangeable with []byte. but not if named
+		return newDirectCallType("ByteSlice", "ByteSlice", "[]uint8", ni), nil
+	}
+
+	return tr.newGenericSliceType(apiName, ni, st, astExpr)
+}
 
 // []byte
 func (tr *typeResolver) newByteSliceType(ni *namedInfo) (Type, error) {
@@ -19,36 +32,35 @@ func (tr *typeResolver) newBoolSliceType(ni *namedInfo) (Type, error) {
 	return newDirectCallType("BoolSlice", "BoolSlice", "[]bool", ni), nil
 }
 
-// generic slice encoder
-type sliceType struct {
+type genericSliceType struct {
 	elemT Type
 	lenT  Type
 	ni    *namedInfo
 }
 
-func (tr *typeResolver) newSliceType(apiName string, ni *namedInfo, st *types.Slice, astExpr ast.Expr) (sliceType, error) {
+func (tr *typeResolver) newGenericSliceType(apiName string, ni *namedInfo, st *types.Slice, astExpr ast.Expr) (genericSliceType, error) {
 	var elemAst ast.Expr
 	if astExpr != nil {
 		arrayAst, ok := astExpr.(*ast.ArrayType)
 		if !ok {
-			return sliceType{}, fmt.Errorf("slice's astExpression is not *ast.ArrayType, but %T of value %#[1]v", astExpr)
+			return genericSliceType{}, fmt.Errorf("slice's astExpression is not *ast.ArrayType, but %T of value %#[1]v", astExpr)
 		}
 		elemAst = arrayAst.Elt
 	}
 
 	elemT, err := tr.newType(apiName, st.Elem(), elemAst)
 	if err != nil {
-		return sliceType{}, fmt.Errorf("newType() for slices element %q: %w", st.Elem(), err)
+		return genericSliceType{}, fmt.Errorf("newType() for slices element %q: %w", st.Elem(), err)
 	}
 
-	return sliceType{
+	return genericSliceType{
 		elemT: elemT,
 		lenT:  tr.lenType,
 		ni:    ni,
 	}, nil
 }
 
-func (st sliceType) name(q *qualifier) string {
+func (st genericSliceType) name(q *qualifier) string {
 	if st.ni != nil {
 		return q.qualifyNamedInfo(*st.ni)
 	}
@@ -56,7 +68,7 @@ func (st sliceType) name(q *qualifier) string {
 }
 
 // encode implements encoder.
-func (st sliceType) encode(varId string, existingVars varNames, q *qualifier) string {
+func (st genericSliceType) encode(varId string, existingVars varNames, q *qualifier) string {
 	sb := &strings.Builder{}
 
 	// length
@@ -74,7 +86,7 @@ func (st sliceType) encode(varId string, existingVars varNames, q *qualifier) st
 }
 
 // decode implements encoder.
-func (st sliceType) decode(varId string, existingVars varNames, q *qualifier) string {
+func (st genericSliceType) decode(varId string, existingVars varNames, q *qualifier) string {
 	sb := &strings.Builder{}
 
 	// length
@@ -95,6 +107,6 @@ func (st sliceType) decode(varId string, existingVars varNames, q *qualifier) st
 }
 
 // codeblock implements encoder.
-func (st sliceType) codeblock(q *qualifier) string {
+func (st genericSliceType) codeblock(q *qualifier) string {
 	return ""
 }

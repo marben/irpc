@@ -1,5 +1,7 @@
 package irpctestpkg
 
+import "slices"
+
 //go:generate go run ../
 
 type namedByteSlice []byte
@@ -13,10 +15,17 @@ type sliceTest interface {
 	SliceOfBytesSum(slice []byte) int
 	namedByteSlice(slice namedByteSlice) int
 	sliceOfBools(slice []bool) namedBoolSlice
+	sliceOfUint8(slice []uint8) []byte
 }
 
 type sliceTestImpl struct {
 	skew int
+}
+
+// sliceOfUint8 implements sliceTest.
+func (st sliceTestImpl) sliceOfUint8(slice []uint8) []byte {
+	slices.Reverse(slice)
+	return slice
 }
 
 // sliceOfBools implements sliceTest.

@@ -16,10 +16,10 @@ func newSliceTestIrpcService(impl sliceTest) *sliceTestIrpcService {
 	return &sliceTestIrpcService{
 		impl: impl,
 		id: []byte{
-			0xc5, 0x17, 0x09, 0x8c, 0xc5, 0xd3, 0xc1, 0x03,
-			0xdb, 0x83, 0xc8, 0xcb, 0xcc, 0x65, 0x1f, 0x79,
-			0xc9, 0xfb, 0x61, 0xb4, 0xda, 0x9e, 0x27, 0x26,
-			0xc9, 0x0d, 0x29, 0xf3, 0x62, 0x85, 0x7e, 0x8d,
+			0x1c, 0x35, 0xd3, 0xb5, 0xbd, 0xba, 0x17, 0xf2,
+			0x7e, 0x4d, 0x61, 0x3c, 0xba, 0x74, 0x05, 0x35,
+			0x5b, 0xf1, 0x69, 0xcf, 0x3f, 0x83, 0x5c, 0x5d,
+			0xd8, 0xc7, 0x73, 0x0b, 0x38, 0x6c, 0xe7, 0x38,
 		},
 	}
 }
@@ -126,6 +126,20 @@ func (s *sliceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 				return resp
 			}, nil
 		}, nil
+	case 7: // sliceOfUint8
+		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _Irpc_sliceTestsliceOfUint8Req
+			if err := args.Deserialize(d); err != nil {
+				return nil, err
+			}
+			return func(ctx context.Context) irpcgen.Serializable {
+				// EXECUTE
+				var resp _Irpc_sliceTestsliceOfUint8Resp
+				resp.Param0 = s.impl.sliceOfUint8(args.Param0_slice)
+				return resp
+			}, nil
+		}, nil
 	default:
 		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, s.Id())
 	}
@@ -138,10 +152,10 @@ type sliceTestIrpcClient struct {
 
 func newSliceTestIrpcClient(endpoint irpcgen.Endpoint) (*sliceTestIrpcClient, error) {
 	id := []byte{
-		0xc5, 0x17, 0x09, 0x8c, 0xc5, 0xd3, 0xc1, 0x03,
-		0xdb, 0x83, 0xc8, 0xcb, 0xcc, 0x65, 0x1f, 0x79,
-		0xc9, 0xfb, 0x61, 0xb4, 0xda, 0x9e, 0x27, 0x26,
-		0xc9, 0x0d, 0x29, 0xf3, 0x62, 0x85, 0x7e, 0x8d,
+		0x1c, 0x35, 0xd3, 0xb5, 0xbd, 0xba, 0x17, 0xf2,
+		0x7e, 0x4d, 0x61, 0x3c, 0xba, 0x74, 0x05, 0x35,
+		0x5b, 0xf1, 0x69, 0xcf, 0x3f, 0x83, 0x5c, 0x5d,
+		0xd8, 0xc7, 0x73, 0x0b, 0x38, 0x6c, 0xe7, 0x38,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
@@ -215,6 +229,16 @@ func (_c *sliceTestIrpcClient) sliceOfBools(slice []bool) namedBoolSlice {
 	}
 	var resp _Irpc_sliceTestsliceOfBoolsResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 6, req, &resp); err != nil {
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
+	}
+	return resp.Param0
+}
+func (_c *sliceTestIrpcClient) sliceOfUint8(slice []uint8) []byte {
+	var req = _Irpc_sliceTestsliceOfUint8Req{
+		Param0_slice: slice,
+	}
+	var resp _Irpc_sliceTestsliceOfUint8Resp
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 7, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
@@ -557,6 +581,40 @@ func (s _Irpc_sliceTestsliceOfBoolsResp) Serialize(e *irpcgen.Encoder) error {
 func (s *_Irpc_sliceTestsliceOfBoolsResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.BoolSlice((*[]bool)(&s.Param0)); err != nil {
 		return fmt.Errorf("deserialize s.Param0 of type \"namedBoolSlice\": %w", err)
+	}
+	return nil
+}
+
+type _Irpc_sliceTestsliceOfUint8Req struct {
+	Param0_slice []uint8
+}
+
+func (s _Irpc_sliceTestsliceOfUint8Req) Serialize(e *irpcgen.Encoder) error {
+	if err := e.ByteSlice(s.Param0_slice); err != nil {
+		return fmt.Errorf("serialize s.Param0_slice of type \"[]uint8\": %w", err)
+	}
+	return nil
+}
+func (s *_Irpc_sliceTestsliceOfUint8Req) Deserialize(d *irpcgen.Decoder) error {
+	if err := d.ByteSlice(&s.Param0_slice); err != nil {
+		return fmt.Errorf("deserialize s.Param0_slice of type \"[]uint8\": %w", err)
+	}
+	return nil
+}
+
+type _Irpc_sliceTestsliceOfUint8Resp struct {
+	Param0 []byte
+}
+
+func (s _Irpc_sliceTestsliceOfUint8Resp) Serialize(e *irpcgen.Encoder) error {
+	if err := e.ByteSlice(s.Param0); err != nil {
+		return fmt.Errorf("serialize s.Param0 of type \"[]byte\": %w", err)
+	}
+	return nil
+}
+func (s *_Irpc_sliceTestsliceOfUint8Resp) Deserialize(d *irpcgen.Decoder) error {
+	if err := d.ByteSlice(&s.Param0); err != nil {
+		return fmt.Errorf("deserialize s.Param0 of type \"[]byte\": %w", err)
 	}
 	return nil
 }
