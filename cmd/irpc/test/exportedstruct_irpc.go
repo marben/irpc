@@ -16,10 +16,10 @@ func NewFileServerIrpcService(impl FileServer) *FileServerIrpcService {
 	return &FileServerIrpcService{
 		impl: impl,
 		id: []byte{
-			0xa8, 0x58, 0x2e, 0xc2, 0x60, 0xd3, 0x8f, 0x6e,
-			0x95, 0xfa, 0x18, 0xba, 0xf0, 0x5b, 0x73, 0x94,
-			0xe3, 0x99, 0xa3, 0xfa, 0x22, 0x2b, 0xca, 0x05,
-			0x74, 0x01, 0xe1, 0xf8, 0xde, 0xfb, 0x21, 0xe9,
+			0xe5, 0x80, 0x23, 0x0b, 0xac, 0x15, 0x0d, 0xc7,
+			0x37, 0x69, 0xe8, 0x58, 0x5f, 0x4e, 0x89, 0x8b,
+			0xdf, 0x31, 0x95, 0x1f, 0xad, 0x26, 0x1b, 0x94,
+			0x86, 0xad, 0x7d, 0x62, 0x48, 0xbd, 0x42, 0x95,
 		},
 	}
 }
@@ -32,7 +32,7 @@ func (s *FileServerIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgD
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
-				var resp _Irpc_FileServerListFilesResp
+				var resp _irpc_FileServer_ListFilesResp
 				resp.Param0, resp.Param1 = s.impl.ListFiles()
 				return resp
 			}, nil
@@ -50,10 +50,10 @@ type FileServerIrpcClient struct {
 
 func NewFileServerIrpcClient(endpoint irpcgen.Endpoint) (*FileServerIrpcClient, error) {
 	id := []byte{
-		0xa8, 0x58, 0x2e, 0xc2, 0x60, 0xd3, 0x8f, 0x6e,
-		0x95, 0xfa, 0x18, 0xba, 0xf0, 0x5b, 0x73, 0x94,
-		0xe3, 0x99, 0xa3, 0xfa, 0x22, 0x2b, 0xca, 0x05,
-		0x74, 0x01, 0xe1, 0xf8, 0xde, 0xfb, 0x21, 0xe9,
+		0xe5, 0x80, 0x23, 0x0b, 0xac, 0x15, 0x0d, 0xc7,
+		0x37, 0x69, 0xe8, 0x58, 0x5f, 0x4e, 0x89, 0x8b,
+		0xdf, 0x31, 0x95, 0x1f, 0xad, 0x26, 0x1b, 0x94,
+		0x86, 0xad, 0x7d, 0x62, 0x48, 0xbd, 0x42, 0x95,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
@@ -61,20 +61,20 @@ func NewFileServerIrpcClient(endpoint irpcgen.Endpoint) (*FileServerIrpcClient, 
 	return &FileServerIrpcClient{endpoint: endpoint, id: id}, nil
 }
 func (_c *FileServerIrpcClient) ListFiles() ([]FileInfo, error) {
-	var resp _Irpc_FileServerListFilesResp
+	var resp _irpc_FileServer_ListFilesResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, irpcgen.EmptySerializable{}, &resp); err != nil {
-		var zero _Irpc_FileServerListFilesResp
+		var zero _irpc_FileServer_ListFilesResp
 		return zero.Param0, err
 	}
 	return resp.Param0, resp.Param1
 }
 
-type _Irpc_FileServerListFilesResp struct {
+type _irpc_FileServer_ListFilesResp struct {
 	Param0 []FileInfo
 	Param1 error
 }
 
-func (s _Irpc_FileServerListFilesResp) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_FileServer_ListFilesResp) Serialize(e *irpcgen.Encoder) error {
 	{ // s.Param0 []FileInfo
 		if err := e.Len(len(s.Param0)); err != nil {
 			return fmt.Errorf("serialize len(s.Param0) of type \"int\": %w", err)
@@ -105,7 +105,7 @@ func (s _Irpc_FileServerListFilesResp) Serialize(e *irpcgen.Encoder) error {
 	}
 	return nil
 }
-func (s *_Irpc_FileServerListFilesResp) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_FileServer_ListFilesResp) Deserialize(d *irpcgen.Decoder) error {
 	{ // s.Param0 []FileInfo
 		var l int
 		if err := d.Len(&l); err != nil {

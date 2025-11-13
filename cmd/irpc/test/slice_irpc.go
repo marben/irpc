@@ -16,10 +16,10 @@ func newSliceTestIrpcService(impl sliceTest) *sliceTestIrpcService {
 	return &sliceTestIrpcService{
 		impl: impl,
 		id: []byte{
-			0x10, 0x39, 0xfc, 0x40, 0x1c, 0xf9, 0xb2, 0x8b,
-			0xb8, 0x17, 0x25, 0x17, 0x41, 0x56, 0x5d, 0xf2,
-			0xe5, 0x7e, 0x1a, 0x24, 0x13, 0xbd, 0xa4, 0xdc,
-			0xfa, 0xfc, 0x51, 0x18, 0x14, 0xb4, 0x7e, 0x61,
+			0x3e, 0x86, 0x9b, 0x05, 0xb9, 0x55, 0xbb, 0x20,
+			0x69, 0xe8, 0xb6, 0xed, 0x99, 0xc0, 0x87, 0xb1,
+			0x9f, 0x11, 0x4a, 0x1a, 0x88, 0xf7, 0x92, 0x95,
+			0x7d, 0x88, 0x1a, 0x22, 0x2d, 0xb2, 0x37, 0x48,
 		},
 	}
 }
@@ -31,13 +31,13 @@ func (s *sliceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 	case 0: // SliceSum
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			// DESERIALIZE
-			var args _Irpc_sliceTestSliceSumReq
+			var args _irpc_sliceTest_SliceSumReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
-				var resp _Irpc_sliceTestSliceSumResp
+				var resp _irpc_sliceTest_SliceSumResp
 				resp.Param0 = s.impl.SliceSum(args.Param0_slice)
 				return resp
 			}, nil
@@ -45,13 +45,13 @@ func (s *sliceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 	case 1: // VectMult
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			// DESERIALIZE
-			var args _Irpc_sliceTestVectMultReq
+			var args _irpc_sliceTest_VectMultReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
-				var resp _Irpc_sliceTestVectMultResp
+				var resp _irpc_sliceTest_VectMultResp
 				resp.Param0 = s.impl.VectMult(args.Param0_vect, args.Param1_s)
 				return resp
 			}, nil
@@ -59,13 +59,13 @@ func (s *sliceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 	case 2: // SliceOfFloat64Sum
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			// DESERIALIZE
-			var args _Irpc_sliceTestSliceOfFloat64SumReq
+			var args _irpc_sliceTest_SliceOfFloat64SumReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
-				var resp _Irpc_sliceTestSliceOfFloat64SumResp
+				var resp _irpc_sliceTest_SliceOfFloat64SumResp
 				resp.Param0 = s.impl.SliceOfFloat64Sum(args.Param0_slice)
 				return resp
 			}, nil
@@ -73,13 +73,13 @@ func (s *sliceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 	case 3: // SliceOfSlicesSum
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			// DESERIALIZE
-			var args _Irpc_sliceTestSliceOfSlicesSumReq
+			var args _irpc_sliceTest_SliceOfSlicesSumReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
-				var resp _Irpc_sliceTestSliceOfSlicesSumResp
+				var resp _irpc_sliceTest_SliceOfSlicesSumResp
 				resp.Param0 = s.impl.SliceOfSlicesSum(args.Param0_slice)
 				return resp
 			}, nil
@@ -87,13 +87,13 @@ func (s *sliceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 	case 4: // SliceOfBytesSum
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			// DESERIALIZE
-			var args _Irpc_sliceTestSliceOfBytesSumReq
+			var args _irpc_sliceTest_SliceOfBytesSumReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
-				var resp _Irpc_sliceTestSliceOfBytesSumResp
+				var resp _irpc_sliceTest_SliceOfBytesSumResp
 				resp.Param0 = s.impl.SliceOfBytesSum(args.Param0_slice)
 				return resp
 			}, nil
@@ -101,13 +101,13 @@ func (s *sliceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 	case 5: // namedByteSlice
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			// DESERIALIZE
-			var args _Irpc_sliceTestnamedByteSliceReq
+			var args _irpc_sliceTest_namedByteSliceReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
-				var resp _Irpc_sliceTestnamedByteSliceResp
+				var resp _irpc_sliceTest_namedByteSliceResp
 				resp.Param0 = s.impl.namedByteSlice(args.Param0_slice)
 				return resp
 			}, nil
@@ -115,13 +115,13 @@ func (s *sliceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 	case 6: // sliceOfBools
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			// DESERIALIZE
-			var args _Irpc_sliceTestsliceOfBoolsReq
+			var args _irpc_sliceTest_sliceOfBoolsReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
-				var resp _Irpc_sliceTestsliceOfBoolsResp
+				var resp _irpc_sliceTest_sliceOfBoolsResp
 				resp.Param0 = s.impl.sliceOfBools(args.Param0_slice)
 				return resp
 			}, nil
@@ -129,13 +129,13 @@ func (s *sliceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 	case 7: // sliceOfUint8
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			// DESERIALIZE
-			var args _Irpc_sliceTestsliceOfUint8Req
+			var args _irpc_sliceTest_sliceOfUint8Req
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
-				var resp _Irpc_sliceTestsliceOfUint8Resp
+				var resp _irpc_sliceTest_sliceOfUint8Resp
 				resp.Param0 = s.impl.sliceOfUint8(args.Param0_slice)
 				return resp
 			}, nil
@@ -153,10 +153,10 @@ type sliceTestIrpcClient struct {
 
 func newSliceTestIrpcClient(endpoint irpcgen.Endpoint) (*sliceTestIrpcClient, error) {
 	id := []byte{
-		0x10, 0x39, 0xfc, 0x40, 0x1c, 0xf9, 0xb2, 0x8b,
-		0xb8, 0x17, 0x25, 0x17, 0x41, 0x56, 0x5d, 0xf2,
-		0xe5, 0x7e, 0x1a, 0x24, 0x13, 0xbd, 0xa4, 0xdc,
-		0xfa, 0xfc, 0x51, 0x18, 0x14, 0xb4, 0x7e, 0x61,
+		0x3e, 0x86, 0x9b, 0x05, 0xb9, 0x55, 0xbb, 0x20,
+		0x69, 0xe8, 0xb6, 0xed, 0x99, 0xc0, 0x87, 0xb1,
+		0x9f, 0x11, 0x4a, 0x1a, 0x88, 0xf7, 0x92, 0x95,
+		0x7d, 0x88, 0x1a, 0x22, 0x2d, 0xb2, 0x37, 0x48,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
@@ -164,92 +164,92 @@ func newSliceTestIrpcClient(endpoint irpcgen.Endpoint) (*sliceTestIrpcClient, er
 	return &sliceTestIrpcClient{endpoint: endpoint, id: id}, nil
 }
 func (_c *sliceTestIrpcClient) SliceSum(slice []int) int {
-	var req = _Irpc_sliceTestSliceSumReq{
+	var req = _irpc_sliceTest_SliceSumReq{
 		Param0_slice: slice,
 	}
-	var resp _Irpc_sliceTestSliceSumResp
+	var resp _irpc_sliceTest_SliceSumResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
 func (_c *sliceTestIrpcClient) VectMult(vect []int, s int) []int {
-	var req = _Irpc_sliceTestVectMultReq{
+	var req = _irpc_sliceTest_VectMultReq{
 		Param0_vect: vect,
 		Param1_s:    s,
 	}
-	var resp _Irpc_sliceTestVectMultResp
+	var resp _irpc_sliceTest_VectMultResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 1, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
 func (_c *sliceTestIrpcClient) SliceOfFloat64Sum(slice []float64) float64 {
-	var req = _Irpc_sliceTestSliceOfFloat64SumReq{
+	var req = _irpc_sliceTest_SliceOfFloat64SumReq{
 		Param0_slice: slice,
 	}
-	var resp _Irpc_sliceTestSliceOfFloat64SumResp
+	var resp _irpc_sliceTest_SliceOfFloat64SumResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 2, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
 func (_c *sliceTestIrpcClient) SliceOfSlicesSum(slice [][]int) int {
-	var req = _Irpc_sliceTestSliceOfSlicesSumReq{
+	var req = _irpc_sliceTest_SliceOfSlicesSumReq{
 		Param0_slice: slice,
 	}
-	var resp _Irpc_sliceTestSliceOfSlicesSumResp
+	var resp _irpc_sliceTest_SliceOfSlicesSumResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 3, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
 func (_c *sliceTestIrpcClient) SliceOfBytesSum(slice []byte) int {
-	var req = _Irpc_sliceTestSliceOfBytesSumReq{
+	var req = _irpc_sliceTest_SliceOfBytesSumReq{
 		Param0_slice: slice,
 	}
-	var resp _Irpc_sliceTestSliceOfBytesSumResp
+	var resp _irpc_sliceTest_SliceOfBytesSumResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 4, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
 func (_c *sliceTestIrpcClient) namedByteSlice(slice namedByteSlice) int {
-	var req = _Irpc_sliceTestnamedByteSliceReq{
+	var req = _irpc_sliceTest_namedByteSliceReq{
 		Param0_slice: slice,
 	}
-	var resp _Irpc_sliceTestnamedByteSliceResp
+	var resp _irpc_sliceTest_namedByteSliceResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 5, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
 func (_c *sliceTestIrpcClient) sliceOfBools(slice []bool) namedBoolSlice {
-	var req = _Irpc_sliceTestsliceOfBoolsReq{
+	var req = _irpc_sliceTest_sliceOfBoolsReq{
 		Param0_slice: slice,
 	}
-	var resp _Irpc_sliceTestsliceOfBoolsResp
+	var resp _irpc_sliceTest_sliceOfBoolsResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 6, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
 func (_c *sliceTestIrpcClient) sliceOfUint8(slice []uint8) []byte {
-	var req = _Irpc_sliceTestsliceOfUint8Req{
+	var req = _irpc_sliceTest_sliceOfUint8Req{
 		Param0_slice: slice,
 	}
-	var resp _Irpc_sliceTestsliceOfUint8Resp
+	var resp _irpc_sliceTest_sliceOfUint8Resp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 7, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
 
-type _Irpc_sliceTestSliceSumReq struct {
+type _irpc_sliceTest_SliceSumReq struct {
 	Param0_slice []int
 }
 
-func (s _Irpc_sliceTestSliceSumReq) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_sliceTest_SliceSumReq) Serialize(e *irpcgen.Encoder) error {
 	{ // s.Param0_slice []int
 		if err := e.Len(len(s.Param0_slice)); err != nil {
 			return fmt.Errorf("serialize len(s.Param0_slice) of type \"int\": %w", err)
@@ -262,7 +262,7 @@ func (s _Irpc_sliceTestSliceSumReq) Serialize(e *irpcgen.Encoder) error {
 	}
 	return nil
 }
-func (s *_Irpc_sliceTestSliceSumReq) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_sliceTest_SliceSumReq) Deserialize(d *irpcgen.Decoder) error {
 	{ // s.Param0_slice []int
 		var l int
 		if err := d.Len(&l); err != nil {
@@ -278,29 +278,29 @@ func (s *_Irpc_sliceTestSliceSumReq) Deserialize(d *irpcgen.Decoder) error {
 	return nil
 }
 
-type _Irpc_sliceTestSliceSumResp struct {
+type _irpc_sliceTest_SliceSumResp struct {
 	Param0 int
 }
 
-func (s _Irpc_sliceTestSliceSumResp) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_sliceTest_SliceSumResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0); err != nil {
 		return fmt.Errorf("serialize s.Param0 of type \"int\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_sliceTestSliceSumResp) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_sliceTest_SliceSumResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0); err != nil {
 		return fmt.Errorf("deserialize s.Param0 of type \"int\": %w", err)
 	}
 	return nil
 }
 
-type _Irpc_sliceTestVectMultReq struct {
+type _irpc_sliceTest_VectMultReq struct {
 	Param0_vect []int
 	Param1_s    int
 }
 
-func (s _Irpc_sliceTestVectMultReq) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_sliceTest_VectMultReq) Serialize(e *irpcgen.Encoder) error {
 	{ // s.Param0_vect []int
 		if err := e.Len(len(s.Param0_vect)); err != nil {
 			return fmt.Errorf("serialize len(s.Param0_vect) of type \"int\": %w", err)
@@ -316,7 +316,7 @@ func (s _Irpc_sliceTestVectMultReq) Serialize(e *irpcgen.Encoder) error {
 	}
 	return nil
 }
-func (s *_Irpc_sliceTestVectMultReq) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_sliceTest_VectMultReq) Deserialize(d *irpcgen.Decoder) error {
 	{ // s.Param0_vect []int
 		var l int
 		if err := d.Len(&l); err != nil {
@@ -335,11 +335,11 @@ func (s *_Irpc_sliceTestVectMultReq) Deserialize(d *irpcgen.Decoder) error {
 	return nil
 }
 
-type _Irpc_sliceTestVectMultResp struct {
+type _irpc_sliceTest_VectMultResp struct {
 	Param0 []int
 }
 
-func (s _Irpc_sliceTestVectMultResp) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_sliceTest_VectMultResp) Serialize(e *irpcgen.Encoder) error {
 	{ // s.Param0 []int
 		if err := e.Len(len(s.Param0)); err != nil {
 			return fmt.Errorf("serialize len(s.Param0) of type \"int\": %w", err)
@@ -352,7 +352,7 @@ func (s _Irpc_sliceTestVectMultResp) Serialize(e *irpcgen.Encoder) error {
 	}
 	return nil
 }
-func (s *_Irpc_sliceTestVectMultResp) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_sliceTest_VectMultResp) Deserialize(d *irpcgen.Decoder) error {
 	{ // s.Param0 []int
 		var l int
 		if err := d.Len(&l); err != nil {
@@ -368,11 +368,11 @@ func (s *_Irpc_sliceTestVectMultResp) Deserialize(d *irpcgen.Decoder) error {
 	return nil
 }
 
-type _Irpc_sliceTestSliceOfFloat64SumReq struct {
+type _irpc_sliceTest_SliceOfFloat64SumReq struct {
 	Param0_slice []float64
 }
 
-func (s _Irpc_sliceTestSliceOfFloat64SumReq) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_sliceTest_SliceOfFloat64SumReq) Serialize(e *irpcgen.Encoder) error {
 	{ // s.Param0_slice []float64
 		if err := e.Len(len(s.Param0_slice)); err != nil {
 			return fmt.Errorf("serialize len(s.Param0_slice) of type \"int\": %w", err)
@@ -385,7 +385,7 @@ func (s _Irpc_sliceTestSliceOfFloat64SumReq) Serialize(e *irpcgen.Encoder) error
 	}
 	return nil
 }
-func (s *_Irpc_sliceTestSliceOfFloat64SumReq) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_sliceTest_SliceOfFloat64SumReq) Deserialize(d *irpcgen.Decoder) error {
 	{ // s.Param0_slice []float64
 		var l int
 		if err := d.Len(&l); err != nil {
@@ -401,28 +401,28 @@ func (s *_Irpc_sliceTestSliceOfFloat64SumReq) Deserialize(d *irpcgen.Decoder) er
 	return nil
 }
 
-type _Irpc_sliceTestSliceOfFloat64SumResp struct {
+type _irpc_sliceTest_SliceOfFloat64SumResp struct {
 	Param0 float64
 }
 
-func (s _Irpc_sliceTestSliceOfFloat64SumResp) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_sliceTest_SliceOfFloat64SumResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.Float64le(s.Param0); err != nil {
 		return fmt.Errorf("serialize s.Param0 of type \"float64\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_sliceTestSliceOfFloat64SumResp) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_sliceTest_SliceOfFloat64SumResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.Float64le(&s.Param0); err != nil {
 		return fmt.Errorf("deserialize s.Param0 of type \"float64\": %w", err)
 	}
 	return nil
 }
 
-type _Irpc_sliceTestSliceOfSlicesSumReq struct {
+type _irpc_sliceTest_SliceOfSlicesSumReq struct {
 	Param0_slice [][]int
 }
 
-func (s _Irpc_sliceTestSliceOfSlicesSumReq) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_sliceTest_SliceOfSlicesSumReq) Serialize(e *irpcgen.Encoder) error {
 	{ // s.Param0_slice [][]int
 		if err := e.Len(len(s.Param0_slice)); err != nil {
 			return fmt.Errorf("serialize len(s.Param0_slice) of type \"int\": %w", err)
@@ -442,7 +442,7 @@ func (s _Irpc_sliceTestSliceOfSlicesSumReq) Serialize(e *irpcgen.Encoder) error 
 	}
 	return nil
 }
-func (s *_Irpc_sliceTestSliceOfSlicesSumReq) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_sliceTest_SliceOfSlicesSumReq) Deserialize(d *irpcgen.Decoder) error {
 	{ // s.Param0_slice [][]int
 		var l int
 		if err := d.Len(&l); err != nil {
@@ -467,153 +467,153 @@ func (s *_Irpc_sliceTestSliceOfSlicesSumReq) Deserialize(d *irpcgen.Decoder) err
 	return nil
 }
 
-type _Irpc_sliceTestSliceOfSlicesSumResp struct {
+type _irpc_sliceTest_SliceOfSlicesSumResp struct {
 	Param0 int
 }
 
-func (s _Irpc_sliceTestSliceOfSlicesSumResp) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_sliceTest_SliceOfSlicesSumResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0); err != nil {
 		return fmt.Errorf("serialize s.Param0 of type \"int\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_sliceTestSliceOfSlicesSumResp) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_sliceTest_SliceOfSlicesSumResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0); err != nil {
 		return fmt.Errorf("deserialize s.Param0 of type \"int\": %w", err)
 	}
 	return nil
 }
 
-type _Irpc_sliceTestSliceOfBytesSumReq struct {
+type _irpc_sliceTest_SliceOfBytesSumReq struct {
 	Param0_slice []byte
 }
 
-func (s _Irpc_sliceTestSliceOfBytesSumReq) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_sliceTest_SliceOfBytesSumReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.ByteSlice(s.Param0_slice); err != nil {
 		return fmt.Errorf("serialize s.Param0_slice of type \"[]byte\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_sliceTestSliceOfBytesSumReq) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_sliceTest_SliceOfBytesSumReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.ByteSlice(&s.Param0_slice); err != nil {
 		return fmt.Errorf("deserialize s.Param0_slice of type \"[]byte\": %w", err)
 	}
 	return nil
 }
 
-type _Irpc_sliceTestSliceOfBytesSumResp struct {
+type _irpc_sliceTest_SliceOfBytesSumResp struct {
 	Param0 int
 }
 
-func (s _Irpc_sliceTestSliceOfBytesSumResp) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_sliceTest_SliceOfBytesSumResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0); err != nil {
 		return fmt.Errorf("serialize s.Param0 of type \"int\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_sliceTestSliceOfBytesSumResp) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_sliceTest_SliceOfBytesSumResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0); err != nil {
 		return fmt.Errorf("deserialize s.Param0 of type \"int\": %w", err)
 	}
 	return nil
 }
 
-type _Irpc_sliceTestnamedByteSliceReq struct {
+type _irpc_sliceTest_namedByteSliceReq struct {
 	Param0_slice namedByteSlice
 }
 
-func (s _Irpc_sliceTestnamedByteSliceReq) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_sliceTest_namedByteSliceReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.ByteSlice([]byte(s.Param0_slice)); err != nil {
 		return fmt.Errorf("serialize s.Param0_slice of type \"namedByteSlice\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_sliceTestnamedByteSliceReq) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_sliceTest_namedByteSliceReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.ByteSlice((*[]byte)(&s.Param0_slice)); err != nil {
 		return fmt.Errorf("deserialize s.Param0_slice of type \"namedByteSlice\": %w", err)
 	}
 	return nil
 }
 
-type _Irpc_sliceTestnamedByteSliceResp struct {
+type _irpc_sliceTest_namedByteSliceResp struct {
 	Param0 int
 }
 
-func (s _Irpc_sliceTestnamedByteSliceResp) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_sliceTest_namedByteSliceResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0); err != nil {
 		return fmt.Errorf("serialize s.Param0 of type \"int\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_sliceTestnamedByteSliceResp) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_sliceTest_namedByteSliceResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0); err != nil {
 		return fmt.Errorf("deserialize s.Param0 of type \"int\": %w", err)
 	}
 	return nil
 }
 
-type _Irpc_sliceTestsliceOfBoolsReq struct {
+type _irpc_sliceTest_sliceOfBoolsReq struct {
 	Param0_slice []bool
 }
 
-func (s _Irpc_sliceTestsliceOfBoolsReq) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_sliceTest_sliceOfBoolsReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.BoolSlice(s.Param0_slice); err != nil {
 		return fmt.Errorf("serialize s.Param0_slice of type \"[]bool\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_sliceTestsliceOfBoolsReq) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_sliceTest_sliceOfBoolsReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.BoolSlice(&s.Param0_slice); err != nil {
 		return fmt.Errorf("deserialize s.Param0_slice of type \"[]bool\": %w", err)
 	}
 	return nil
 }
 
-type _Irpc_sliceTestsliceOfBoolsResp struct {
+type _irpc_sliceTest_sliceOfBoolsResp struct {
 	Param0 namedBoolSlice
 }
 
-func (s _Irpc_sliceTestsliceOfBoolsResp) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_sliceTest_sliceOfBoolsResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.BoolSlice([]bool(s.Param0)); err != nil {
 		return fmt.Errorf("serialize s.Param0 of type \"namedBoolSlice\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_sliceTestsliceOfBoolsResp) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_sliceTest_sliceOfBoolsResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.BoolSlice((*[]bool)(&s.Param0)); err != nil {
 		return fmt.Errorf("deserialize s.Param0 of type \"namedBoolSlice\": %w", err)
 	}
 	return nil
 }
 
-type _Irpc_sliceTestsliceOfUint8Req struct {
+type _irpc_sliceTest_sliceOfUint8Req struct {
 	Param0_slice []uint8
 }
 
-func (s _Irpc_sliceTestsliceOfUint8Req) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_sliceTest_sliceOfUint8Req) Serialize(e *irpcgen.Encoder) error {
 	if err := e.ByteSlice(s.Param0_slice); err != nil {
 		return fmt.Errorf("serialize s.Param0_slice of type \"[]uint8\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_sliceTestsliceOfUint8Req) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_sliceTest_sliceOfUint8Req) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.ByteSlice(&s.Param0_slice); err != nil {
 		return fmt.Errorf("deserialize s.Param0_slice of type \"[]uint8\": %w", err)
 	}
 	return nil
 }
 
-type _Irpc_sliceTestsliceOfUint8Resp struct {
+type _irpc_sliceTest_sliceOfUint8Resp struct {
 	Param0 []byte
 }
 
-func (s _Irpc_sliceTestsliceOfUint8Resp) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_sliceTest_sliceOfUint8Resp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.ByteSlice(s.Param0); err != nil {
 		return fmt.Errorf("serialize s.Param0 of type \"[]byte\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_sliceTestsliceOfUint8Resp) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_sliceTest_sliceOfUint8Resp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.ByteSlice(&s.Param0); err != nil {
 		return fmt.Errorf("deserialize s.Param0 of type \"[]byte\": %w", err)
 	}

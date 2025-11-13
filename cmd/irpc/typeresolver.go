@@ -21,7 +21,6 @@ type typeResolver struct {
 	boolType                     Type
 }
 
-// todo: make value type?
 func newTypeResolver(filename string) (typeResolver, error) {
 	absFilePath, err := filepath.Abs(filename)
 	if err != nil {
@@ -54,7 +53,6 @@ func newTypeResolver(filename string) (typeResolver, error) {
 
 	srcImports := newOrderedSet[importSpec]()
 	for _, is := range fileAst.Imports {
-		// log.Printf("file import spec: %q  %q", is.Name, is.Path.Value)
 		var alias string
 		if is.Name != nil {
 			alias = is.Name.Name
@@ -68,7 +66,6 @@ func newTypeResolver(filename string) (typeResolver, error) {
 			// package was parsed by go/packages library
 			spec := importSpec{alias, path, pkg.Name}
 			srcImports.add(spec)
-			// log.Printf("added src import: %+v", spec)
 		} else {
 			// must be from stdlib, which isn't provided by the packages lib
 			imp := importer.Default()
@@ -78,7 +75,6 @@ func newTypeResolver(filename string) (typeResolver, error) {
 			}
 			spec := importSpec{alias: alias, path: pkg.Path(), pkgName: pkg.Name()}
 			srcImports.add(spec)
-			// log.Printf("added src import: %+v", spec)
 		}
 	}
 

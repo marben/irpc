@@ -38,7 +38,7 @@ func newMethodGenerator(tr typeResolver, apiName string, methodField *ast.Field,
 	}
 
 	// REQUEST
-	reqStructTypeName := "_Irpc_" + apiName + methodName + "Req"
+	reqStructTypeName := "_irpc_" + apiName + "_" + methodName + "Req"
 
 	reqFieldNames := make(map[string]struct{}, len(params))
 	for _, rf := range params {
@@ -60,7 +60,7 @@ func newMethodGenerator(tr typeResolver, apiName string, methodField *ast.Field,
 	}
 
 	// RESPONSE
-	respStructTypeName := "_Irpc_" + apiName + methodName + "Resp"
+	respStructTypeName := "_irpc_" + apiName + "_" + methodName + "Resp"
 	respParams := []funcParam{}
 	for _, result := range results {
 		rp, err := newResultParam(result)

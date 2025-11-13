@@ -16,10 +16,10 @@ func newNamedTestIrpcService(impl namedTest) *namedTestIrpcService {
 	return &namedTestIrpcService{
 		impl: impl,
 		id: []byte{
-			0xde, 0xe5, 0xa3, 0x68, 0x4e, 0x2d, 0x9e, 0xd5,
-			0x69, 0x09, 0x8f, 0xae, 0x93, 0xe9, 0x55, 0x07,
-			0x19, 0x19, 0x5d, 0xa8, 0x1d, 0xc0, 0xed, 0x97,
-			0xc2, 0x0f, 0x70, 0xb5, 0x97, 0xe0, 0xa0, 0xf0,
+			0x28, 0x91, 0x4b, 0xce, 0x3a, 0xf8, 0x33, 0xf8,
+			0x51, 0xdc, 0xb1, 0x1d, 0xf9, 0x3f, 0x40, 0x04,
+			0xd9, 0x4d, 0x3a, 0xba, 0xb4, 0xeb, 0x47, 0x36,
+			0xc1, 0xe9, 0x37, 0x3e, 0x94, 0xd0, 0xb6, 0x4c,
 		},
 	}
 }
@@ -31,13 +31,13 @@ func (s *namedTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 	case 0: // isWeekend
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			// DESERIALIZE
-			var args _Irpc_namedTestisWeekendReq
+			var args _irpc_namedTest_isWeekendReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
-				var resp _Irpc_namedTestisWeekendResp
+				var resp _irpc_namedTest_isWeekendResp
 				resp.Param0 = s.impl.isWeekend(args.Param0_wd)
 				return resp
 			}, nil
@@ -45,13 +45,13 @@ func (s *namedTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 	case 1: // isWeekend2
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			// DESERIALIZE
-			var args _Irpc_namedTestisWeekend2Req
+			var args _irpc_namedTest_isWeekend2Req
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
-				var resp _Irpc_namedTestisWeekend2Resp
+				var resp _irpc_namedTest_isWeekend2Resp
 				resp.Param0 = s.impl.isWeekend2(args.Param0_wd)
 				return resp
 			}, nil
@@ -59,13 +59,13 @@ func (s *namedTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 	case 2: // containsSaturday
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			// DESERIALIZE
-			var args _Irpc_namedTestcontainsSaturdayReq
+			var args _irpc_namedTest_containsSaturdayReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
-				var resp _Irpc_namedTestcontainsSaturdayResp
+				var resp _irpc_namedTest_containsSaturdayResp
 				resp.Param0 = s.impl.containsSaturday(args.Param0_wds)
 				return resp
 			}, nil
@@ -73,13 +73,13 @@ func (s *namedTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 	case 3: // containsSaturday2
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			// DESERIALIZE
-			var args _Irpc_namedTestcontainsSaturday2Req
+			var args _irpc_namedTest_containsSaturday2Req
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
-				var resp _Irpc_namedTestcontainsSaturday2Resp
+				var resp _irpc_namedTest_containsSaturday2Resp
 				resp.Param0 = s.impl.containsSaturday2(args.Param0_wds)
 				return resp
 			}, nil
@@ -87,13 +87,13 @@ func (s *namedTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 	case 4: // namedBytesSum
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			// DESERIALIZE
-			var args _Irpc_namedTestnamedBytesSumReq
+			var args _irpc_namedTest_namedBytesSumReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
-				var resp _Irpc_namedTestnamedBytesSumResp
+				var resp _irpc_namedTest_namedBytesSumResp
 				resp.Param0 = s.impl.namedBytesSum(args.Param0_nb)
 				return resp
 			}, nil
@@ -101,13 +101,13 @@ func (s *namedTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 	case 5: // namedMapSum
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			// DESERIALIZE
-			var args _Irpc_namedTestnamedMapSumReq
+			var args _irpc_namedTest_namedMapSumReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
-				var resp _Irpc_namedTestnamedMapSumResp
+				var resp _irpc_namedTest_namedMapSumResp
 				resp.Param0 = s.impl.namedMapSum(args.Param0_p0)
 				return resp
 			}, nil
@@ -125,10 +125,10 @@ type namedTestIrpcClient struct {
 
 func newNamedTestIrpcClient(endpoint irpcgen.Endpoint) (*namedTestIrpcClient, error) {
 	id := []byte{
-		0xde, 0xe5, 0xa3, 0x68, 0x4e, 0x2d, 0x9e, 0xd5,
-		0x69, 0x09, 0x8f, 0xae, 0x93, 0xe9, 0x55, 0x07,
-		0x19, 0x19, 0x5d, 0xa8, 0x1d, 0xc0, 0xed, 0x97,
-		0xc2, 0x0f, 0x70, 0xb5, 0x97, 0xe0, 0xa0, 0xf0,
+		0x28, 0x91, 0x4b, 0xce, 0x3a, 0xf8, 0x33, 0xf8,
+		0x51, 0xdc, 0xb1, 0x1d, 0xf9, 0x3f, 0x40, 0x04,
+		0xd9, 0x4d, 0x3a, 0xba, 0xb4, 0xeb, 0x47, 0x36,
+		0xc1, 0xe9, 0x37, 0x3e, 0x94, 0xd0, 0xb6, 0x4c,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
@@ -136,139 +136,139 @@ func newNamedTestIrpcClient(endpoint irpcgen.Endpoint) (*namedTestIrpcClient, er
 	return &namedTestIrpcClient{endpoint: endpoint, id: id}, nil
 }
 func (_c *namedTestIrpcClient) isWeekend(wd weekDay) bool {
-	var req = _Irpc_namedTestisWeekendReq{
+	var req = _irpc_namedTest_isWeekendReq{
 		Param0_wd: wd,
 	}
-	var resp _Irpc_namedTestisWeekendResp
+	var resp _irpc_namedTest_isWeekendResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
 func (_c *namedTestIrpcClient) isWeekend2(wd weekDay2) bool {
-	var req = _Irpc_namedTestisWeekend2Req{
+	var req = _irpc_namedTest_isWeekend2Req{
 		Param0_wd: wd,
 	}
-	var resp _Irpc_namedTestisWeekend2Resp
+	var resp _irpc_namedTest_isWeekend2Resp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 1, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
 func (_c *namedTestIrpcClient) containsSaturday(wds []weekDay) bool {
-	var req = _Irpc_namedTestcontainsSaturdayReq{
+	var req = _irpc_namedTest_containsSaturdayReq{
 		Param0_wds: wds,
 	}
-	var resp _Irpc_namedTestcontainsSaturdayResp
+	var resp _irpc_namedTest_containsSaturdayResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 2, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
 func (_c *namedTestIrpcClient) containsSaturday2(wds namedWeekDaysSliceType) bool {
-	var req = _Irpc_namedTestcontainsSaturday2Req{
+	var req = _irpc_namedTest_containsSaturday2Req{
 		Param0_wds: wds,
 	}
-	var resp _Irpc_namedTestcontainsSaturday2Resp
+	var resp _irpc_namedTest_containsSaturday2Resp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 3, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
 func (_c *namedTestIrpcClient) namedBytesSum(nb namedByteSliceType) int {
-	var req = _Irpc_namedTestnamedBytesSumReq{
+	var req = _irpc_namedTest_namedBytesSumReq{
 		Param0_nb: nb,
 	}
-	var resp _Irpc_namedTestnamedBytesSumResp
+	var resp _irpc_namedTest_namedBytesSumResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 4, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
 func (_c *namedTestIrpcClient) namedMapSum(p0 namedMap) float64 {
-	var req = _Irpc_namedTestnamedMapSumReq{
+	var req = _irpc_namedTest_namedMapSumReq{
 		Param0_p0: p0,
 	}
-	var resp _Irpc_namedTestnamedMapSumResp
+	var resp _irpc_namedTest_namedMapSumResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 5, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
 
-type _Irpc_namedTestisWeekendReq struct {
+type _irpc_namedTest_isWeekendReq struct {
 	Param0_wd weekDay
 }
 
-func (s _Irpc_namedTestisWeekendReq) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_namedTest_isWeekendReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.Uint8(uint8(s.Param0_wd)); err != nil {
 		return fmt.Errorf("serialize s.Param0_wd of type \"weekDay\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_namedTestisWeekendReq) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_namedTest_isWeekendReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.Uint8((*uint8)(&s.Param0_wd)); err != nil {
 		return fmt.Errorf("deserialize s.Param0_wd of type \"weekDay\": %w", err)
 	}
 	return nil
 }
 
-type _Irpc_namedTestisWeekendResp struct {
+type _irpc_namedTest_isWeekendResp struct {
 	Param0 bool
 }
 
-func (s _Irpc_namedTestisWeekendResp) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_namedTest_isWeekendResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.Bool(s.Param0); err != nil {
 		return fmt.Errorf("serialize s.Param0 of type \"bool\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_namedTestisWeekendResp) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_namedTest_isWeekendResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.Bool(&s.Param0); err != nil {
 		return fmt.Errorf("deserialize s.Param0 of type \"bool\": %w", err)
 	}
 	return nil
 }
 
-type _Irpc_namedTestisWeekend2Req struct {
+type _irpc_namedTest_isWeekend2Req struct {
 	Param0_wd weekDay2
 }
 
-func (s _Irpc_namedTestisWeekend2Req) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_namedTest_isWeekend2Req) Serialize(e *irpcgen.Encoder) error {
 	if err := e.Uint8(uint8(s.Param0_wd)); err != nil {
 		return fmt.Errorf("serialize s.Param0_wd of type \"weekDay2\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_namedTestisWeekend2Req) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_namedTest_isWeekend2Req) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.Uint8((*uint8)(&s.Param0_wd)); err != nil {
 		return fmt.Errorf("deserialize s.Param0_wd of type \"weekDay2\": %w", err)
 	}
 	return nil
 }
 
-type _Irpc_namedTestisWeekend2Resp struct {
+type _irpc_namedTest_isWeekend2Resp struct {
 	Param0 bool
 }
 
-func (s _Irpc_namedTestisWeekend2Resp) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_namedTest_isWeekend2Resp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.Bool(s.Param0); err != nil {
 		return fmt.Errorf("serialize s.Param0 of type \"bool\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_namedTestisWeekend2Resp) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_namedTest_isWeekend2Resp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.Bool(&s.Param0); err != nil {
 		return fmt.Errorf("deserialize s.Param0 of type \"bool\": %w", err)
 	}
 	return nil
 }
 
-type _Irpc_namedTestcontainsSaturdayReq struct {
+type _irpc_namedTest_containsSaturdayReq struct {
 	Param0_wds []weekDay
 }
 
-func (s _Irpc_namedTestcontainsSaturdayReq) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_namedTest_containsSaturdayReq) Serialize(e *irpcgen.Encoder) error {
 	{ // s.Param0_wds []weekDay
 		if err := e.Len(len(s.Param0_wds)); err != nil {
 			return fmt.Errorf("serialize len(s.Param0_wds) of type \"int\": %w", err)
@@ -281,7 +281,7 @@ func (s _Irpc_namedTestcontainsSaturdayReq) Serialize(e *irpcgen.Encoder) error 
 	}
 	return nil
 }
-func (s *_Irpc_namedTestcontainsSaturdayReq) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_namedTest_containsSaturdayReq) Deserialize(d *irpcgen.Decoder) error {
 	{ // s.Param0_wds []weekDay
 		var l int
 		if err := d.Len(&l); err != nil {
@@ -297,28 +297,28 @@ func (s *_Irpc_namedTestcontainsSaturdayReq) Deserialize(d *irpcgen.Decoder) err
 	return nil
 }
 
-type _Irpc_namedTestcontainsSaturdayResp struct {
+type _irpc_namedTest_containsSaturdayResp struct {
 	Param0 bool
 }
 
-func (s _Irpc_namedTestcontainsSaturdayResp) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_namedTest_containsSaturdayResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.Bool(s.Param0); err != nil {
 		return fmt.Errorf("serialize s.Param0 of type \"bool\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_namedTestcontainsSaturdayResp) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_namedTest_containsSaturdayResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.Bool(&s.Param0); err != nil {
 		return fmt.Errorf("deserialize s.Param0 of type \"bool\": %w", err)
 	}
 	return nil
 }
 
-type _Irpc_namedTestcontainsSaturday2Req struct {
+type _irpc_namedTest_containsSaturday2Req struct {
 	Param0_wds namedWeekDaysSliceType
 }
 
-func (s _Irpc_namedTestcontainsSaturday2Req) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_namedTest_containsSaturday2Req) Serialize(e *irpcgen.Encoder) error {
 	{ // s.Param0_wds namedWeekDaysSliceType
 		if err := e.Len(len(s.Param0_wds)); err != nil {
 			return fmt.Errorf("serialize len(s.Param0_wds) of type \"int\": %w", err)
@@ -331,7 +331,7 @@ func (s _Irpc_namedTestcontainsSaturday2Req) Serialize(e *irpcgen.Encoder) error
 	}
 	return nil
 }
-func (s *_Irpc_namedTestcontainsSaturday2Req) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_namedTest_containsSaturday2Req) Deserialize(d *irpcgen.Decoder) error {
 	{ // s.Param0_wds namedWeekDaysSliceType
 		var l int
 		if err := d.Len(&l); err != nil {
@@ -347,62 +347,62 @@ func (s *_Irpc_namedTestcontainsSaturday2Req) Deserialize(d *irpcgen.Decoder) er
 	return nil
 }
 
-type _Irpc_namedTestcontainsSaturday2Resp struct {
+type _irpc_namedTest_containsSaturday2Resp struct {
 	Param0 bool
 }
 
-func (s _Irpc_namedTestcontainsSaturday2Resp) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_namedTest_containsSaturday2Resp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.Bool(s.Param0); err != nil {
 		return fmt.Errorf("serialize s.Param0 of type \"bool\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_namedTestcontainsSaturday2Resp) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_namedTest_containsSaturday2Resp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.Bool(&s.Param0); err != nil {
 		return fmt.Errorf("deserialize s.Param0 of type \"bool\": %w", err)
 	}
 	return nil
 }
 
-type _Irpc_namedTestnamedBytesSumReq struct {
+type _irpc_namedTest_namedBytesSumReq struct {
 	Param0_nb namedByteSliceType
 }
 
-func (s _Irpc_namedTestnamedBytesSumReq) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_namedTest_namedBytesSumReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.ByteSlice([]byte(s.Param0_nb)); err != nil {
 		return fmt.Errorf("serialize s.Param0_nb of type \"namedByteSliceType\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_namedTestnamedBytesSumReq) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_namedTest_namedBytesSumReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.ByteSlice((*[]byte)(&s.Param0_nb)); err != nil {
 		return fmt.Errorf("deserialize s.Param0_nb of type \"namedByteSliceType\": %w", err)
 	}
 	return nil
 }
 
-type _Irpc_namedTestnamedBytesSumResp struct {
+type _irpc_namedTest_namedBytesSumResp struct {
 	Param0 int
 }
 
-func (s _Irpc_namedTestnamedBytesSumResp) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_namedTest_namedBytesSumResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0); err != nil {
 		return fmt.Errorf("serialize s.Param0 of type \"int\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_namedTestnamedBytesSumResp) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_namedTest_namedBytesSumResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0); err != nil {
 		return fmt.Errorf("deserialize s.Param0 of type \"int\": %w", err)
 	}
 	return nil
 }
 
-type _Irpc_namedTestnamedMapSumReq struct {
+type _irpc_namedTest_namedMapSumReq struct {
 	Param0_p0 namedMap
 }
 
-func (s _Irpc_namedTestnamedMapSumReq) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_namedTest_namedMapSumReq) Serialize(e *irpcgen.Encoder) error {
 	{ // s.Param0_p0 namedMap
 		if err := e.Len(len(s.Param0_p0)); err != nil {
 			return fmt.Errorf("serialize len(s.Param0_p0) of type \"int\": %w", err)
@@ -418,7 +418,7 @@ func (s _Irpc_namedTestnamedMapSumReq) Serialize(e *irpcgen.Encoder) error {
 	}
 	return nil
 }
-func (s *_Irpc_namedTestnamedMapSumReq) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_namedTest_namedMapSumReq) Deserialize(d *irpcgen.Decoder) error {
 	{ // s.Param0_p0 namedMap
 		var l int
 		if err := d.Len(&l); err != nil {
@@ -442,17 +442,17 @@ func (s *_Irpc_namedTestnamedMapSumReq) Deserialize(d *irpcgen.Decoder) error {
 	return nil
 }
 
-type _Irpc_namedTestnamedMapSumResp struct {
+type _irpc_namedTest_namedMapSumResp struct {
 	Param0 float64
 }
 
-func (s _Irpc_namedTestnamedMapSumResp) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_namedTest_namedMapSumResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.Float64le(s.Param0); err != nil {
 		return fmt.Errorf("serialize s.Param0 of type \"float64\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_namedTestnamedMapSumResp) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_namedTest_namedMapSumResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.Float64le(&s.Param0); err != nil {
 		return fmt.Errorf("deserialize s.Param0 of type \"float64\": %w", err)
 	}

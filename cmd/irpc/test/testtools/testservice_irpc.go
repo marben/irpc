@@ -16,10 +16,10 @@ func NewTestServiceIrpcService(impl TestService) *TestServiceIrpcService {
 	return &TestServiceIrpcService{
 		impl: impl,
 		id: []byte{
-			0x51, 0xb2, 0xf3, 0xd9, 0xf0, 0x11, 0x0e, 0x49,
-			0x56, 0x00, 0xae, 0x62, 0xcf, 0x20, 0x1b, 0x6e,
-			0x39, 0x32, 0xb4, 0xbf, 0x81, 0x1b, 0xbe, 0x0f,
-			0xba, 0xa4, 0x40, 0x2d, 0xa9, 0x31, 0xa6, 0x21,
+			0x00, 0xfe, 0xcf, 0xf8, 0x86, 0xc6, 0xb3, 0x09,
+			0x4b, 0xd3, 0xdc, 0xab, 0x54, 0x62, 0x09, 0xd5,
+			0xbe, 0x81, 0x78, 0x10, 0x83, 0xd3, 0x91, 0x2f,
+			0x28, 0x29, 0x6f, 0xfd, 0xbb, 0x36, 0xb7, 0x65,
 		},
 	}
 }
@@ -31,13 +31,13 @@ func (s *TestServiceIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.Arg
 	case 0: // Div
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			// DESERIALIZE
-			var args _Irpc_TestServiceDivReq
+			var args _irpc_TestService_DivReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
-				var resp _Irpc_TestServiceDivResp
+				var resp _irpc_TestService_DivResp
 				resp.Param0 = s.impl.Div(args.Param0_a, args.Param0_b)
 				return resp
 			}, nil
@@ -45,13 +45,13 @@ func (s *TestServiceIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.Arg
 	case 1: // DivErr
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			// DESERIALIZE
-			var args _Irpc_TestServiceDivErrReq
+			var args _irpc_TestService_DivErrReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
-				var resp _Irpc_TestServiceDivErrResp
+				var resp _irpc_TestService_DivErrResp
 				resp.Param0, resp.Param1 = s.impl.DivErr(args.Param0_a, args.Param0_b)
 				return resp
 			}, nil
@@ -59,13 +59,13 @@ func (s *TestServiceIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.Arg
 	case 2: // DivCtxErr
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			// DESERIALIZE
-			var args _Irpc_TestServiceDivCtxErrReq
+			var args _irpc_TestService_DivCtxErrReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
-				var resp _Irpc_TestServiceDivCtxErrResp
+				var resp _irpc_TestService_DivCtxErrResp
 				resp.Param0, resp.Param1 = s.impl.DivCtxErr(ctx, args.Param1_a, args.Param1_b)
 				return resp
 			}, nil
@@ -83,10 +83,10 @@ type TestServiceIrpcClient struct {
 
 func NewTestServiceIrpcClient(endpoint irpcgen.Endpoint) (*TestServiceIrpcClient, error) {
 	id := []byte{
-		0x51, 0xb2, 0xf3, 0xd9, 0xf0, 0x11, 0x0e, 0x49,
-		0x56, 0x00, 0xae, 0x62, 0xcf, 0x20, 0x1b, 0x6e,
-		0x39, 0x32, 0xb4, 0xbf, 0x81, 0x1b, 0xbe, 0x0f,
-		0xba, 0xa4, 0x40, 0x2d, 0xa9, 0x31, 0xa6, 0x21,
+		0x00, 0xfe, 0xcf, 0xf8, 0x86, 0xc6, 0xb3, 0x09,
+		0x4b, 0xd3, 0xdc, 0xab, 0x54, 0x62, 0x09, 0xd5,
+		0xbe, 0x81, 0x78, 0x10, 0x83, 0xd3, 0x91, 0x2f,
+		0x28, 0x29, 0x6f, 0xfd, 0xbb, 0x36, 0xb7, 0x65,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
@@ -94,48 +94,48 @@ func NewTestServiceIrpcClient(endpoint irpcgen.Endpoint) (*TestServiceIrpcClient
 	return &TestServiceIrpcClient{endpoint: endpoint, id: id}, nil
 }
 func (_c *TestServiceIrpcClient) Div(a int, b int) int {
-	var req = _Irpc_TestServiceDivReq{
+	var req = _irpc_TestService_DivReq{
 		Param0_a: a,
 		Param0_b: b,
 	}
-	var resp _Irpc_TestServiceDivResp
+	var resp _irpc_TestService_DivResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
 func (_c *TestServiceIrpcClient) DivErr(a int, b int) (int, error) {
-	var req = _Irpc_TestServiceDivErrReq{
+	var req = _irpc_TestService_DivErrReq{
 		Param0_a: a,
 		Param0_b: b,
 	}
-	var resp _Irpc_TestServiceDivErrResp
+	var resp _irpc_TestService_DivErrResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 1, req, &resp); err != nil {
-		var zero _Irpc_TestServiceDivErrResp
+		var zero _irpc_TestService_DivErrResp
 		return zero.Param0, err
 	}
 	return resp.Param0, resp.Param1
 }
 func (_c *TestServiceIrpcClient) DivCtxErr(ctx context.Context, a int, b int) (int, error) {
-	var req = _Irpc_TestServiceDivCtxErrReq{
+	var req = _irpc_TestService_DivCtxErrReq{
 		// Param0_ctx: ctx,
 		Param1_a: a,
 		Param1_b: b,
 	}
-	var resp _Irpc_TestServiceDivCtxErrResp
+	var resp _irpc_TestService_DivCtxErrResp
 	if err := _c.endpoint.CallRemoteFunc(ctx, _c.id, 2, req, &resp); err != nil {
-		var zero _Irpc_TestServiceDivCtxErrResp
+		var zero _irpc_TestService_DivCtxErrResp
 		return zero.Param0, err
 	}
 	return resp.Param0, resp.Param1
 }
 
-type _Irpc_TestServiceDivReq struct {
+type _irpc_TestService_DivReq struct {
 	Param0_a int
 	Param0_b int
 }
 
-func (s _Irpc_TestServiceDivReq) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_TestService_DivReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0_a); err != nil {
 		return fmt.Errorf("serialize s.Param0_a of type \"int\": %w", err)
 	}
@@ -144,7 +144,7 @@ func (s _Irpc_TestServiceDivReq) Serialize(e *irpcgen.Encoder) error {
 	}
 	return nil
 }
-func (s *_Irpc_TestServiceDivReq) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_TestService_DivReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0_a); err != nil {
 		return fmt.Errorf("deserialize s.Param0_a of type \"int\": %w", err)
 	}
@@ -154,29 +154,29 @@ func (s *_Irpc_TestServiceDivReq) Deserialize(d *irpcgen.Decoder) error {
 	return nil
 }
 
-type _Irpc_TestServiceDivResp struct {
+type _irpc_TestService_DivResp struct {
 	Param0 int
 }
 
-func (s _Irpc_TestServiceDivResp) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_TestService_DivResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0); err != nil {
 		return fmt.Errorf("serialize s.Param0 of type \"int\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_TestServiceDivResp) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_TestService_DivResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0); err != nil {
 		return fmt.Errorf("deserialize s.Param0 of type \"int\": %w", err)
 	}
 	return nil
 }
 
-type _Irpc_TestServiceDivErrReq struct {
+type _irpc_TestService_DivErrReq struct {
 	Param0_a int
 	Param0_b int
 }
 
-func (s _Irpc_TestServiceDivErrReq) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_TestService_DivErrReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0_a); err != nil {
 		return fmt.Errorf("serialize s.Param0_a of type \"int\": %w", err)
 	}
@@ -185,7 +185,7 @@ func (s _Irpc_TestServiceDivErrReq) Serialize(e *irpcgen.Encoder) error {
 	}
 	return nil
 }
-func (s *_Irpc_TestServiceDivErrReq) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_TestService_DivErrReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0_a); err != nil {
 		return fmt.Errorf("deserialize s.Param0_a of type \"int\": %w", err)
 	}
@@ -195,12 +195,12 @@ func (s *_Irpc_TestServiceDivErrReq) Deserialize(d *irpcgen.Decoder) error {
 	return nil
 }
 
-type _Irpc_TestServiceDivErrResp struct {
+type _irpc_TestService_DivErrResp struct {
 	Param0 int
 	Param1 error
 }
 
-func (s _Irpc_TestServiceDivErrResp) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_TestService_DivErrResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0); err != nil {
 		return fmt.Errorf("serialize s.Param0 of type \"int\": %w", err)
 	}
@@ -224,7 +224,7 @@ func (s _Irpc_TestServiceDivErrResp) Serialize(e *irpcgen.Encoder) error {
 	}
 	return nil
 }
-func (s *_Irpc_TestServiceDivErrResp) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_TestService_DivErrResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0); err != nil {
 		return fmt.Errorf("deserialize s.Param0 of type \"int\": %w", err)
 	}
@@ -257,13 +257,13 @@ func (i _error_TestService_impl) Error() string {
 	return i._Error_0_
 }
 
-type _Irpc_TestServiceDivCtxErrReq struct {
+type _irpc_TestService_DivCtxErrReq struct {
 	// Param0_ctx context.Context
 	Param1_a int
 	Param1_b int
 }
 
-func (s _Irpc_TestServiceDivCtxErrReq) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_TestService_DivCtxErrReq) Serialize(e *irpcgen.Encoder) error {
 	// no code for context encoding
 	if err := e.VarInt(s.Param1_a); err != nil {
 		return fmt.Errorf("serialize s.Param1_a of type \"int\": %w", err)
@@ -273,7 +273,7 @@ func (s _Irpc_TestServiceDivCtxErrReq) Serialize(e *irpcgen.Encoder) error {
 	}
 	return nil
 }
-func (s *_Irpc_TestServiceDivCtxErrReq) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_TestService_DivCtxErrReq) Deserialize(d *irpcgen.Decoder) error {
 	// no code for context decoding
 	if err := d.VarInt(&s.Param1_a); err != nil {
 		return fmt.Errorf("deserialize s.Param1_a of type \"int\": %w", err)
@@ -284,12 +284,12 @@ func (s *_Irpc_TestServiceDivCtxErrReq) Deserialize(d *irpcgen.Decoder) error {
 	return nil
 }
 
-type _Irpc_TestServiceDivCtxErrResp struct {
+type _irpc_TestService_DivCtxErrResp struct {
 	Param0 int
 	Param1 error
 }
 
-func (s _Irpc_TestServiceDivCtxErrResp) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_TestService_DivCtxErrResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0); err != nil {
 		return fmt.Errorf("serialize s.Param0 of type \"int\": %w", err)
 	}
@@ -313,7 +313,7 @@ func (s _Irpc_TestServiceDivCtxErrResp) Serialize(e *irpcgen.Encoder) error {
 	}
 	return nil
 }
-func (s *_Irpc_TestServiceDivCtxErrResp) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_TestService_DivCtxErrResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0); err != nil {
 		return fmt.Errorf("deserialize s.Param0 of type \"int\": %w", err)
 	}

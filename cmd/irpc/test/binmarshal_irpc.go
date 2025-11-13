@@ -17,10 +17,10 @@ func newBinMarshalIrpcService(impl binMarshal) *binMarshalIrpcService {
 	return &binMarshalIrpcService{
 		impl: impl,
 		id: []byte{
-			0x05, 0x26, 0xac, 0xc3, 0x0f, 0xfb, 0x6f, 0x4b,
-			0xe0, 0xf5, 0x47, 0x63, 0xbd, 0x3d, 0x2d, 0x2f,
-			0x6a, 0x14, 0x98, 0xcf, 0xee, 0xd7, 0xcf, 0xf8,
-			0x77, 0xa8, 0xd9, 0xe6, 0x0d, 0x45, 0x0d, 0x62,
+			0x17, 0x22, 0x89, 0xcf, 0x94, 0x1d, 0x74, 0x58,
+			0xad, 0x3b, 0x40, 0x95, 0x26, 0x86, 0x55, 0x32,
+			0x3f, 0xe1, 0x96, 0xfb, 0x7f, 0xc9, 0x2f, 0x85,
+			0xc6, 0xf9, 0x95, 0x12, 0x90, 0x63, 0xcd, 0x1b,
 		},
 	}
 }
@@ -32,13 +32,13 @@ func (s *binMarshalIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgD
 	case 0: // reflect
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			// DESERIALIZE
-			var args _Irpc_binMarshalreflectReq
+			var args _irpc_binMarshal_reflectReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
-				var resp _Irpc_binMarshalreflectResp
+				var resp _irpc_binMarshal_reflectResp
 				resp.Param0 = s.impl.reflect(args.Param0_t)
 				return resp
 			}, nil
@@ -46,13 +46,13 @@ func (s *binMarshalIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgD
 	case 1: // addHour
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			// DESERIALIZE
-			var args _Irpc_binMarshaladdHourReq
+			var args _irpc_binMarshal_addHourReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
-				var resp _Irpc_binMarshaladdHourResp
+				var resp _irpc_binMarshal_addHourResp
 				resp.Param0 = s.impl.addHour(args.Param0_t)
 				return resp
 			}, nil
@@ -60,13 +60,13 @@ func (s *binMarshalIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgD
 	case 2: // addMyHour
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			// DESERIALIZE
-			var args _Irpc_binMarshaladdMyHourReq
+			var args _irpc_binMarshal_addMyHourReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
-				var resp _Irpc_binMarshaladdMyHourResp
+				var resp _irpc_binMarshal_addMyHourResp
 				resp.Param0 = s.impl.addMyHour(args.Param0_t)
 				return resp
 			}, nil
@@ -74,13 +74,13 @@ func (s *binMarshalIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgD
 	case 3: // addMyStructHour
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			// DESERIALIZE
-			var args _Irpc_binMarshaladdMyStructHourReq
+			var args _irpc_binMarshal_addMyStructHourReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
-				var resp _Irpc_binMarshaladdMyStructHourResp
+				var resp _irpc_binMarshal_addMyStructHourResp
 				resp.Param0 = s.impl.addMyStructHour(args.Param0_t)
 				return resp
 			}, nil
@@ -88,13 +88,13 @@ func (s *binMarshalIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgD
 	case 4: // structPass
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			// DESERIALIZE
-			var args _Irpc_binMarshalstructPassReq
+			var args _irpc_binMarshal_structPassReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
-				var resp _Irpc_binMarshalstructPassResp
+				var resp _irpc_binMarshal_structPassResp
 				resp.Param0 = s.impl.structPass(args.Param0_st)
 				return resp
 			}, nil
@@ -112,10 +112,10 @@ type binMarshalIrpcClient struct {
 
 func newBinMarshalIrpcClient(endpoint irpcgen.Endpoint) (*binMarshalIrpcClient, error) {
 	id := []byte{
-		0x05, 0x26, 0xac, 0xc3, 0x0f, 0xfb, 0x6f, 0x4b,
-		0xe0, 0xf5, 0x47, 0x63, 0xbd, 0x3d, 0x2d, 0x2f,
-		0x6a, 0x14, 0x98, 0xcf, 0xee, 0xd7, 0xcf, 0xf8,
-		0x77, 0xa8, 0xd9, 0xe6, 0x0d, 0x45, 0x0d, 0x62,
+		0x17, 0x22, 0x89, 0xcf, 0x94, 0x1d, 0x74, 0x58,
+		0xad, 0x3b, 0x40, 0x95, 0x26, 0x86, 0x55, 0x32,
+		0x3f, 0xe1, 0x96, 0xfb, 0x7f, 0xc9, 0x2f, 0x85,
+		0xc6, 0xf9, 0x95, 0x12, 0x90, 0x63, 0xcd, 0x1b,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
@@ -123,220 +123,220 @@ func newBinMarshalIrpcClient(endpoint irpcgen.Endpoint) (*binMarshalIrpcClient, 
 	return &binMarshalIrpcClient{endpoint: endpoint, id: id}, nil
 }
 func (_c *binMarshalIrpcClient) reflect(t time.Time) time.Time {
-	var req = _Irpc_binMarshalreflectReq{
+	var req = _irpc_binMarshal_reflectReq{
 		Param0_t: t,
 	}
-	var resp _Irpc_binMarshalreflectResp
+	var resp _irpc_binMarshal_reflectResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
 func (_c *binMarshalIrpcClient) addHour(t time.Time) time.Time {
-	var req = _Irpc_binMarshaladdHourReq{
+	var req = _irpc_binMarshal_addHourReq{
 		Param0_t: t,
 	}
-	var resp _Irpc_binMarshaladdHourResp
+	var resp _irpc_binMarshal_addHourResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 1, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
 func (_c *binMarshalIrpcClient) addMyHour(t myTime) myTime {
-	var req = _Irpc_binMarshaladdMyHourReq{
+	var req = _irpc_binMarshal_addMyHourReq{
 		Param0_t: t,
 	}
-	var resp _Irpc_binMarshaladdMyHourResp
+	var resp _irpc_binMarshal_addMyHourResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 2, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
 func (_c *binMarshalIrpcClient) addMyStructHour(t myStructTime) myStructTime {
-	var req = _Irpc_binMarshaladdMyStructHourReq{
+	var req = _irpc_binMarshal_addMyStructHourReq{
 		Param0_t: t,
 	}
-	var resp _Irpc_binMarshaladdMyStructHourResp
+	var resp _irpc_binMarshal_addMyStructHourResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 3, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
 func (_c *binMarshalIrpcClient) structPass(st structContainingBinMarshallable) structContainingBinMarshallable {
-	var req = _Irpc_binMarshalstructPassReq{
+	var req = _irpc_binMarshal_structPassReq{
 		Param0_st: st,
 	}
-	var resp _Irpc_binMarshalstructPassResp
+	var resp _irpc_binMarshal_structPassResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 4, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
 
-type _Irpc_binMarshalreflectReq struct {
+type _irpc_binMarshal_reflectReq struct {
 	Param0_t time.Time
 }
 
-func (s _Irpc_binMarshalreflectReq) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_binMarshal_reflectReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.BinaryMarshaler(s.Param0_t); err != nil {
 		return fmt.Errorf("serialize s.Param0_t of type \"time.Time\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_binMarshalreflectReq) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_binMarshal_reflectReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.BinaryUnmarshaler(&s.Param0_t); err != nil {
 		return fmt.Errorf("deserialize s.Param0_t of type \"time.Time\": %w", err)
 	}
 	return nil
 }
 
-type _Irpc_binMarshalreflectResp struct {
+type _irpc_binMarshal_reflectResp struct {
 	Param0 time.Time
 }
 
-func (s _Irpc_binMarshalreflectResp) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_binMarshal_reflectResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.BinaryMarshaler(s.Param0); err != nil {
 		return fmt.Errorf("serialize s.Param0 of type \"time.Time\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_binMarshalreflectResp) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_binMarshal_reflectResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.BinaryUnmarshaler(&s.Param0); err != nil {
 		return fmt.Errorf("deserialize s.Param0 of type \"time.Time\": %w", err)
 	}
 	return nil
 }
 
-type _Irpc_binMarshaladdHourReq struct {
+type _irpc_binMarshal_addHourReq struct {
 	Param0_t time.Time
 }
 
-func (s _Irpc_binMarshaladdHourReq) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_binMarshal_addHourReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.BinaryMarshaler(s.Param0_t); err != nil {
 		return fmt.Errorf("serialize s.Param0_t of type \"time.Time\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_binMarshaladdHourReq) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_binMarshal_addHourReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.BinaryUnmarshaler(&s.Param0_t); err != nil {
 		return fmt.Errorf("deserialize s.Param0_t of type \"time.Time\": %w", err)
 	}
 	return nil
 }
 
-type _Irpc_binMarshaladdHourResp struct {
+type _irpc_binMarshal_addHourResp struct {
 	Param0 time.Time
 }
 
-func (s _Irpc_binMarshaladdHourResp) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_binMarshal_addHourResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.BinaryMarshaler(s.Param0); err != nil {
 		return fmt.Errorf("serialize s.Param0 of type \"time.Time\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_binMarshaladdHourResp) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_binMarshal_addHourResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.BinaryUnmarshaler(&s.Param0); err != nil {
 		return fmt.Errorf("deserialize s.Param0 of type \"time.Time\": %w", err)
 	}
 	return nil
 }
 
-type _Irpc_binMarshaladdMyHourReq struct {
+type _irpc_binMarshal_addMyHourReq struct {
 	Param0_t myTime
 }
 
-func (s _Irpc_binMarshaladdMyHourReq) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_binMarshal_addMyHourReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.BinaryMarshaler(s.Param0_t); err != nil {
 		return fmt.Errorf("serialize s.Param0_t of type \"myTime\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_binMarshaladdMyHourReq) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_binMarshal_addMyHourReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.BinaryUnmarshaler(&s.Param0_t); err != nil {
 		return fmt.Errorf("deserialize s.Param0_t of type \"myTime\": %w", err)
 	}
 	return nil
 }
 
-type _Irpc_binMarshaladdMyHourResp struct {
+type _irpc_binMarshal_addMyHourResp struct {
 	Param0 myTime
 }
 
-func (s _Irpc_binMarshaladdMyHourResp) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_binMarshal_addMyHourResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.BinaryMarshaler(s.Param0); err != nil {
 		return fmt.Errorf("serialize s.Param0 of type \"myTime\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_binMarshaladdMyHourResp) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_binMarshal_addMyHourResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.BinaryUnmarshaler(&s.Param0); err != nil {
 		return fmt.Errorf("deserialize s.Param0 of type \"myTime\": %w", err)
 	}
 	return nil
 }
 
-type _Irpc_binMarshaladdMyStructHourReq struct {
+type _irpc_binMarshal_addMyStructHourReq struct {
 	Param0_t myStructTime
 }
 
-func (s _Irpc_binMarshaladdMyStructHourReq) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_binMarshal_addMyStructHourReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.BinaryMarshaler(s.Param0_t); err != nil {
 		return fmt.Errorf("serialize s.Param0_t of type \"myStructTime\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_binMarshaladdMyStructHourReq) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_binMarshal_addMyStructHourReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.BinaryUnmarshaler(&s.Param0_t); err != nil {
 		return fmt.Errorf("deserialize s.Param0_t of type \"myStructTime\": %w", err)
 	}
 	return nil
 }
 
-type _Irpc_binMarshaladdMyStructHourResp struct {
+type _irpc_binMarshal_addMyStructHourResp struct {
 	Param0 myStructTime
 }
 
-func (s _Irpc_binMarshaladdMyStructHourResp) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_binMarshal_addMyStructHourResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.BinaryMarshaler(s.Param0); err != nil {
 		return fmt.Errorf("serialize s.Param0 of type \"myStructTime\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_binMarshaladdMyStructHourResp) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_binMarshal_addMyStructHourResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.BinaryUnmarshaler(&s.Param0); err != nil {
 		return fmt.Errorf("deserialize s.Param0 of type \"myStructTime\": %w", err)
 	}
 	return nil
 }
 
-type _Irpc_binMarshalstructPassReq struct {
+type _irpc_binMarshal_structPassReq struct {
 	Param0_st structContainingBinMarshallable
 }
 
-func (s _Irpc_binMarshalstructPassReq) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_binMarshal_structPassReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.BinaryMarshaler(s.Param0_st.t); err != nil {
 		return fmt.Errorf("serialize s.Param0_st.t of type \"time.Time\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_binMarshalstructPassReq) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_binMarshal_structPassReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.BinaryUnmarshaler(&s.Param0_st.t); err != nil {
 		return fmt.Errorf("deserialize s.Param0_st.t of type \"time.Time\": %w", err)
 	}
 	return nil
 }
 
-type _Irpc_binMarshalstructPassResp struct {
+type _irpc_binMarshal_structPassResp struct {
 	Param0 structContainingBinMarshallable
 }
 
-func (s _Irpc_binMarshalstructPassResp) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_binMarshal_structPassResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.BinaryMarshaler(s.Param0.t); err != nil {
 		return fmt.Errorf("serialize s.Param0.t of type \"time.Time\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_binMarshalstructPassResp) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_binMarshal_structPassResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.BinaryUnmarshaler(&s.Param0.t); err != nil {
 		return fmt.Errorf("deserialize s.Param0.t of type \"time.Time\": %w", err)
 	}

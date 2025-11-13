@@ -16,10 +16,10 @@ func newEmptyAPIIrpcService(impl emptyAPI) *emptyAPIIrpcService {
 	return &emptyAPIIrpcService{
 		impl: impl,
 		id: []byte{
-			0x7b, 0x34, 0xf2, 0xac, 0xee, 0x77, 0x35, 0x9f,
-			0x04, 0x18, 0x60, 0xfc, 0xe9, 0x8c, 0x9b, 0xe4,
-			0x4c, 0xd3, 0xcd, 0xf8, 0x8e, 0x02, 0x37, 0xd7,
-			0x6d, 0xb0, 0x11, 0x10, 0xbb, 0x6d, 0x5a, 0x1a,
+			0xcd, 0x52, 0x23, 0xa3, 0x2d, 0x42, 0xf2, 0xd1,
+			0x47, 0xe3, 0xab, 0x20, 0x6c, 0xc9, 0x47, 0x3b,
+			0x0a, 0x9e, 0x9f, 0xbe, 0x8c, 0x41, 0xac, 0x46,
+			0xc4, 0x26, 0x1d, 0xcd, 0xa8, 0x73, 0x41, 0xdd,
 		},
 	}
 }
@@ -41,10 +41,10 @@ type emptyAPIIrpcClient struct {
 
 func newEmptyAPIIrpcClient(endpoint irpcgen.Endpoint) (*emptyAPIIrpcClient, error) {
 	id := []byte{
-		0x7b, 0x34, 0xf2, 0xac, 0xee, 0x77, 0x35, 0x9f,
-		0x04, 0x18, 0x60, 0xfc, 0xe9, 0x8c, 0x9b, 0xe4,
-		0x4c, 0xd3, 0xcd, 0xf8, 0x8e, 0x02, 0x37, 0xd7,
-		0x6d, 0xb0, 0x11, 0x10, 0xbb, 0x6d, 0x5a, 0x1a,
+		0xcd, 0x52, 0x23, 0xa3, 0x2d, 0x42, 0xf2, 0xd1,
+		0x47, 0xe3, 0xab, 0x20, 0x6c, 0xc9, 0x47, 0x3b,
+		0x0a, 0x9e, 0x9f, 0xbe, 0x8c, 0x41, 0xac, 0x46,
+		0xc4, 0x26, 0x1d, 0xcd, 0xa8, 0x73, 0x41, 0xdd,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
@@ -61,10 +61,10 @@ func newEdgeCasesIrpcService(impl edgeCases) *edgeCasesIrpcService {
 	return &edgeCasesIrpcService{
 		impl: impl,
 		id: []byte{
-			0x39, 0x3a, 0x40, 0x8d, 0x16, 0xa6, 0x18, 0x9c,
-			0xbd, 0x88, 0xbd, 0x70, 0x72, 0x25, 0xc4, 0x5a,
-			0x63, 0x00, 0xf7, 0xf7, 0xa7, 0x35, 0x06, 0x6d,
-			0x77, 0x69, 0xb4, 0x32, 0xf9, 0x2d, 0xd2, 0x97,
+			0x30, 0x05, 0xbe, 0x5e, 0x05, 0x41, 0x25, 0x71,
+			0x53, 0xa0, 0xce, 0xab, 0xc8, 0x05, 0xa5, 0x23,
+			0x8c, 0xdd, 0xc4, 0xef, 0x18, 0x77, 0xa2, 0x71,
+			0xb4, 0x8d, 0xf5, 0x26, 0x73, 0x86, 0x5d, 0xcc,
 		},
 	}
 }
@@ -76,7 +76,7 @@ func (s *edgeCasesIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 	case 0: // noReturn
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			// DESERIALIZE
-			var args _Irpc_edgeCasesnoReturnReq
+			var args _irpc_edgeCases_noReturnReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
@@ -90,7 +90,7 @@ func (s *edgeCasesIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
-				var resp _Irpc_edgeCasesnoParamsResp
+				var resp _irpc_edgeCases_noParamsResp
 				resp.Param0 = s.impl.noParams()
 				return resp
 			}, nil
@@ -106,7 +106,7 @@ func (s *edgeCasesIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 	case 3: // unnamedIntParam
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			// DESERIALIZE
-			var args _Irpc_edgeCasesunnamedIntParamReq
+			var args _irpc_edgeCases_unnamedIntParamReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
@@ -119,7 +119,7 @@ func (s *edgeCasesIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 	case 4: // mixedParamIds
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			// DESERIALIZE
-			var args _Irpc_edgeCasesmixedParamIdsReq
+			var args _irpc_edgeCases_mixedParamIdsReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
@@ -142,10 +142,10 @@ type edgeCasesIrpcClient struct {
 
 func newEdgeCasesIrpcClient(endpoint irpcgen.Endpoint) (*edgeCasesIrpcClient, error) {
 	id := []byte{
-		0x39, 0x3a, 0x40, 0x8d, 0x16, 0xa6, 0x18, 0x9c,
-		0xbd, 0x88, 0xbd, 0x70, 0x72, 0x25, 0xc4, 0x5a,
-		0x63, 0x00, 0xf7, 0xf7, 0xa7, 0x35, 0x06, 0x6d,
-		0x77, 0x69, 0xb4, 0x32, 0xf9, 0x2d, 0xd2, 0x97,
+		0x30, 0x05, 0xbe, 0x5e, 0x05, 0x41, 0x25, 0x71,
+		0x53, 0xa0, 0xce, 0xab, 0xc8, 0x05, 0xa5, 0x23,
+		0x8c, 0xdd, 0xc4, 0xef, 0x18, 0x77, 0xa2, 0x71,
+		0xb4, 0x8d, 0xf5, 0x26, 0x73, 0x86, 0x5d, 0xcc,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
@@ -153,7 +153,7 @@ func newEdgeCasesIrpcClient(endpoint irpcgen.Endpoint) (*edgeCasesIrpcClient, er
 	return &edgeCasesIrpcClient{endpoint: endpoint, id: id}, nil
 }
 func (_c *edgeCasesIrpcClient) noReturn(i int) {
-	var req = _Irpc_edgeCasesnoReturnReq{
+	var req = _irpc_edgeCases_noReturnReq{
 		Param0_i: i,
 	}
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &irpcgen.EmptyDeserializable{}); err != nil {
@@ -161,7 +161,7 @@ func (_c *edgeCasesIrpcClient) noReturn(i int) {
 	}
 }
 func (_c *edgeCasesIrpcClient) noParams() int {
-	var resp _Irpc_edgeCasesnoParamsResp
+	var resp _irpc_edgeCases_noParamsResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 1, irpcgen.EmptySerializable{}, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
@@ -173,7 +173,7 @@ func (_c *edgeCasesIrpcClient) nothingAtAll() {
 	}
 }
 func (_c *edgeCasesIrpcClient) unnamedIntParam(p0 int) {
-	var req = _Irpc_edgeCasesunnamedIntParamReq{
+	var req = _irpc_edgeCases_unnamedIntParamReq{
 		Param0_p0: p0,
 	}
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 3, req, &irpcgen.EmptyDeserializable{}); err != nil {
@@ -181,7 +181,7 @@ func (_c *edgeCasesIrpcClient) unnamedIntParam(p0 int) {
 	}
 }
 func (_c *edgeCasesIrpcClient) mixedParamIds(p0_ int, p0 uint8, p2 struct{ a int }) {
-	var req = _Irpc_edgeCasesmixedParamIdsReq{
+	var req = _irpc_edgeCases_mixedParamIdsReq{
 		Param0_p0_: p0_,
 		Param1_p0:  p0,
 		Param2_p2:  p2,
@@ -191,64 +191,64 @@ func (_c *edgeCasesIrpcClient) mixedParamIds(p0_ int, p0 uint8, p2 struct{ a int
 	}
 }
 
-type _Irpc_edgeCasesnoReturnReq struct {
+type _irpc_edgeCases_noReturnReq struct {
 	Param0_i int
 }
 
-func (s _Irpc_edgeCasesnoReturnReq) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_edgeCases_noReturnReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0_i); err != nil {
 		return fmt.Errorf("serialize s.Param0_i of type \"int\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_edgeCasesnoReturnReq) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_edgeCases_noReturnReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0_i); err != nil {
 		return fmt.Errorf("deserialize s.Param0_i of type \"int\": %w", err)
 	}
 	return nil
 }
 
-type _Irpc_edgeCasesnoParamsResp struct {
+type _irpc_edgeCases_noParamsResp struct {
 	Param0 int
 }
 
-func (s _Irpc_edgeCasesnoParamsResp) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_edgeCases_noParamsResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0); err != nil {
 		return fmt.Errorf("serialize s.Param0 of type \"int\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_edgeCasesnoParamsResp) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_edgeCases_noParamsResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0); err != nil {
 		return fmt.Errorf("deserialize s.Param0 of type \"int\": %w", err)
 	}
 	return nil
 }
 
-type _Irpc_edgeCasesunnamedIntParamReq struct {
+type _irpc_edgeCases_unnamedIntParamReq struct {
 	Param0_p0 int
 }
 
-func (s _Irpc_edgeCasesunnamedIntParamReq) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_edgeCases_unnamedIntParamReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0_p0); err != nil {
 		return fmt.Errorf("serialize s.Param0_p0 of type \"int\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_edgeCasesunnamedIntParamReq) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_edgeCases_unnamedIntParamReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0_p0); err != nil {
 		return fmt.Errorf("deserialize s.Param0_p0 of type \"int\": %w", err)
 	}
 	return nil
 }
 
-type _Irpc_edgeCasesmixedParamIdsReq struct {
+type _irpc_edgeCases_mixedParamIdsReq struct {
 	Param0_p0_ int
 	Param1_p0  uint8
 	Param2_p2  struct{ a int }
 }
 
-func (s _Irpc_edgeCasesmixedParamIdsReq) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_edgeCases_mixedParamIdsReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0_p0_); err != nil {
 		return fmt.Errorf("serialize s.Param0_p0_ of type \"int\": %w", err)
 	}
@@ -260,7 +260,7 @@ func (s _Irpc_edgeCasesmixedParamIdsReq) Serialize(e *irpcgen.Encoder) error {
 	}
 	return nil
 }
-func (s *_Irpc_edgeCasesmixedParamIdsReq) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_edgeCases_mixedParamIdsReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0_p0_); err != nil {
 		return fmt.Errorf("deserialize s.Param0_p0_ of type \"int\": %w", err)
 	}
@@ -282,10 +282,10 @@ func newAnotherInterfaceIrpcService(impl anotherInterface) *anotherInterfaceIrpc
 	return &anotherInterfaceIrpcService{
 		impl: impl,
 		id: []byte{
-			0xb3, 0x76, 0xe4, 0x83, 0x80, 0x4c, 0x8a, 0xeb,
-			0x1e, 0xe1, 0x7a, 0x98, 0x13, 0x44, 0xea, 0x8b,
-			0xa5, 0xea, 0xda, 0x0a, 0xc4, 0xc3, 0xaf, 0xdf,
-			0x67, 0x75, 0x9b, 0x76, 0xc4, 0x16, 0x96, 0x06,
+			0x50, 0xfa, 0x3b, 0x95, 0xac, 0x85, 0x43, 0x6a,
+			0x94, 0xd6, 0x7a, 0x8e, 0xb6, 0x21, 0xc9, 0x6c,
+			0xbf, 0x81, 0xac, 0xf8, 0x1a, 0x84, 0x26, 0x3e,
+			0x59, 0x47, 0x11, 0xe9, 0x48, 0xab, 0x00, 0xa0,
 		},
 	}
 }
@@ -297,13 +297,13 @@ func (s *anotherInterfaceIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcge
 	case 0: // anotherAdd
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			// DESERIALIZE
-			var args _Irpc_anotherInterfaceanotherAddReq
+			var args _irpc_anotherInterface_anotherAddReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
-				var resp _Irpc_anotherInterfaceanotherAddResp
+				var resp _irpc_anotherInterface_anotherAddResp
 				resp.Param0 = s.impl.anotherAdd(args.Param0_a, args.Param0_b)
 				return resp
 			}, nil
@@ -321,10 +321,10 @@ type anotherInterfaceIrpcClient struct {
 
 func newAnotherInterfaceIrpcClient(endpoint irpcgen.Endpoint) (*anotherInterfaceIrpcClient, error) {
 	id := []byte{
-		0xb3, 0x76, 0xe4, 0x83, 0x80, 0x4c, 0x8a, 0xeb,
-		0x1e, 0xe1, 0x7a, 0x98, 0x13, 0x44, 0xea, 0x8b,
-		0xa5, 0xea, 0xda, 0x0a, 0xc4, 0xc3, 0xaf, 0xdf,
-		0x67, 0x75, 0x9b, 0x76, 0xc4, 0x16, 0x96, 0x06,
+		0x50, 0xfa, 0x3b, 0x95, 0xac, 0x85, 0x43, 0x6a,
+		0x94, 0xd6, 0x7a, 0x8e, 0xb6, 0x21, 0xc9, 0x6c,
+		0xbf, 0x81, 0xac, 0xf8, 0x1a, 0x84, 0x26, 0x3e,
+		0x59, 0x47, 0x11, 0xe9, 0x48, 0xab, 0x00, 0xa0,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
@@ -332,23 +332,23 @@ func newAnotherInterfaceIrpcClient(endpoint irpcgen.Endpoint) (*anotherInterface
 	return &anotherInterfaceIrpcClient{endpoint: endpoint, id: id}, nil
 }
 func (_c *anotherInterfaceIrpcClient) anotherAdd(a int, b int) int {
-	var req = _Irpc_anotherInterfaceanotherAddReq{
+	var req = _irpc_anotherInterface_anotherAddReq{
 		Param0_a: a,
 		Param0_b: b,
 	}
-	var resp _Irpc_anotherInterfaceanotherAddResp
+	var resp _irpc_anotherInterface_anotherAddResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.Param0
 }
 
-type _Irpc_anotherInterfaceanotherAddReq struct {
+type _irpc_anotherInterface_anotherAddReq struct {
 	Param0_a int
 	Param0_b int
 }
 
-func (s _Irpc_anotherInterfaceanotherAddReq) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_anotherInterface_anotherAddReq) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0_a); err != nil {
 		return fmt.Errorf("serialize s.Param0_a of type \"int\": %w", err)
 	}
@@ -357,7 +357,7 @@ func (s _Irpc_anotherInterfaceanotherAddReq) Serialize(e *irpcgen.Encoder) error
 	}
 	return nil
 }
-func (s *_Irpc_anotherInterfaceanotherAddReq) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_anotherInterface_anotherAddReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0_a); err != nil {
 		return fmt.Errorf("deserialize s.Param0_a of type \"int\": %w", err)
 	}
@@ -367,17 +367,17 @@ func (s *_Irpc_anotherInterfaceanotherAddReq) Deserialize(d *irpcgen.Decoder) er
 	return nil
 }
 
-type _Irpc_anotherInterfaceanotherAddResp struct {
+type _irpc_anotherInterface_anotherAddResp struct {
 	Param0 int
 }
 
-func (s _Irpc_anotherInterfaceanotherAddResp) Serialize(e *irpcgen.Encoder) error {
+func (s _irpc_anotherInterface_anotherAddResp) Serialize(e *irpcgen.Encoder) error {
 	if err := e.VarInt(s.Param0); err != nil {
 		return fmt.Errorf("serialize s.Param0 of type \"int\": %w", err)
 	}
 	return nil
 }
-func (s *_Irpc_anotherInterfaceanotherAddResp) Deserialize(d *irpcgen.Decoder) error {
+func (s *_irpc_anotherInterface_anotherAddResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.VarInt(&s.Param0); err != nil {
 		return fmt.Errorf("deserialize s.Param0 of type \"int\": %w", err)
 	}
