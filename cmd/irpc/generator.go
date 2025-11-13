@@ -42,7 +42,13 @@ func newGenerator(filename string) (generator, error) {
 				continue
 			}
 			if iface, ok := ts.Type.(*ast.InterfaceType); ok {
-				api, err := newApiGenerator(tr, ts.Name.String(), iface)
+				var doc *ast.CommentGroup
+				if ts.Doc != nil {
+					doc = ts.Doc
+				} else if genDecl.Doc != nil {
+					doc = genDecl.Doc
+				}
+				api, err := newApiGenerator(tr, ts.Name.String(), iface, doc)
 				if err != nil {
 					return generator{}, fmt.Errorf("new apiGenerator: %w", err)
 				}

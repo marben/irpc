@@ -6,6 +6,9 @@ import (
 )
 
 //go:generate go run ../
+
+// basicAPI tests types.Basic types
+// and this is a two line description
 type basicAPI interface {
 	addByte(a byte, b byte) byte
 	addInt(a int, b int) int

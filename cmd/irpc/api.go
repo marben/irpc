@@ -7,11 +7,12 @@ import (
 )
 
 type apiGenerator struct {
-	apiName string
-	methods []methodGenerator
+	apiName         string
+	docCommentGroup *ast.CommentGroup
+	methods         []methodGenerator
 }
 
-func newApiGenerator(tr typeResolver, apiName string, astIface *ast.InterfaceType) (apiGenerator, error) {
+func newApiGenerator(tr typeResolver, apiName string, astIface *ast.InterfaceType, godoc *ast.CommentGroup) (apiGenerator, error) {
 	methods := []methodGenerator{}
 	for i, methodField := range astIface.Methods.List {
 		method, err := newMethodGenerator(tr, apiName, methodField, i)
@@ -22,8 +23,9 @@ func newApiGenerator(tr typeResolver, apiName string, astIface *ast.InterfaceTyp
 	}
 
 	return apiGenerator{
-		apiName: apiName,
-		methods: methods,
+		apiName:         apiName,
+		docCommentGroup: godoc,
+		methods:         methods,
 	}, nil
 }
 
@@ -35,15 +37,42 @@ func (ag apiGenerator) paramStructs() []paramStructGenerator {
 	return paramStructs
 }
 
+func (ag apiGenerator) goDoc() string {
+	if ag.docCommentGroup == nil {
+		return ""
+	}
+
+	var sb strings.Builder
+	for _, l := range ag.docCommentGroup.List {
+		text := l.Text
+
+		// filter out go directives
+		if strings.HasPrefix(text, "//go:") ||
+			strings.HasPrefix(text, "/*go:") ||
+			strings.HasPrefix(text, "//line ") {
+			continue
+		}
+
+		sb.WriteString(text)
+		sb.WriteByte('\n')
+	}
+	return sb.String()
+}
+
 func (ag apiGenerator) clientCode(hash []byte, q *qualifier) string {
 	clientTypeName := ag.apiName + "IrpcClient"
 	fncReceiverName := "_c" // todo: must not collide with any of fnc variable names
+	sb := &strings.Builder{}
 
-	q.addUsedImport(irpcGenImport, fmtImport) // todo: remove
-	b := &strings.Builder{}
+	// GoDoc comment
+	fmt.Fprintf(sb, "// %s implements %s\n", clientTypeName, ag.apiName)
+	if ag.goDoc() != "" {
+		sb.WriteString("// \n")
+		sb.WriteString(ag.goDoc())
+	}
+
 	// type definition
-	fmt.Fprintf(b, `
-	type %[1]s struct {
+	fmt.Fprintf(sb, `type %[1]s struct {
 		endpoint irpcgen.Endpoint
 		id []byte
 	}
@@ -60,7 +89,7 @@ func (ag apiGenerator) clientCode(hash []byte, q *qualifier) string {
 	// func calls
 	for _, m := range ag.methods {
 		// func header
-		fmt.Fprintf(b, "func(%s *%s)%s(%s)(%s){\n", fncReceiverName, clientTypeName, m.name, m.req.funcCallParams(q), m.resp.funcCallParams(q))
+		fmt.Fprintf(sb, "func(%s *%s)%s(%s)(%s){\n", fncReceiverName, clientTypeName, m.name, m.req.funcCallParams(q), m.resp.funcCallParams(q))
 
 		var allVarIds varNames
 		for _, p := range m.req.params {
@@ -77,15 +106,15 @@ func (ag apiGenerator) clientCode(hash []byte, q *qualifier) string {
 		} else {
 			reqVarName = allVarIds.generateUniqueVarName("req")
 			// request construction
-			fmt.Fprintf(b, "var %s = %s {\n", reqVarName, m.req.typeName)
+			fmt.Fprintf(sb, "var %s = %s {\n", reqVarName, m.req.typeName)
 			for _, p := range m.req.params {
 				if p.isContext() {
 					// we skip contexts, as they are treated special
-					b.WriteString("// ")
+					sb.WriteString("// ")
 				}
-				fmt.Fprintf(b, "%s: %s,\n", p.structFieldName, p.identifier)
+				fmt.Fprintf(sb, "%s: %s,\n", p.structFieldName, p.identifier)
 			}
-			fmt.Fprintf(b, "}\n") // end struct assignment
+			fmt.Fprintf(sb, "}\n") // end struct assignment
 		}
 
 		// response
@@ -94,43 +123,43 @@ func (ag apiGenerator) clientCode(hash []byte, q *qualifier) string {
 			respVarName = "irpcgen.EmptyDeserializable{}"
 		} else {
 			respVarName = allVarIds.generateUniqueVarName("resp")
-			fmt.Fprintf(b, "var %s %s\n", respVarName, m.resp.typeName)
+			fmt.Fprintf(sb, "var %s %s\n", respVarName, m.resp.typeName)
 		}
 
 		// func call
-		fmt.Fprintf(b, "if err := %s.endpoint.CallRemoteFunc(%s,%[1]s.id, %[3]d, %s, &%s); err != nil {\n", fncReceiverName, m.ctxVar, m.index, reqVarName, respVarName)
+		fmt.Fprintf(sb, "if err := %s.endpoint.CallRemoteFunc(%s,%[1]s.id, %[3]d, %s, &%s); err != nil {\n", fncReceiverName, m.ctxVar, m.index, reqVarName, respVarName)
 		if m.resp.isLastTypeError(q) {
 			// declare zero var, because i don't know, how to directly instantiate zero values
 			if len(m.resp.params) > 1 {
-				fmt.Fprintf(b, "var zero %s\n", m.resp.typeName)
+				fmt.Fprintf(sb, "var zero %s\n", m.resp.typeName)
 			}
-			fmt.Fprintf(b, "return ")
+			fmt.Fprintf(sb, "return ")
 			for i := 0; i < len(m.resp.params)-1; i++ {
 				p := m.resp.params[i]
-				fmt.Fprintf(b, "%s.%s,", "zero", p.structFieldName)
+				fmt.Fprintf(sb, "%s.%s,", "zero", p.structFieldName)
 			}
-			fmt.Fprintf(b, "err\n")
+			fmt.Fprintf(sb, "err\n")
 		} else {
-			fmt.Fprintf(b, "panic(err) // to avoid panic, make your func return error and regenerate irpc code\n")
+			fmt.Fprintf(sb, "panic(err) // to avoid panic, make your func return error and regenerate irpc code\n")
 		}
-		fmt.Fprintf(b, "}\n")
+		fmt.Fprintf(sb, "}\n")
 
 		// return values
 		if !m.resp.isEmpty() {
-			fmt.Fprintf(b, "return ")
+			fmt.Fprintf(sb, "return ")
 			for i, f := range m.resp.params {
-				fmt.Fprintf(b, "%s.%s", respVarName, f.structFieldName)
+				fmt.Fprintf(sb, "%s.%s", respVarName, f.structFieldName)
 				if i != len(m.resp.params)-1 {
-					fmt.Fprintf(b, ",")
+					fmt.Fprintf(sb, ",")
 				}
 			}
-			fmt.Fprintf(b, "\n")
+			fmt.Fprintf(sb, "\n")
 		}
 
-		fmt.Fprintf(b, "}\n") // end of func
+		fmt.Fprintf(sb, "}\n") // end of func
 	}
 
-	return b.String()
+	return sb.String()
 }
 
 func (ag apiGenerator) serviceCode(hash []byte, q *qualifier) string {

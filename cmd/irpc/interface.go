@@ -20,7 +20,7 @@ type interfaceType struct {
 	boolT        Type
 }
 
-func (tr *typeResolver) newInterfaceType(apiName string, ni *namedInfo, t *types.Interface, astExpr ast.Expr) (interfaceType, error) {
+func (tr *typeResolver) newInterfaceType(apiName string, ni *namedInfo, ifaceT *types.Interface, astExpr ast.Expr) (interfaceType, error) {
 	var ifaceAst *ast.InterfaceType
 	if astExpr != nil {
 		var ok bool
@@ -31,8 +31,8 @@ func (tr *typeResolver) newInterfaceType(apiName string, ni *namedInfo, t *types
 	}
 
 	fncs := []ifaceFunc{}
-	for i := 0; i < t.NumMethods(); i++ {
-		method := t.Method(i)
+	for i := 0; i < ifaceT.NumMethods(); i++ {
+		method := ifaceT.Method(i)
 		sig := method.Type().(*types.Signature)
 
 		// we only handle interfaces that return values.
@@ -80,7 +80,7 @@ func (tr *typeResolver) newInterfaceType(apiName string, ni *namedInfo, t *types
 	if ni != nil {
 		n = ni.namedName
 	} else {
-		n = sanitizeInterfaceName(t)
+		n = sanitizeInterfaceName(ifaceT)
 	}
 	implTypeName := "_" + n + "_" + apiName + "_impl"
 
@@ -89,7 +89,7 @@ func (tr *typeResolver) newInterfaceType(apiName string, ni *namedInfo, t *types
 		fncs:         fncs,
 		ni:           ni,
 		apiName:      apiName,
-		t:            t,
+		t:            ifaceT,
 		boolT:        tr.boolType,
 	}, nil
 }

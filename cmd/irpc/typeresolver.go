@@ -22,7 +22,7 @@ type typeResolver struct {
 }
 
 // todo: make value type?
-func newTypeResolver(filename string /*, inputPkg *packages.Package, allPkgs []*packages.Package*/) (typeResolver, error) {
+func newTypeResolver(filename string) (typeResolver, error) {
 	absFilePath, err := filepath.Abs(filename)
 	if err != nil {
 		return typeResolver{}, fmt.Errorf("filepath.Abs(): %w", err)
