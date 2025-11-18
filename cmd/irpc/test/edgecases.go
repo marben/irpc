@@ -11,6 +11,7 @@ type edgeCases interface {
 	mixedParamIds(_ int, p0 uint8, _ struct{ a int })
 	underscoreParamNames(_ int, p0 uint8, _ float64) (_ float64)
 	underscoreRtnName(p0 int) (_ int, _ uint8)
+	paramNamedAsReceiver(_c int)
 }
 
 type anotherInterface interface {
@@ -25,6 +26,11 @@ type edgeCasesImpl struct {
 	nothingAtAllFunc    func()
 	unnamedIntParamFunc func(int, int)
 	mixedParamIdsFunc   func(int)
+}
+
+// paramNamedAsReceiver implements edgeCases.
+func (e edgeCasesImpl) paramNamedAsReceiver(_c int) {
+	panic("unimplemented")
 }
 
 // underscoreRtnName implements edgeCases.

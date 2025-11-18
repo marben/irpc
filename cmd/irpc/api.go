@@ -61,7 +61,6 @@ func (ag apiGenerator) goDoc() string {
 
 func (ag apiGenerator) clientCode(hash []byte, q *qualifier) string {
 	clientTypeName := ag.apiName + "IrpcClient"
-	fncReceiverName := "_c" // todo: must not collide with any of fnc variable names
 	sb := &strings.Builder{}
 
 	// GoDoc comment
@@ -88,9 +87,6 @@ func (ag apiGenerator) clientCode(hash []byte, q *qualifier) string {
 
 	// func calls
 	for _, m := range ag.methods {
-		// func header
-		fmt.Fprintf(sb, "func(%s *%s)%s(%s)(%s){\n", fncReceiverName, clientTypeName, m.name, m.req.funcCallParams(q), m.resp.funcCallParams(q))
-
 		var allVarIds varNames
 		for _, p := range m.req.params {
 			allVarIds.addVarName(p.identifier)
@@ -98,6 +94,11 @@ func (ag apiGenerator) clientCode(hash []byte, q *qualifier) string {
 		for _, p := range m.resp.params {
 			allVarIds.addVarName(p.identifier)
 		}
+
+		fncReceiverName := allVarIds.generateUniqueVarName("_c")
+
+		// func header
+		fmt.Fprintf(sb, "func(%s *%s)%s(%s)(%s){\n", fncReceiverName, clientTypeName, m.name, m.req.funcCallParams(q), m.resp.funcCallParams(q))
 
 		// request
 		var reqVarName string

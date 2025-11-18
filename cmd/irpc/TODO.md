@@ -1,4 +1,3 @@
-- paramStructGenerator - have a look at the generate.go file and perhaps use it's functions to generate new parameter names?
 - two interfaces in one file - are service/client hashes the same? maybe we need to add interface name to the hash?
 - get rid of "var zero" declarations for some cases, where we know the zero value (nil for inerface/slice/map, "" for string etc...)
 - map[int]interface{}
