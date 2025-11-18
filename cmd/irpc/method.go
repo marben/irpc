@@ -37,51 +37,15 @@ func newMethodGenerator(tr typeResolver, apiName string, methodField *ast.Field,
 		}
 	}
 
-	// REQUEST
-	reqStructTypeName := "_irpc_" + apiName + "_" + methodName + "Req"
-
-	reqFieldNames := make(map[string]struct{}, len(params))
-	for _, rf := range params {
-		// make sure this name is not allocated by another param id
-		reqFieldNames[rf.name] = struct{}{}
-	}
-
-	reqParams := []funcParam{}
-	for _, param := range params {
-		rp, err := newRequestParam(param, reqFieldNames)
-		if err != nil {
-			return methodGenerator{}, fmt.Errorf("newRequestParam '%s': %w", param.name, err)
-		}
-		reqParams = append(reqParams, rp)
-	}
-	req, err := newParamStructGenerator(reqStructTypeName, reqParams)
+	req, resp, err := newReqRespStructsGenerator(apiName, methodName, params, results)
 	if err != nil {
-		return methodGenerator{}, fmt.Errorf("new req struct for method '%s': %w", methodName, err)
-	}
-
-	// RESPONSE
-	respStructTypeName := "_irpc_" + apiName + "_" + methodName + "Resp"
-	respParams := []funcParam{}
-	for _, result := range results {
-		rp, err := newResultParam(result)
-		if err != nil {
-			return methodGenerator{}, fmt.Errorf("newResultParam '%s': %w", result.name, err)
-		}
-		// we don't support returning context.Context
-		if rp.isContext() {
-			return methodGenerator{}, fmt.Errorf("unsupported context.Context as return value for varfiled: %s - %s", apiName, methodName)
-		}
-		respParams = append(respParams, rp)
-	}
-	resp, err := newParamStructGenerator(respStructTypeName, respParams)
-	if err != nil {
-		return methodGenerator{}, fmt.Errorf("new resp struct for method '%s': %w", methodName, err)
+		return methodGenerator{}, fmt.Errorf("newReqRespStructsGenerator(): %w", err)
 	}
 
 	// context
 	// we currently only support one or no context var
 	// multiple ctx vars could be combined, but it doesn't make much sense and i cannot be bothered atm
-	ctxParams := []funcParam{}
+	ctxParams := []genParam{}
 	for _, p := range req.params {
 		if p.isContext() {
 			ctxParams = append(ctxParams, p)
@@ -130,7 +94,7 @@ func (mg methodGenerator) executorFuncCode(q *qualifier) string {
 				// EXECUTE
 				s.impl.%[2]s(%[3]s)
 				return irpcgen.EmptySerializable{}
-			}`, mg.resp.typeName, mg.name, mg.requestParamsListPrefixed("args.", "ctx"))
+			}`, mg.resp.structName, mg.name, mg.requestParamsListPrefixed("args.", "ctx"))
 	}
 
 	return fmt.Sprintf(`func(ctx context.Context) irpcgen.Serializable {
@@ -138,5 +102,5 @@ func (mg methodGenerator) executorFuncCode(q *qualifier) string {
 				var resp %[1]s
 				%[2]s = s.impl.%[3]s(%[4]s)
 				return resp
-			}`, mg.resp.typeName, mg.resp.paramListPrefixed("resp."), mg.name, mg.requestParamsListPrefixed("args.", "ctx"))
+			}`, mg.resp.structName, mg.resp.paramListPrefixed("resp."), mg.name, mg.requestParamsListPrefixed("args.", "ctx"))
 }

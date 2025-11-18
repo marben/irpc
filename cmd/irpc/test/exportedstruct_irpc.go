@@ -16,10 +16,10 @@ func NewFileServerIrpcService(impl FileServer) *FileServerIrpcService {
 	return &FileServerIrpcService{
 		impl: impl,
 		id: []byte{
-			0xe5, 0x80, 0x23, 0x0b, 0xac, 0x15, 0x0d, 0xc7,
-			0x37, 0x69, 0xe8, 0x58, 0x5f, 0x4e, 0x89, 0x8b,
-			0xdf, 0x31, 0x95, 0x1f, 0xad, 0x26, 0x1b, 0x94,
-			0x86, 0xad, 0x7d, 0x62, 0x48, 0xbd, 0x42, 0x95,
+			0x53, 0xc2, 0x5b, 0x20, 0xb2, 0xd3, 0x1a, 0x7f,
+			0xc5, 0x71, 0xe1, 0xe9, 0x2b, 0x90, 0x04, 0x82,
+			0xff, 0x28, 0x42, 0xd4, 0x64, 0xa9, 0xfa, 0xaf,
+			0x08, 0x3a, 0x68, 0xca, 0x40, 0xf6, 0x08, 0xba,
 		},
 	}
 }
@@ -33,7 +33,7 @@ func (s *FileServerIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgD
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
 				var resp _irpc_FileServer_ListFilesResp
-				resp.Param0, resp.Param1 = s.impl.ListFiles()
+				resp.p0, resp.p1 = s.impl.ListFiles()
 				return resp
 			}, nil
 		}, nil
@@ -50,10 +50,10 @@ type FileServerIrpcClient struct {
 
 func NewFileServerIrpcClient(endpoint irpcgen.Endpoint) (*FileServerIrpcClient, error) {
 	id := []byte{
-		0xe5, 0x80, 0x23, 0x0b, 0xac, 0x15, 0x0d, 0xc7,
-		0x37, 0x69, 0xe8, 0x58, 0x5f, 0x4e, 0x89, 0x8b,
-		0xdf, 0x31, 0x95, 0x1f, 0xad, 0x26, 0x1b, 0x94,
-		0x86, 0xad, 0x7d, 0x62, 0x48, 0xbd, 0x42, 0x95,
+		0x53, 0xc2, 0x5b, 0x20, 0xb2, 0xd3, 0x1a, 0x7f,
+		0xc5, 0x71, 0xe1, 0xe9, 0x2b, 0x90, 0x04, 0x82,
+		0xff, 0x28, 0x42, 0xd4, 0x64, 0xa9, 0xfa, 0xaf,
+		0x08, 0x3a, 0x68, 0xca, 0x40, 0xf6, 0x08, 0xba,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
@@ -64,22 +64,22 @@ func (_c *FileServerIrpcClient) ListFiles() ([]FileInfo, error) {
 	var resp _irpc_FileServer_ListFilesResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, irpcgen.EmptySerializable{}, &resp); err != nil {
 		var zero _irpc_FileServer_ListFilesResp
-		return zero.Param0, err
+		return zero.p0, err
 	}
-	return resp.Param0, resp.Param1
+	return resp.p0, resp.p1
 }
 
 type _irpc_FileServer_ListFilesResp struct {
-	Param0 []FileInfo
-	Param1 error
+	p0 []FileInfo
+	p1 error
 }
 
 func (s _irpc_FileServer_ListFilesResp) Serialize(e *irpcgen.Encoder) error {
-	{ // s.Param0 []FileInfo
-		if err := e.Len(len(s.Param0)); err != nil {
-			return fmt.Errorf("serialize len(s.Param0) of type \"int\": %w", err)
+	{ // s.p0 []FileInfo
+		if err := e.Len(len(s.p0)); err != nil {
+			return fmt.Errorf("serialize len(s.p0) of type \"int\": %w", err)
 		}
-		for _, v := range s.Param0 {
+		for _, v := range s.p0 {
 			if err := e.UvarInt64(v.FileSize); err != nil {
 				return fmt.Errorf("serialize v.FileSize of type \"uint64\": %w", err)
 			}
@@ -87,7 +87,7 @@ func (s _irpc_FileServer_ListFilesResp) Serialize(e *irpcgen.Encoder) error {
 	}
 	{
 		var isNil bool
-		if s.Param1 == nil {
+		if s.p1 == nil {
 			isNil = true
 		}
 		if err := e.Bool(isNil); err != nil {
@@ -96,7 +96,7 @@ func (s _irpc_FileServer_ListFilesResp) Serialize(e *irpcgen.Encoder) error {
 
 		if !isNil {
 			{ // Error()
-				_Error_0_ := s.Param1.Error()
+				_Error_0_ := s.p1.Error()
 				if err := e.String(_Error_0_); err != nil {
 					return fmt.Errorf("serialize _Error_0_ of type \"string\": %w", err)
 				}
@@ -106,15 +106,15 @@ func (s _irpc_FileServer_ListFilesResp) Serialize(e *irpcgen.Encoder) error {
 	return nil
 }
 func (s *_irpc_FileServer_ListFilesResp) Deserialize(d *irpcgen.Decoder) error {
-	{ // s.Param0 []FileInfo
+	{ // s.p0 []FileInfo
 		var l int
 		if err := d.Len(&l); err != nil {
 			return fmt.Errorf("deserialize l of type \"int\": %w", err)
 		}
-		s.Param0 = make([]FileInfo, l)
+		s.p0 = make([]FileInfo, l)
 		for i := range l {
-			if err := d.UvarInt64(&s.Param0[i].FileSize); err != nil {
-				return fmt.Errorf("deserialize s.Param0[i].FileSize of type \"uint64\": %w", err)
+			if err := d.UvarInt64(&s.p0[i].FileSize); err != nil {
+				return fmt.Errorf("deserialize s.p0[i].FileSize of type \"uint64\": %w", err)
 			}
 		}
 	}
@@ -125,7 +125,7 @@ func (s *_irpc_FileServer_ListFilesResp) Deserialize(d *irpcgen.Decoder) error {
 		}
 
 		if isNil {
-			s.Param1 = nil
+			s.p1 = nil
 		} else {
 			var impl _error_FileServer_impl
 			{ // Error()
@@ -133,7 +133,7 @@ func (s *_irpc_FileServer_ListFilesResp) Deserialize(d *irpcgen.Decoder) error {
 					return fmt.Errorf("deserialize impl._Error_0_ of type \"string\": %w", err)
 				}
 			}
-			s.Param1 = impl
+			s.p1 = impl
 		}
 	}
 	return nil

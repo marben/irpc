@@ -9,7 +9,6 @@ import (
 )
 
 // represents function parameters/return value
-// todo: seems unnecessary. could construct funcParam directly
 type rpcParam struct {
 	pos  int // position in field
 	name string

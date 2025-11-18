@@ -128,18 +128,18 @@ func (tr typeResolver) loadRpcParamList(apiName string, list []*ast.Field) ([]rp
 
 		if field.Names == nil {
 			// parameter doesn't have name, just a type (typically function returns)
-			param, err := newRpcParam(pos, "", t)
-			if err != nil {
-				return nil, fmt.Errorf("newRpcParam on pos %d: %w", pos, err)
-			}
-			params = append(params, param)
+			params = append(params, rpcParam{
+				pos:  pos,
+				name: "",
+				typ:  t,
+			})
 		} else {
 			for _, name := range field.Names {
-				param, err := newRpcParam(pos, name.Name, t)
-				if err != nil {
-					return nil, fmt.Errorf("newRpcParam on pos %d: %w", pos, err)
-				}
-				params = append(params, param)
+				params = append(params, rpcParam{
+					pos:  pos,
+					name: name.Name,
+					typ:  t,
+				})
 			}
 		}
 	}

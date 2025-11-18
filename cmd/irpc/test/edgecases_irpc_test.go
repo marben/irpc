@@ -22,7 +22,7 @@ func TestEdgecases(t *testing.T) {
 		noReturnFunc:        func(i int) { noReturnC <- i },
 		noParamsFunc:        func() int { return 9 },
 		nothingAtAllFunc:    func() { nothingAtAllC <- 12 },
-		unnamedIntParamFunc: func(i int) { unnamedIntParamC <- i },
+		unnamedIntParamFunc: func(i, j int) { unnamedIntParamC <- i },
 		mixedParamIdsFunc:   func(i int) { mixedParamIdsC <- i },
 	}))
 
@@ -48,7 +48,7 @@ func TestEdgecases(t *testing.T) {
 		t.Fatalf("nothingAtAll(): %d", nothingAtAllRes)
 	}
 
-	c.unnamedIntParam(99)
+	c.unnamedIntParam(99, 0)
 	unnamedIntParamRes := <-unnamedIntParamC
 	if unnamedIntParamRes != 99 {
 		t.Fatalf("unnamedIntParamRes: %d", unnamedIntParamRes)

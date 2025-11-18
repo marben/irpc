@@ -6,20 +6,70 @@ import (
 )
 
 type paramStructGenerator struct {
-	typeName string
-	params   []funcParam
+	structName string
+	params     []genParam
 }
 
-func newParamStructGenerator(typeName string, params []funcParam) (paramStructGenerator, error) {
-	return paramStructGenerator{
-		typeName: typeName,
-		params:   params,
-	}, nil
+func newReqRespStructsGenerator(apiName, methodName string, reqParams, respParams []rpcParam) (req, resp paramStructGenerator, err error) {
+	var paramNames varNames = make([]string, 0, len(reqParams)+len(respParams))
+
+	for _, p := range reqParams {
+		paramNames.addVarName(p.name)
+	}
+	for _, p := range respParams {
+		paramNames.addVarName(p.name)
+	}
+
+	// req
+	reqStructParams := make([]genParam, 0, len(reqParams))
+	for _, p := range reqParams {
+		id := p.name
+		if id == "" || id == "_" {
+			id = paramNames.generateUniqueVarName(fmt.Sprintf("p%d", p.pos))
+		}
+		reqStructParams = append(reqStructParams, genParam{
+			identifier:      id,
+			structFieldName: id,
+			typ:             p.typ,
+		})
+	}
+
+	req = paramStructGenerator{
+		structName: "_irpc_" + apiName + "_" + methodName + "Req",
+		params:     reqStructParams,
+	}
+
+	// resp
+	respStructParams := make([]genParam, 0, len(respParams))
+	for _, p := range respParams {
+		id := p.name
+		if id == "" || id == "_" {
+			id = paramNames.generateUniqueVarName(fmt.Sprintf("p%d", p.pos))
+		}
+		fp := genParam{
+			identifier:      p.name,
+			structFieldName: id,
+			typ:             p.typ,
+		}
+
+		if fp.isContext() {
+			return paramStructGenerator{}, paramStructGenerator{}, fmt.Errorf("unsupported context.Context as return value for varfiled: %s - %s", apiName, methodName)
+		}
+
+		respStructParams = append(respStructParams, fp)
+	}
+
+	resp = paramStructGenerator{
+		structName: "_irpc_" + apiName + "_" + methodName + "Resp",
+		params:     respStructParams,
+	}
+
+	return req, resp, nil
 }
 
 func (sg paramStructGenerator) code(q *qualifier) string {
 	sb := &strings.Builder{}
-	fmt.Fprintf(sb, "type %s struct{\n", sg.typeName)
+	fmt.Fprintf(sb, "type %s struct{\n", sg.structName)
 	for _, p := range sg.params {
 		if p.isContext() {
 			// we comment out context var as it is not filled anyway
@@ -40,7 +90,7 @@ func (sg paramStructGenerator) isEmpty() bool {
 
 func (sg paramStructGenerator) serializeFunc(q *qualifier) string {
 	sb := &strings.Builder{}
-	fmt.Fprintf(sb, "func (s %s)Serialize(e *irpcgen.Encoder) error {\n", sg.typeName)
+	fmt.Fprintf(sb, "func (s %s)Serialize(e *irpcgen.Encoder) error {\n", sg.structName)
 	if len(sg.params) > 0 {
 		for _, p := range sg.params {
 			sb.WriteString(p.typ.encode("s."+p.structFieldName, nil, q))
@@ -53,7 +103,7 @@ func (sg paramStructGenerator) serializeFunc(q *qualifier) string {
 
 func (sg paramStructGenerator) deserializeFunc(q *qualifier) string {
 	sb := &strings.Builder{}
-	fmt.Fprintf(sb, "func (s *%s)Deserialize(d *irpcgen.Decoder) error {\n", sg.typeName)
+	fmt.Fprintf(sb, "func (s *%s)Deserialize(d *irpcgen.Decoder) error {\n", sg.structName)
 	if len(sg.params) > 0 {
 		for _, p := range sg.params {
 			sb.WriteString(p.typ.decode("s."+p.structFieldName, nil, q))
@@ -109,4 +159,25 @@ func (sg paramStructGenerator) types() []Type {
 	}
 
 	return types
+}
+
+// genParam descibes a function parameter and it's representation in our req/resp structure
+type genParam struct {
+	// identifier. eg: 'a' in func(a int){}. if it's ommited or '_', we generate a name, because we must allow it in our client
+	// unique within func definition
+	identifier string
+
+	// structFieldName eq: "a" in reqStruct.a	stores the value of our parameter (the argument)
+	structFieldName string
+
+	// typ contains all we need for encoding/decoding of this type
+	typ Type
+}
+
+// returns true if field is of type context.Context
+func (fp genParam) isContext() bool {
+	if _, ok := fp.typ.(contextType); ok {
+		return true
+	}
+	return false
 }

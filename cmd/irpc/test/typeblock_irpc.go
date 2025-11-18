@@ -16,10 +16,10 @@ func newTbInterfaceAIrpcService(impl tbInterfaceA) *tbInterfaceAIrpcService {
 	return &tbInterfaceAIrpcService{
 		impl: impl,
 		id: []byte{
-			0x3f, 0x57, 0x18, 0xa5, 0x78, 0x7f, 0x1d, 0xf0,
-			0x36, 0x51, 0x88, 0x2a, 0xc5, 0x09, 0x96, 0xb4,
-			0x86, 0xe6, 0xe0, 0x0b, 0x7d, 0x11, 0xa2, 0xbd,
-			0xf7, 0xdb, 0xef, 0x9d, 0x76, 0xbe, 0xe5, 0x69,
+			0x40, 0x55, 0xf6, 0xfb, 0xb3, 0x86, 0x84, 0x71,
+			0xdd, 0x4f, 0xec, 0xbe, 0xa6, 0xb4, 0x7b, 0x4a,
+			0x41, 0x59, 0x4a, 0xe2, 0x91, 0xbb, 0x3a, 0x77,
+			0x4e, 0xe7, 0xf0, 0x97, 0x87, 0xd7, 0xcc, 0x28,
 		},
 	}
 }
@@ -38,7 +38,7 @@ func (s *tbInterfaceAIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.Ar
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
 				var resp _irpc_tbInterfaceA_reverseResp
-				resp.Param0 = s.impl.reverse(args.Param0_p0)
+				resp.p02 = s.impl.reverse(args.p0)
 				return resp
 			}, nil
 		}, nil
@@ -57,10 +57,10 @@ type tbInterfaceAIrpcClient struct {
 
 func newTbInterfaceAIrpcClient(endpoint irpcgen.Endpoint) (*tbInterfaceAIrpcClient, error) {
 	id := []byte{
-		0x3f, 0x57, 0x18, 0xa5, 0x78, 0x7f, 0x1d, 0xf0,
-		0x36, 0x51, 0x88, 0x2a, 0xc5, 0x09, 0x96, 0xb4,
-		0x86, 0xe6, 0xe0, 0x0b, 0x7d, 0x11, 0xa2, 0xbd,
-		0xf7, 0xdb, 0xef, 0x9d, 0x76, 0xbe, 0xe5, 0x69,
+		0x40, 0x55, 0xf6, 0xfb, 0xb3, 0x86, 0x84, 0x71,
+		0xdd, 0x4f, 0xec, 0xbe, 0xa6, 0xb4, 0x7b, 0x4a,
+		0x41, 0x59, 0x4a, 0xe2, 0x91, 0xbb, 0x3a, 0x77,
+		0x4e, 0xe7, 0xf0, 0x97, 0x87, 0xd7, 0xcc, 0x28,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
@@ -69,45 +69,45 @@ func newTbInterfaceAIrpcClient(endpoint irpcgen.Endpoint) (*tbInterfaceAIrpcClie
 }
 func (_c *tbInterfaceAIrpcClient) reverse(p0 string) string {
 	var req = _irpc_tbInterfaceA_reverseReq{
-		Param0_p0: p0,
+		p0: p0,
 	}
 	var resp _irpc_tbInterfaceA_reverseResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
-	return resp.Param0
+	return resp.p02
 }
 
 type _irpc_tbInterfaceA_reverseReq struct {
-	Param0_p0 string
+	p0 string
 }
 
 func (s _irpc_tbInterfaceA_reverseReq) Serialize(e *irpcgen.Encoder) error {
-	if err := e.String(s.Param0_p0); err != nil {
-		return fmt.Errorf("serialize s.Param0_p0 of type \"string\": %w", err)
+	if err := e.String(s.p0); err != nil {
+		return fmt.Errorf("serialize s.p0 of type \"string\": %w", err)
 	}
 	return nil
 }
 func (s *_irpc_tbInterfaceA_reverseReq) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.String(&s.Param0_p0); err != nil {
-		return fmt.Errorf("deserialize s.Param0_p0 of type \"string\": %w", err)
+	if err := d.String(&s.p0); err != nil {
+		return fmt.Errorf("deserialize s.p0 of type \"string\": %w", err)
 	}
 	return nil
 }
 
 type _irpc_tbInterfaceA_reverseResp struct {
-	Param0 string
+	p02 string
 }
 
 func (s _irpc_tbInterfaceA_reverseResp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.String(s.Param0); err != nil {
-		return fmt.Errorf("serialize s.Param0 of type \"string\": %w", err)
+	if err := e.String(s.p02); err != nil {
+		return fmt.Errorf("serialize s.p02 of type \"string\": %w", err)
 	}
 	return nil
 }
 func (s *_irpc_tbInterfaceA_reverseResp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.String(&s.Param0); err != nil {
-		return fmt.Errorf("deserialize s.Param0 of type \"string\": %w", err)
+	if err := d.String(&s.p02); err != nil {
+		return fmt.Errorf("deserialize s.p02 of type \"string\": %w", err)
 	}
 	return nil
 }
@@ -121,10 +121,10 @@ func newTvInterfaceBIrpcService(impl tvInterfaceB) *tvInterfaceBIrpcService {
 	return &tvInterfaceBIrpcService{
 		impl: impl,
 		id: []byte{
-			0x5c, 0x8c, 0x06, 0x15, 0x93, 0x84, 0x58, 0x90,
-			0x0c, 0x7e, 0x4e, 0x40, 0x08, 0x10, 0x69, 0xa7,
-			0xfe, 0x56, 0xd8, 0xe3, 0x7c, 0x3e, 0xde, 0xe3,
-			0x8a, 0x28, 0x23, 0x44, 0x6f, 0x5d, 0xab, 0x8e,
+			0xbf, 0x55, 0x80, 0xb9, 0xb7, 0x3e, 0xbb, 0x9b,
+			0xfe, 0x45, 0x4e, 0xb6, 0x1a, 0x16, 0x74, 0xac,
+			0xe1, 0x71, 0x0f, 0x00, 0x30, 0xc2, 0xe9, 0x40,
+			0x12, 0xad, 0xe3, 0x37, 0xa7, 0xf8, 0x86, 0x6e,
 		},
 	}
 }
@@ -143,7 +143,7 @@ func (s *tvInterfaceBIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.Ar
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
 				var resp _irpc_tvInterfaceB_addResp
-				resp.Param0 = s.impl.add(args.Param0_a, args.Param0_b)
+				resp.p0 = s.impl.add(args.a, args.b)
 				return resp
 			}, nil
 		}, nil
@@ -167,10 +167,10 @@ type tvInterfaceBIrpcClient struct {
 
 func newTvInterfaceBIrpcClient(endpoint irpcgen.Endpoint) (*tvInterfaceBIrpcClient, error) {
 	id := []byte{
-		0x5c, 0x8c, 0x06, 0x15, 0x93, 0x84, 0x58, 0x90,
-		0x0c, 0x7e, 0x4e, 0x40, 0x08, 0x10, 0x69, 0xa7,
-		0xfe, 0x56, 0xd8, 0xe3, 0x7c, 0x3e, 0xde, 0xe3,
-		0x8a, 0x28, 0x23, 0x44, 0x6f, 0x5d, 0xab, 0x8e,
+		0xbf, 0x55, 0x80, 0xb9, 0xb7, 0x3e, 0xbb, 0x9b,
+		0xfe, 0x45, 0x4e, 0xb6, 0x1a, 0x16, 0x74, 0xac,
+		0xe1, 0x71, 0x0f, 0x00, 0x30, 0xc2, 0xe9, 0x40,
+		0x12, 0xad, 0xe3, 0x37, 0xa7, 0xf8, 0x86, 0x6e,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
@@ -179,53 +179,53 @@ func newTvInterfaceBIrpcClient(endpoint irpcgen.Endpoint) (*tvInterfaceBIrpcClie
 }
 func (_c *tvInterfaceBIrpcClient) add(a int, b int) int {
 	var req = _irpc_tvInterfaceB_addReq{
-		Param0_a: a,
-		Param0_b: b,
+		a: a,
+		b: b,
 	}
 	var resp _irpc_tvInterfaceB_addResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
-	return resp.Param0
+	return resp.p0
 }
 
 type _irpc_tvInterfaceB_addReq struct {
-	Param0_a int
-	Param0_b int
+	a int
+	b int
 }
 
 func (s _irpc_tvInterfaceB_addReq) Serialize(e *irpcgen.Encoder) error {
-	if err := e.VarInt(s.Param0_a); err != nil {
-		return fmt.Errorf("serialize s.Param0_a of type \"int\": %w", err)
+	if err := e.VarInt(s.a); err != nil {
+		return fmt.Errorf("serialize s.a of type \"int\": %w", err)
 	}
-	if err := e.VarInt(s.Param0_b); err != nil {
-		return fmt.Errorf("serialize s.Param0_b of type \"int\": %w", err)
+	if err := e.VarInt(s.b); err != nil {
+		return fmt.Errorf("serialize s.b of type \"int\": %w", err)
 	}
 	return nil
 }
 func (s *_irpc_tvInterfaceB_addReq) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.VarInt(&s.Param0_a); err != nil {
-		return fmt.Errorf("deserialize s.Param0_a of type \"int\": %w", err)
+	if err := d.VarInt(&s.a); err != nil {
+		return fmt.Errorf("deserialize s.a of type \"int\": %w", err)
 	}
-	if err := d.VarInt(&s.Param0_b); err != nil {
-		return fmt.Errorf("deserialize s.Param0_b of type \"int\": %w", err)
+	if err := d.VarInt(&s.b); err != nil {
+		return fmt.Errorf("deserialize s.b of type \"int\": %w", err)
 	}
 	return nil
 }
 
 type _irpc_tvInterfaceB_addResp struct {
-	Param0 int
+	p0 int
 }
 
 func (s _irpc_tvInterfaceB_addResp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.VarInt(s.Param0); err != nil {
-		return fmt.Errorf("serialize s.Param0 of type \"int\": %w", err)
+	if err := e.VarInt(s.p0); err != nil {
+		return fmt.Errorf("serialize s.p0 of type \"int\": %w", err)
 	}
 	return nil
 }
 func (s *_irpc_tvInterfaceB_addResp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.VarInt(&s.Param0); err != nil {
-		return fmt.Errorf("deserialize s.Param0 of type \"int\": %w", err)
+	if err := d.VarInt(&s.p0); err != nil {
+		return fmt.Errorf("deserialize s.p0 of type \"int\": %w", err)
 	}
 	return nil
 }

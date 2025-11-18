@@ -17,10 +17,10 @@ func newOutsideTestIrpcService(impl outsideTest) *outsideTestIrpcService {
 	return &outsideTestIrpcService{
 		impl: impl,
 		id: []byte{
-			0x8c, 0xec, 0x70, 0xa7, 0x04, 0x1c, 0xdf, 0x12,
-			0x43, 0x82, 0xc6, 0x9d, 0xd4, 0x92, 0x81, 0xf0,
-			0xdc, 0x55, 0xa4, 0xd6, 0xc5, 0xfb, 0x1c, 0x82,
-			0x58, 0x5f, 0xc8, 0xed, 0x1f, 0xf2, 0xd8, 0x1b,
+			0x18, 0x86, 0x03, 0x9c, 0xb8, 0xfe, 0xc5, 0x48,
+			0x99, 0x6e, 0xcd, 0x31, 0x95, 0x8d, 0xfa, 0xfe,
+			0x72, 0x5d, 0x31, 0x34, 0x5b, 0xb0, 0xc8, 0x0f,
+			0x21, 0x45, 0x51, 0xd5, 0x65, 0x41, 0x5d, 0x1c,
 		},
 	}
 }
@@ -39,7 +39,7 @@ func (s *outsideTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.Arg
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
 				var resp _irpc_outsideTest_addUint8Resp
-				resp.Param0 = s.impl.addUint8(args.Param0_a, args.Param0_b)
+				resp.p0 = s.impl.addUint8(args.a, args.b)
 				return resp
 			}, nil
 		}, nil
@@ -56,10 +56,10 @@ type outsideTestIrpcClient struct {
 
 func newOutsideTestIrpcClient(endpoint irpcgen.Endpoint) (*outsideTestIrpcClient, error) {
 	id := []byte{
-		0x8c, 0xec, 0x70, 0xa7, 0x04, 0x1c, 0xdf, 0x12,
-		0x43, 0x82, 0xc6, 0x9d, 0xd4, 0x92, 0x81, 0xf0,
-		0xdc, 0x55, 0xa4, 0xd6, 0xc5, 0xfb, 0x1c, 0x82,
-		0x58, 0x5f, 0xc8, 0xed, 0x1f, 0xf2, 0xd8, 0x1b,
+		0x18, 0x86, 0x03, 0x9c, 0xb8, 0xfe, 0xc5, 0x48,
+		0x99, 0x6e, 0xcd, 0x31, 0x95, 0x8d, 0xfa, 0xfe,
+		0x72, 0x5d, 0x31, 0x34, 0x5b, 0xb0, 0xc8, 0x0f,
+		0x21, 0x45, 0x51, 0xd5, 0x65, 0x41, 0x5d, 0x1c,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
@@ -68,53 +68,53 @@ func newOutsideTestIrpcClient(endpoint irpcgen.Endpoint) (*outsideTestIrpcClient
 }
 func (_c *outsideTestIrpcClient) addUint8(a out.Uint8, b out.Uint8) out.Uint8 {
 	var req = _irpc_outsideTest_addUint8Req{
-		Param0_a: a,
-		Param0_b: b,
+		a: a,
+		b: b,
 	}
 	var resp _irpc_outsideTest_addUint8Resp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
-	return resp.Param0
+	return resp.p0
 }
 
 type _irpc_outsideTest_addUint8Req struct {
-	Param0_a out.Uint8
-	Param0_b out.Uint8
+	a out.Uint8
+	b out.Uint8
 }
 
 func (s _irpc_outsideTest_addUint8Req) Serialize(e *irpcgen.Encoder) error {
-	if err := e.Uint8(uint8(s.Param0_a)); err != nil {
-		return fmt.Errorf("serialize s.Param0_a of type \"out.Uint8\": %w", err)
+	if err := e.Uint8(uint8(s.a)); err != nil {
+		return fmt.Errorf("serialize s.a of type \"out.Uint8\": %w", err)
 	}
-	if err := e.Uint8(uint8(s.Param0_b)); err != nil {
-		return fmt.Errorf("serialize s.Param0_b of type \"out.Uint8\": %w", err)
+	if err := e.Uint8(uint8(s.b)); err != nil {
+		return fmt.Errorf("serialize s.b of type \"out.Uint8\": %w", err)
 	}
 	return nil
 }
 func (s *_irpc_outsideTest_addUint8Req) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.Uint8((*uint8)(&s.Param0_a)); err != nil {
-		return fmt.Errorf("deserialize s.Param0_a of type \"out.Uint8\": %w", err)
+	if err := d.Uint8((*uint8)(&s.a)); err != nil {
+		return fmt.Errorf("deserialize s.a of type \"out.Uint8\": %w", err)
 	}
-	if err := d.Uint8((*uint8)(&s.Param0_b)); err != nil {
-		return fmt.Errorf("deserialize s.Param0_b of type \"out.Uint8\": %w", err)
+	if err := d.Uint8((*uint8)(&s.b)); err != nil {
+		return fmt.Errorf("deserialize s.b of type \"out.Uint8\": %w", err)
 	}
 	return nil
 }
 
 type _irpc_outsideTest_addUint8Resp struct {
-	Param0 out.Uint8
+	p0 out.Uint8
 }
 
 func (s _irpc_outsideTest_addUint8Resp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.Uint8(uint8(s.Param0)); err != nil {
-		return fmt.Errorf("serialize s.Param0 of type \"out.Uint8\": %w", err)
+	if err := e.Uint8(uint8(s.p0)); err != nil {
+		return fmt.Errorf("serialize s.p0 of type \"out.Uint8\": %w", err)
 	}
 	return nil
 }
 func (s *_irpc_outsideTest_addUint8Resp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.Uint8((*uint8)(&s.Param0)); err != nil {
-		return fmt.Errorf("deserialize s.Param0 of type \"out.Uint8\": %w", err)
+	if err := d.Uint8((*uint8)(&s.p0)); err != nil {
+		return fmt.Errorf("deserialize s.p0 of type \"out.Uint8\": %w", err)
 	}
 	return nil
 }

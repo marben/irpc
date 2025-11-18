@@ -1,8 +1,8 @@
+- paramStructGenerator - have a look at the generate.go file and perhaps use it's functions to generate new parameter names?
 - two interfaces in one file - are service/client hashes the same? maybe we need to add interface name to the hash?
+- get rid of "var zero" declarations for some cases, where we know the zero value (nil for inerface/slice/map, "" for string etc...)
 - map[int]interface{}
 - dot imports
-- does encoder still make sense? there seems to be only one now - directcallencoder, no?
- - actually i think direct call encoder should be merged into direct call type. not sure about lenEncoder and boolEncoder, but those are just 2
 - BinaryAppender
 - test named types outside of module
 - support/test aliases

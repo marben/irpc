@@ -64,14 +64,6 @@ func newGenerator(filename string) (generator, error) {
 	}, nil
 }
 
-func newRpcParam(position int, name string, t Type) (rpcParam, error) {
-	return rpcParam{
-		pos:  position,
-		name: name,
-		typ:  t,
-	}, nil
-}
-
 // if hash is nil, we generate service id with empty hash
 //   - this is used during first run of generator
 func (g generator) generate(w io.Writer, hash []byte) error {

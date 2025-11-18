@@ -17,10 +17,10 @@ func newSliceNamedApiIrpcService(impl sliceNamedApi) *sliceNamedApiIrpcService {
 	return &sliceNamedApiIrpcService{
 		impl: impl,
 		id: []byte{
-			0xe1, 0xf8, 0xba, 0xbd, 0x53, 0x0a, 0x4f, 0x23,
-			0xe4, 0x57, 0x62, 0xc2, 0x1c, 0x24, 0x41, 0x56,
-			0x46, 0x17, 0x80, 0x7e, 0xdb, 0x4c, 0xd0, 0x3f,
-			0x26, 0x93, 0xc7, 0x37, 0x36, 0xe6, 0x9e, 0xe1,
+			0xfa, 0x2e, 0x6e, 0x06, 0x54, 0xd3, 0xf8, 0xfc,
+			0xf8, 0xa1, 0xdb, 0xaa, 0x89, 0xc8, 0x6f, 0xe2,
+			0x2e, 0x70, 0x44, 0x68, 0x74, 0x72, 0x47, 0x6f,
+			0xf7, 0xb1, 0xe6, 0xa5, 0x75, 0xff, 0xc5, 0x5d,
 		},
 	}
 }
@@ -39,7 +39,7 @@ func (s *sliceNamedApiIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.A
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
 				var resp _irpc_sliceNamedApi_sumNamedIntsResp
-				resp.Param0 = s.impl.sumNamedInts(args.Param0_vec)
+				resp.p0 = s.impl.sumNamedInts(args.vec)
 				return resp
 			}, nil
 		}, nil
@@ -53,7 +53,7 @@ func (s *sliceNamedApiIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.A
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
 				var resp _irpc_sliceNamedApi_sumOutsideNamedIntsResp
-				resp.Param0 = s.impl.sumOutsideNamedInts(args.Param0_vec)
+				resp.p0 = s.impl.sumOutsideNamedInts(args.vec)
 				return resp
 			}, nil
 		}, nil
@@ -67,7 +67,7 @@ func (s *sliceNamedApiIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.A
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
 				var resp _irpc_sliceNamedApi_sumSliceOfNamedIntsResp
-				resp.Param0 = s.impl.sumSliceOfNamedInts(args.Param0_vec)
+				resp.p0 = s.impl.sumSliceOfNamedInts(args.vec)
 				return resp
 			}, nil
 		}, nil
@@ -84,10 +84,10 @@ type sliceNamedApiIrpcClient struct {
 
 func newSliceNamedApiIrpcClient(endpoint irpcgen.Endpoint) (*sliceNamedApiIrpcClient, error) {
 	id := []byte{
-		0xe1, 0xf8, 0xba, 0xbd, 0x53, 0x0a, 0x4f, 0x23,
-		0xe4, 0x57, 0x62, 0xc2, 0x1c, 0x24, 0x41, 0x56,
-		0x46, 0x17, 0x80, 0x7e, 0xdb, 0x4c, 0xd0, 0x3f,
-		0x26, 0x93, 0xc7, 0x37, 0x36, 0xe6, 0x9e, 0xe1,
+		0xfa, 0x2e, 0x6e, 0x06, 0x54, 0xd3, 0xf8, 0xfc,
+		0xf8, 0xa1, 0xdb, 0xaa, 0x89, 0xc8, 0x6f, 0xe2,
+		0x2e, 0x70, 0x44, 0x68, 0x74, 0x72, 0x47, 0x6f,
+		0xf7, 0xb1, 0xe6, 0xa5, 0x75, 0xff, 0xc5, 0x5d,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
@@ -96,45 +96,45 @@ func newSliceNamedApiIrpcClient(endpoint irpcgen.Endpoint) (*sliceNamedApiIrpcCl
 }
 func (_c *sliceNamedApiIrpcClient) sumNamedInts(vec namedSliceOfInts) int {
 	var req = _irpc_sliceNamedApi_sumNamedIntsReq{
-		Param0_vec: vec,
+		vec: vec,
 	}
 	var resp _irpc_sliceNamedApi_sumNamedIntsResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
-	return resp.Param0
+	return resp.p0
 }
 func (_c *sliceNamedApiIrpcClient) sumOutsideNamedInts(vec out.AliasedByteSlice) int {
 	var req = _irpc_sliceNamedApi_sumOutsideNamedIntsReq{
-		Param0_vec: vec,
+		vec: vec,
 	}
 	var resp _irpc_sliceNamedApi_sumOutsideNamedIntsResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 1, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
-	return resp.Param0
+	return resp.p0
 }
 func (_c *sliceNamedApiIrpcClient) sumSliceOfNamedInts(vec []out.Uint8) out.Uint8 {
 	var req = _irpc_sliceNamedApi_sumSliceOfNamedIntsReq{
-		Param0_vec: vec,
+		vec: vec,
 	}
 	var resp _irpc_sliceNamedApi_sumSliceOfNamedIntsResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 2, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
-	return resp.Param0
+	return resp.p0
 }
 
 type _irpc_sliceNamedApi_sumNamedIntsReq struct {
-	Param0_vec namedSliceOfInts
+	vec namedSliceOfInts
 }
 
 func (s _irpc_sliceNamedApi_sumNamedIntsReq) Serialize(e *irpcgen.Encoder) error {
-	{ // s.Param0_vec namedSliceOfInts
-		if err := e.Len(len(s.Param0_vec)); err != nil {
-			return fmt.Errorf("serialize len(s.Param0_vec) of type \"int\": %w", err)
+	{ // s.vec namedSliceOfInts
+		if err := e.Len(len(s.vec)); err != nil {
+			return fmt.Errorf("serialize len(s.vec) of type \"int\": %w", err)
 		}
-		for _, v := range s.Param0_vec {
+		for _, v := range s.vec {
 			if err := e.VarInt(v); err != nil {
 				return fmt.Errorf("serialize v of type \"int\": %w", err)
 			}
@@ -143,15 +143,15 @@ func (s _irpc_sliceNamedApi_sumNamedIntsReq) Serialize(e *irpcgen.Encoder) error
 	return nil
 }
 func (s *_irpc_sliceNamedApi_sumNamedIntsReq) Deserialize(d *irpcgen.Decoder) error {
-	{ // s.Param0_vec namedSliceOfInts
+	{ // s.vec namedSliceOfInts
 		var l int
 		if err := d.Len(&l); err != nil {
 			return fmt.Errorf("deserialize l of type \"int\": %w", err)
 		}
-		s.Param0_vec = make(namedSliceOfInts, l)
+		s.vec = make(namedSliceOfInts, l)
 		for i := range l {
-			if err := d.VarInt(&s.Param0_vec[i]); err != nil {
-				return fmt.Errorf("deserialize s.Param0_vec[i] of type \"int\": %w", err)
+			if err := d.VarInt(&s.vec[i]); err != nil {
+				return fmt.Errorf("deserialize s.vec[i] of type \"int\": %w", err)
 			}
 		}
 	}
@@ -159,32 +159,32 @@ func (s *_irpc_sliceNamedApi_sumNamedIntsReq) Deserialize(d *irpcgen.Decoder) er
 }
 
 type _irpc_sliceNamedApi_sumNamedIntsResp struct {
-	Param0 int
+	p0 int
 }
 
 func (s _irpc_sliceNamedApi_sumNamedIntsResp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.VarInt(s.Param0); err != nil {
-		return fmt.Errorf("serialize s.Param0 of type \"int\": %w", err)
+	if err := e.VarInt(s.p0); err != nil {
+		return fmt.Errorf("serialize s.p0 of type \"int\": %w", err)
 	}
 	return nil
 }
 func (s *_irpc_sliceNamedApi_sumNamedIntsResp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.VarInt(&s.Param0); err != nil {
-		return fmt.Errorf("deserialize s.Param0 of type \"int\": %w", err)
+	if err := d.VarInt(&s.p0); err != nil {
+		return fmt.Errorf("deserialize s.p0 of type \"int\": %w", err)
 	}
 	return nil
 }
 
 type _irpc_sliceNamedApi_sumOutsideNamedIntsReq struct {
-	Param0_vec out.AliasedByteSlice
+	vec out.AliasedByteSlice
 }
 
 func (s _irpc_sliceNamedApi_sumOutsideNamedIntsReq) Serialize(e *irpcgen.Encoder) error {
-	{ // s.Param0_vec out.AliasedByteSlice
-		if err := e.Len(len(s.Param0_vec)); err != nil {
-			return fmt.Errorf("serialize len(s.Param0_vec) of type \"int\": %w", err)
+	{ // s.vec out.AliasedByteSlice
+		if err := e.Len(len(s.vec)); err != nil {
+			return fmt.Errorf("serialize len(s.vec) of type \"int\": %w", err)
 		}
-		for _, v := range s.Param0_vec {
+		for _, v := range s.vec {
 			if err := e.Uint8(uint8(v)); err != nil {
 				return fmt.Errorf("serialize v of type \"out_.Uint8\": %w", err)
 			}
@@ -193,15 +193,15 @@ func (s _irpc_sliceNamedApi_sumOutsideNamedIntsReq) Serialize(e *irpcgen.Encoder
 	return nil
 }
 func (s *_irpc_sliceNamedApi_sumOutsideNamedIntsReq) Deserialize(d *irpcgen.Decoder) error {
-	{ // s.Param0_vec out.AliasedByteSlice
+	{ // s.vec out.AliasedByteSlice
 		var l int
 		if err := d.Len(&l); err != nil {
 			return fmt.Errorf("deserialize l of type \"int\": %w", err)
 		}
-		s.Param0_vec = make(out.AliasedByteSlice, l)
+		s.vec = make(out.AliasedByteSlice, l)
 		for i := range l {
-			if err := d.Uint8((*uint8)(&s.Param0_vec[i])); err != nil {
-				return fmt.Errorf("deserialize s.Param0_vec[i] of type \"out_.Uint8\": %w", err)
+			if err := d.Uint8((*uint8)(&s.vec[i])); err != nil {
+				return fmt.Errorf("deserialize s.vec[i] of type \"out_.Uint8\": %w", err)
 			}
 		}
 	}
@@ -209,32 +209,32 @@ func (s *_irpc_sliceNamedApi_sumOutsideNamedIntsReq) Deserialize(d *irpcgen.Deco
 }
 
 type _irpc_sliceNamedApi_sumOutsideNamedIntsResp struct {
-	Param0 int
+	p0 int
 }
 
 func (s _irpc_sliceNamedApi_sumOutsideNamedIntsResp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.VarInt(s.Param0); err != nil {
-		return fmt.Errorf("serialize s.Param0 of type \"int\": %w", err)
+	if err := e.VarInt(s.p0); err != nil {
+		return fmt.Errorf("serialize s.p0 of type \"int\": %w", err)
 	}
 	return nil
 }
 func (s *_irpc_sliceNamedApi_sumOutsideNamedIntsResp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.VarInt(&s.Param0); err != nil {
-		return fmt.Errorf("deserialize s.Param0 of type \"int\": %w", err)
+	if err := d.VarInt(&s.p0); err != nil {
+		return fmt.Errorf("deserialize s.p0 of type \"int\": %w", err)
 	}
 	return nil
 }
 
 type _irpc_sliceNamedApi_sumSliceOfNamedIntsReq struct {
-	Param0_vec []out.Uint8
+	vec []out.Uint8
 }
 
 func (s _irpc_sliceNamedApi_sumSliceOfNamedIntsReq) Serialize(e *irpcgen.Encoder) error {
-	{ // s.Param0_vec []out.Uint8
-		if err := e.Len(len(s.Param0_vec)); err != nil {
-			return fmt.Errorf("serialize len(s.Param0_vec) of type \"int\": %w", err)
+	{ // s.vec []out.Uint8
+		if err := e.Len(len(s.vec)); err != nil {
+			return fmt.Errorf("serialize len(s.vec) of type \"int\": %w", err)
 		}
-		for _, v := range s.Param0_vec {
+		for _, v := range s.vec {
 			if err := e.Uint8(uint8(v)); err != nil {
 				return fmt.Errorf("serialize v of type \"out.Uint8\": %w", err)
 			}
@@ -243,15 +243,15 @@ func (s _irpc_sliceNamedApi_sumSliceOfNamedIntsReq) Serialize(e *irpcgen.Encoder
 	return nil
 }
 func (s *_irpc_sliceNamedApi_sumSliceOfNamedIntsReq) Deserialize(d *irpcgen.Decoder) error {
-	{ // s.Param0_vec []out.Uint8
+	{ // s.vec []out.Uint8
 		var l int
 		if err := d.Len(&l); err != nil {
 			return fmt.Errorf("deserialize l of type \"int\": %w", err)
 		}
-		s.Param0_vec = make([]out.Uint8, l)
+		s.vec = make([]out.Uint8, l)
 		for i := range l {
-			if err := d.Uint8((*uint8)(&s.Param0_vec[i])); err != nil {
-				return fmt.Errorf("deserialize s.Param0_vec[i] of type \"out.Uint8\": %w", err)
+			if err := d.Uint8((*uint8)(&s.vec[i])); err != nil {
+				return fmt.Errorf("deserialize s.vec[i] of type \"out.Uint8\": %w", err)
 			}
 		}
 	}
@@ -259,18 +259,18 @@ func (s *_irpc_sliceNamedApi_sumSliceOfNamedIntsReq) Deserialize(d *irpcgen.Deco
 }
 
 type _irpc_sliceNamedApi_sumSliceOfNamedIntsResp struct {
-	Param0 out.Uint8
+	p0 out.Uint8
 }
 
 func (s _irpc_sliceNamedApi_sumSliceOfNamedIntsResp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.Uint8(uint8(s.Param0)); err != nil {
-		return fmt.Errorf("serialize s.Param0 of type \"out.Uint8\": %w", err)
+	if err := e.Uint8(uint8(s.p0)); err != nil {
+		return fmt.Errorf("serialize s.p0 of type \"out.Uint8\": %w", err)
 	}
 	return nil
 }
 func (s *_irpc_sliceNamedApi_sumSliceOfNamedIntsResp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.Uint8((*uint8)(&s.Param0)); err != nil {
-		return fmt.Errorf("deserialize s.Param0 of type \"out.Uint8\": %w", err)
+	if err := d.Uint8((*uint8)(&s.p0)); err != nil {
+		return fmt.Errorf("deserialize s.p0 of type \"out.Uint8\": %w", err)
 	}
 	return nil
 }

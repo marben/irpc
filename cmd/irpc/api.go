@@ -106,7 +106,7 @@ func (ag apiGenerator) clientCode(hash []byte, q *qualifier) string {
 		} else {
 			reqVarName = allVarIds.generateUniqueVarName("req")
 			// request construction
-			fmt.Fprintf(sb, "var %s = %s {\n", reqVarName, m.req.typeName)
+			fmt.Fprintf(sb, "var %s = %s {\n", reqVarName, m.req.structName)
 			for _, p := range m.req.params {
 				if p.isContext() {
 					// we skip contexts, as they are treated special
@@ -123,7 +123,7 @@ func (ag apiGenerator) clientCode(hash []byte, q *qualifier) string {
 			respVarName = "irpcgen.EmptyDeserializable{}"
 		} else {
 			respVarName = allVarIds.generateUniqueVarName("resp")
-			fmt.Fprintf(sb, "var %s %s\n", respVarName, m.resp.typeName)
+			fmt.Fprintf(sb, "var %s %s\n", respVarName, m.resp.structName)
 		}
 
 		// func call
@@ -131,7 +131,7 @@ func (ag apiGenerator) clientCode(hash []byte, q *qualifier) string {
 		if m.resp.isLastTypeError(q) {
 			// declare zero var, because i don't know, how to directly instantiate zero values
 			if len(m.resp.params) > 1 {
-				fmt.Fprintf(sb, "var zero %s\n", m.resp.typeName)
+				fmt.Fprintf(sb, "var zero %s\n", m.resp.structName)
 			}
 			fmt.Fprintf(sb, "return ")
 			for i := 0; i < len(m.resp.params)-1; i++ {
@@ -207,7 +207,7 @@ func (ag apiGenerator) serviceCode(hash []byte, q *qualifier) string {
 		 	if err := args.Deserialize(d); err != nil {
 		 		return nil, err
 		 	}
-			`, m.req.typeName)
+			`, m.req.structName)
 		}
 
 		fmt.Fprintf(w, `return %s, nil

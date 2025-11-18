@@ -16,10 +16,10 @@ func NewMathIrpcService(impl Math) *MathIrpcService {
 	return &MathIrpcService{
 		impl: impl,
 		id: []byte{
-			0xa4, 0x8b, 0xd7, 0x43, 0x8c, 0x8f, 0xff, 0x42,
-			0xba, 0x03, 0x05, 0xf6, 0x14, 0x34, 0xf4, 0x06,
-			0x4b, 0xe4, 0xe0, 0x8f, 0xf7, 0x42, 0x0f, 0xef,
-			0xd4, 0xe6, 0x8c, 0x5e, 0x42, 0xce, 0xba, 0x68,
+			0x70, 0x70, 0xcf, 0xb2, 0x18, 0x26, 0x76, 0x92,
+			0xd4, 0xcd, 0xec, 0x67, 0x80, 0xb8, 0x83, 0xc6,
+			0xb0, 0x5b, 0x88, 0x7e, 0x9e, 0xb8, 0x4d, 0x0f,
+			0x70, 0xd3, 0x39, 0x23, 0xf2, 0xe4, 0x66, 0x22,
 		},
 	}
 }
@@ -38,7 +38,7 @@ func (s *MathIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeseria
 			return func(ctx context.Context) irpcgen.Serializable {
 				// EXECUTE
 				var resp _irpc_Math_AddResp
-				resp.Param0, resp.Param1 = s.impl.Add(args.Param0_a, args.Param0_b)
+				resp.p0, resp.p1 = s.impl.Add(args.a, args.b)
 				return resp
 			}, nil
 		}, nil
@@ -55,10 +55,10 @@ type MathIrpcClient struct {
 
 func NewMathIrpcClient(endpoint irpcgen.Endpoint) (*MathIrpcClient, error) {
 	id := []byte{
-		0xa4, 0x8b, 0xd7, 0x43, 0x8c, 0x8f, 0xff, 0x42,
-		0xba, 0x03, 0x05, 0xf6, 0x14, 0x34, 0xf4, 0x06,
-		0x4b, 0xe4, 0xe0, 0x8f, 0xf7, 0x42, 0x0f, 0xef,
-		0xd4, 0xe6, 0x8c, 0x5e, 0x42, 0xce, 0xba, 0x68,
+		0x70, 0x70, 0xcf, 0xb2, 0x18, 0x26, 0x76, 0x92,
+		0xd4, 0xcd, 0xec, 0x67, 0x80, 0xb8, 0x83, 0xc6,
+		0xb0, 0x5b, 0x88, 0x7e, 0x9e, 0xb8, 0x4d, 0x0f,
+		0x70, 0xd3, 0x39, 0x23, 0xf2, 0xe4, 0x66, 0x22,
 	}
 	if err := endpoint.RegisterClient(id); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
@@ -67,53 +67,53 @@ func NewMathIrpcClient(endpoint irpcgen.Endpoint) (*MathIrpcClient, error) {
 }
 func (_c *MathIrpcClient) Add(a int, b int) (int, error) {
 	var req = _irpc_Math_AddReq{
-		Param0_a: a,
-		Param0_b: b,
+		a: a,
+		b: b,
 	}
 	var resp _irpc_Math_AddResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
 		var zero _irpc_Math_AddResp
-		return zero.Param0, err
+		return zero.p0, err
 	}
-	return resp.Param0, resp.Param1
+	return resp.p0, resp.p1
 }
 
 type _irpc_Math_AddReq struct {
-	Param0_a int
-	Param0_b int
+	a int
+	b int
 }
 
 func (s _irpc_Math_AddReq) Serialize(e *irpcgen.Encoder) error {
-	if err := e.VarInt(s.Param0_a); err != nil {
-		return fmt.Errorf("serialize s.Param0_a of type \"int\": %w", err)
+	if err := e.VarInt(s.a); err != nil {
+		return fmt.Errorf("serialize s.a of type \"int\": %w", err)
 	}
-	if err := e.VarInt(s.Param0_b); err != nil {
-		return fmt.Errorf("serialize s.Param0_b of type \"int\": %w", err)
+	if err := e.VarInt(s.b); err != nil {
+		return fmt.Errorf("serialize s.b of type \"int\": %w", err)
 	}
 	return nil
 }
 func (s *_irpc_Math_AddReq) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.VarInt(&s.Param0_a); err != nil {
-		return fmt.Errorf("deserialize s.Param0_a of type \"int\": %w", err)
+	if err := d.VarInt(&s.a); err != nil {
+		return fmt.Errorf("deserialize s.a of type \"int\": %w", err)
 	}
-	if err := d.VarInt(&s.Param0_b); err != nil {
-		return fmt.Errorf("deserialize s.Param0_b of type \"int\": %w", err)
+	if err := d.VarInt(&s.b); err != nil {
+		return fmt.Errorf("deserialize s.b of type \"int\": %w", err)
 	}
 	return nil
 }
 
 type _irpc_Math_AddResp struct {
-	Param0 int
-	Param1 error
+	p0 int
+	p1 error
 }
 
 func (s _irpc_Math_AddResp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.VarInt(s.Param0); err != nil {
-		return fmt.Errorf("serialize s.Param0 of type \"int\": %w", err)
+	if err := e.VarInt(s.p0); err != nil {
+		return fmt.Errorf("serialize s.p0 of type \"int\": %w", err)
 	}
 	{
 		var isNil bool
-		if s.Param1 == nil {
+		if s.p1 == nil {
 			isNil = true
 		}
 		if err := e.Bool(isNil); err != nil {
@@ -122,7 +122,7 @@ func (s _irpc_Math_AddResp) Serialize(e *irpcgen.Encoder) error {
 
 		if !isNil {
 			{ // Error()
-				_Error_0_ := s.Param1.Error()
+				_Error_0_ := s.p1.Error()
 				if err := e.String(_Error_0_); err != nil {
 					return fmt.Errorf("serialize _Error_0_ of type \"string\": %w", err)
 				}
@@ -132,8 +132,8 @@ func (s _irpc_Math_AddResp) Serialize(e *irpcgen.Encoder) error {
 	return nil
 }
 func (s *_irpc_Math_AddResp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.VarInt(&s.Param0); err != nil {
-		return fmt.Errorf("deserialize s.Param0 of type \"int\": %w", err)
+	if err := d.VarInt(&s.p0); err != nil {
+		return fmt.Errorf("deserialize s.p0 of type \"int\": %w", err)
 	}
 	{
 		var isNil bool
@@ -142,7 +142,7 @@ func (s *_irpc_Math_AddResp) Deserialize(d *irpcgen.Decoder) error {
 		}
 
 		if isNil {
-			s.Param1 = nil
+			s.p1 = nil
 		} else {
 			var impl _error_Math_impl
 			{ // Error()
@@ -150,7 +150,7 @@ func (s *_irpc_Math_AddResp) Deserialize(d *irpcgen.Decoder) error {
 					return fmt.Errorf("deserialize impl._Error_0_ of type \"string\": %w", err)
 				}
 			}
-			s.Param1 = impl
+			s.p1 = impl
 		}
 	}
 	return nil
