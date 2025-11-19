@@ -34,7 +34,7 @@ func newQualifier(tr typeResolver) *qualifier {
 	return &qualifier{
 		srcFileImports: tr.srcImports,
 		usedImports:    newOrderedSet[importSpec](),
-		inputPkgPath:   tr.inputPkg.PkgPath,
+		inputPkgPath:   tr.srcPkg.PkgPath,
 	}
 }
 

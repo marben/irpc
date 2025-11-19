@@ -4,10 +4,15 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"go/ast"
+	"os"
+	"path"
+	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
 	"unicode"
+
+	"golang.org/x/tools/go/packages"
 )
 
 var (
@@ -148,4 +153,37 @@ func godocFromAstCommentGroup(cg *ast.CommentGroup) string {
 		sb.WriteByte('\n')
 	}
 	return sb.String()
+}
+
+func canonicalSrcFilePath(file string, srcPkg *packages.Package) (string, error) {
+	fileAbsPath, err := filepath.Abs(file)
+	if err != nil {
+		return "", fmt.Errorf("couldn't resolve absolute path of file %q: %w", file, err)
+	}
+
+	if srcPkg.Module != nil {
+		moduleName := srcPkg.Module.Path // e.g. github.com/marben/irpc
+		moduleDir := srcPkg.Module.Dir   // absolute filesystem path
+
+		rel, err := filepath.Rel(moduleDir, fileAbsPath)
+		if err != nil {
+			return "", fmt.Errorf("filepath.Rel(): %w", err)
+		}
+
+		return path.Join(moduleName, filepath.ToSlash(rel)), nil
+	} else {
+		// not in module
+		// this mode is currently unsupported for other reasons, but could/should be allowed one time
+		cwd, err := os.Getwd()
+		if err != nil {
+			return "", fmt.Errorf("os.Getwd(): %w", err)
+		}
+
+		rel, err := filepath.Rel(cwd, fileAbsPath)
+		if err != nil {
+			return "", fmt.Errorf("filepath.Rel(%q, %q): %w", cwd, fileAbsPath, err)
+		}
+
+		return filepath.ToSlash(rel), nil
+	}
 }

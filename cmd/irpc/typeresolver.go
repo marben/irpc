@@ -12,13 +12,18 @@ import (
 )
 
 type typeResolver struct {
-	inputPkg                     *packages.Package
+	srcPkg                       *packages.Package
 	allPkgs                      []*packages.Package
 	srcFileAst                   *ast.File
 	srcImports                   orderedSet[importSpec] // imports from the src file
 	binMarshaler, binUnmarshaler *types.Interface
 	lenType                      Type
 	boolType                     Type
+
+	// srcFilePath is written to the generated file in comment
+	// if it's part of module, fully qualified import path is used
+	// otherwise just a filename
+	srcFilePath string
 }
 
 func newTypeResolver(filename string) (typeResolver, error) {
@@ -41,12 +46,17 @@ func newTypeResolver(filename string) (typeResolver, error) {
 		return typeResolver{}, fmt.Errorf("packages.Load(): %w", err)
 	}
 
-	targetPkg, err := findPackageForFile(allPackages, filename)
+	srcPkg, err := findPackageForFile(allPackages, filename)
 	if err != nil {
 		return typeResolver{}, err
 	}
 
-	fileAst, err := findASTForFile(targetPkg, filename)
+	srcFilePath, err := canonicalSrcFilePath(filename, srcPkg)
+	if err != nil {
+		return typeResolver{}, fmt.Errorf("canonicalSrcFilePath(%q): %w", filename, err)
+	}
+
+	fileAst, err := findASTForFile(srcPkg, filename)
 	if err != nil {
 		return typeResolver{}, fmt.Errorf("couldn't find ast for given file %s", filename)
 	}
@@ -93,7 +103,7 @@ func newTypeResolver(filename string) (typeResolver, error) {
 	}
 
 	return typeResolver{
-		inputPkg:       targetPkg,
+		srcPkg:         srcPkg,
 		allPkgs:        allPackages,
 		srcFileAst:     fileAst,
 		srcImports:     srcImports,
@@ -101,6 +111,7 @@ func newTypeResolver(filename string) (typeResolver, error) {
 		binUnmarshaler: binUnmarshaler,
 		lenType:        newDirectCallType("Len", "Len", "int", nil),
 		boolType:       newDirectCallType("Bool", "Bool", "bool", nil),
+		srcFilePath:    srcFilePath,
 	}, nil
 }
 
@@ -119,7 +130,7 @@ func (tr typeResolver) loadRpcParamList(apiName string, list []*ast.Field) ([]rp
 		astExpr := field.Type
 		tv, err := tr.findTypeAndValueForAst(astExpr)
 		if err != nil {
-			return nil, fmt.Errorf("couldn't determine ast's %T fileld's type and value: %w", astExpr, err)
+			return nil, fmt.Errorf("couldn't determine ast's %T field's type and value: %w", astExpr, err)
 		}
 		t, err := tr.newType(apiName, tv.Type, astExpr)
 		if err != nil {

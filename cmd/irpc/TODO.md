@@ -1,5 +1,6 @@
 - merge hash from client and service to one var. it should be ok within a single package
 - ? put file path within go module to generated file, to allow two identical interfaces register two different service implementation from different packages but on the same endpoint
+- support files outside of module. it is currently unsupported and fails
 - two interfaces in one file - are service/client hashes the same? maybe we need to add interface name to the hash?
 - get rid of "var zero" declarations for some cases, where we know the zero value (nil for inerface/slice/map, "" for string etc...)
 - map[int]interface{}
