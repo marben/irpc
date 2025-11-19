@@ -7,12 +7,12 @@ import (
 )
 
 type apiGenerator struct {
-	apiName         string
-	docCommentGroup *ast.CommentGroup
-	methods         []methodGenerator
+	apiName string
+	goDoc   string
+	methods []methodGenerator
 }
 
-func newApiGenerator(tr typeResolver, apiName string, astIface *ast.InterfaceType, godoc *ast.CommentGroup) (apiGenerator, error) {
+func newApiGenerator(tr typeResolver, apiName string, astIface *ast.InterfaceType, godocCg *ast.CommentGroup) (apiGenerator, error) {
 	methods := []methodGenerator{}
 	for i, methodField := range astIface.Methods.List {
 		method, err := newMethodGenerator(tr, apiName, methodField, i)
@@ -23,9 +23,9 @@ func newApiGenerator(tr typeResolver, apiName string, astIface *ast.InterfaceTyp
 	}
 
 	return apiGenerator{
-		apiName:         apiName,
-		docCommentGroup: godoc,
-		methods:         methods,
+		apiName: apiName,
+		goDoc:   godocFromAstCommentGroup(godocCg),
+		methods: methods,
 	}, nil
 }
 
@@ -37,37 +37,15 @@ func (ag apiGenerator) paramStructs() []paramStructGenerator {
 	return paramStructs
 }
 
-func (ag apiGenerator) goDoc() string {
-	if ag.docCommentGroup == nil {
-		return ""
-	}
-
-	var sb strings.Builder
-	for _, l := range ag.docCommentGroup.List {
-		text := l.Text
-
-		// filter out go directives
-		if strings.HasPrefix(text, "//go:") ||
-			strings.HasPrefix(text, "/*go:") ||
-			strings.HasPrefix(text, "//line ") {
-			continue
-		}
-
-		sb.WriteString(text)
-		sb.WriteByte('\n')
-	}
-	return sb.String()
-}
-
 func (ag apiGenerator) clientCode(hash []byte, q *qualifier) string {
 	clientTypeName := ag.apiName + "IrpcClient"
 	sb := &strings.Builder{}
 
 	// GoDoc comment
 	fmt.Fprintf(sb, "// %s implements %s\n", clientTypeName, ag.apiName)
-	if ag.goDoc() != "" {
+	if ag.goDoc != "" {
 		sb.WriteString("// \n")
-		sb.WriteString(ag.goDoc())
+		sb.WriteString(ag.goDoc)
 	}
 
 	// type definition
@@ -98,6 +76,7 @@ func (ag apiGenerator) clientCode(hash []byte, q *qualifier) string {
 		fncReceiverName := allVarIds.generateUniqueVarName("_c")
 
 		// func header
+		sb.WriteString(m.goDoc)
 		fmt.Fprintf(sb, "func(%s *%s)%s(%s)(%s){\n", fncReceiverName, clientTypeName, m.name, m.req.funcCallParams(q), m.resp.funcCallParams(q))
 
 		// request

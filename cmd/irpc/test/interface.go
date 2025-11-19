@@ -22,7 +22,6 @@ type interfaceTest interface {
 		Age() int
 	}) string
 
-	// todo: uncomment and implement proper type naming
 	passAnonInterfaceWithNamedParams(input interface {
 		a() (out.Uint8, int)
 		b() out2.Uint8

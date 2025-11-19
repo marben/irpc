@@ -12,7 +12,10 @@ import (
 type basicAPI interface {
 	addByte(a byte, b byte) byte
 	addInt(a int, b int) int
-	swapInt(a int, b int) (int, int) // multiple return values
+
+	// multiple return values
+	swapInt(a int, b int) (int, int)
+
 	subUint(a, b uint) uint
 	addInt8(a, b int8) int8
 	addUint8(a, b uint8) uint8

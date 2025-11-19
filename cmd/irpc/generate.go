@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/sha256"
 	"fmt"
+	"go/ast"
 	"slices"
 	"strconv"
 	"strings"
@@ -124,4 +125,27 @@ func byteSliceLiteral(in []byte) string {
 		}
 		return fmt.Sprintf("[]byte{\n%s\n}", sb.String())
 	}
+}
+
+// parses godoc comment group, does some sanitization and returns godoc as string
+func godocFromAstCommentGroup(cg *ast.CommentGroup) string {
+	if cg == nil {
+		return ""
+	}
+
+	var sb strings.Builder
+	for _, l := range cg.List {
+		text := l.Text
+
+		// filter out go directives
+		if strings.HasPrefix(text, "//go:") ||
+			strings.HasPrefix(text, "/*go:") ||
+			strings.HasPrefix(text, "//line ") {
+			continue
+		}
+
+		sb.WriteString(text)
+		sb.WriteByte('\n')
+	}
+	return sb.String()
 }

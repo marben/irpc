@@ -11,6 +11,7 @@ type methodGenerator struct {
 	index     int
 	req, resp paramStructGenerator
 	ctxVar    string // context used for method call (either there is context param, or we use context.Background() )
+	goDoc     string
 }
 
 func newMethodGenerator(tr typeResolver, apiName string, methodField *ast.Field, index int) (methodGenerator, error) {
@@ -67,6 +68,7 @@ func newMethodGenerator(tr typeResolver, apiName string, methodField *ast.Field,
 		req:    req,
 		resp:   resp,
 		ctxVar: ctxVarName,
+		goDoc:  godocFromAstCommentGroup(methodField.Doc),
 	}, nil
 }
 

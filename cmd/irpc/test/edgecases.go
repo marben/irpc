@@ -5,7 +5,8 @@ type emptyAPI interface{}
 //go:generate go run ../
 type edgeCases interface {
 	noReturn(i int)
-	noParams() int
+	// noParams is function with no params lol. and this is godoc just above it
+	noParams() int // noParams also has som doc on the same line as definition. but this is not considered godoc
 	nothingAtAll()
 	unnamedIntParam(int, int)
 	mixedParamIds(_ int, p0 uint8, _ struct{ a int })
