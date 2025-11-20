@@ -9,10 +9,10 @@ import (
 )
 
 var _mapTestIrpcId = []byte{
-	0x22, 0x26, 0xc2, 0xc2, 0x66, 0xba, 0x3e, 0xd8,
-	0x8f, 0x9d, 0x57, 0x35, 0x03, 0xd0, 0x5c, 0xcd,
-	0x39, 0xae, 0x3c, 0x13, 0xe4, 0x24, 0x20, 0xcd,
-	0x81, 0x4c, 0xe4, 0xa9, 0xd2, 0x73, 0x7c, 0x7a,
+	0x9c, 0x92, 0x33, 0xfc, 0x28, 0x78, 0xd0, 0x6c,
+	0xae, 0x60, 0xa9, 0x7a, 0x8d, 0x68, 0xed, 0x84,
+	0xab, 0x6b, 0x18, 0x71, 0x95, 0xb9, 0xf0, 0xe8,
+	0x03, 0xf5, 0xe5, 0x9e, 0xf2, 0xd2, 0x42, 0x87,
 }
 
 type mapTestIrpcService struct {
@@ -99,6 +99,20 @@ func (s *mapTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDese
 				return resp
 			}, nil
 		}, nil
+	case 5: // emptyInterfaceMapReflect
+		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _irpc_mapTest_emptyInterfaceMapReflectReq
+			if err := args.Deserialize(d); err != nil {
+				return nil, err
+			}
+			return func(ctx context.Context) irpcgen.Serializable {
+				// EXECUTE
+				var resp _irpc_mapTest_emptyInterfaceMapReflectResp
+				resp.p0 = s.impl.emptyInterfaceMapReflect(args.in)
+				return resp
+			}, nil
+		}, nil
 	default:
 		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, s.Id())
 	}
@@ -161,6 +175,16 @@ func (_c *mapTestIrpcClient) namedKeySum(in map[mapNamedInt]mapNamedFloat64) map
 	}
 	var resp _irpc_mapTest_namedKeySumResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _mapTestIrpcId, 4, req, &resp); err != nil {
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
+	}
+	return resp.p0
+}
+func (_c *mapTestIrpcClient) emptyInterfaceMapReflect(in map[int]interface{}) map[int]interface{} {
+	var req = _irpc_mapTest_emptyInterfaceMapReflectReq{
+		in: in,
+	}
+	var resp _irpc_mapTest_emptyInterfaceMapReflectResp
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _mapTestIrpcId, 5, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -603,6 +627,135 @@ func (s _irpc_mapTest_namedKeySumResp) Serialize(e *irpcgen.Encoder) error {
 func (s *_irpc_mapTest_namedKeySumResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := d.Float64le((*float64)(&s.p0)); err != nil {
 		return fmt.Errorf("deserialize s.p0 of type \"mapNamedFloat64\": %w", err)
+	}
+	return nil
+}
+
+type _irpc_mapTest_emptyInterfaceMapReflectReq struct {
+	in map[int]interface{}
+}
+
+func (s _irpc_mapTest_emptyInterfaceMapReflectReq) Serialize(e *irpcgen.Encoder) error {
+	{ // s.in map[int]interface {}
+		if err := e.Len(len(s.in)); err != nil {
+			return fmt.Errorf("serialize len(s.in) of type \"int\": %w", err)
+		}
+		for k, v := range s.in {
+			if err := e.VarInt(k); err != nil {
+				return fmt.Errorf("serialize k of type \"int\": %w", err)
+			}
+			{
+				var isNil bool
+				if v == nil {
+					isNil = true
+				}
+				if err := e.Bool(isNil); err != nil {
+					return fmt.Errorf("serialize isNil of type \"bool\": %w", err)
+				}
+
+				if !isNil {
+				}
+			}
+		}
+	}
+	return nil
+}
+func (s *_irpc_mapTest_emptyInterfaceMapReflectReq) Deserialize(d *irpcgen.Decoder) error {
+	{ // s.in map[int]interface {}
+		var l int
+		if err := d.Len(&l); err != nil {
+			return fmt.Errorf("deserialize l of type \"int\": %w", err)
+		}
+		s.in = make(map[int]interface{}, l)
+		for range l {
+			var k int
+			if err := d.VarInt(&k); err != nil {
+				return fmt.Errorf("deserialize k of type \"int\": %w", err)
+			}
+
+			var v interface{}
+			{
+				var isNil bool
+				if err := d.Bool(&isNil); err != nil {
+					return fmt.Errorf("deserialize isNil of type \"bool\": %w", err)
+				}
+
+				if isNil {
+					v = nil
+				} else {
+					var impl _iface_Empty_mapTest_impl
+					v = impl
+				}
+			}
+
+			s.in[k] = v
+		}
+	}
+	return nil
+}
+
+type _iface_Empty_mapTest_impl struct {
+}
+
+type _irpc_mapTest_emptyInterfaceMapReflectResp struct {
+	p0 map[int]interface{}
+}
+
+func (s _irpc_mapTest_emptyInterfaceMapReflectResp) Serialize(e *irpcgen.Encoder) error {
+	{ // s.p0 map[int]interface {}
+		if err := e.Len(len(s.p0)); err != nil {
+			return fmt.Errorf("serialize len(s.p0) of type \"int\": %w", err)
+		}
+		for k, v := range s.p0 {
+			if err := e.VarInt(k); err != nil {
+				return fmt.Errorf("serialize k of type \"int\": %w", err)
+			}
+			{
+				var isNil bool
+				if v == nil {
+					isNil = true
+				}
+				if err := e.Bool(isNil); err != nil {
+					return fmt.Errorf("serialize isNil of type \"bool\": %w", err)
+				}
+
+				if !isNil {
+				}
+			}
+		}
+	}
+	return nil
+}
+func (s *_irpc_mapTest_emptyInterfaceMapReflectResp) Deserialize(d *irpcgen.Decoder) error {
+	{ // s.p0 map[int]interface {}
+		var l int
+		if err := d.Len(&l); err != nil {
+			return fmt.Errorf("deserialize l of type \"int\": %w", err)
+		}
+		s.p0 = make(map[int]interface{}, l)
+		for range l {
+			var k int
+			if err := d.VarInt(&k); err != nil {
+				return fmt.Errorf("deserialize k of type \"int\": %w", err)
+			}
+
+			var v interface{}
+			{
+				var isNil bool
+				if err := d.Bool(&isNil); err != nil {
+					return fmt.Errorf("deserialize isNil of type \"bool\": %w", err)
+				}
+
+				if isNil {
+					v = nil
+				} else {
+					var impl _iface_Empty_mapTest_impl
+					v = impl
+				}
+			}
+
+			s.p0[k] = v
+		}
 	}
 	return nil
 }

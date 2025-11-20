@@ -115,7 +115,7 @@ func (i interfaceType) name(q *qualifier) string {
 }
 
 // we need concrete implementation of our interface
-func (i interfaceType) codeblock(q *qualifier) string {
+func (i interfaceType) codeblocks(q *qualifier) []string {
 	sb := &strings.Builder{}
 
 	// struct that will hold all our interface's return values
@@ -134,7 +134,7 @@ func (i interfaceType) codeblock(q *qualifier) string {
 		sb.WriteString("}\n")
 	}
 
-	return sb.String()
+	return []string{sb.String()}
 }
 
 // decode implements Type.

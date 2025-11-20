@@ -34,12 +34,18 @@ type structAPI interface {
 	InlineInlineParams(s struct{ a struct{ b int } }) int
 	InlineReturn(a int) struct{ b int }
 	PointNeg(p image.Point) image.Point // todo: write test
+	ReturnErr() error
 }
 
 var _ structAPI = structImpl{}
 
 type structImpl struct {
 	skew int
+}
+
+// ReturnErr implements structAPI.
+func (i structImpl) ReturnErr() error {
+	panic("unimplemented")
 }
 
 // InlineParamsNamed implements structAPI.

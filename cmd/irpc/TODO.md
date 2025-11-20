@@ -1,12 +1,16 @@
+- document versioning in README
+- map[int]interface{}
+- think about and probably implement nil-ability of slices, maps, etc...
+ - perhaps use generics for slices/maps etc? it would simplify generated code greatly
+- make sure passing interface{} != nil returns something that is not nil ??
+- interface{} like for instance in map[int]interface{} doesn't need to have a codeblock
 - support files outside of module. it is currently unsupported and fails
 - two interfaces in one file - are service/client hashes the same? maybe we need to add interface name to the hash?
 - get rid of "var zero" declarations for some cases, where we know the zero value (nil for inerface/slice/map, "" for string etc...)
-- map[int]interface{}
 - dot imports
 - BinaryAppender
 - test named types outside of module
 - support/test aliases
-- get rid of .codeblock() in encoders, since almost none use it - we can make a separate interface for it
 - (maybe) implement bitpacking writer. first for slice of bool, eventually perhaps
     for everything? (could use some benchmarking before that though)
 - implement and test sending big messages with different endpoint.MaxMsgLen. client should be splitting msgs etc?

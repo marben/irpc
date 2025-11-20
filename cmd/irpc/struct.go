@@ -93,8 +93,12 @@ func (s structType) name(q *qualifier) string {
 }
 
 // codeblock implements Type.
-func (s structType) codeblock(q *qualifier) string {
-	return ""
+func (s structType) codeblocks(q *qualifier) []string {
+	var cb []string
+	for _, f := range s.fields {
+		cb = append(cb, f.t.codeblocks(q)...)
+	}
+	return cb
 }
 
 // decode implements Type.

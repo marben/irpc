@@ -2,6 +2,11 @@ package irpctestpkg
 
 //go:generate go run ../
 
+import (
+	"log"
+	"maps"
+)
+
 type namedIntFloatMap map[int]float64
 type mapNamedInt int
 type mapNamedFloat64 float64
@@ -12,11 +17,20 @@ type mapTest interface {
 	sumSlices(in map[intStruct][]intStruct) (keysSum, valsSum int)
 	namedMapInc(in namedIntFloatMap) namedIntFloatMap               // todo: write a test
 	namedKeySum(in map[mapNamedInt]mapNamedFloat64) mapNamedFloat64 // todo: write a test
+	emptyInterfaceMapReflect(in map[int]interface{}) map[int]interface{}
 }
 
 var _ mapTest = mapTestImpl{}
 
 type mapTestImpl struct {
+}
+
+// emptyInterfaceMapSum implements mapTest.
+func (mt mapTestImpl) emptyInterfaceMapReflect(in map[int]interface{}) map[int]interface{} {
+	log.Printf("implementation obtained map: %v", in)
+	var rtnMap = make(map[int]interface{}, len(in))
+	maps.Copy(rtnMap, in)
+	return rtnMap
 }
 
 func (mt mapTestImpl) mapSum(in map[int]float64) (keysSum int, valsSum float64) {

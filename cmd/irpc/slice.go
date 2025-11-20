@@ -107,6 +107,6 @@ func (st genericSliceType) decode(varId string, existingVars varNames, q *qualif
 }
 
 // codeblock implements encoder.
-func (st genericSliceType) codeblock(q *qualifier) string {
-	return ""
+func (st genericSliceType) codeblocks(q *qualifier) []string {
+	return st.elemT.codeblocks(q)
 }

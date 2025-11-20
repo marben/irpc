@@ -52,8 +52,8 @@ func (m mapType) name(q *qualifier) string {
 }
 
 // codeblock implements Type.
-func (m mapType) codeblock(q *qualifier) string {
-	return ""
+func (m mapType) codeblocks(q *qualifier) []string {
+	return append(m.keyT.codeblocks(q), m.valT.codeblocks(q)...)
 }
 
 // decode implements Type.

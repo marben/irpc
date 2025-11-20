@@ -16,10 +16,18 @@ type sliceTest interface {
 	namedByteSlice(slice namedByteSlice) int
 	sliceOfBools(slice []bool) namedBoolSlice
 	sliceOfUint8(slice []uint8) []byte
+	sliceOfErrors(slice []error)
 }
+
+var _ sliceTest = sliceTestImpl{}
 
 type sliceTestImpl struct {
 	skew int
+}
+
+// sliceOfErrors implements sliceTest.
+func (st sliceTestImpl) sliceOfErrors(slice []error) {
+	panic("unimplemented")
 }
 
 // sliceOfUint8 implements sliceTest.

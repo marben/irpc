@@ -16,8 +16,8 @@ func (c contextType) name(q *qualifier) string {
 }
 
 // codeblock implements Type.
-func (c contextType) codeblock(q *qualifier) string {
-	return ""
+func (c contextType) codeblocks(q *qualifier) []string {
+	return nil
 }
 
 // decode implements Type.

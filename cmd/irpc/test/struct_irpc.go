@@ -12,10 +12,10 @@ import (
 )
 
 var _structAPIIrpcId = []byte{
-	0x21, 0x55, 0x96, 0x47, 0x65, 0x61, 0xfe, 0xd1,
-	0xb8, 0x44, 0xd3, 0x46, 0x0d, 0x10, 0x11, 0x8f,
-	0x5d, 0x72, 0x69, 0xf0, 0x85, 0x45, 0xdb, 0x44,
-	0xc2, 0xb7, 0xa7, 0x81, 0x4e, 0xc5, 0xb2, 0xe8,
+	0x3c, 0x8c, 0xe3, 0x09, 0xe2, 0xec, 0xa3, 0x0e,
+	0x54, 0xb2, 0xa7, 0x62, 0x15, 0xf2, 0xfa, 0xc4,
+	0xb3, 0x26, 0xbe, 0x72, 0x83, 0xe2, 0xdb, 0xbc,
+	0xe9, 0x29, 0xa3, 0xb2, 0x21, 0x8f, 0x9b, 0x43,
 }
 
 type structAPIIrpcService struct {
@@ -143,6 +143,15 @@ func (s *structAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 				return resp
 			}, nil
 		}, nil
+	case 8: // ReturnErr
+		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
+			return func(ctx context.Context) irpcgen.Serializable {
+				// EXECUTE
+				var resp _irpc_structAPI_ReturnErrResp
+				resp.p0 = s.impl.ReturnErr()
+				return resp
+			}, nil
+		}, nil
 	default:
 		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, s.Id())
 	}
@@ -237,6 +246,13 @@ func (_c *structAPIIrpcClient) PointNeg(p image.Point) image.Point {
 	var resp _irpc_structAPI_PointNegResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _structAPIIrpcId, 7, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
+	}
+	return resp.p0
+}
+func (_c *structAPIIrpcClient) ReturnErr() error {
+	var resp _irpc_structAPI_ReturnErrResp
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _structAPIIrpcId, 8, irpcgen.EmptySerializable{}, &resp); err != nil {
+		return err
 	}
 	return resp.p0
 }
@@ -625,4 +641,59 @@ func (s *_irpc_structAPI_PointNegResp) Deserialize(d *irpcgen.Decoder) error {
 		return fmt.Errorf("deserialize s.p0.Y of type \"int\": %w", err)
 	}
 	return nil
+}
+
+type _irpc_structAPI_ReturnErrResp struct {
+	p0 error
+}
+
+func (s _irpc_structAPI_ReturnErrResp) Serialize(e *irpcgen.Encoder) error {
+	{
+		var isNil bool
+		if s.p0 == nil {
+			isNil = true
+		}
+		if err := e.Bool(isNil); err != nil {
+			return fmt.Errorf("serialize isNil of type \"bool\": %w", err)
+		}
+
+		if !isNil {
+			{ // Error()
+				_Error_0_ := s.p0.Error()
+				if err := e.String(_Error_0_); err != nil {
+					return fmt.Errorf("serialize _Error_0_ of type \"string\": %w", err)
+				}
+			}
+		}
+	}
+	return nil
+}
+func (s *_irpc_structAPI_ReturnErrResp) Deserialize(d *irpcgen.Decoder) error {
+	{
+		var isNil bool
+		if err := d.Bool(&isNil); err != nil {
+			return fmt.Errorf("deserialize isNil of type \"bool\": %w", err)
+		}
+
+		if isNil {
+			s.p0 = nil
+		} else {
+			var impl _error_structAPI_impl
+			{ // Error()
+				if err := d.String(&impl._Error_0_); err != nil {
+					return fmt.Errorf("deserialize impl._Error_0_ of type \"string\": %w", err)
+				}
+			}
+			s.p0 = impl
+		}
+	}
+	return nil
+}
+
+type _error_structAPI_impl struct {
+	_Error_0_ string
+}
+
+func (i _error_structAPI_impl) Error() string {
+	return i._Error_0_
 }

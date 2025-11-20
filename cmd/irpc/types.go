@@ -9,7 +9,7 @@ import (
 type Type interface {
 	encode(varId string, existingVars varNames, q *qualifier) string // inline variable encode
 	decode(varId string, existingVars varNames, q *qualifier) string // inline variable decode
-	codeblock(q *qualifier) string                                   // requested encoder's code block at top level
+	codeblocks(q *qualifier) []string                                // requested type's encode/decode code block at top level
 	name(q *qualifier) string
 }
 
@@ -93,8 +93,8 @@ func (t directCallType) nameForComments(q *qualifier) string {
 	return q.qualifyNamedInfoWithoutAddingImports(*t.ni)
 }
 
-func (t directCallType) codeblock(q *qualifier) string {
-	return ""
+func (t directCallType) codeblocks(q *qualifier) []string {
+	return nil
 }
 
 func (t directCallType) decode(varId string, existingVars varNames, q *qualifier) string {

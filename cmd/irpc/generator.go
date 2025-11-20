@@ -81,7 +81,7 @@ func (g generator) generate(w io.Writer, hash []byte) error {
 			if !ps.isEmpty() {
 				codeBlocks.add(ps.code(q))
 				for _, e := range ps.types() {
-					codeBlocks.add(e.codeblock(q))
+					codeBlocks.add(e.codeblocks(q)...)
 				}
 			}
 		}
