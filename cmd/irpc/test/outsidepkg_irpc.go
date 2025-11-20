@@ -9,24 +9,24 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
+var _outsideTestIrpcId = []byte{
+	0xed, 0x82, 0x5c, 0x57, 0xd6, 0x64, 0xda, 0x22,
+	0x80, 0xdc, 0xfa, 0x31, 0x60, 0x3d, 0x77, 0x2e,
+	0xa2, 0xe4, 0x91, 0xb0, 0x28, 0xed, 0xca, 0xe6,
+	0xfc, 0x72, 0xae, 0x43, 0x46, 0x73, 0x24, 0x09,
+}
+
 type outsideTestIrpcService struct {
 	impl outsideTest
-	id   []byte
 }
 
 func newOutsideTestIrpcService(impl outsideTest) *outsideTestIrpcService {
 	return &outsideTestIrpcService{
 		impl: impl,
-		id: []byte{
-			0x80, 0x5f, 0xae, 0x63, 0x1a, 0xe9, 0xca, 0x15,
-			0xb4, 0x6b, 0xbe, 0x13, 0x40, 0x68, 0x40, 0xee,
-			0x10, 0x26, 0x87, 0x70, 0xb6, 0xc8, 0x1b, 0x92,
-			0x61, 0x4c, 0x88, 0xd7, 0x10, 0x1b, 0xfa, 0xcd,
-		},
 	}
 }
 func (s *outsideTestIrpcService) Id() []byte {
-	return s.id
+	return _outsideTestIrpcId
 }
 func (s *outsideTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
@@ -52,20 +52,13 @@ func (s *outsideTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.Arg
 // outsideTestIrpcClient implements outsideTest
 type outsideTestIrpcClient struct {
 	endpoint irpcgen.Endpoint
-	id       []byte
 }
 
 func newOutsideTestIrpcClient(endpoint irpcgen.Endpoint) (*outsideTestIrpcClient, error) {
-	id := []byte{
-		0x80, 0x5f, 0xae, 0x63, 0x1a, 0xe9, 0xca, 0x15,
-		0xb4, 0x6b, 0xbe, 0x13, 0x40, 0x68, 0x40, 0xee,
-		0x10, 0x26, 0x87, 0x70, 0xb6, 0xc8, 0x1b, 0x92,
-		0x61, 0x4c, 0x88, 0xd7, 0x10, 0x1b, 0xfa, 0xcd,
-	}
-	if err := endpoint.RegisterClient(id); err != nil {
+	if err := endpoint.RegisterClient(_outsideTestIrpcId); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &outsideTestIrpcClient{endpoint: endpoint, id: id}, nil
+	return &outsideTestIrpcClient{endpoint: endpoint}, nil
 }
 func (_c *outsideTestIrpcClient) addUint8(a out.Uint8, b out.Uint8) out.Uint8 {
 	var req = _irpc_outsideTest_addUint8Req{
@@ -73,7 +66,7 @@ func (_c *outsideTestIrpcClient) addUint8(a out.Uint8, b out.Uint8) out.Uint8 {
 		b: b,
 	}
 	var resp _irpc_outsideTest_addUint8Resp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _outsideTestIrpcId, 0, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0

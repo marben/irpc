@@ -7,9 +7,10 @@ import (
 )
 
 type apiGenerator struct {
-	apiName string
-	goDoc   string
-	methods []methodGenerator
+	apiName          string
+	goDoc            string
+	serviceIdVarName string
+	methods          []methodGenerator
 }
 
 func newApiGenerator(tr typeResolver, apiName string, astIface *ast.InterfaceType, godocCg *ast.CommentGroup) (apiGenerator, error) {
@@ -23,9 +24,10 @@ func newApiGenerator(tr typeResolver, apiName string, astIface *ast.InterfaceTyp
 	}
 
 	return apiGenerator{
-		apiName: apiName,
-		goDoc:   godocFromAstCommentGroup(godocCg),
-		methods: methods,
+		apiName:          apiName,
+		goDoc:            godocFromAstCommentGroup(godocCg),
+		serviceIdVarName: fmt.Sprintf("_%sIrpcId", apiName),
+		methods:          methods,
 	}, nil
 }
 
@@ -37,7 +39,11 @@ func (ag apiGenerator) paramStructs() []paramStructGenerator {
 	return paramStructs
 }
 
-func (ag apiGenerator) clientCode(hash []byte, q *qualifier) string {
+func (ag apiGenerator) serviceIdVarDefinition(hash []byte) string {
+	return fmt.Sprintf("var %s = %s", ag.serviceIdVarName, byteSliceLiteral(ag.serviceId(hash)))
+}
+
+func (ag apiGenerator) clientCode(q *qualifier) string {
 	clientTypeName := ag.apiName + "IrpcClient"
 	sb := &strings.Builder{}
 
@@ -51,17 +57,15 @@ func (ag apiGenerator) clientCode(hash []byte, q *qualifier) string {
 	// type definition
 	fmt.Fprintf(sb, `type %[1]s struct {
 		endpoint irpcgen.Endpoint
-		id []byte
 	}
 
 	func %[2]s(endpoint irpcgen.Endpoint) (*%[1]s, error) {
-		id := %[3]s
-		if err := endpoint.RegisterClient(id); err != nil {
+		if err := endpoint.RegisterClient(%[3]s); err != nil {
 			return nil, fmt.Errorf("register failed: %%w", err)
 		}
-		return &%[1]s{endpoint: endpoint, id: id}, nil
+		return &%[1]s{endpoint: endpoint}, nil
 	}
-	`, clientTypeName, generateStructConstructorName(clientTypeName), byteSliceLiteral(ag.serviceId(hash)))
+	`, clientTypeName, generateStructConstructorName(clientTypeName), ag.serviceIdVarName)
 
 	// func calls
 	for _, m := range ag.methods {
@@ -107,7 +111,7 @@ func (ag apiGenerator) clientCode(hash []byte, q *qualifier) string {
 		}
 
 		// func call
-		fmt.Fprintf(sb, "if err := %s.endpoint.CallRemoteFunc(%s,%[1]s.id, %[3]d, %s, &%s); err != nil {\n", fncReceiverName, m.ctxVar, m.index, reqVarName, respVarName)
+		fmt.Fprintf(sb, "if err := %s.endpoint.CallRemoteFunc(%s,%s, %d, %s, &%s); err != nil {\n", fncReceiverName, m.ctxVar, ag.serviceIdVarName, m.index, reqVarName, respVarName)
 		if m.resp.isLastTypeError(q) {
 			// declare zero var, because i don't know, how to directly instantiate zero values
 			if len(m.resp.params) > 1 {
@@ -142,7 +146,7 @@ func (ag apiGenerator) clientCode(hash []byte, q *qualifier) string {
 	return sb.String()
 }
 
-func (ag apiGenerator) serviceCode(hash []byte, q *qualifier) string {
+func (ag apiGenerator) serviceCode(q *qualifier) string {
 	w := &strings.Builder{}
 
 	serviceTypeName := ag.apiName + "IrpcService"
@@ -150,7 +154,6 @@ func (ag apiGenerator) serviceCode(hash []byte, q *qualifier) string {
 	// type definition
 	fmt.Fprintf(w, `type %s struct{
 		impl %s
-		id []byte
 	}
 	`, serviceTypeName, ag.apiName)
 
@@ -158,16 +161,15 @@ func (ag apiGenerator) serviceCode(hash []byte, q *qualifier) string {
 	fmt.Fprintf(w, `func %s (impl %s) *%[3]s {
 		return &%[3]s{
 			impl:impl,
-			id: %s,
 		}
 	}
-	`, generateStructConstructorName(serviceTypeName), ag.apiName, serviceTypeName, byteSliceLiteral(ag.serviceId(hash)))
+	`, generateStructConstructorName(serviceTypeName), ag.apiName, serviceTypeName)
 
 	// Id() func
 	fmt.Fprintf(w, `func (s *%s) Id() []byte {
-		return s.id
+		return %s
 	}
-	`, serviceTypeName)
+	`, serviceTypeName, ag.serviceIdVarName)
 
 	// Call func call switch
 	fmt.Fprintf(w, `func (s *%s) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error){

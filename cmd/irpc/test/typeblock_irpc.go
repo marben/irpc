@@ -8,24 +8,24 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
+var _tbInterfaceAIrpcId = []byte{
+	0xcb, 0x56, 0x6e, 0x1f, 0x86, 0x23, 0x6b, 0xfe,
+	0xbb, 0xae, 0x68, 0xeb, 0x8a, 0xd8, 0xef, 0x50,
+	0x8f, 0x82, 0x97, 0x86, 0x2f, 0xac, 0x94, 0x46,
+	0x3e, 0x38, 0x55, 0x06, 0x05, 0x2f, 0x4b, 0x19,
+}
+
 type tbInterfaceAIrpcService struct {
 	impl tbInterfaceA
-	id   []byte
 }
 
 func newTbInterfaceAIrpcService(impl tbInterfaceA) *tbInterfaceAIrpcService {
 	return &tbInterfaceAIrpcService{
 		impl: impl,
-		id: []byte{
-			0x28, 0x34, 0x9c, 0x03, 0xb4, 0x39, 0x7c, 0x17,
-			0x24, 0x23, 0x2e, 0x77, 0x36, 0xa8, 0x24, 0xd6,
-			0xed, 0x6d, 0x90, 0xbf, 0x86, 0x58, 0x03, 0x19,
-			0x5f, 0x5a, 0x59, 0xa6, 0x2f, 0xed, 0xb4, 0x08,
-		},
 	}
 }
 func (s *tbInterfaceAIrpcService) Id() []byte {
-	return s.id
+	return _tbInterfaceAIrpcId
 }
 func (s *tbInterfaceAIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
@@ -53,27 +53,20 @@ func (s *tbInterfaceAIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.Ar
 // tbInterfaceA deals with string
 type tbInterfaceAIrpcClient struct {
 	endpoint irpcgen.Endpoint
-	id       []byte
 }
 
 func newTbInterfaceAIrpcClient(endpoint irpcgen.Endpoint) (*tbInterfaceAIrpcClient, error) {
-	id := []byte{
-		0x28, 0x34, 0x9c, 0x03, 0xb4, 0x39, 0x7c, 0x17,
-		0x24, 0x23, 0x2e, 0x77, 0x36, 0xa8, 0x24, 0xd6,
-		0xed, 0x6d, 0x90, 0xbf, 0x86, 0x58, 0x03, 0x19,
-		0x5f, 0x5a, 0x59, 0xa6, 0x2f, 0xed, 0xb4, 0x08,
-	}
-	if err := endpoint.RegisterClient(id); err != nil {
+	if err := endpoint.RegisterClient(_tbInterfaceAIrpcId); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &tbInterfaceAIrpcClient{endpoint: endpoint, id: id}, nil
+	return &tbInterfaceAIrpcClient{endpoint: endpoint}, nil
 }
 func (_c *tbInterfaceAIrpcClient) reverse(p0 string) string {
 	var req = _irpc_tbInterfaceA_reverseReq{
 		p0: p0,
 	}
 	var resp _irpc_tbInterfaceA_reverseResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _tbInterfaceAIrpcId, 0, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p02
@@ -113,24 +106,24 @@ func (s *_irpc_tbInterfaceA_reverseResp) Deserialize(d *irpcgen.Decoder) error {
 	return nil
 }
 
+var _tvInterfaceBIrpcId = []byte{
+	0x24, 0xb4, 0xc5, 0x0d, 0xf3, 0x4f, 0x23, 0x0d,
+	0x56, 0x51, 0xed, 0x45, 0x97, 0xdb, 0x37, 0xad,
+	0x88, 0x0b, 0xe8, 0x21, 0x46, 0xff, 0xbb, 0x2e,
+	0xec, 0xb3, 0x66, 0x3a, 0x6e, 0x07, 0x10, 0x1e,
+}
+
 type tvInterfaceBIrpcService struct {
 	impl tvInterfaceB
-	id   []byte
 }
 
 func newTvInterfaceBIrpcService(impl tvInterfaceB) *tvInterfaceBIrpcService {
 	return &tvInterfaceBIrpcService{
 		impl: impl,
-		id: []byte{
-			0x8f, 0x28, 0xb4, 0x33, 0x88, 0xd8, 0xf8, 0x7c,
-			0x8a, 0xca, 0xde, 0xcb, 0xb6, 0x17, 0xeb, 0x30,
-			0x32, 0x33, 0x94, 0x4d, 0x92, 0x4c, 0x0d, 0xb7,
-			0x8f, 0x4c, 0xf9, 0xa4, 0xe4, 0x4d, 0xdc, 0xf7,
-		},
 	}
 }
 func (s *tvInterfaceBIrpcService) Id() []byte {
-	return s.id
+	return _tvInterfaceBIrpcId
 }
 func (s *tvInterfaceBIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
@@ -163,20 +156,13 @@ func (s *tvInterfaceBIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.Ar
  */
 type tvInterfaceBIrpcClient struct {
 	endpoint irpcgen.Endpoint
-	id       []byte
 }
 
 func newTvInterfaceBIrpcClient(endpoint irpcgen.Endpoint) (*tvInterfaceBIrpcClient, error) {
-	id := []byte{
-		0x8f, 0x28, 0xb4, 0x33, 0x88, 0xd8, 0xf8, 0x7c,
-		0x8a, 0xca, 0xde, 0xcb, 0xb6, 0x17, 0xeb, 0x30,
-		0x32, 0x33, 0x94, 0x4d, 0x92, 0x4c, 0x0d, 0xb7,
-		0x8f, 0x4c, 0xf9, 0xa4, 0xe4, 0x4d, 0xdc, 0xf7,
-	}
-	if err := endpoint.RegisterClient(id); err != nil {
+	if err := endpoint.RegisterClient(_tvInterfaceBIrpcId); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &tvInterfaceBIrpcClient{endpoint: endpoint, id: id}, nil
+	return &tvInterfaceBIrpcClient{endpoint: endpoint}, nil
 }
 func (_c *tvInterfaceBIrpcClient) add(a int, b int) int {
 	var req = _irpc_tvInterfaceB_addReq{
@@ -184,7 +170,7 @@ func (_c *tvInterfaceBIrpcClient) add(a int, b int) int {
 		b: b,
 	}
 	var resp _irpc_tvInterfaceB_addResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _tvInterfaceBIrpcId, 0, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0

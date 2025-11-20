@@ -8,24 +8,24 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
+var _TestServiceIrpcId = []byte{
+	0x18, 0xe9, 0x0b, 0xe9, 0xf3, 0x75, 0xd4, 0x06,
+	0xe2, 0x11, 0x34, 0x04, 0xa3, 0xcb, 0x23, 0xe6,
+	0xbc, 0x71, 0xca, 0xd2, 0x24, 0xe0, 0x71, 0xa8,
+	0xd8, 0xab, 0x1a, 0xb4, 0x1d, 0x3a, 0x63, 0x47,
+}
+
 type TestServiceIrpcService struct {
 	impl TestService
-	id   []byte
 }
 
 func NewTestServiceIrpcService(impl TestService) *TestServiceIrpcService {
 	return &TestServiceIrpcService{
 		impl: impl,
-		id: []byte{
-			0x43, 0xf1, 0x04, 0x20, 0xb0, 0x4d, 0xc1, 0xa6,
-			0xd3, 0xb9, 0x6d, 0xf3, 0xf9, 0xfd, 0x36, 0xd0,
-			0xc5, 0x02, 0x43, 0xd8, 0x7c, 0x77, 0xbf, 0xa0,
-			0x5a, 0x7a, 0x9f, 0x0b, 0x11, 0xdd, 0x05, 0x2a,
-		},
 	}
 }
 func (s *TestServiceIrpcService) Id() []byte {
-	return s.id
+	return _TestServiceIrpcId
 }
 func (s *TestServiceIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
@@ -79,20 +79,13 @@ func (s *TestServiceIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.Arg
 // TestServiceIrpcClient implements TestService
 type TestServiceIrpcClient struct {
 	endpoint irpcgen.Endpoint
-	id       []byte
 }
 
 func NewTestServiceIrpcClient(endpoint irpcgen.Endpoint) (*TestServiceIrpcClient, error) {
-	id := []byte{
-		0x43, 0xf1, 0x04, 0x20, 0xb0, 0x4d, 0xc1, 0xa6,
-		0xd3, 0xb9, 0x6d, 0xf3, 0xf9, 0xfd, 0x36, 0xd0,
-		0xc5, 0x02, 0x43, 0xd8, 0x7c, 0x77, 0xbf, 0xa0,
-		0x5a, 0x7a, 0x9f, 0x0b, 0x11, 0xdd, 0x05, 0x2a,
-	}
-	if err := endpoint.RegisterClient(id); err != nil {
+	if err := endpoint.RegisterClient(_TestServiceIrpcId); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &TestServiceIrpcClient{endpoint: endpoint, id: id}, nil
+	return &TestServiceIrpcClient{endpoint: endpoint}, nil
 }
 func (_c *TestServiceIrpcClient) Div(a int, b int) int {
 	var req = _irpc_TestService_DivReq{
@@ -100,7 +93,7 @@ func (_c *TestServiceIrpcClient) Div(a int, b int) int {
 		b: b,
 	}
 	var resp _irpc_TestService_DivResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _TestServiceIrpcId, 0, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -111,7 +104,7 @@ func (_c *TestServiceIrpcClient) DivErr(a int, b int) (int, error) {
 		b: b,
 	}
 	var resp _irpc_TestService_DivErrResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 1, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _TestServiceIrpcId, 1, req, &resp); err != nil {
 		var zero _irpc_TestService_DivErrResp
 		return zero.p0, err
 	}
@@ -124,7 +117,7 @@ func (_c *TestServiceIrpcClient) DivCtxErr(ctx context.Context, a int, b int) (i
 		b: b,
 	}
 	var resp _irpc_TestService_DivCtxErrResp
-	if err := _c.endpoint.CallRemoteFunc(ctx, _c.id, 2, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(ctx, _TestServiceIrpcId, 2, req, &resp); err != nil {
 		var zero _irpc_TestService_DivCtxErrResp
 		return zero.p0, err
 	}

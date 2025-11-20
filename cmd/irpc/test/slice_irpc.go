@@ -8,24 +8,24 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
+var _sliceTestIrpcId = []byte{
+	0x46, 0xd6, 0xa2, 0xe5, 0x70, 0x6a, 0xd3, 0x42,
+	0x8f, 0x3f, 0xe7, 0xf8, 0x6e, 0x1a, 0xde, 0x5d,
+	0x6e, 0xd1, 0x1c, 0x4b, 0x16, 0xd6, 0x61, 0x4e,
+	0x07, 0x0e, 0x85, 0x50, 0x7e, 0x0c, 0xbb, 0x3a,
+}
+
 type sliceTestIrpcService struct {
 	impl sliceTest
-	id   []byte
 }
 
 func newSliceTestIrpcService(impl sliceTest) *sliceTestIrpcService {
 	return &sliceTestIrpcService{
 		impl: impl,
-		id: []byte{
-			0x92, 0x44, 0xa0, 0xe6, 0x69, 0xa6, 0xab, 0xad,
-			0xda, 0x9d, 0xe4, 0x67, 0x4c, 0x80, 0xa4, 0xd9,
-			0xce, 0x75, 0xa8, 0x01, 0x71, 0x1f, 0x06, 0x41,
-			0x24, 0xd6, 0x09, 0xba, 0xe2, 0xfa, 0x15, 0x6a,
-		},
 	}
 }
 func (s *sliceTestIrpcService) Id() []byte {
-	return s.id
+	return _sliceTestIrpcId
 }
 func (s *sliceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
@@ -149,27 +149,20 @@ func (s *sliceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 // sliceTestIrpcClient implements sliceTest
 type sliceTestIrpcClient struct {
 	endpoint irpcgen.Endpoint
-	id       []byte
 }
 
 func newSliceTestIrpcClient(endpoint irpcgen.Endpoint) (*sliceTestIrpcClient, error) {
-	id := []byte{
-		0x92, 0x44, 0xa0, 0xe6, 0x69, 0xa6, 0xab, 0xad,
-		0xda, 0x9d, 0xe4, 0x67, 0x4c, 0x80, 0xa4, 0xd9,
-		0xce, 0x75, 0xa8, 0x01, 0x71, 0x1f, 0x06, 0x41,
-		0x24, 0xd6, 0x09, 0xba, 0xe2, 0xfa, 0x15, 0x6a,
-	}
-	if err := endpoint.RegisterClient(id); err != nil {
+	if err := endpoint.RegisterClient(_sliceTestIrpcId); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &sliceTestIrpcClient{endpoint: endpoint, id: id}, nil
+	return &sliceTestIrpcClient{endpoint: endpoint}, nil
 }
 func (_c *sliceTestIrpcClient) SliceSum(slice []int) int {
 	var req = _irpc_sliceTest_SliceSumReq{
 		slice: slice,
 	}
 	var resp _irpc_sliceTest_SliceSumResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _sliceTestIrpcId, 0, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -180,7 +173,7 @@ func (_c *sliceTestIrpcClient) VectMult(vect []int, s int) []int {
 		s:    s,
 	}
 	var resp _irpc_sliceTest_VectMultResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 1, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _sliceTestIrpcId, 1, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -190,7 +183,7 @@ func (_c *sliceTestIrpcClient) SliceOfFloat64Sum(slice []float64) float64 {
 		slice: slice,
 	}
 	var resp _irpc_sliceTest_SliceOfFloat64SumResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 2, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _sliceTestIrpcId, 2, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -200,7 +193,7 @@ func (_c *sliceTestIrpcClient) SliceOfSlicesSum(slice [][]int) int {
 		slice: slice,
 	}
 	var resp _irpc_sliceTest_SliceOfSlicesSumResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 3, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _sliceTestIrpcId, 3, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -210,7 +203,7 @@ func (_c *sliceTestIrpcClient) SliceOfBytesSum(slice []byte) int {
 		slice: slice,
 	}
 	var resp _irpc_sliceTest_SliceOfBytesSumResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 4, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _sliceTestIrpcId, 4, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -220,7 +213,7 @@ func (_c *sliceTestIrpcClient) namedByteSlice(slice namedByteSlice) int {
 		slice: slice,
 	}
 	var resp _irpc_sliceTest_namedByteSliceResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 5, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _sliceTestIrpcId, 5, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -230,7 +223,7 @@ func (_c *sliceTestIrpcClient) sliceOfBools(slice []bool) namedBoolSlice {
 		slice: slice,
 	}
 	var resp _irpc_sliceTest_sliceOfBoolsResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 6, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _sliceTestIrpcId, 6, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -240,7 +233,7 @@ func (_c *sliceTestIrpcClient) sliceOfUint8(slice []uint8) []byte {
 		slice: slice,
 	}
 	var resp _irpc_sliceTest_sliceOfUint8Resp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 7, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _sliceTestIrpcId, 7, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0

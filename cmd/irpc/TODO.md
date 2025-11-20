@@ -1,4 +1,3 @@
-- merge hash from client and service to one var. it should be ok within a single package
 - support files outside of module. it is currently unsupported and fails
 - two interfaces in one file - are service/client hashes the same? maybe we need to add interface name to the hash?
 - get rid of "var zero" declarations for some cases, where we know the zero value (nil for inerface/slice/map, "" for string etc...)

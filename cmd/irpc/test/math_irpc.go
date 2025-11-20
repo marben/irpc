@@ -8,24 +8,24 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
+var _MathIrpcId = []byte{
+	0x91, 0xf5, 0x43, 0x6d, 0x55, 0x7a, 0x6f, 0x95,
+	0x32, 0xe1, 0x2d, 0xbf, 0xd1, 0x36, 0xf6, 0xa2,
+	0x07, 0x0f, 0x50, 0xdf, 0x51, 0x0e, 0x9c, 0x67,
+	0xe0, 0x51, 0xb5, 0xb8, 0xea, 0x1d, 0xbe, 0x93,
+}
+
 type MathIrpcService struct {
 	impl Math
-	id   []byte
 }
 
 func NewMathIrpcService(impl Math) *MathIrpcService {
 	return &MathIrpcService{
 		impl: impl,
-		id: []byte{
-			0x57, 0x07, 0xfc, 0x2d, 0xfe, 0xb0, 0xf4, 0x1e,
-			0xd5, 0xd6, 0x49, 0x2c, 0xe6, 0x3e, 0xd5, 0x62,
-			0xf4, 0x14, 0x79, 0xae, 0xfa, 0x26, 0x3e, 0xb5,
-			0x8a, 0xac, 0x04, 0xc4, 0xa7, 0x3a, 0x53, 0xc4,
-		},
 	}
 }
 func (s *MathIrpcService) Id() []byte {
-	return s.id
+	return _MathIrpcId
 }
 func (s *MathIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
@@ -51,20 +51,13 @@ func (s *MathIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeseria
 // MathIrpcClient implements Math
 type MathIrpcClient struct {
 	endpoint irpcgen.Endpoint
-	id       []byte
 }
 
 func NewMathIrpcClient(endpoint irpcgen.Endpoint) (*MathIrpcClient, error) {
-	id := []byte{
-		0x57, 0x07, 0xfc, 0x2d, 0xfe, 0xb0, 0xf4, 0x1e,
-		0xd5, 0xd6, 0x49, 0x2c, 0xe6, 0x3e, 0xd5, 0x62,
-		0xf4, 0x14, 0x79, 0xae, 0xfa, 0x26, 0x3e, 0xb5,
-		0x8a, 0xac, 0x04, 0xc4, 0xa7, 0x3a, 0x53, 0xc4,
-	}
-	if err := endpoint.RegisterClient(id); err != nil {
+	if err := endpoint.RegisterClient(_MathIrpcId); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &MathIrpcClient{endpoint: endpoint, id: id}, nil
+	return &MathIrpcClient{endpoint: endpoint}, nil
 }
 func (_c *MathIrpcClient) Add(a int, b int) (int, error) {
 	var req = _irpc_Math_AddReq{
@@ -72,7 +65,7 @@ func (_c *MathIrpcClient) Add(a int, b int) (int, error) {
 		b: b,
 	}
 	var resp _irpc_Math_AddResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _MathIrpcId, 0, req, &resp); err != nil {
 		var zero _irpc_Math_AddResp
 		return zero.p0, err
 	}

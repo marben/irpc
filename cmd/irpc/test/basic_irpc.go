@@ -8,24 +8,24 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
+var _basicAPIIrpcId = []byte{
+	0x92, 0xb4, 0xa3, 0x16, 0x11, 0x9e, 0x8e, 0x5e,
+	0x74, 0x3d, 0x2e, 0x01, 0x58, 0xff, 0x3d, 0x47,
+	0xac, 0x5f, 0x39, 0x1b, 0x41, 0xd2, 0xe3, 0xba,
+	0xb7, 0x02, 0xdf, 0xf9, 0x9c, 0xa5, 0x9d, 0xee,
+}
+
 type basicAPIIrpcService struct {
 	impl basicAPI
-	id   []byte
 }
 
 func newBasicAPIIrpcService(impl basicAPI) *basicAPIIrpcService {
 	return &basicAPIIrpcService{
 		impl: impl,
-		id: []byte{
-			0x22, 0x45, 0x57, 0xea, 0xd1, 0xca, 0xd2, 0xf5,
-			0x0d, 0x8f, 0x74, 0x2a, 0xc0, 0x95, 0x8b, 0x32,
-			0x49, 0x4b, 0x98, 0x89, 0x74, 0xf7, 0x81, 0x09,
-			0xa5, 0x0b, 0x07, 0x61, 0x17, 0x27, 0x86, 0xf1,
-		},
 	}
 }
 func (s *basicAPIIrpcService) Id() []byte {
-	return s.id
+	return _basicAPIIrpcId
 }
 func (s *basicAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
@@ -278,20 +278,13 @@ func (s *basicAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 // and this is a two line description
 type basicAPIIrpcClient struct {
 	endpoint irpcgen.Endpoint
-	id       []byte
 }
 
 func newBasicAPIIrpcClient(endpoint irpcgen.Endpoint) (*basicAPIIrpcClient, error) {
-	id := []byte{
-		0x22, 0x45, 0x57, 0xea, 0xd1, 0xca, 0xd2, 0xf5,
-		0x0d, 0x8f, 0x74, 0x2a, 0xc0, 0x95, 0x8b, 0x32,
-		0x49, 0x4b, 0x98, 0x89, 0x74, 0xf7, 0x81, 0x09,
-		0xa5, 0x0b, 0x07, 0x61, 0x17, 0x27, 0x86, 0xf1,
-	}
-	if err := endpoint.RegisterClient(id); err != nil {
+	if err := endpoint.RegisterClient(_basicAPIIrpcId); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &basicAPIIrpcClient{endpoint: endpoint, id: id}, nil
+	return &basicAPIIrpcClient{endpoint: endpoint}, nil
 }
 func (_c *basicAPIIrpcClient) addByte(a byte, b byte) byte {
 	var req = _irpc_basicAPI_addByteReq{
@@ -299,7 +292,7 @@ func (_c *basicAPIIrpcClient) addByte(a byte, b byte) byte {
 		b: b,
 	}
 	var resp _irpc_basicAPI_addByteResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _basicAPIIrpcId, 0, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -310,7 +303,7 @@ func (_c *basicAPIIrpcClient) addInt(a int, b int) int {
 		b: b,
 	}
 	var resp _irpc_basicAPI_addIntResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 1, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _basicAPIIrpcId, 1, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -323,7 +316,7 @@ func (_c *basicAPIIrpcClient) swapInt(a int, b int) (int, int) {
 		b: b,
 	}
 	var resp _irpc_basicAPI_swapIntResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 2, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _basicAPIIrpcId, 2, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0, resp.p1
@@ -334,7 +327,7 @@ func (_c *basicAPIIrpcClient) subUint(a uint, b uint) uint {
 		b: b,
 	}
 	var resp _irpc_basicAPI_subUintResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 3, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _basicAPIIrpcId, 3, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -345,7 +338,7 @@ func (_c *basicAPIIrpcClient) addInt8(a int8, b int8) int8 {
 		b: b,
 	}
 	var resp _irpc_basicAPI_addInt8Resp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 4, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _basicAPIIrpcId, 4, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -356,7 +349,7 @@ func (_c *basicAPIIrpcClient) addUint8(a uint8, b uint8) uint8 {
 		b: b,
 	}
 	var resp _irpc_basicAPI_addUint8Resp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 5, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _basicAPIIrpcId, 5, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -367,7 +360,7 @@ func (_c *basicAPIIrpcClient) addInt16(a int16, b int16) int16 {
 		b: b,
 	}
 	var resp _irpc_basicAPI_addInt16Resp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 6, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _basicAPIIrpcId, 6, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -378,7 +371,7 @@ func (_c *basicAPIIrpcClient) addUint16(a uint16, b uint16) uint16 {
 		b: b,
 	}
 	var resp _irpc_basicAPI_addUint16Resp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 7, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _basicAPIIrpcId, 7, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -389,7 +382,7 @@ func (_c *basicAPIIrpcClient) addInt32(a int32, b int32) int32 {
 		b: b,
 	}
 	var resp _irpc_basicAPI_addInt32Resp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 8, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _basicAPIIrpcId, 8, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -400,7 +393,7 @@ func (_c *basicAPIIrpcClient) addUint32(a uint32, b uint32) uint32 {
 		b: b,
 	}
 	var resp _irpc_basicAPI_addUint32Resp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 9, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _basicAPIIrpcId, 9, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -411,7 +404,7 @@ func (_c *basicAPIIrpcClient) addInt64(a int64, b int64) int64 {
 		b: b,
 	}
 	var resp _irpc_basicAPI_addInt64Resp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 10, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _basicAPIIrpcId, 10, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -422,7 +415,7 @@ func (_c *basicAPIIrpcClient) addUint64(a uint64, b uint64) uint64 {
 		b: b,
 	}
 	var resp _irpc_basicAPI_addUint64Resp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 11, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _basicAPIIrpcId, 11, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -433,7 +426,7 @@ func (_c *basicAPIIrpcClient) addFloat64(a float64, b float64) float64 {
 		b: b,
 	}
 	var resp _irpc_basicAPI_addFloat64Resp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 12, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _basicAPIIrpcId, 12, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -444,7 +437,7 @@ func (_c *basicAPIIrpcClient) addFloat32(a float32, b float32) float32 {
 		b: b,
 	}
 	var resp _irpc_basicAPI_addFloat32Resp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 13, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _basicAPIIrpcId, 13, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -454,7 +447,7 @@ func (_c *basicAPIIrpcClient) toUpper(c rune) rune {
 		c: c,
 	}
 	var resp _irpc_basicAPI_toUpperResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 14, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _basicAPIIrpcId, 14, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -464,7 +457,7 @@ func (_c *basicAPIIrpcClient) toUpperString(s string) string {
 		s: s,
 	}
 	var resp _irpc_basicAPI_toUpperStringResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 15, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _basicAPIIrpcId, 15, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -474,7 +467,7 @@ func (_c *basicAPIIrpcClient) negBool(ok bool) bool {
 		ok: ok,
 	}
 	var resp _irpc_basicAPI_negBoolResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 16, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _basicAPIIrpcId, 16, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0

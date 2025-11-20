@@ -8,24 +8,24 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
+var _emptyAPIIrpcId = []byte{
+	0x27, 0xaf, 0xed, 0xa7, 0x8f, 0xdc, 0xd4, 0x2a,
+	0x05, 0xf8, 0x6f, 0xb9, 0x57, 0xd6, 0x33, 0x0d,
+	0x09, 0x56, 0x5c, 0xb1, 0xbc, 0xab, 0x0f, 0x0c,
+	0xd0, 0x68, 0x80, 0x17, 0x03, 0x8a, 0x38, 0xf6,
+}
+
 type emptyAPIIrpcService struct {
 	impl emptyAPI
-	id   []byte
 }
 
 func newEmptyAPIIrpcService(impl emptyAPI) *emptyAPIIrpcService {
 	return &emptyAPIIrpcService{
 		impl: impl,
-		id: []byte{
-			0x04, 0x73, 0x69, 0xb5, 0x72, 0x7f, 0x93, 0x57,
-			0xb0, 0x7c, 0x49, 0x20, 0x73, 0x8f, 0xe8, 0xf2,
-			0xb8, 0xc4, 0x3d, 0xc9, 0x9e, 0x29, 0x3a, 0xa5,
-			0x14, 0x67, 0x36, 0xfa, 0xca, 0x87, 0x51, 0xc8,
-		},
 	}
 }
 func (s *emptyAPIIrpcService) Id() []byte {
-	return s.id
+	return _emptyAPIIrpcId
 }
 func (s *emptyAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
@@ -37,40 +37,33 @@ func (s *emptyAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 // emptyAPIIrpcClient implements emptyAPI
 type emptyAPIIrpcClient struct {
 	endpoint irpcgen.Endpoint
-	id       []byte
 }
 
 func newEmptyAPIIrpcClient(endpoint irpcgen.Endpoint) (*emptyAPIIrpcClient, error) {
-	id := []byte{
-		0x04, 0x73, 0x69, 0xb5, 0x72, 0x7f, 0x93, 0x57,
-		0xb0, 0x7c, 0x49, 0x20, 0x73, 0x8f, 0xe8, 0xf2,
-		0xb8, 0xc4, 0x3d, 0xc9, 0x9e, 0x29, 0x3a, 0xa5,
-		0x14, 0x67, 0x36, 0xfa, 0xca, 0x87, 0x51, 0xc8,
-	}
-	if err := endpoint.RegisterClient(id); err != nil {
+	if err := endpoint.RegisterClient(_emptyAPIIrpcId); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &emptyAPIIrpcClient{endpoint: endpoint, id: id}, nil
+	return &emptyAPIIrpcClient{endpoint: endpoint}, nil
+}
+
+var _edgeCasesIrpcId = []byte{
+	0x96, 0xa6, 0x57, 0x5e, 0xa7, 0xa7, 0x05, 0xd7,
+	0x86, 0x90, 0xc3, 0xb3, 0xa9, 0x3a, 0xa4, 0xfc,
+	0x7f, 0x5e, 0x48, 0x39, 0x75, 0x78, 0x68, 0x0f,
+	0xdc, 0x0a, 0x7e, 0x80, 0x59, 0xf9, 0xf2, 0xb4,
 }
 
 type edgeCasesIrpcService struct {
 	impl edgeCases
-	id   []byte
 }
 
 func newEdgeCasesIrpcService(impl edgeCases) *edgeCasesIrpcService {
 	return &edgeCasesIrpcService{
 		impl: impl,
-		id: []byte{
-			0xbb, 0x02, 0x86, 0x75, 0xdf, 0x9e, 0xb5, 0x1d,
-			0xe0, 0x09, 0x29, 0x20, 0x1d, 0xc6, 0xdd, 0x24,
-			0x1c, 0x9d, 0x84, 0x5a, 0x48, 0x6f, 0xb2, 0x30,
-			0x63, 0xf7, 0xd7, 0x3b, 0x20, 0xa5, 0xa3, 0x47,
-		},
 	}
 }
 func (s *edgeCasesIrpcService) Id() []byte {
-	return s.id
+	return _edgeCasesIrpcId
 }
 func (s *edgeCasesIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
@@ -179,26 +172,19 @@ func (s *edgeCasesIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 // edgeCasesIrpcClient implements edgeCases
 type edgeCasesIrpcClient struct {
 	endpoint irpcgen.Endpoint
-	id       []byte
 }
 
 func newEdgeCasesIrpcClient(endpoint irpcgen.Endpoint) (*edgeCasesIrpcClient, error) {
-	id := []byte{
-		0xbb, 0x02, 0x86, 0x75, 0xdf, 0x9e, 0xb5, 0x1d,
-		0xe0, 0x09, 0x29, 0x20, 0x1d, 0xc6, 0xdd, 0x24,
-		0x1c, 0x9d, 0x84, 0x5a, 0x48, 0x6f, 0xb2, 0x30,
-		0x63, 0xf7, 0xd7, 0x3b, 0x20, 0xa5, 0xa3, 0x47,
-	}
-	if err := endpoint.RegisterClient(id); err != nil {
+	if err := endpoint.RegisterClient(_edgeCasesIrpcId); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &edgeCasesIrpcClient{endpoint: endpoint, id: id}, nil
+	return &edgeCasesIrpcClient{endpoint: endpoint}, nil
 }
 func (_c *edgeCasesIrpcClient) noReturn(i int) {
 	var req = _irpc_edgeCases_noReturnReq{
 		i: i,
 	}
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &irpcgen.EmptyDeserializable{}); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _edgeCasesIrpcId, 0, req, &irpcgen.EmptyDeserializable{}); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 }
@@ -206,13 +192,13 @@ func (_c *edgeCasesIrpcClient) noReturn(i int) {
 // noParams is function with no params lol. and this is godoc just above it
 func (_c *edgeCasesIrpcClient) noParams() int {
 	var resp _irpc_edgeCases_noParamsResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 1, irpcgen.EmptySerializable{}, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _edgeCasesIrpcId, 1, irpcgen.EmptySerializable{}, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
 }
 func (_c *edgeCasesIrpcClient) nothingAtAll() {
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 2, irpcgen.EmptySerializable{}, &irpcgen.EmptyDeserializable{}); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _edgeCasesIrpcId, 2, irpcgen.EmptySerializable{}, &irpcgen.EmptyDeserializable{}); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 }
@@ -221,7 +207,7 @@ func (_c *edgeCasesIrpcClient) unnamedIntParam(p0 int, p1 int) {
 		p0: p0,
 		p1: p1,
 	}
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 3, req, &irpcgen.EmptyDeserializable{}); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _edgeCasesIrpcId, 3, req, &irpcgen.EmptyDeserializable{}); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 }
@@ -231,7 +217,7 @@ func (_c *edgeCasesIrpcClient) mixedParamIds(p02 int, p0 uint8, p2 struct{ a int
 		p0:  p0,
 		p2:  p2,
 	}
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 4, req, &irpcgen.EmptyDeserializable{}); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _edgeCasesIrpcId, 4, req, &irpcgen.EmptyDeserializable{}); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 }
@@ -242,7 +228,7 @@ func (_c *edgeCasesIrpcClient) underscoreParamNames(p02 int, p0 uint8, p2 float6
 		p2:  p2,
 	}
 	var resp _irpc_edgeCases_underscoreParamNamesResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 5, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _edgeCasesIrpcId, 5, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p03
@@ -252,7 +238,7 @@ func (_c *edgeCasesIrpcClient) underscoreRtnName(p0 int) (_ int, _ uint8) {
 		p0: p0,
 	}
 	var resp _irpc_edgeCases_underscoreRtnNameResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 6, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _edgeCasesIrpcId, 6, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p02, resp.p1
@@ -261,7 +247,7 @@ func (_c2 *edgeCasesIrpcClient) paramNamedAsReceiver(_c int) {
 	var req = _irpc_edgeCases_paramNamedAsReceiverReq{
 		_c: _c,
 	}
-	if err := _c2.endpoint.CallRemoteFunc(context.Background(), _c2.id, 7, req, &irpcgen.EmptyDeserializable{}); err != nil {
+	if err := _c2.endpoint.CallRemoteFunc(context.Background(), _edgeCasesIrpcId, 7, req, &irpcgen.EmptyDeserializable{}); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 }
@@ -461,24 +447,24 @@ func (s *_irpc_edgeCases_paramNamedAsReceiverReq) Deserialize(d *irpcgen.Decoder
 	return nil
 }
 
+var _anotherInterfaceIrpcId = []byte{
+	0x97, 0x42, 0x5c, 0x53, 0x02, 0xe8, 0x87, 0xff,
+	0xca, 0x85, 0xdb, 0x1c, 0xd6, 0xe2, 0xf7, 0x84,
+	0x84, 0xd2, 0x2b, 0x3c, 0x14, 0x60, 0xaf, 0xed,
+	0x6b, 0x21, 0x11, 0xe5, 0x42, 0x1e, 0xbe, 0x9c,
+}
+
 type anotherInterfaceIrpcService struct {
 	impl anotherInterface
-	id   []byte
 }
 
 func newAnotherInterfaceIrpcService(impl anotherInterface) *anotherInterfaceIrpcService {
 	return &anotherInterfaceIrpcService{
 		impl: impl,
-		id: []byte{
-			0x5a, 0x44, 0xc3, 0xd5, 0x9e, 0x2f, 0xca, 0x5e,
-			0x0a, 0x6d, 0xca, 0x1e, 0xbd, 0xc3, 0xc4, 0xbd,
-			0x27, 0x61, 0x5e, 0xeb, 0x9e, 0x21, 0x03, 0xe7,
-			0xa0, 0x6c, 0xda, 0x55, 0xad, 0x92, 0xcc, 0x65,
-		},
 	}
 }
 func (s *anotherInterfaceIrpcService) Id() []byte {
-	return s.id
+	return _anotherInterfaceIrpcId
 }
 func (s *anotherInterfaceIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
@@ -504,20 +490,13 @@ func (s *anotherInterfaceIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcge
 // anotherInterfaceIrpcClient implements anotherInterface
 type anotherInterfaceIrpcClient struct {
 	endpoint irpcgen.Endpoint
-	id       []byte
 }
 
 func newAnotherInterfaceIrpcClient(endpoint irpcgen.Endpoint) (*anotherInterfaceIrpcClient, error) {
-	id := []byte{
-		0x5a, 0x44, 0xc3, 0xd5, 0x9e, 0x2f, 0xca, 0x5e,
-		0x0a, 0x6d, 0xca, 0x1e, 0xbd, 0xc3, 0xc4, 0xbd,
-		0x27, 0x61, 0x5e, 0xeb, 0x9e, 0x21, 0x03, 0xe7,
-		0xa0, 0x6c, 0xda, 0x55, 0xad, 0x92, 0xcc, 0x65,
-	}
-	if err := endpoint.RegisterClient(id); err != nil {
+	if err := endpoint.RegisterClient(_anotherInterfaceIrpcId); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &anotherInterfaceIrpcClient{endpoint: endpoint, id: id}, nil
+	return &anotherInterfaceIrpcClient{endpoint: endpoint}, nil
 }
 func (_c *anotherInterfaceIrpcClient) anotherAdd(a int, b int) int {
 	var req = _irpc_anotherInterface_anotherAddReq{
@@ -525,7 +504,7 @@ func (_c *anotherInterfaceIrpcClient) anotherAdd(a int, b int) int {
 		b: b,
 	}
 	var resp _irpc_anotherInterface_anotherAddResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _anotherInterfaceIrpcId, 0, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0

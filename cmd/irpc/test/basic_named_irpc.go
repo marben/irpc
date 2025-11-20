@@ -9,24 +9,24 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
+var _basicNamedAPIIrpcId = []byte{
+	0x7e, 0xf3, 0x0b, 0x98, 0xcb, 0x5f, 0xfb, 0x30,
+	0xfd, 0x4b, 0xc8, 0x93, 0xd4, 0xf8, 0x4f, 0x16,
+	0xa9, 0xc9, 0xa5, 0x35, 0x5c, 0x5f, 0x5d, 0x2b,
+	0x67, 0x71, 0x02, 0x38, 0x52, 0x05, 0xf4, 0xe6,
+}
+
 type basicNamedAPIIrpcService struct {
 	impl basicNamedAPI
-	id   []byte
 }
 
 func newBasicNamedAPIIrpcService(impl basicNamedAPI) *basicNamedAPIIrpcService {
 	return &basicNamedAPIIrpcService{
 		impl: impl,
-		id: []byte{
-			0xa1, 0x45, 0x71, 0x19, 0xa2, 0x7d, 0xd4, 0xe3,
-			0x9a, 0xad, 0x12, 0xae, 0x4f, 0x18, 0x90, 0x96,
-			0xbd, 0x8f, 0x44, 0xd9, 0xaa, 0xc0, 0xa6, 0x14,
-			0x62, 0x60, 0xc2, 0x5e, 0xd2, 0x6d, 0xbb, 0xb5,
-		},
 	}
 }
 func (s *basicNamedAPIIrpcService) Id() []byte {
-	return s.id
+	return _basicNamedAPIIrpcId
 }
 func (s *basicNamedAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
@@ -80,20 +80,13 @@ func (s *basicNamedAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.A
 // basicNamedAPIIrpcClient implements basicNamedAPI
 type basicNamedAPIIrpcClient struct {
 	endpoint irpcgen.Endpoint
-	id       []byte
 }
 
 func newBasicNamedAPIIrpcClient(endpoint irpcgen.Endpoint) (*basicNamedAPIIrpcClient, error) {
-	id := []byte{
-		0xa1, 0x45, 0x71, 0x19, 0xa2, 0x7d, 0xd4, 0xe3,
-		0x9a, 0xad, 0x12, 0xae, 0x4f, 0x18, 0x90, 0x96,
-		0xbd, 0x8f, 0x44, 0xd9, 0xaa, 0xc0, 0xa6, 0x14,
-		0x62, 0x60, 0xc2, 0x5e, 0xd2, 0x6d, 0xbb, 0xb5,
-	}
-	if err := endpoint.RegisterClient(id); err != nil {
+	if err := endpoint.RegisterClient(_basicNamedAPIIrpcId); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &basicNamedAPIIrpcClient{endpoint: endpoint, id: id}, nil
+	return &basicNamedAPIIrpcClient{endpoint: endpoint}, nil
 }
 func (_c *basicNamedAPIIrpcClient) addFakeUint8(a out2.Uint8, b out2.Uint8) FakeUint8 {
 	var req = _irpc_basicNamedAPI_addFakeUint8Req{
@@ -101,7 +94,7 @@ func (_c *basicNamedAPIIrpcClient) addFakeUint8(a out2.Uint8, b out2.Uint8) Fake
 		b: b,
 	}
 	var resp _irpc_basicNamedAPI_addFakeUint8Resp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _basicNamedAPIIrpcId, 0, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -112,7 +105,7 @@ func (_c *basicNamedAPIIrpcClient) addUint8(a uint8, b uint8) uint8 {
 		b: b,
 	}
 	var resp _irpc_basicNamedAPI_addUint8Resp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 1, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _basicNamedAPIIrpcId, 1, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -123,7 +116,7 @@ func (_c *basicNamedAPIIrpcClient) addByte(a byte, b byte) byte {
 		b: b,
 	}
 	var resp _irpc_basicNamedAPI_addByteResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 2, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _basicNamedAPIIrpcId, 2, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0

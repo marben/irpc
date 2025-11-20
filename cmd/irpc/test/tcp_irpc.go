@@ -8,24 +8,24 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
+var _tcpTestApiIrpcId = []byte{
+	0x65, 0x15, 0x79, 0xf3, 0xc5, 0x45, 0xeb, 0x58,
+	0x06, 0xf7, 0x58, 0x99, 0x19, 0x6e, 0x69, 0x64,
+	0x98, 0x9f, 0x52, 0xbb, 0x5b, 0x3f, 0x49, 0x4a,
+	0xc8, 0x9c, 0xf5, 0x49, 0xf7, 0xa5, 0x2c, 0x74,
+}
+
 type tcpTestApiIrpcService struct {
 	impl tcpTestApi
-	id   []byte
 }
 
 func newTcpTestApiIrpcService(impl tcpTestApi) *tcpTestApiIrpcService {
 	return &tcpTestApiIrpcService{
 		impl: impl,
-		id: []byte{
-			0x5c, 0x76, 0xac, 0x0c, 0x0d, 0x00, 0x44, 0x11,
-			0x1e, 0x23, 0x88, 0x0c, 0xf0, 0xdf, 0xec, 0x4c,
-			0x08, 0x0a, 0xe5, 0xda, 0x50, 0xd0, 0x13, 0x81,
-			0xee, 0x58, 0x79, 0x53, 0xb8, 0x68, 0x4a, 0x80,
-		},
 	}
 }
 func (s *tcpTestApiIrpcService) Id() []byte {
-	return s.id
+	return _tcpTestApiIrpcId
 }
 func (s *tcpTestApiIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
@@ -51,20 +51,13 @@ func (s *tcpTestApiIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgD
 // tcpTestApiIrpcClient implements tcpTestApi
 type tcpTestApiIrpcClient struct {
 	endpoint irpcgen.Endpoint
-	id       []byte
 }
 
 func newTcpTestApiIrpcClient(endpoint irpcgen.Endpoint) (*tcpTestApiIrpcClient, error) {
-	id := []byte{
-		0x5c, 0x76, 0xac, 0x0c, 0x0d, 0x00, 0x44, 0x11,
-		0x1e, 0x23, 0x88, 0x0c, 0xf0, 0xdf, 0xec, 0x4c,
-		0x08, 0x0a, 0xe5, 0xda, 0x50, 0xd0, 0x13, 0x81,
-		0xee, 0x58, 0x79, 0x53, 0xb8, 0x68, 0x4a, 0x80,
-	}
-	if err := endpoint.RegisterClient(id); err != nil {
+	if err := endpoint.RegisterClient(_tcpTestApiIrpcId); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &tcpTestApiIrpcClient{endpoint: endpoint, id: id}, nil
+	return &tcpTestApiIrpcClient{endpoint: endpoint}, nil
 }
 func (_c *tcpTestApiIrpcClient) Div(a float64, b float64) (float64, error) {
 	var req = _irpc_tcpTestApi_DivReq{
@@ -72,7 +65,7 @@ func (_c *tcpTestApiIrpcClient) Div(a float64, b float64) (float64, error) {
 		b: b,
 	}
 	var resp _irpc_tcpTestApi_DivResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _tcpTestApiIrpcId, 0, req, &resp); err != nil {
 		var zero _irpc_tcpTestApi_DivResp
 		return zero.p0, err
 	}

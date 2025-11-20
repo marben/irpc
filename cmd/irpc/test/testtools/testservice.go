@@ -15,7 +15,7 @@ type TestService interface {
 func TestServiceId() []byte {
 	impl := NewTestServiceImpl(0)
 	service := NewTestServiceIrpcService(impl)
-	return service.id
+	return service.Id()
 }
 
 var _ TestService = NewTestServiceImpl(0)

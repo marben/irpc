@@ -9,24 +9,24 @@ import (
 	"time"
 )
 
+var _binMarshalIrpcId = []byte{
+	0x10, 0x79, 0x95, 0xc4, 0xc1, 0x43, 0x67, 0x58,
+	0x35, 0x95, 0x30, 0xc1, 0x2e, 0xc6, 0xce, 0xb9,
+	0x8a, 0x64, 0xe3, 0xb0, 0xdf, 0x20, 0x22, 0x43,
+	0x49, 0x02, 0xb8, 0xc2, 0x22, 0x3c, 0x29, 0x9e,
+}
+
 type binMarshalIrpcService struct {
 	impl binMarshal
-	id   []byte
 }
 
 func newBinMarshalIrpcService(impl binMarshal) *binMarshalIrpcService {
 	return &binMarshalIrpcService{
 		impl: impl,
-		id: []byte{
-			0xb0, 0xdc, 0xe0, 0x7d, 0x97, 0x77, 0xdb, 0xe6,
-			0xa5, 0x7d, 0x07, 0x7b, 0x08, 0x8b, 0x39, 0x2c,
-			0xc9, 0x8f, 0xcc, 0xd1, 0xfd, 0x3e, 0x67, 0x99,
-			0xc9, 0xfe, 0x42, 0x52, 0x6c, 0x9b, 0x7f, 0xee,
-		},
 	}
 }
 func (s *binMarshalIrpcService) Id() []byte {
-	return s.id
+	return _binMarshalIrpcId
 }
 func (s *binMarshalIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
@@ -108,27 +108,20 @@ func (s *binMarshalIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgD
 // binMarshalIrpcClient implements binMarshal
 type binMarshalIrpcClient struct {
 	endpoint irpcgen.Endpoint
-	id       []byte
 }
 
 func newBinMarshalIrpcClient(endpoint irpcgen.Endpoint) (*binMarshalIrpcClient, error) {
-	id := []byte{
-		0xb0, 0xdc, 0xe0, 0x7d, 0x97, 0x77, 0xdb, 0xe6,
-		0xa5, 0x7d, 0x07, 0x7b, 0x08, 0x8b, 0x39, 0x2c,
-		0xc9, 0x8f, 0xcc, 0xd1, 0xfd, 0x3e, 0x67, 0x99,
-		0xc9, 0xfe, 0x42, 0x52, 0x6c, 0x9b, 0x7f, 0xee,
-	}
-	if err := endpoint.RegisterClient(id); err != nil {
+	if err := endpoint.RegisterClient(_binMarshalIrpcId); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &binMarshalIrpcClient{endpoint: endpoint, id: id}, nil
+	return &binMarshalIrpcClient{endpoint: endpoint}, nil
 }
 func (_c *binMarshalIrpcClient) reflect(t time.Time) time.Time {
 	var req = _irpc_binMarshal_reflectReq{
 		t: t,
 	}
 	var resp _irpc_binMarshal_reflectResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _binMarshalIrpcId, 0, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -138,7 +131,7 @@ func (_c *binMarshalIrpcClient) addHour(t time.Time) time.Time {
 		t: t,
 	}
 	var resp _irpc_binMarshal_addHourResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 1, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _binMarshalIrpcId, 1, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -148,7 +141,7 @@ func (_c *binMarshalIrpcClient) addMyHour(t myTime) myTime {
 		t: t,
 	}
 	var resp _irpc_binMarshal_addMyHourResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 2, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _binMarshalIrpcId, 2, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -158,7 +151,7 @@ func (_c *binMarshalIrpcClient) addMyStructHour(t myStructTime) myStructTime {
 		t: t,
 	}
 	var resp _irpc_binMarshal_addMyStructHourResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 3, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _binMarshalIrpcId, 3, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -168,7 +161,7 @@ func (_c *binMarshalIrpcClient) structPass(st structContainingBinMarshallable) s
 		st: st,
 	}
 	var resp _irpc_binMarshal_structPassResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 4, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _binMarshalIrpcId, 4, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0

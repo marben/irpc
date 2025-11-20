@@ -8,24 +8,24 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
+var _mapTestIrpcId = []byte{
+	0x22, 0x26, 0xc2, 0xc2, 0x66, 0xba, 0x3e, 0xd8,
+	0x8f, 0x9d, 0x57, 0x35, 0x03, 0xd0, 0x5c, 0xcd,
+	0x39, 0xae, 0x3c, 0x13, 0xe4, 0x24, 0x20, 0xcd,
+	0x81, 0x4c, 0xe4, 0xa9, 0xd2, 0x73, 0x7c, 0x7a,
+}
+
 type mapTestIrpcService struct {
 	impl mapTest
-	id   []byte
 }
 
 func newMapTestIrpcService(impl mapTest) *mapTestIrpcService {
 	return &mapTestIrpcService{
 		impl: impl,
-		id: []byte{
-			0x9f, 0x8b, 0xbd, 0xa7, 0xee, 0xd5, 0xbd, 0xd6,
-			0x4a, 0x8c, 0xd5, 0xfa, 0x91, 0x9b, 0x44, 0x13,
-			0x2e, 0x07, 0xab, 0x82, 0xd1, 0x0d, 0xa3, 0x0e,
-			0x4f, 0xba, 0x55, 0x8f, 0x49, 0x0a, 0x6c, 0x7b,
-		},
 	}
 }
 func (s *mapTestIrpcService) Id() []byte {
-	return s.id
+	return _mapTestIrpcId
 }
 func (s *mapTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
@@ -107,27 +107,20 @@ func (s *mapTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDese
 // mapTestIrpcClient implements mapTest
 type mapTestIrpcClient struct {
 	endpoint irpcgen.Endpoint
-	id       []byte
 }
 
 func newMapTestIrpcClient(endpoint irpcgen.Endpoint) (*mapTestIrpcClient, error) {
-	id := []byte{
-		0x9f, 0x8b, 0xbd, 0xa7, 0xee, 0xd5, 0xbd, 0xd6,
-		0x4a, 0x8c, 0xd5, 0xfa, 0x91, 0x9b, 0x44, 0x13,
-		0x2e, 0x07, 0xab, 0x82, 0xd1, 0x0d, 0xa3, 0x0e,
-		0x4f, 0xba, 0x55, 0x8f, 0x49, 0x0a, 0x6c, 0x7b,
-	}
-	if err := endpoint.RegisterClient(id); err != nil {
+	if err := endpoint.RegisterClient(_mapTestIrpcId); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &mapTestIrpcClient{endpoint: endpoint, id: id}, nil
+	return &mapTestIrpcClient{endpoint: endpoint}, nil
 }
 func (_c *mapTestIrpcClient) mapSum(in map[int]float64) (keysSum int, valsSum float64) {
 	var req = _irpc_mapTest_mapSumReq{
 		in: in,
 	}
 	var resp _irpc_mapTest_mapSumResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _mapTestIrpcId, 0, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.keysSum, resp.valsSum
@@ -137,7 +130,7 @@ func (_c *mapTestIrpcClient) sumStructs(in map[intStruct]intStruct) (keysSum int
 		in: in,
 	}
 	var resp _irpc_mapTest_sumStructsResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 1, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _mapTestIrpcId, 1, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.keysSum, resp.valsSum
@@ -147,7 +140,7 @@ func (_c *mapTestIrpcClient) sumSlices(in map[intStruct][]intStruct) (keysSum in
 		in: in,
 	}
 	var resp _irpc_mapTest_sumSlicesResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 2, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _mapTestIrpcId, 2, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.keysSum, resp.valsSum
@@ -157,7 +150,7 @@ func (_c *mapTestIrpcClient) namedMapInc(in namedIntFloatMap) namedIntFloatMap {
 		in: in,
 	}
 	var resp _irpc_mapTest_namedMapIncResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 3, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _mapTestIrpcId, 3, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -167,7 +160,7 @@ func (_c *mapTestIrpcClient) namedKeySum(in map[mapNamedInt]mapNamedFloat64) map
 		in: in,
 	}
 	var resp _irpc_mapTest_namedKeySumResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 4, req, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _mapTestIrpcId, 4, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0

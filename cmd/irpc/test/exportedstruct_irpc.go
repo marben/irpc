@@ -8,24 +8,24 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
+var _FileServerIrpcId = []byte{
+	0x14, 0xf0, 0x28, 0xe0, 0x88, 0x89, 0x39, 0xac,
+	0x34, 0xa7, 0xe1, 0x49, 0x07, 0x5e, 0x94, 0x97,
+	0x0b, 0x82, 0x05, 0xf5, 0x36, 0x8a, 0xab, 0x69,
+	0xae, 0x61, 0xf1, 0x62, 0x82, 0x19, 0xd6, 0x23,
+}
+
 type FileServerIrpcService struct {
 	impl FileServer
-	id   []byte
 }
 
 func NewFileServerIrpcService(impl FileServer) *FileServerIrpcService {
 	return &FileServerIrpcService{
 		impl: impl,
-		id: []byte{
-			0x9f, 0x8c, 0x0b, 0x21, 0x12, 0x97, 0x33, 0x9e,
-			0xb7, 0xfe, 0x59, 0x61, 0x15, 0x8d, 0xfe, 0x00,
-			0xce, 0x2b, 0x08, 0x26, 0xef, 0xf6, 0xfd, 0x38,
-			0xd2, 0x84, 0xfd, 0x19, 0x44, 0xd5, 0xef, 0x4a,
-		},
 	}
 }
 func (s *FileServerIrpcService) Id() []byte {
-	return s.id
+	return _FileServerIrpcId
 }
 func (s *FileServerIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
@@ -46,24 +46,17 @@ func (s *FileServerIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgD
 // FileServerIrpcClient implements FileServer
 type FileServerIrpcClient struct {
 	endpoint irpcgen.Endpoint
-	id       []byte
 }
 
 func NewFileServerIrpcClient(endpoint irpcgen.Endpoint) (*FileServerIrpcClient, error) {
-	id := []byte{
-		0x9f, 0x8c, 0x0b, 0x21, 0x12, 0x97, 0x33, 0x9e,
-		0xb7, 0xfe, 0x59, 0x61, 0x15, 0x8d, 0xfe, 0x00,
-		0xce, 0x2b, 0x08, 0x26, 0xef, 0xf6, 0xfd, 0x38,
-		0xd2, 0x84, 0xfd, 0x19, 0x44, 0xd5, 0xef, 0x4a,
-	}
-	if err := endpoint.RegisterClient(id); err != nil {
+	if err := endpoint.RegisterClient(_FileServerIrpcId); err != nil {
 		return nil, fmt.Errorf("register failed: %w", err)
 	}
-	return &FileServerIrpcClient{endpoint: endpoint, id: id}, nil
+	return &FileServerIrpcClient{endpoint: endpoint}, nil
 }
 func (_c *FileServerIrpcClient) ListFiles() ([]FileInfo, error) {
 	var resp _irpc_FileServer_ListFilesResp
-	if err := _c.endpoint.CallRemoteFunc(context.Background(), _c.id, 0, irpcgen.EmptySerializable{}, &resp); err != nil {
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _FileServerIrpcId, 0, irpcgen.EmptySerializable{}, &resp); err != nil {
 		var zero _irpc_FileServer_ListFilesResp
 		return zero.p0, err
 	}
