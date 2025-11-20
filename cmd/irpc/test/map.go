@@ -3,7 +3,6 @@ package irpctestpkg
 //go:generate go run ../
 
 import (
-	"log"
 	"maps"
 )
 
@@ -27,7 +26,7 @@ type mapTestImpl struct {
 
 // emptyInterfaceMapSum implements mapTest.
 func (mt mapTestImpl) emptyInterfaceMapReflect(in map[int]interface{}) map[int]interface{} {
-	log.Printf("implementation obtained map: %v", in)
+	// log.Printf("implementation obtained map: %v", in)
 	var rtnMap = make(map[int]interface{}, len(in))
 	maps.Copy(rtnMap, in)
 	return rtnMap

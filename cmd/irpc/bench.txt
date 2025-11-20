@@ -4,14 +4,19 @@ goos: linux
 goarch: amd64
 pkg: github.com/marben/irpc/cmd/irpc/test
 cpu: Intel(R) Core(TM) i7-8665U CPU @ 1.90GHz
-BenchmarkAddInt64-8   	   44388	     24826 ns/op	         3.000 rBytes/rpc	        10.00 wBytes/rpc	     518 B/op	      13 allocs/op
---- BENCH: BenchmarkAddInt64-8
-    bench_test.go:148: N: 1, rBytes: 3, wBytes: 10
-    bench_test.go:148: N: 100, rBytes: 300, wBytes: 1000
-    bench_test.go:148: N: 10000, rBytes: 30000, wBytes: 100000
-    bench_test.go:148: N: 44388, rBytes: 133164, wBytes: 443880
+BenchmarkBinaryMarshal/runs-1-8         	   43036	     26776 ns/op	        18.00 rBytes/rpc	        24.00 wBytes/rpc	     666 B/op	      20 allocs/op
+BenchmarkBinaryMarshal/runs-10-8        	    4279	    274018 ns/op	       180.0 rBytes/rpc	       240.0 wBytes/rpc	    6805 B/op	     200 allocs/op
+BenchmarkBinaryMarshal/runs-100-8       	     418	   2652475 ns/op	      1800 rBytes/rpc	      2400 wBytes/rpc	   76729 B/op	    2001 allocs/op
+BenchmarkAddInt64/runs-1-8              	   46886	     26349 ns/op	         3.000 rBytes/rpc	        10.00 wBytes/rpc	     527 B/op	      13 allocs/op
+BenchmarkAddInt64/runs-10-8             	    4453	    255063 ns/op	        30.00 rBytes/rpc	       100.0 wBytes/rpc	    4730 B/op	     130 allocs/op
+BenchmarkAddInt64/runs-100-8            	     460	   2558344 ns/op	       300.0 rBytes/rpc	      1000 wBytes/rpc	   54555 B/op	    1300 allocs/op
 PASS
-ok  	github.com/marben/irpc/cmd/irpc/test	1.418s
+ok  	github.com/marben/irpc/cmd/irpc/test	8.250s
 ?   	github.com/marben/irpc/cmd/irpc/test/out	[no test files]
 ?   	github.com/marben/irpc/cmd/irpc/test/out2	[no test files]
 ?   	github.com/marben/irpc/cmd/irpc/test/testtools	[no test files]
+2025/11/20 17:37:20 api version: latest
+PASS
+ok  	github.com/marben/irpc/cmd/irpc/test/versiontest	0.003s
+?   	github.com/marben/irpc/cmd/irpc/test/versiontest/api	[no test files]
+?   	github.com/marben/irpc/cmd/irpc/test/versiontest/api/v1	[no test files]
