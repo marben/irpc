@@ -6,8 +6,8 @@ import (
 )
 
 type Type interface {
-	genEncFunc(encoderVarName string, q *qualifier) string // todo: encVarName not necessary?
-	genDecFunc(decoderVarName string, q *qualifier) string
+	genEncFunc(q *qualifier) string // todo: encVarName not necessary?
+	genDecFunc(q *qualifier) string
 	codeblocks(q *qualifier) []string // requested type's encode/decode code block at top level
 	name(q *qualifier) string
 }
@@ -90,12 +90,12 @@ func newDirectCallType(encFunc, decFunc string, typeName string, ni *namedInfo) 
 }
 
 // genEncFunc implements Type.
-func (t directCallType) genEncFunc(_ string, q *qualifier) string {
+func (t directCallType) genEncFunc(q *qualifier) string {
 	return t.encFunc
 }
 
 // genDecFunc implements Type.
-func (t directCallType) genDecFunc(_ string, q *qualifier) string {
+func (t directCallType) genDecFunc(q *qualifier) string {
 	return t.decFunc
 }
 

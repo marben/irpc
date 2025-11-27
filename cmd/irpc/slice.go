@@ -69,19 +69,19 @@ func (st genericSliceType) name(q *qualifier) string {
 }
 
 // genEncFunc implements Type.
-func (st genericSliceType) genEncFunc(_ string, q *qualifier) string {
+func (st genericSliceType) genEncFunc(q *qualifier) string {
 	lq := q.copy()
 	return fmt.Sprintf(`func(enc *irpcgen.Encoder, sl %s) error{
 		return irpcgen.EncSlice(enc, %q, %s, sl)
-	}`, st.name(q), st.elemT.name(lq), st.elemT.genEncFunc("enc", q))
+	}`, st.name(q), st.elemT.name(lq), st.elemT.genEncFunc(q))
 }
 
 // genDecFunc implements Type.
-func (st genericSliceType) genDecFunc(_ string, q *qualifier) string {
+func (st genericSliceType) genDecFunc(q *qualifier) string {
 	lq := q.copy()
 	return fmt.Sprintf(`func(dec *irpcgen.Decoder, sl *%s) error {
 		return irpcgen.DecSlice(dec, %q, %s, sl)
-	}`, st.name(q), st.elemT.name(lq), st.elemT.genDecFunc("dec", q))
+	}`, st.name(q), st.elemT.name(lq), st.elemT.genDecFunc(q))
 }
 
 // codeblock implements encoder.

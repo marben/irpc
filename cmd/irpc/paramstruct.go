@@ -94,7 +94,7 @@ func (sg paramStructGenerator) serializeFunc(q *qualifier) string {
 	if len(sg.params) > 0 {
 		for _, p := range sg.params {
 			varId := "s." + p.structFieldName
-			encFunc := p.typ.genEncFunc(varId, q)
+			encFunc := p.typ.genEncFunc(q)
 			if encFunc == "" {
 				// some types skip encoding (currently it's context)
 				continue
@@ -119,7 +119,7 @@ func (sg paramStructGenerator) deserializeFunc(q *qualifier) string {
 	if len(sg.params) > 0 {
 		for _, p := range sg.params {
 			varId := "s." + p.structFieldName
-			decFunc := p.typ.genDecFunc(varId, q)
+			decFunc := p.typ.genDecFunc(q)
 			if decFunc == "" {
 				continue
 			}

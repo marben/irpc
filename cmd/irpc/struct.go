@@ -102,7 +102,7 @@ func (s structType) codeblocks(q *qualifier) []string {
 }
 
 // genEncFunc implements Type.
-func (s structType) genEncFunc(_ string, q *qualifier) string {
+func (s structType) genEncFunc(q *qualifier) string {
 	lq := q.copy()
 	sb := &strings.Builder{}
 	// todo: 's' could be named like the serialize/deserialize struct param. we would need to revam the encFunc definition
@@ -111,7 +111,7 @@ func (s structType) genEncFunc(_ string, q *qualifier) string {
 		fmt.Fprintf(sb, `if err := %s(enc, s.%s); err != nil {
 			return fmt.Errorf("serialize s.%s of type %s: %%w", err)
 		}
-		 `, f.t.genEncFunc("enc", q), f.name, f.name, f.t.name(lq))
+		 `, f.t.genEncFunc(q), f.name, f.name, f.t.name(lq))
 	}
 	sb.WriteString("return nil\n")
 	sb.WriteString("}")
@@ -119,7 +119,7 @@ func (s structType) genEncFunc(_ string, q *qualifier) string {
 }
 
 // genDecFunc implements Type.
-func (s structType) genDecFunc(decoderVarName string, q *qualifier) string {
+func (s structType) genDecFunc(q *qualifier) string {
 	lq := q.copy()
 	sb := &strings.Builder{}
 	fmt.Fprintf(sb, "func(dec *irpcgen.Decoder, s *%s) error {\n", s.name(q))
@@ -127,7 +127,7 @@ func (s structType) genDecFunc(decoderVarName string, q *qualifier) string {
 		fmt.Fprintf(sb, `if err := %s(dec, &s.%s); err != nil {
 			return fmt.Errorf("deserialize s.%s of type %s: %%w", err)
 		}
-		`, f.t.genDecFunc("dec", q), f.name, f.name, f.t.name(lq))
+		`, f.t.genDecFunc(q), f.name, f.name, f.t.name(lq))
 	}
 	sb.WriteString("return nil\n")
 	sb.WriteString("}")

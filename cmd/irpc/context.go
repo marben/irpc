@@ -7,12 +7,12 @@ type contextType struct {
 }
 
 // genDecFunc implements Type.
-func (c contextType) genDecFunc(decoderVarName string, q *qualifier) string {
+func (c contextType) genDecFunc(q *qualifier) string {
 	return ""
 }
 
 // genEncFunc implements Type.
-func (c contextType) genEncFunc(encoderVarName string, q *qualifier) string {
+func (c contextType) genEncFunc(q *qualifier) string {
 	return ""
 }
 

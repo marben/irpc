@@ -56,17 +56,17 @@ func (m mapType) codeblocks(q *qualifier) []string {
 }
 
 // genEncFunc implements Type.
-func (m mapType) genEncFunc(encoderVarName string, q *qualifier) string {
+func (m mapType) genEncFunc(q *qualifier) string {
 	lq := q.copy()
 	return fmt.Sprintf(`func(enc *irpcgen.Encoder, m %s)error{
 		return irpcgen.EncMap(enc, m, %q, %s, %q, %s)
-	}`, m.name(q), m.keyT.name(lq), m.keyT.genEncFunc("enc", q), m.valT.name(lq), m.valT.genEncFunc("enc", q))
+	}`, m.name(q), m.keyT.name(lq), m.keyT.genEncFunc(q), m.valT.name(lq), m.valT.genEncFunc(q))
 }
 
 // genDecFunc implements Type.
-func (m mapType) genDecFunc(decoderVarName string, q *qualifier) string {
+func (m mapType) genDecFunc(q *qualifier) string {
 	lq := q.copy()
 	return fmt.Sprintf(`func(dec *irpcgen.Decoder, m *%s) error {
 		return irpcgen.DecMap(dec, m, %q, %s, %q, %s)
-	}`, m.name(q), m.keyT.name(lq), m.keyT.genDecFunc("dec", q), m.valT.name(lq), m.valT.genDecFunc("dec", q))
+	}`, m.name(q), m.keyT.name(lq), m.keyT.genDecFunc(q), m.valT.name(lq), m.valT.genDecFunc(q))
 }

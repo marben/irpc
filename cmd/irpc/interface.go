@@ -20,67 +20,6 @@ type interfaceType struct {
 	boolT        Type
 }
 
-// genDecFunc implements Type.
-func (i interfaceType) genDecFunc(decoderVarName string, q *qualifier) string {
-	sb := &strings.Builder{}
-	fmt.Fprintf(sb, "func (dec *irpcgen.Decoder, s *%s) error {\n", i.name(q))
-	fmt.Fprintf(sb, `var isNil bool
-		if err := irpcgen.DecBool(dec, &isNil); err != nil {
-			return fmt.Errorf("deserialize isNil: %%w:", err)
-		}
-			if isNil {
-				return nil
-			}
-		`)
-	fmt.Fprintf(sb, "var impl %s\n", i.implTypeName)
-	for _, fn := range i.fncs {
-		for _, r := range fn.results {
-			fmt.Fprintf(sb, `if err := %s(dec, &impl.%s); err != nil{
-				return fmt.Errorf("deserialize \"%s\" %s: %%w", err)
-			}
-			`, r.f.t.genDecFunc("dec", q), r.implStructParamName, r.implStructParamName, r.f.t.name(q.copy()))
-		}
-	}
-	sb.WriteString("*s = impl\n")
-	sb.WriteString("return nil\n")
-	sb.WriteString("}")
-	return sb.String()
-}
-
-// genEncFunc implements Type.
-func (i interfaceType) genEncFunc(_ string, q *qualifier) string {
-	sb := &strings.Builder{}
-	fmt.Fprintf(sb, "func (enc *irpcgen.Encoder, v %s) error {\n", i.name(q))
-	fmt.Fprintf(sb, `isNil := v == nil
-			if err := irpcgen.EncBool(enc, isNil); err != nil {
-				return fmt.Errorf("serialize isNil == %%t: %%w", isNil, err)
-			}
-			if isNil {
-				return nil
-			}
-		`)
-	for _, fn := range i.fncs {
-		for i, r := range fn.results {
-			sb.WriteString(r.implStructParamName)
-			if i != len(fn.results)-1 {
-				sb.WriteString(",")
-			}
-		}
-		fmt.Fprintf(sb, ":= v.%s()\n", fn.name)
-		for _, r := range fn.results {
-			fmt.Fprintf(sb, `if err := %s(enc, %s); err != nil {
-				return fmt.Errorf("serialize \"v.%s()\" of type %s: %%w", err)
-			}
-				`, r.f.t.genEncFunc("enc", q), r.implStructParamName, fn.name, r.f.t.name(q.copy()))
-		}
-	}
-	sb.WriteString("")
-	sb.WriteString("return nil\n")
-	sb.WriteString("}")
-
-	return sb.String()
-}
-
 func (tr *typeResolver) newInterfaceType(apiName string, ni *namedInfo, ifaceT *types.Interface, astExpr ast.Expr) (interfaceType, error) {
 	var ifaceAst *ast.InterfaceType
 	if astExpr != nil {
@@ -167,6 +106,67 @@ func (i interfaceType) name(q *qualifier) string {
 		sb.WriteString(f.signature(q))
 		sb.WriteString(";")
 	}
+	sb.WriteString("}")
+	return sb.String()
+}
+
+// genEncFunc implements Type.
+func (i interfaceType) genEncFunc(q *qualifier) string {
+	sb := &strings.Builder{}
+	fmt.Fprintf(sb, "func (enc *irpcgen.Encoder, v %s) error {\n", i.name(q))
+	fmt.Fprintf(sb, `isNil := v == nil
+			if err := irpcgen.EncBool(enc, isNil); err != nil {
+				return fmt.Errorf("serialize isNil == %%t: %%w", isNil, err)
+			}
+			if isNil {
+				return nil
+			}
+		`)
+	for _, fn := range i.fncs {
+		for i, r := range fn.results {
+			sb.WriteString(r.implStructParamName)
+			if i != len(fn.results)-1 {
+				sb.WriteString(",")
+			}
+		}
+		fmt.Fprintf(sb, ":= v.%s()\n", fn.name)
+		for _, r := range fn.results {
+			fmt.Fprintf(sb, `if err := %s(enc, %s); err != nil {
+				return fmt.Errorf("serialize \"v.%s()\" of type %s: %%w", err)
+			}
+				`, r.f.t.genEncFunc(q), r.implStructParamName, fn.name, r.f.t.name(q.copy()))
+		}
+	}
+	sb.WriteString("")
+	sb.WriteString("return nil\n")
+	sb.WriteString("}")
+
+	return sb.String()
+}
+
+// genDecFunc implements Type.
+func (i interfaceType) genDecFunc(q *qualifier) string {
+	sb := &strings.Builder{}
+	fmt.Fprintf(sb, "func (dec *irpcgen.Decoder, s *%s) error {\n", i.name(q))
+	fmt.Fprintf(sb, `var isNil bool
+		if err := irpcgen.DecBool(dec, &isNil); err != nil {
+			return fmt.Errorf("deserialize isNil: %%w:", err)
+		}
+			if isNil {
+				return nil
+			}
+		`)
+	fmt.Fprintf(sb, "var impl %s\n", i.implTypeName)
+	for _, fn := range i.fncs {
+		for _, r := range fn.results {
+			fmt.Fprintf(sb, `if err := %s(dec, &impl.%s); err != nil{
+				return fmt.Errorf("deserialize \"%s\" %s: %%w", err)
+			}
+			`, r.f.t.genDecFunc(q), r.implStructParamName, r.implStructParamName, r.f.t.name(q.copy()))
+		}
+	}
+	sb.WriteString("*s = impl\n")
+	sb.WriteString("return nil\n")
 	sb.WriteString("}")
 	return sb.String()
 }

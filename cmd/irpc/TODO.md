@@ -1,4 +1,3 @@
-- remove 'variable name' from genEncFunc() - i don't think it's necessary
 - make generators report their imports and only populate qualifier from param structs, not gen functions - if possible?
 - write a function to to batch serialiaton/deserialization/error reporting and call it from generated code instead of the repetitive error checking
 - implement nil encoding/decoding for nillable types (slice, map...)
