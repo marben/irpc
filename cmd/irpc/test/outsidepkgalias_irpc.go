@@ -12,10 +12,10 @@ import (
 )
 
 var _outsidepkgaliasIrpcId = []byte{
-	0x59, 0x72, 0xb2, 0x6a, 0x1a, 0x5e, 0xce, 0x01,
-	0xc2, 0x60, 0x4d, 0xb6, 0xc8, 0xfd, 0x70, 0xf1,
-	0x89, 0x6c, 0x9e, 0x8a, 0x5d, 0xf3, 0x6d, 0x94,
-	0x77, 0xd0, 0x2b, 0x2e, 0x3a, 0x91, 0x87, 0xfe,
+	0x62, 0x14, 0x75, 0xf3, 0x3d, 0x3c, 0x77, 0x36,
+	0xba, 0xb0, 0x36, 0x9b, 0xd7, 0x3b, 0xf7, 0x97,
+	0xeb, 0x6e, 0xd6, 0xce, 0x0b, 0x5e, 0xd7, 0x58,
+	0xe4, 0x0b, 0xd8, 0x36, 0xdc, 0x2e, 0x90, 0xe2,
 }
 
 type outsidepkgaliasIrpcService struct {
@@ -154,20 +154,20 @@ type _irpc_outsidepkgalias_addReq struct {
 }
 
 func (s _irpc_outsidepkgalias_addReq) Serialize(e *irpcgen.Encoder) error {
-	if err := e.Uint8(uint8(s.a)); err != nil {
-		return fmt.Errorf("serialize s.a of type \"out1.Uint8\": %w", err)
+	if err := irpcgen.EncUint8(e, s.a); err != nil {
+		return fmt.Errorf("serialize \"a\" of type out1.Uint8: %w", err)
 	}
-	if err := e.Uint8(uint8(s.b)); err != nil {
-		return fmt.Errorf("serialize s.b of type \"out1.Uint8\": %w", err)
+	if err := irpcgen.EncUint8(e, s.b); err != nil {
+		return fmt.Errorf("serialize \"b\" of type out1.Uint8: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_outsidepkgalias_addReq) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.Uint8((*uint8)(&s.a)); err != nil {
-		return fmt.Errorf("deserialize s.a of type \"out1.Uint8\": %w", err)
+	if err := irpcgen.DecUint8(d, &s.a); err != nil {
+		return fmt.Errorf("deserialize a of type out1.Uint8: %w", err)
 	}
-	if err := d.Uint8((*uint8)(&s.b)); err != nil {
-		return fmt.Errorf("deserialize s.b of type \"out1.Uint8\": %w", err)
+	if err := irpcgen.DecUint8(d, &s.b); err != nil {
+		return fmt.Errorf("deserialize b of type out1.Uint8: %w", err)
 	}
 	return nil
 }
@@ -177,14 +177,14 @@ type _irpc_outsidepkgalias_addResp struct {
 }
 
 func (s _irpc_outsidepkgalias_addResp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.VarInt(s.p0); err != nil {
-		return fmt.Errorf("serialize s.p0 of type \"int\": %w", err)
+	if err := irpcgen.EncInt(e, s.p0); err != nil {
+		return fmt.Errorf("serialize type int: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_outsidepkgalias_addResp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.VarInt(&s.p0); err != nil {
-		return fmt.Errorf("deserialize s.p0 of type \"int\": %w", err)
+	if err := irpcgen.DecInt(d, &s.p0); err != nil {
+		return fmt.Errorf("deserialize type int: %w", err)
 	}
 	return nil
 }
@@ -195,20 +195,20 @@ type _irpc_outsidepkgalias_add2Req struct {
 }
 
 func (s _irpc_outsidepkgalias_add2Req) Serialize(e *irpcgen.Encoder) error {
-	if err := e.Uint8(uint8(s.a)); err != nil {
-		return fmt.Errorf("serialize s.a of type \"out1.Uint8\": %w", err)
+	if err := irpcgen.EncUint8(e, s.a); err != nil {
+		return fmt.Errorf("serialize \"a\" of type out1.Uint8: %w", err)
 	}
-	if err := e.Uint8(uint8(s.b)); err != nil {
-		return fmt.Errorf("serialize s.b of type \"out.Uint8\": %w", err)
+	if err := irpcgen.EncUint8(e, s.b); err != nil {
+		return fmt.Errorf("serialize \"b\" of type out.Uint8: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_outsidepkgalias_add2Req) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.Uint8((*uint8)(&s.a)); err != nil {
-		return fmt.Errorf("deserialize s.a of type \"out1.Uint8\": %w", err)
+	if err := irpcgen.DecUint8(d, &s.a); err != nil {
+		return fmt.Errorf("deserialize a of type out1.Uint8: %w", err)
 	}
-	if err := d.Uint8((*uint8)(&s.b)); err != nil {
-		return fmt.Errorf("deserialize s.b of type \"out.Uint8\": %w", err)
+	if err := irpcgen.DecUint8(d, &s.b); err != nil {
+		return fmt.Errorf("deserialize b of type out.Uint8: %w", err)
 	}
 	return nil
 }
@@ -218,14 +218,14 @@ type _irpc_outsidepkgalias_add2Resp struct {
 }
 
 func (s _irpc_outsidepkgalias_add2Resp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.VarInt(s.p0); err != nil {
-		return fmt.Errorf("serialize s.p0 of type \"int\": %w", err)
+	if err := irpcgen.EncInt(e, s.p0); err != nil {
+		return fmt.Errorf("serialize type int: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_outsidepkgalias_add2Resp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.VarInt(&s.p0); err != nil {
-		return fmt.Errorf("deserialize s.p0 of type \"int\": %w", err)
+	if err := irpcgen.DecInt(d, &s.p0); err != nil {
+		return fmt.Errorf("deserialize type int: %w", err)
 	}
 	return nil
 }
@@ -236,20 +236,20 @@ type _irpc_outsidepkgalias_add3Req struct {
 }
 
 func (s _irpc_outsidepkgalias_add3Req) Serialize(e *irpcgen.Encoder) error {
-	if err := e.VarInt(s.a); err != nil {
-		return fmt.Errorf("serialize s.a of type \"int\": %w", err)
+	if err := irpcgen.EncInt(e, s.a); err != nil {
+		return fmt.Errorf("serialize \"a\" of type int: %w", err)
 	}
-	if err := e.Uint8(uint8(s.b)); err != nil {
-		return fmt.Errorf("serialize s.b of type \"out.Uint8\": %w", err)
+	if err := irpcgen.EncUint8(e, s.b); err != nil {
+		return fmt.Errorf("serialize \"b\" of type out.Uint8: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_outsidepkgalias_add3Req) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.VarInt(&s.a); err != nil {
-		return fmt.Errorf("deserialize s.a of type \"int\": %w", err)
+	if err := irpcgen.DecInt(d, &s.a); err != nil {
+		return fmt.Errorf("deserialize a of type int: %w", err)
 	}
-	if err := d.Uint8((*uint8)(&s.b)); err != nil {
-		return fmt.Errorf("deserialize s.b of type \"out.Uint8\": %w", err)
+	if err := irpcgen.DecUint8(d, &s.b); err != nil {
+		return fmt.Errorf("deserialize b of type out.Uint8: %w", err)
 	}
 	return nil
 }
@@ -259,14 +259,14 @@ type _irpc_outsidepkgalias_add3Resp struct {
 }
 
 func (s _irpc_outsidepkgalias_add3Resp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.Uint8(uint8(s.p0)); err != nil {
-		return fmt.Errorf("serialize s.p0 of type \"out2.Uint8\": %w", err)
+	if err := irpcgen.EncUint8(e, s.p0); err != nil {
+		return fmt.Errorf("serialize type out2.Uint8: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_outsidepkgalias_add3Resp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.Uint8((*uint8)(&s.p0)); err != nil {
-		return fmt.Errorf("deserialize s.p0 of type \"out2.Uint8\": %w", err)
+	if err := irpcgen.DecUint8(d, &s.p0); err != nil {
+		return fmt.Errorf("deserialize type out2.Uint8: %w", err)
 	}
 	return nil
 }
@@ -276,30 +276,18 @@ type _irpc_outsidepkgalias_sumReq struct {
 }
 
 func (s _irpc_outsidepkgalias_sumReq) Serialize(e *irpcgen.Encoder) error {
-	{ // s.inSlice out1.AliasedByteSlice
-		if err := e.Len(len(s.inSlice)); err != nil {
-			return fmt.Errorf("serialize len(s.inSlice) of type \"int\": %w", err)
-		}
-		for _, v := range s.inSlice {
-			if err := e.Uint8(uint8(v)); err != nil {
-				return fmt.Errorf("serialize v of type \"out_.Uint8\": %w", err)
-			}
-		}
+	if err := func(enc *irpcgen.Encoder, sl out1.AliasedByteSlice) error {
+		return irpcgen.EncSlice(enc, "out_.Uint8", irpcgen.EncUint8, sl)
+	}(e, s.inSlice); err != nil {
+		return fmt.Errorf("serialize \"inSlice\" of type out1.AliasedByteSlice: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_outsidepkgalias_sumReq) Deserialize(d *irpcgen.Decoder) error {
-	{ // s.inSlice out1.AliasedByteSlice
-		var l int
-		if err := d.Len(&l); err != nil {
-			return fmt.Errorf("deserialize l of type \"int\": %w", err)
-		}
-		s.inSlice = make(out1.AliasedByteSlice, l)
-		for i := range l {
-			if err := d.Uint8((*uint8)(&s.inSlice[i])); err != nil {
-				return fmt.Errorf("deserialize s.inSlice[i] of type \"out_.Uint8\": %w", err)
-			}
-		}
+	if err := func(dec *irpcgen.Decoder, sl *out1.AliasedByteSlice) error {
+		return irpcgen.DecSlice(dec, "out_.Uint8", irpcgen.DecUint8, sl)
+	}(d, &s.inSlice); err != nil {
+		return fmt.Errorf("deserialize inSlice of type out1.AliasedByteSlice: %w", err)
 	}
 	return nil
 }
@@ -309,14 +297,14 @@ type _irpc_outsidepkgalias_sumResp struct {
 }
 
 func (s _irpc_outsidepkgalias_sumResp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.VarInt(s.p0); err != nil {
-		return fmt.Errorf("serialize s.p0 of type \"int\": %w", err)
+	if err := irpcgen.EncInt(e, s.p0); err != nil {
+		return fmt.Errorf("serialize type int: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_outsidepkgalias_sumResp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.VarInt(&s.p0); err != nil {
-		return fmt.Errorf("deserialize s.p0 of type \"int\": %w", err)
+	if err := irpcgen.DecInt(d, &s.p0); err != nil {
+		return fmt.Errorf("deserialize type int: %w", err)
 	}
 	return nil
 }

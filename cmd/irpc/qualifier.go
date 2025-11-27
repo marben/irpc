@@ -49,14 +49,8 @@ func (q *qualifier) qualifyNamedInfo(ni namedInfo) string {
 		return ni.namedName
 	}
 	// log.Printf("returning %s.%s", qual, ni.namedName)
+	// debug.PrintStack()
 	return qual + "." + ni.namedName
-}
-
-// copy receiver - doesn't alter already existing imports
-func (q qualifier) qualifyNamedInfoWithoutAddingImports(ni namedInfo) string {
-	// todo: if pkg is never imported by actual code, we could use full path (eg: github.com/marben/irpc/some_package.TypeName) in comments
-	// todo: this is case for example with slice_named_ircp.go in tests, which uses out_.Uint8 somewhere.
-	return q.qualifyNamedInfo(ni)
 }
 
 func (q *qualifier) qualifierForImportSpec(is importSpec) string {
@@ -117,6 +111,13 @@ func (q *qualifier) qualifierForImportSpec(is importSpec) string {
 		}
 		requestedQualifier += "_"
 	}
+}
+
+// a shallow copy
+// todo: should i actually do deep copy? especially the maps are important
+func (q *qualifier) copy() *qualifier {
+	q2 := *q
+	return &q2
 }
 
 func (q *qualifier) addUsedImport(specs ...importSpec) {

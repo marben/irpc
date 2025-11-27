@@ -60,6 +60,15 @@ func TestSlice(t *testing.T) {
 	if !slices.Equal(resSU8, []uint8{4, 3, 2, 1}) {
 		t.Fatalf("sliceOfUint8(): %v", resSU8)
 	}
+
+	t.Log("slice of structs")
+	resSS := c.sliceOfStructs([]struct {
+		A int
+		B string
+	}{{1, "one"}, {5, "five"}, {10, "ten"}})
+	if resSS != 16 {
+		t.Fatalf("sliceOfStructs(): %d", resSS)
+	}
 }
 
 func TestUint8SliceCasting(t *testing.T) {

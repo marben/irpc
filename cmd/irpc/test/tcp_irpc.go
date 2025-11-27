@@ -9,10 +9,10 @@ import (
 )
 
 var _tcpTestApiIrpcId = []byte{
-	0x65, 0x15, 0x79, 0xf3, 0xc5, 0x45, 0xeb, 0x58,
-	0x06, 0xf7, 0x58, 0x99, 0x19, 0x6e, 0x69, 0x64,
-	0x98, 0x9f, 0x52, 0xbb, 0x5b, 0x3f, 0x49, 0x4a,
-	0xc8, 0x9c, 0xf5, 0x49, 0xf7, 0xa5, 0x2c, 0x74,
+	0xc8, 0x06, 0xe2, 0xfa, 0x90, 0x7a, 0xb9, 0x2f,
+	0x3e, 0x56, 0x11, 0x94, 0xd2, 0x00, 0x50, 0x4c,
+	0xa5, 0x86, 0x14, 0x74, 0x24, 0x1d, 0x5a, 0xe9,
+	0x22, 0xfb, 0x7e, 0x9b, 0xa1, 0xd2, 0xe3, 0x86,
 }
 
 type tcpTestApiIrpcService struct {
@@ -78,20 +78,20 @@ type _irpc_tcpTestApi_DivReq struct {
 }
 
 func (s _irpc_tcpTestApi_DivReq) Serialize(e *irpcgen.Encoder) error {
-	if err := e.Float64le(s.a); err != nil {
-		return fmt.Errorf("serialize s.a of type \"float64\": %w", err)
+	if err := irpcgen.EncFloat64(e, s.a); err != nil {
+		return fmt.Errorf("serialize \"a\" of type float64: %w", err)
 	}
-	if err := e.Float64le(s.b); err != nil {
-		return fmt.Errorf("serialize s.b of type \"float64\": %w", err)
+	if err := irpcgen.EncFloat64(e, s.b); err != nil {
+		return fmt.Errorf("serialize \"b\" of type float64: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_tcpTestApi_DivReq) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.Float64le(&s.a); err != nil {
-		return fmt.Errorf("deserialize s.a of type \"float64\": %w", err)
+	if err := irpcgen.DecFloat64(d, &s.a); err != nil {
+		return fmt.Errorf("deserialize a of type float64: %w", err)
 	}
-	if err := d.Float64le(&s.b); err != nil {
-		return fmt.Errorf("deserialize s.b of type \"float64\": %w", err)
+	if err := irpcgen.DecFloat64(d, &s.b); err != nil {
+		return fmt.Errorf("deserialize b of type float64: %w", err)
 	}
 	return nil
 }
@@ -102,50 +102,47 @@ type _irpc_tcpTestApi_DivResp struct {
 }
 
 func (s _irpc_tcpTestApi_DivResp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.Float64le(s.p0); err != nil {
-		return fmt.Errorf("serialize s.p0 of type \"float64\": %w", err)
+	if err := irpcgen.EncFloat64(e, s.p0); err != nil {
+		return fmt.Errorf("serialize type float64: %w", err)
 	}
-	{
-		var isNil bool
-		if s.p1 == nil {
-			isNil = true
+	if err := func(enc *irpcgen.Encoder, v error) error {
+		isNil := v == nil
+		if err := irpcgen.EncBool(enc, isNil); err != nil {
+			return fmt.Errorf("serialize isNil == %t: %w", isNil, err)
 		}
-		if err := e.Bool(isNil); err != nil {
-			return fmt.Errorf("serialize isNil of type \"bool\": %w", err)
+		if isNil {
+			return nil
 		}
-
-		if !isNil {
-			{ // Error()
-				_Error_0_ := s.p1.Error()
-				if err := e.String(_Error_0_); err != nil {
-					return fmt.Errorf("serialize _Error_0_ of type \"string\": %w", err)
-				}
-			}
+		_Error_0_ := v.Error()
+		if err := irpcgen.EncString(enc, _Error_0_); err != nil {
+			return fmt.Errorf("serialize \"v.Error()\" of type string: %w", err)
 		}
+		return nil
+	}(e, s.p1); err != nil {
+		return fmt.Errorf("serialize type error: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_tcpTestApi_DivResp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.Float64le(&s.p0); err != nil {
-		return fmt.Errorf("deserialize s.p0 of type \"float64\": %w", err)
+	if err := irpcgen.DecFloat64(d, &s.p0); err != nil {
+		return fmt.Errorf("deserialize type float64: %w", err)
 	}
-	{
+	if err := func(dec *irpcgen.Decoder, s *error) error {
 		var isNil bool
-		if err := d.Bool(&isNil); err != nil {
-			return fmt.Errorf("deserialize isNil of type \"bool\": %w", err)
+		if err := irpcgen.DecBool(dec, &isNil); err != nil {
+			return fmt.Errorf("deserialize isNil: %w:", err)
 		}
-
 		if isNil {
-			s.p1 = nil
-		} else {
-			var impl _error_tcpTestApi_impl
-			{ // Error()
-				if err := d.String(&impl._Error_0_); err != nil {
-					return fmt.Errorf("deserialize impl._Error_0_ of type \"string\": %w", err)
-				}
-			}
-			s.p1 = impl
+			return nil
 		}
+		var impl _error_tcpTestApi_impl
+		if err := irpcgen.DecString(dec, &impl._Error_0_); err != nil {
+			return fmt.Errorf("deserialize \"_Error_0_\" string: %w", err)
+		}
+		*s = impl
+		return nil
+	}(d, &s.p1); err != nil {
+		return fmt.Errorf("deserialize type error: %w", err)
 	}
 	return nil
 }

@@ -109,8 +109,8 @@ func newTypeResolver(filename string) (typeResolver, error) {
 		srcImports:     srcImports,
 		binMarshaler:   binMarshaler,
 		binUnmarshaler: binUnmarshaler,
-		lenType:        newDirectCallType("Len", "Len", "int", nil),
-		boolType:       newDirectCallType("Bool", "Bool", "bool", nil),
+		lenType:        newDirectCallType("irpcgen.EncLen", "irpcgen.DecLen", "int", nil), // todo: still necessary?
+		boolType:       newDirectCallType("irpcgen.EncBool", "irpcgen.DecBool", "bool", nil),
 		srcFilePath:    srcFilePath,
 	}, nil
 }
@@ -175,7 +175,6 @@ func (tr typeResolver) typeIsContext(t types.Type) bool {
 	return true
 }
 
-// todo: do we still use the astExpr? not sure now
 func (tr typeResolver) newType(apiName string, t types.Type, astExpr ast.Expr) (Type, error) {
 	ni, utAst, err := tr.unwrapNamedOrPassThrough(t, astExpr)
 	if err != nil {

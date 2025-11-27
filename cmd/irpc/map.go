@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"go/ast"
 	"go/types"
-	"strings"
 )
 
 var _ Type = mapType{}
@@ -56,48 +55,18 @@ func (m mapType) codeblocks(q *qualifier) []string {
 	return append(m.keyT.codeblocks(q), m.valT.codeblocks(q)...)
 }
 
-// decode implements Type.
-func (m mapType) decode(varId string, existingVars varNames, q *qualifier) string {
-	sb := &strings.Builder{}
-
-	// length
-	fmt.Fprintf(sb, "{ // %s %s\n", varId, m.name(q))
-	sb.WriteString("var l int\n")
-	sb.WriteString(m.lenT.decode("l", existingVars, q))
-	existingVars = append(existingVars, "l")
-
-	fmt.Fprintf(sb, "%s = make(%s, l)\n", varId, m.name(q))
-	sb.WriteString("for range l {\n")
-
-	fmt.Fprintf(sb, "var k %s\n", m.keyT.name(q))
-	existingVars = append(existingVars, "k")
-	fmt.Fprintf(sb, "%s\n", m.keyT.decode("k", existingVars, q))
-
-	fmt.Fprintf(sb, "var v %s\n", m.valT.name(q))
-	existingVars = append(existingVars, "v")
-	fmt.Fprintf(sb, "%s\n", m.valT.decode("v", existingVars, q))
-
-	fmt.Fprintf(sb, "%s[k] = v", varId)
-	sb.WriteString("}\n")
-	sb.WriteString("}\n") // end of block
-	return sb.String()
+// genEncFunc implements Type.
+func (m mapType) genEncFunc(encoderVarName string, q *qualifier) string {
+	lq := q.copy()
+	return fmt.Sprintf(`func(enc *irpcgen.Encoder, m %s)error{
+		return irpcgen.EncMap(enc, m, %q, %s, %q, %s)
+	}`, m.name(q), m.keyT.name(lq), m.keyT.genEncFunc("enc", q), m.valT.name(lq), m.valT.genEncFunc("enc", q))
 }
 
-// encode implements Type.
-func (m mapType) encode(varId string, existingVars varNames, q *qualifier) string {
-	sb := &strings.Builder{}
-	// length
-	fmt.Fprintf(sb, "{ // %s %s\n", varId, m.name(q))
-	sb.WriteString(m.lenT.encode("len("+varId+")", existingVars, q))
-
-	keyIt, valIt := existingVars.generateKeyValueIteratorNames()
-
-	// for loop
-	fmt.Fprintf(sb, "for %s, %s := range %s {", keyIt, valIt, varId)
-	sb.WriteString(m.keyT.encode(keyIt, existingVars, q))
-	sb.WriteString(m.valT.encode(valIt, existingVars, q))
-	sb.WriteString("}\n") // end of for loop
-
-	sb.WriteString("}\n") // end of block
-	return sb.String()
+// genDecFunc implements Type.
+func (m mapType) genDecFunc(decoderVarName string, q *qualifier) string {
+	lq := q.copy()
+	return fmt.Sprintf(`func(dec *irpcgen.Decoder, m *%s) error {
+		return irpcgen.DecMap(dec, m, %q, %s, %q, %s)
+	}`, m.name(q), m.keyT.name(lq), m.keyT.genDecFunc("dec", q), m.valT.name(lq), m.valT.genDecFunc("dec", q))
 }

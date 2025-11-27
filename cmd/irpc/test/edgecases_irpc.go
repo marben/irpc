@@ -9,10 +9,10 @@ import (
 )
 
 var _emptyAPIIrpcId = []byte{
-	0x27, 0xaf, 0xed, 0xa7, 0x8f, 0xdc, 0xd4, 0x2a,
-	0x05, 0xf8, 0x6f, 0xb9, 0x57, 0xd6, 0x33, 0x0d,
-	0x09, 0x56, 0x5c, 0xb1, 0xbc, 0xab, 0x0f, 0x0c,
-	0xd0, 0x68, 0x80, 0x17, 0x03, 0x8a, 0x38, 0xf6,
+	0x8d, 0x0d, 0xce, 0x8f, 0xa2, 0x0c, 0x81, 0xeb,
+	0x79, 0xc3, 0xbe, 0xe7, 0x77, 0xb6, 0x30, 0x78,
+	0xe9, 0x46, 0x1c, 0x3f, 0xdd, 0x82, 0x6b, 0xfc,
+	0xc0, 0xe6, 0xb0, 0x6a, 0x79, 0xc7, 0x3a, 0x84,
 }
 
 type emptyAPIIrpcService struct {
@@ -47,10 +47,10 @@ func newEmptyAPIIrpcClient(endpoint irpcgen.Endpoint) (*emptyAPIIrpcClient, erro
 }
 
 var _edgeCasesIrpcId = []byte{
-	0x96, 0xa6, 0x57, 0x5e, 0xa7, 0xa7, 0x05, 0xd7,
-	0x86, 0x90, 0xc3, 0xb3, 0xa9, 0x3a, 0xa4, 0xfc,
-	0x7f, 0x5e, 0x48, 0x39, 0x75, 0x78, 0x68, 0x0f,
-	0xdc, 0x0a, 0x7e, 0x80, 0x59, 0xf9, 0xf2, 0xb4,
+	0x55, 0xa3, 0x33, 0x44, 0x68, 0xea, 0x40, 0x8f,
+	0xd3, 0x73, 0x71, 0x5e, 0xcd, 0x3a, 0xf1, 0xda,
+	0x01, 0xdb, 0x33, 0x4b, 0xd5, 0x24, 0x9f, 0xc8,
+	0x6a, 0x4a, 0x07, 0x7a, 0xe2, 0x8a, 0xc1, 0x1a,
 }
 
 type edgeCasesIrpcService struct {
@@ -257,14 +257,14 @@ type _irpc_edgeCases_noReturnReq struct {
 }
 
 func (s _irpc_edgeCases_noReturnReq) Serialize(e *irpcgen.Encoder) error {
-	if err := e.VarInt(s.i); err != nil {
-		return fmt.Errorf("serialize s.i of type \"int\": %w", err)
+	if err := irpcgen.EncInt(e, s.i); err != nil {
+		return fmt.Errorf("serialize \"i\" of type int: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_edgeCases_noReturnReq) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.VarInt(&s.i); err != nil {
-		return fmt.Errorf("deserialize s.i of type \"int\": %w", err)
+	if err := irpcgen.DecInt(d, &s.i); err != nil {
+		return fmt.Errorf("deserialize i of type int: %w", err)
 	}
 	return nil
 }
@@ -274,14 +274,14 @@ type _irpc_edgeCases_noParamsResp struct {
 }
 
 func (s _irpc_edgeCases_noParamsResp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.VarInt(s.p0); err != nil {
-		return fmt.Errorf("serialize s.p0 of type \"int\": %w", err)
+	if err := irpcgen.EncInt(e, s.p0); err != nil {
+		return fmt.Errorf("serialize type int: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_edgeCases_noParamsResp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.VarInt(&s.p0); err != nil {
-		return fmt.Errorf("deserialize s.p0 of type \"int\": %w", err)
+	if err := irpcgen.DecInt(d, &s.p0); err != nil {
+		return fmt.Errorf("deserialize type int: %w", err)
 	}
 	return nil
 }
@@ -292,20 +292,20 @@ type _irpc_edgeCases_unnamedIntParamReq struct {
 }
 
 func (s _irpc_edgeCases_unnamedIntParamReq) Serialize(e *irpcgen.Encoder) error {
-	if err := e.VarInt(s.p0); err != nil {
-		return fmt.Errorf("serialize s.p0 of type \"int\": %w", err)
+	if err := irpcgen.EncInt(e, s.p0); err != nil {
+		return fmt.Errorf("serialize \"p0\" of type int: %w", err)
 	}
-	if err := e.VarInt(s.p1); err != nil {
-		return fmt.Errorf("serialize s.p1 of type \"int\": %w", err)
+	if err := irpcgen.EncInt(e, s.p1); err != nil {
+		return fmt.Errorf("serialize \"p1\" of type int: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_edgeCases_unnamedIntParamReq) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.VarInt(&s.p0); err != nil {
-		return fmt.Errorf("deserialize s.p0 of type \"int\": %w", err)
+	if err := irpcgen.DecInt(d, &s.p0); err != nil {
+		return fmt.Errorf("deserialize p0 of type int: %w", err)
 	}
-	if err := d.VarInt(&s.p1); err != nil {
-		return fmt.Errorf("deserialize s.p1 of type \"int\": %w", err)
+	if err := irpcgen.DecInt(d, &s.p1); err != nil {
+		return fmt.Errorf("deserialize p1 of type int: %w", err)
 	}
 	return nil
 }
@@ -317,26 +317,36 @@ type _irpc_edgeCases_mixedParamIdsReq struct {
 }
 
 func (s _irpc_edgeCases_mixedParamIdsReq) Serialize(e *irpcgen.Encoder) error {
-	if err := e.VarInt(s.p02); err != nil {
-		return fmt.Errorf("serialize s.p02 of type \"int\": %w", err)
+	if err := irpcgen.EncInt(e, s.p02); err != nil {
+		return fmt.Errorf("serialize \"p02\" of type int: %w", err)
 	}
-	if err := e.Uint8(s.p0); err != nil {
-		return fmt.Errorf("serialize s.p0 of type \"uint8\": %w", err)
+	if err := irpcgen.EncUint8(e, s.p0); err != nil {
+		return fmt.Errorf("serialize \"p0\" of type uint8: %w", err)
 	}
-	if err := e.VarInt(s.p2.a); err != nil {
-		return fmt.Errorf("serialize s.p2.a of type \"int\": %w", err)
+	if err := func(enc *irpcgen.Encoder, s struct{ a int }) error {
+		if err := irpcgen.EncInt(enc, s.a); err != nil {
+			return fmt.Errorf("serialize s.a of type int: %w", err)
+		}
+		return nil
+	}(e, s.p2); err != nil {
+		return fmt.Errorf("serialize \"p2\" of type struct{a int;}: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_edgeCases_mixedParamIdsReq) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.VarInt(&s.p02); err != nil {
-		return fmt.Errorf("deserialize s.p02 of type \"int\": %w", err)
+	if err := irpcgen.DecInt(d, &s.p02); err != nil {
+		return fmt.Errorf("deserialize p02 of type int: %w", err)
 	}
-	if err := d.Uint8(&s.p0); err != nil {
-		return fmt.Errorf("deserialize s.p0 of type \"uint8\": %w", err)
+	if err := irpcgen.DecUint8(d, &s.p0); err != nil {
+		return fmt.Errorf("deserialize p0 of type uint8: %w", err)
 	}
-	if err := d.VarInt(&s.p2.a); err != nil {
-		return fmt.Errorf("deserialize s.p2.a of type \"int\": %w", err)
+	if err := func(dec *irpcgen.Decoder, s *struct{ a int }) error {
+		if err := irpcgen.DecInt(dec, &s.a); err != nil {
+			return fmt.Errorf("deserialize s.a of type int: %w", err)
+		}
+		return nil
+	}(d, &s.p2); err != nil {
+		return fmt.Errorf("deserialize p2 of type struct{a int;}: %w", err)
 	}
 	return nil
 }
@@ -348,26 +358,26 @@ type _irpc_edgeCases_underscoreParamNamesReq struct {
 }
 
 func (s _irpc_edgeCases_underscoreParamNamesReq) Serialize(e *irpcgen.Encoder) error {
-	if err := e.VarInt(s.p02); err != nil {
-		return fmt.Errorf("serialize s.p02 of type \"int\": %w", err)
+	if err := irpcgen.EncInt(e, s.p02); err != nil {
+		return fmt.Errorf("serialize \"p02\" of type int: %w", err)
 	}
-	if err := e.Uint8(s.p0); err != nil {
-		return fmt.Errorf("serialize s.p0 of type \"uint8\": %w", err)
+	if err := irpcgen.EncUint8(e, s.p0); err != nil {
+		return fmt.Errorf("serialize \"p0\" of type uint8: %w", err)
 	}
-	if err := e.Float64le(s.p2); err != nil {
-		return fmt.Errorf("serialize s.p2 of type \"float64\": %w", err)
+	if err := irpcgen.EncFloat64(e, s.p2); err != nil {
+		return fmt.Errorf("serialize \"p2\" of type float64: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_edgeCases_underscoreParamNamesReq) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.VarInt(&s.p02); err != nil {
-		return fmt.Errorf("deserialize s.p02 of type \"int\": %w", err)
+	if err := irpcgen.DecInt(d, &s.p02); err != nil {
+		return fmt.Errorf("deserialize p02 of type int: %w", err)
 	}
-	if err := d.Uint8(&s.p0); err != nil {
-		return fmt.Errorf("deserialize s.p0 of type \"uint8\": %w", err)
+	if err := irpcgen.DecUint8(d, &s.p0); err != nil {
+		return fmt.Errorf("deserialize p0 of type uint8: %w", err)
 	}
-	if err := d.Float64le(&s.p2); err != nil {
-		return fmt.Errorf("deserialize s.p2 of type \"float64\": %w", err)
+	if err := irpcgen.DecFloat64(d, &s.p2); err != nil {
+		return fmt.Errorf("deserialize p2 of type float64: %w", err)
 	}
 	return nil
 }
@@ -377,14 +387,14 @@ type _irpc_edgeCases_underscoreParamNamesResp struct {
 }
 
 func (s _irpc_edgeCases_underscoreParamNamesResp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.Float64le(s.p03); err != nil {
-		return fmt.Errorf("serialize s.p03 of type \"float64\": %w", err)
+	if err := irpcgen.EncFloat64(e, s.p03); err != nil {
+		return fmt.Errorf("serialize \"_\" of type float64: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_edgeCases_underscoreParamNamesResp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.Float64le(&s.p03); err != nil {
-		return fmt.Errorf("deserialize s.p03 of type \"float64\": %w", err)
+	if err := irpcgen.DecFloat64(d, &s.p03); err != nil {
+		return fmt.Errorf("deserialize _ of type float64: %w", err)
 	}
 	return nil
 }
@@ -394,14 +404,14 @@ type _irpc_edgeCases_underscoreRtnNameReq struct {
 }
 
 func (s _irpc_edgeCases_underscoreRtnNameReq) Serialize(e *irpcgen.Encoder) error {
-	if err := e.VarInt(s.p0); err != nil {
-		return fmt.Errorf("serialize s.p0 of type \"int\": %w", err)
+	if err := irpcgen.EncInt(e, s.p0); err != nil {
+		return fmt.Errorf("serialize \"p0\" of type int: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_edgeCases_underscoreRtnNameReq) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.VarInt(&s.p0); err != nil {
-		return fmt.Errorf("deserialize s.p0 of type \"int\": %w", err)
+	if err := irpcgen.DecInt(d, &s.p0); err != nil {
+		return fmt.Errorf("deserialize p0 of type int: %w", err)
 	}
 	return nil
 }
@@ -412,20 +422,20 @@ type _irpc_edgeCases_underscoreRtnNameResp struct {
 }
 
 func (s _irpc_edgeCases_underscoreRtnNameResp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.VarInt(s.p02); err != nil {
-		return fmt.Errorf("serialize s.p02 of type \"int\": %w", err)
+	if err := irpcgen.EncInt(e, s.p02); err != nil {
+		return fmt.Errorf("serialize \"_\" of type int: %w", err)
 	}
-	if err := e.Uint8(s.p1); err != nil {
-		return fmt.Errorf("serialize s.p1 of type \"uint8\": %w", err)
+	if err := irpcgen.EncUint8(e, s.p1); err != nil {
+		return fmt.Errorf("serialize \"_\" of type uint8: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_edgeCases_underscoreRtnNameResp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.VarInt(&s.p02); err != nil {
-		return fmt.Errorf("deserialize s.p02 of type \"int\": %w", err)
+	if err := irpcgen.DecInt(d, &s.p02); err != nil {
+		return fmt.Errorf("deserialize _ of type int: %w", err)
 	}
-	if err := d.Uint8(&s.p1); err != nil {
-		return fmt.Errorf("deserialize s.p1 of type \"uint8\": %w", err)
+	if err := irpcgen.DecUint8(d, &s.p1); err != nil {
+		return fmt.Errorf("deserialize _ of type uint8: %w", err)
 	}
 	return nil
 }
@@ -435,23 +445,23 @@ type _irpc_edgeCases_paramNamedAsReceiverReq struct {
 }
 
 func (s _irpc_edgeCases_paramNamedAsReceiverReq) Serialize(e *irpcgen.Encoder) error {
-	if err := e.VarInt(s._c); err != nil {
-		return fmt.Errorf("serialize s._c of type \"int\": %w", err)
+	if err := irpcgen.EncInt(e, s._c); err != nil {
+		return fmt.Errorf("serialize \"_c\" of type int: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_edgeCases_paramNamedAsReceiverReq) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.VarInt(&s._c); err != nil {
-		return fmt.Errorf("deserialize s._c of type \"int\": %w", err)
+	if err := irpcgen.DecInt(d, &s._c); err != nil {
+		return fmt.Errorf("deserialize _c of type int: %w", err)
 	}
 	return nil
 }
 
 var _anotherInterfaceIrpcId = []byte{
-	0x97, 0x42, 0x5c, 0x53, 0x02, 0xe8, 0x87, 0xff,
-	0xca, 0x85, 0xdb, 0x1c, 0xd6, 0xe2, 0xf7, 0x84,
-	0x84, 0xd2, 0x2b, 0x3c, 0x14, 0x60, 0xaf, 0xed,
-	0x6b, 0x21, 0x11, 0xe5, 0x42, 0x1e, 0xbe, 0x9c,
+	0x62, 0xbf, 0xfb, 0x5b, 0x1b, 0x0b, 0xa4, 0xde,
+	0xee, 0x46, 0xbe, 0xa3, 0x43, 0xc4, 0xa6, 0x4f,
+	0x5a, 0x59, 0x7f, 0xee, 0xdc, 0x74, 0x60, 0xd1,
+	0x3f, 0x20, 0x74, 0x41, 0x76, 0x9c, 0x85, 0xc7,
 }
 
 type anotherInterfaceIrpcService struct {
@@ -516,20 +526,20 @@ type _irpc_anotherInterface_anotherAddReq struct {
 }
 
 func (s _irpc_anotherInterface_anotherAddReq) Serialize(e *irpcgen.Encoder) error {
-	if err := e.VarInt(s.a); err != nil {
-		return fmt.Errorf("serialize s.a of type \"int\": %w", err)
+	if err := irpcgen.EncInt(e, s.a); err != nil {
+		return fmt.Errorf("serialize \"a\" of type int: %w", err)
 	}
-	if err := e.VarInt(s.b); err != nil {
-		return fmt.Errorf("serialize s.b of type \"int\": %w", err)
+	if err := irpcgen.EncInt(e, s.b); err != nil {
+		return fmt.Errorf("serialize \"b\" of type int: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_anotherInterface_anotherAddReq) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.VarInt(&s.a); err != nil {
-		return fmt.Errorf("deserialize s.a of type \"int\": %w", err)
+	if err := irpcgen.DecInt(d, &s.a); err != nil {
+		return fmt.Errorf("deserialize a of type int: %w", err)
 	}
-	if err := d.VarInt(&s.b); err != nil {
-		return fmt.Errorf("deserialize s.b of type \"int\": %w", err)
+	if err := irpcgen.DecInt(d, &s.b); err != nil {
+		return fmt.Errorf("deserialize b of type int: %w", err)
 	}
 	return nil
 }
@@ -539,14 +549,14 @@ type _irpc_anotherInterface_anotherAddResp struct {
 }
 
 func (s _irpc_anotherInterface_anotherAddResp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.VarInt(s.p0); err != nil {
-		return fmt.Errorf("serialize s.p0 of type \"int\": %w", err)
+	if err := irpcgen.EncInt(e, s.p0); err != nil {
+		return fmt.Errorf("serialize type int: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_anotherInterface_anotherAddResp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.VarInt(&s.p0); err != nil {
-		return fmt.Errorf("deserialize s.p0 of type \"int\": %w", err)
+	if err := irpcgen.DecInt(d, &s.p0); err != nil {
+		return fmt.Errorf("deserialize type int: %w", err)
 	}
 	return nil
 }

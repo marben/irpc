@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"go/ast"
 	"go/types"
-	"strings"
 )
 
 func (tr *typeResolver) newSliceType(apiName string, ni *namedInfo, st *types.Slice, astExpr ast.Expr) (Type, error) {
@@ -16,7 +15,7 @@ func (tr *typeResolver) newSliceType(apiName string, ni *namedInfo, st *types.Sl
 	}
 	if st.String() == "[]uint8" {
 		// []uint8 is interchangeable with []byte. but not if named
-		return newDirectCallType("ByteSlice", "ByteSlice", "[]uint8", ni), nil
+		return newDirectCallType("irpcgen.EncByteSlice", "irpcgen.DecByteSlice", "[]uint8", ni), nil
 	}
 
 	return tr.newGenericSliceType(apiName, ni, st, astExpr)
@@ -24,13 +23,15 @@ func (tr *typeResolver) newSliceType(apiName string, ni *namedInfo, st *types.Sl
 
 // []byte
 func (tr *typeResolver) newByteSliceType(ni *namedInfo) (Type, error) {
-	return newDirectCallType("ByteSlice", "ByteSlice", "[]byte", ni), nil
+	return newDirectCallType("irpcgen.EncByteSlice", "irpcgen.DecByteSlice", "[]byte", ni), nil
 }
 
 // []bool
 func (tr *typeResolver) newBoolSliceType(ni *namedInfo) (Type, error) {
-	return newDirectCallType("BoolSlice", "BoolSlice", "[]bool", ni), nil
+	return newDirectCallType("irpcgen.EncBoolSlice", "irpcgen.DecBoolSlice", "[]bool", ni), nil
 }
+
+var _ Type = genericSliceType{}
 
 type genericSliceType struct {
 	elemT Type
@@ -67,43 +68,20 @@ func (st genericSliceType) name(q *qualifier) string {
 	return "[]" + st.elemT.name(q)
 }
 
-// encode implements encoder.
-func (st genericSliceType) encode(varId string, existingVars varNames, q *qualifier) string {
-	sb := &strings.Builder{}
-
-	// length
-	fmt.Fprintf(sb, "{ // %s %s\n", varId, st.name(q))
-	sb.WriteString(st.lenT.encode("len("+varId+")", existingVars, q))
-
-	// for loop
-	existingVars = append(existingVars, "v")
-	fmt.Fprintf(sb, "for _, v := range %s {\n", varId)
-	sb.WriteString(st.elemT.encode("v", existingVars, q))
-	sb.WriteString("}")
-	sb.WriteString("}\n")
-
-	return sb.String()
+// genEncFunc implements Type.
+func (st genericSliceType) genEncFunc(_ string, q *qualifier) string {
+	lq := q.copy()
+	return fmt.Sprintf(`func(enc *irpcgen.Encoder, sl %s) error{
+		return irpcgen.EncSlice(enc, %q, %s, sl)
+	}`, st.name(q), st.elemT.name(lq), st.elemT.genEncFunc("enc", q))
 }
 
-// decode implements encoder.
-func (st genericSliceType) decode(varId string, existingVars varNames, q *qualifier) string {
-	sb := &strings.Builder{}
-
-	// length
-	fmt.Fprintf(sb, "{ // %s %s\n", varId, st.name(q))
-	sb.WriteString("var l int\n")
-	sb.WriteString(st.lenT.decode("l", existingVars, q))
-	existingVars = append(existingVars, "l")
-
-	// for loop
-	itName := existingVars.generateIteratorName()
-	fmt.Fprintf(sb, "%s = make(%s, l)\n", varId, st.name(q))
-	fmt.Fprintf(sb, "for %s := range l {", itName)
-	sb.WriteString(st.elemT.decode(varId+"["+itName+"]", existingVars, q))
-	sb.WriteString("}\n")
-	sb.WriteString("}\n")
-
-	return sb.String()
+// genDecFunc implements Type.
+func (st genericSliceType) genDecFunc(_ string, q *qualifier) string {
+	lq := q.copy()
+	return fmt.Sprintf(`func(dec *irpcgen.Decoder, sl *%s) error {
+		return irpcgen.DecSlice(dec, %q, %s, sl)
+	}`, st.name(q), st.elemT.name(lq), st.elemT.genDecFunc("dec", q))
 }
 
 // codeblock implements encoder.

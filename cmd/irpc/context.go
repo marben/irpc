@@ -6,6 +6,16 @@ type contextType struct {
 	ni namedInfo
 }
 
+// genDecFunc implements Type.
+func (c contextType) genDecFunc(decoderVarName string, q *qualifier) string {
+	return ""
+}
+
+// genEncFunc implements Type.
+func (c contextType) genEncFunc(encoderVarName string, q *qualifier) string {
+	return ""
+}
+
 func newContextType(ni namedInfo) contextType {
 	return contextType{ni: ni}
 }
@@ -18,14 +28,4 @@ func (c contextType) name(q *qualifier) string {
 // codeblock implements Type.
 func (c contextType) codeblocks(q *qualifier) []string {
 	return nil
-}
-
-// decode implements Type.
-func (c contextType) decode(varId string, existingVars varNames, q *qualifier) string {
-	return "// no code for context decoding\n"
-}
-
-// encode implements Type.
-func (c contextType) encode(varId string, existingVars varNames, q *qualifier) string {
-	return "// no code for context encoding\n"
 }

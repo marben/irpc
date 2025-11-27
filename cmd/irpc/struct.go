@@ -66,7 +66,7 @@ func (tr *typeResolver) newStructType(apiName string, ni *namedInfo, t *types.St
 		if err != nil {
 			return structType{}, fmt.Errorf("create Type for field %q: %w", f, err)
 		}
-		sf := field{name: f.Name(), t: ft}
+		sf := newField(f.Name(), ft)
 		fields = append(fields, sf)
 	}
 
@@ -83,7 +83,7 @@ func (s structType) name(q *qualifier) string {
 	}
 
 	sb := strings.Builder{}
-	sb.WriteString("struct {")
+	sb.WriteString("struct{")
 	for _, f := range s.fields {
 		sb.WriteString(f.name + " " + f.t.name(q))
 		sb.WriteString(";")
@@ -101,20 +101,36 @@ func (s structType) codeblocks(q *qualifier) []string {
 	return cb
 }
 
-// decode implements Type.
-func (s structType) decode(varId string, existingVars varNames, q *qualifier) string {
+// genEncFunc implements Type.
+func (s structType) genEncFunc(_ string, q *qualifier) string {
+	lq := q.copy()
 	sb := &strings.Builder{}
+	// todo: 's' could be named like the serialize/deserialize struct param. we would need to revam the encFunc definition
+	fmt.Fprintf(sb, "func(enc *irpcgen.Encoder, s %s) error {\n", s.name(q))
 	for _, f := range s.fields {
-		sb.WriteString(f.t.decode(varId+"."+f.name, existingVars, q))
+		fmt.Fprintf(sb, `if err := %s(enc, s.%s); err != nil {
+			return fmt.Errorf("serialize s.%s of type %s: %%w", err)
+		}
+		 `, f.t.genEncFunc("enc", q), f.name, f.name, f.t.name(lq))
 	}
+	sb.WriteString("return nil\n")
+	sb.WriteString("}")
 	return sb.String()
 }
 
-// encode implements Type.
-func (s structType) encode(varId string, existingVars varNames, q *qualifier) string {
-	sb := strings.Builder{}
+// genDecFunc implements Type.
+func (s structType) genDecFunc(decoderVarName string, q *qualifier) string {
+	lq := q.copy()
+	sb := &strings.Builder{}
+	fmt.Fprintf(sb, "func(dec *irpcgen.Decoder, s *%s) error {\n", s.name(q))
 	for _, f := range s.fields {
-		sb.WriteString(f.t.encode(varId+"."+f.name, existingVars, q))
+		fmt.Fprintf(sb, `if err := %s(dec, &s.%s); err != nil {
+			return fmt.Errorf("deserialize s.%s of type %s: %%w", err)
+		}
+		`, f.t.genDecFunc("dec", q), f.name, f.name, f.t.name(lq))
 	}
+	sb.WriteString("return nil\n")
+	sb.WriteString("}")
+
 	return sb.String()
 }

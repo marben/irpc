@@ -20,6 +20,67 @@ type interfaceType struct {
 	boolT        Type
 }
 
+// genDecFunc implements Type.
+func (i interfaceType) genDecFunc(decoderVarName string, q *qualifier) string {
+	sb := &strings.Builder{}
+	fmt.Fprintf(sb, "func (dec *irpcgen.Decoder, s *%s) error {\n", i.name(q))
+	fmt.Fprintf(sb, `var isNil bool
+		if err := irpcgen.DecBool(dec, &isNil); err != nil {
+			return fmt.Errorf("deserialize isNil: %%w:", err)
+		}
+			if isNil {
+				return nil
+			}
+		`)
+	fmt.Fprintf(sb, "var impl %s\n", i.implTypeName)
+	for _, fn := range i.fncs {
+		for _, r := range fn.results {
+			fmt.Fprintf(sb, `if err := %s(dec, &impl.%s); err != nil{
+				return fmt.Errorf("deserialize \"%s\" %s: %%w", err)
+			}
+			`, r.f.t.genDecFunc("dec", q), r.implStructParamName, r.implStructParamName, r.f.t.name(q.copy()))
+		}
+	}
+	sb.WriteString("*s = impl\n")
+	sb.WriteString("return nil\n")
+	sb.WriteString("}")
+	return sb.String()
+}
+
+// genEncFunc implements Type.
+func (i interfaceType) genEncFunc(_ string, q *qualifier) string {
+	sb := &strings.Builder{}
+	fmt.Fprintf(sb, "func (enc *irpcgen.Encoder, v %s) error {\n", i.name(q))
+	fmt.Fprintf(sb, `isNil := v == nil
+			if err := irpcgen.EncBool(enc, isNil); err != nil {
+				return fmt.Errorf("serialize isNil == %%t: %%w", isNil, err)
+			}
+			if isNil {
+				return nil
+			}
+		`)
+	for _, fn := range i.fncs {
+		for i, r := range fn.results {
+			sb.WriteString(r.implStructParamName)
+			if i != len(fn.results)-1 {
+				sb.WriteString(",")
+			}
+		}
+		fmt.Fprintf(sb, ":= v.%s()\n", fn.name)
+		for _, r := range fn.results {
+			fmt.Fprintf(sb, `if err := %s(enc, %s); err != nil {
+				return fmt.Errorf("serialize \"v.%s()\" of type %s: %%w", err)
+			}
+				`, r.f.t.genEncFunc("enc", q), r.implStructParamName, fn.name, r.f.t.name(q.copy()))
+		}
+	}
+	sb.WriteString("")
+	sb.WriteString("return nil\n")
+	sb.WriteString("}")
+
+	return sb.String()
+}
+
 func (tr *typeResolver) newInterfaceType(apiName string, ni *namedInfo, ifaceT *types.Interface, astExpr ast.Expr) (interfaceType, error) {
 	var ifaceAst *ast.InterfaceType
 	if astExpr != nil {
@@ -64,7 +125,7 @@ func (tr *typeResolver) newInterfaceType(apiName string, ni *namedInfo, ifaceT *
 
 			results = append(results, ifaceImplVar{
 				implStructParamName: fmt.Sprintf("_%s_%d_%s", method.Name(), i, v.Name()),
-				f:                   field{name: v.Name(), t: typ},
+				f:                   newField(v.Name(), typ),
 			})
 		}
 
@@ -94,10 +155,6 @@ func (tr *typeResolver) newInterfaceType(apiName string, ni *namedInfo, ifaceT *
 	}, nil
 }
 
-func (i interfaceType) implTypeNam() string {
-	return i.implTypeName
-}
-
 // name implements Type.
 func (i interfaceType) name(q *qualifier) string {
 	if i.ni != nil {
@@ -105,7 +162,7 @@ func (i interfaceType) name(q *qualifier) string {
 	}
 
 	sb := strings.Builder{}
-	sb.WriteString("interface {")
+	sb.WriteString("interface{")
 	for _, f := range i.fncs {
 		sb.WriteString(f.signature(q))
 		sb.WriteString(";")
@@ -119,7 +176,7 @@ func (i interfaceType) codeblocks(q *qualifier) []string {
 	sb := &strings.Builder{}
 
 	// struct that will hold all our interface's return values
-	fmt.Fprintf(sb, "type %s struct {\n", i.implTypeNam())
+	fmt.Fprintf(sb, "type %s struct {\n", i.implTypeName)
 	for _, f := range i.fncs {
 		for _, v := range f.results {
 			fmt.Fprintf(sb, "%s %s\n", v.implStructParamName, v.f.t.name(q))
@@ -129,72 +186,12 @@ func (i interfaceType) codeblocks(q *qualifier) []string {
 
 	// we implement each interface function and return value stored withing the struct
 	for _, f := range i.fncs {
-		fmt.Fprintf(sb, "func (i %s)%s()(%s){\n", i.implTypeNam(), f.name, f.listNamesWithTypes(q))
+		fmt.Fprintf(sb, "func (i %s)%s()(%s){\n", i.implTypeName, f.name, f.listNamesWithTypes(q))
 		fmt.Fprintf(sb, "return %s\n", f.listImplNamesPrefixed("i."))
 		sb.WriteString("}\n")
 	}
 
 	return []string{sb.String()}
-}
-
-// decode implements Type.
-func (i interfaceType) decode(varId string, existingVars varNames, q *qualifier) string {
-	existingVars.addVarName(varId)
-	sb := &strings.Builder{}
-	sb.WriteString("{\n") // separate block
-	fmt.Fprintf(sb, `var isNil bool
-	%s
-	if isNil {
-		%s = nil
-	} else {
-	`, i.boolT.decode("isNil", existingVars, q), varId)
-
-	implVarName := existingVars.generateUniqueVarName("impl")
-
-	fmt.Fprintf(sb, "var %s %s\n", implVarName, i.implTypeNam())
-	for _, f := range i.fncs {
-		fmt.Fprintf(sb, "{ // %s()\n", f.name)
-		for _, v := range f.results {
-			sb.WriteString(v.f.t.decode(implVarName+"."+v.implStructParamName, existingVars, q))
-		}
-		sb.WriteString("}\n")
-	}
-	fmt.Fprintf(sb, "%s = %s\n", varId, implVarName)
-	sb.WriteString("}\n") // else {
-	sb.WriteString("}\n") // separate block
-
-	return sb.String()
-}
-
-// encode implements Type.
-func (i interfaceType) encode(varId string, existingVars varNames, q *qualifier) string {
-	sb := &strings.Builder{}
-	sb.WriteString("{\n") // separate block
-	fmt.Fprintf(sb, `var isNil bool
-	if %s == nil {
-		isNil = true
-	}
-	%s
-	`, varId, i.boolT.encode("isNil", existingVars, q))
-	sb.WriteString("if !isNil{\n")
-	for _, f := range i.fncs {
-		fmt.Fprintf(sb, "{ // %s()\n", f.name)
-		for i, v := range f.results {
-			sb.WriteString(v.implStructParamName)
-			if i != len(f.results)-1 {
-				sb.WriteString(",")
-			}
-		}
-		fmt.Fprintf(sb, ":= %s.%s()\n", varId, f.name)
-		for _, v := range f.results {
-			sb.WriteString(v.f.t.encode(v.implStructParamName, existingVars, q))
-		}
-		sb.WriteString("}\n")
-	}
-	sb.WriteString("}\n") // if !isNil
-	sb.WriteString("}\n") // separate block
-
-	return sb.String()
 }
 
 type ifaceFunc struct {

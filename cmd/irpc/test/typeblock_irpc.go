@@ -9,10 +9,10 @@ import (
 )
 
 var _tbInterfaceAIrpcId = []byte{
-	0xcb, 0x56, 0x6e, 0x1f, 0x86, 0x23, 0x6b, 0xfe,
-	0xbb, 0xae, 0x68, 0xeb, 0x8a, 0xd8, 0xef, 0x50,
-	0x8f, 0x82, 0x97, 0x86, 0x2f, 0xac, 0x94, 0x46,
-	0x3e, 0x38, 0x55, 0x06, 0x05, 0x2f, 0x4b, 0x19,
+	0x31, 0x76, 0xfc, 0x21, 0xcc, 0x64, 0xbb, 0x4d,
+	0xe8, 0x7c, 0x56, 0xd0, 0xd9, 0x05, 0x08, 0x16,
+	0xb0, 0x36, 0x39, 0x0b, 0xdd, 0x16, 0x3a, 0x27,
+	0x6b, 0x79, 0x29, 0x8c, 0x3c, 0x3d, 0x38, 0xac,
 }
 
 type tbInterfaceAIrpcService struct {
@@ -77,14 +77,14 @@ type _irpc_tbInterfaceA_reverseReq struct {
 }
 
 func (s _irpc_tbInterfaceA_reverseReq) Serialize(e *irpcgen.Encoder) error {
-	if err := e.String(s.p0); err != nil {
-		return fmt.Errorf("serialize s.p0 of type \"string\": %w", err)
+	if err := irpcgen.EncString(e, s.p0); err != nil {
+		return fmt.Errorf("serialize \"p0\" of type string: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_tbInterfaceA_reverseReq) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.String(&s.p0); err != nil {
-		return fmt.Errorf("deserialize s.p0 of type \"string\": %w", err)
+	if err := irpcgen.DecString(d, &s.p0); err != nil {
+		return fmt.Errorf("deserialize p0 of type string: %w", err)
 	}
 	return nil
 }
@@ -94,23 +94,23 @@ type _irpc_tbInterfaceA_reverseResp struct {
 }
 
 func (s _irpc_tbInterfaceA_reverseResp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.String(s.p02); err != nil {
-		return fmt.Errorf("serialize s.p02 of type \"string\": %w", err)
+	if err := irpcgen.EncString(e, s.p02); err != nil {
+		return fmt.Errorf("serialize type string: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_tbInterfaceA_reverseResp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.String(&s.p02); err != nil {
-		return fmt.Errorf("deserialize s.p02 of type \"string\": %w", err)
+	if err := irpcgen.DecString(d, &s.p02); err != nil {
+		return fmt.Errorf("deserialize type string: %w", err)
 	}
 	return nil
 }
 
 var _tvInterfaceBIrpcId = []byte{
-	0x24, 0xb4, 0xc5, 0x0d, 0xf3, 0x4f, 0x23, 0x0d,
-	0x56, 0x51, 0xed, 0x45, 0x97, 0xdb, 0x37, 0xad,
-	0x88, 0x0b, 0xe8, 0x21, 0x46, 0xff, 0xbb, 0x2e,
-	0xec, 0xb3, 0x66, 0x3a, 0x6e, 0x07, 0x10, 0x1e,
+	0xc6, 0x44, 0xfb, 0x40, 0xd3, 0x7b, 0x69, 0xe4,
+	0xd7, 0x7c, 0xb6, 0x97, 0x30, 0x05, 0x50, 0x90,
+	0xf3, 0x5e, 0x44, 0x26, 0x6c, 0xdb, 0x64, 0x03,
+	0xb8, 0x5d, 0x08, 0xec, 0xb5, 0xfc, 0xf6, 0x6f,
 }
 
 type tvInterfaceBIrpcService struct {
@@ -182,20 +182,20 @@ type _irpc_tvInterfaceB_addReq struct {
 }
 
 func (s _irpc_tvInterfaceB_addReq) Serialize(e *irpcgen.Encoder) error {
-	if err := e.VarInt(s.a); err != nil {
-		return fmt.Errorf("serialize s.a of type \"int\": %w", err)
+	if err := irpcgen.EncInt(e, s.a); err != nil {
+		return fmt.Errorf("serialize \"a\" of type int: %w", err)
 	}
-	if err := e.VarInt(s.b); err != nil {
-		return fmt.Errorf("serialize s.b of type \"int\": %w", err)
+	if err := irpcgen.EncInt(e, s.b); err != nil {
+		return fmt.Errorf("serialize \"b\" of type int: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_tvInterfaceB_addReq) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.VarInt(&s.a); err != nil {
-		return fmt.Errorf("deserialize s.a of type \"int\": %w", err)
+	if err := irpcgen.DecInt(d, &s.a); err != nil {
+		return fmt.Errorf("deserialize a of type int: %w", err)
 	}
-	if err := d.VarInt(&s.b); err != nil {
-		return fmt.Errorf("deserialize s.b of type \"int\": %w", err)
+	if err := irpcgen.DecInt(d, &s.b); err != nil {
+		return fmt.Errorf("deserialize b of type int: %w", err)
 	}
 	return nil
 }
@@ -205,14 +205,14 @@ type _irpc_tvInterfaceB_addResp struct {
 }
 
 func (s _irpc_tvInterfaceB_addResp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.VarInt(s.p0); err != nil {
-		return fmt.Errorf("serialize s.p0 of type \"int\": %w", err)
+	if err := irpcgen.EncInt(e, s.p0); err != nil {
+		return fmt.Errorf("serialize type int: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_tvInterfaceB_addResp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.VarInt(&s.p0); err != nil {
-		return fmt.Errorf("deserialize s.p0 of type \"int\": %w", err)
+	if err := irpcgen.DecInt(d, &s.p0); err != nil {
+		return fmt.Errorf("deserialize type int: %w", err)
 	}
 	return nil
 }

@@ -16,6 +16,11 @@ type sliceTest interface {
 	namedByteSlice(slice namedByteSlice) int
 	sliceOfBools(slice []bool) namedBoolSlice
 	sliceOfUint8(slice []uint8) []byte
+	sliceOfMaps(slice []map[int]string)
+	sliceOfStructs(slice []struct {
+		A int
+		B string
+	}) (sumA int)
 	sliceOfErrors(slice []error)
 }
 
@@ -23,6 +28,22 @@ var _ sliceTest = sliceTestImpl{}
 
 type sliceTestImpl struct {
 	skew int
+}
+
+// sliceOfStructs implements sliceTest.
+func (st sliceTestImpl) sliceOfStructs(slice []struct {
+	A int
+	B string
+}) (sumA int) {
+	for _, s := range slice {
+		sumA += s.A
+	}
+	return sumA
+}
+
+// sliceOfMaps implements sliceTest.
+func (st sliceTestImpl) sliceOfMaps(slice []map[int]string) {
+	panic("unimplemented")
 }
 
 // sliceOfErrors implements sliceTest.

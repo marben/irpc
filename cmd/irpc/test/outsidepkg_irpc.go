@@ -10,10 +10,10 @@ import (
 )
 
 var _outsideTestIrpcId = []byte{
-	0xed, 0x82, 0x5c, 0x57, 0xd6, 0x64, 0xda, 0x22,
-	0x80, 0xdc, 0xfa, 0x31, 0x60, 0x3d, 0x77, 0x2e,
-	0xa2, 0xe4, 0x91, 0xb0, 0x28, 0xed, 0xca, 0xe6,
-	0xfc, 0x72, 0xae, 0x43, 0x46, 0x73, 0x24, 0x09,
+	0x32, 0xfc, 0x51, 0x02, 0x58, 0x69, 0x08, 0x5a,
+	0xde, 0xcb, 0x58, 0x70, 0x0f, 0x00, 0x20, 0xbe,
+	0x0d, 0xba, 0xbd, 0x70, 0xc4, 0xfc, 0xe7, 0x2c,
+	0x43, 0x74, 0x00, 0x35, 0x97, 0xa8, 0xa0, 0xb1,
 }
 
 type outsideTestIrpcService struct {
@@ -78,20 +78,20 @@ type _irpc_outsideTest_addUint8Req struct {
 }
 
 func (s _irpc_outsideTest_addUint8Req) Serialize(e *irpcgen.Encoder) error {
-	if err := e.Uint8(uint8(s.a)); err != nil {
-		return fmt.Errorf("serialize s.a of type \"out.Uint8\": %w", err)
+	if err := irpcgen.EncUint8(e, s.a); err != nil {
+		return fmt.Errorf("serialize \"a\" of type out.Uint8: %w", err)
 	}
-	if err := e.Uint8(uint8(s.b)); err != nil {
-		return fmt.Errorf("serialize s.b of type \"out.Uint8\": %w", err)
+	if err := irpcgen.EncUint8(e, s.b); err != nil {
+		return fmt.Errorf("serialize \"b\" of type out.Uint8: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_outsideTest_addUint8Req) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.Uint8((*uint8)(&s.a)); err != nil {
-		return fmt.Errorf("deserialize s.a of type \"out.Uint8\": %w", err)
+	if err := irpcgen.DecUint8(d, &s.a); err != nil {
+		return fmt.Errorf("deserialize a of type out.Uint8: %w", err)
 	}
-	if err := d.Uint8((*uint8)(&s.b)); err != nil {
-		return fmt.Errorf("deserialize s.b of type \"out.Uint8\": %w", err)
+	if err := irpcgen.DecUint8(d, &s.b); err != nil {
+		return fmt.Errorf("deserialize b of type out.Uint8: %w", err)
 	}
 	return nil
 }
@@ -101,14 +101,14 @@ type _irpc_outsideTest_addUint8Resp struct {
 }
 
 func (s _irpc_outsideTest_addUint8Resp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.Uint8(uint8(s.p0)); err != nil {
-		return fmt.Errorf("serialize s.p0 of type \"out.Uint8\": %w", err)
+	if err := irpcgen.EncUint8(e, s.p0); err != nil {
+		return fmt.Errorf("serialize type out.Uint8: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_outsideTest_addUint8Resp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.Uint8((*uint8)(&s.p0)); err != nil {
-		return fmt.Errorf("deserialize s.p0 of type \"out.Uint8\": %w", err)
+	if err := irpcgen.DecUint8(d, &s.p0); err != nil {
+		return fmt.Errorf("deserialize type out.Uint8: %w", err)
 	}
 	return nil
 }

@@ -9,10 +9,10 @@ import (
 )
 
 var _MathIrpcId = []byte{
-	0x91, 0xf5, 0x43, 0x6d, 0x55, 0x7a, 0x6f, 0x95,
-	0x32, 0xe1, 0x2d, 0xbf, 0xd1, 0x36, 0xf6, 0xa2,
-	0x07, 0x0f, 0x50, 0xdf, 0x51, 0x0e, 0x9c, 0x67,
-	0xe0, 0x51, 0xb5, 0xb8, 0xea, 0x1d, 0xbe, 0x93,
+	0x6b, 0x77, 0xf3, 0x0c, 0x99, 0x5e, 0xef, 0x4b,
+	0x36, 0x93, 0xf6, 0x53, 0x9f, 0x24, 0x11, 0x0e,
+	0x80, 0xf5, 0x7e, 0x24, 0x04, 0x20, 0x22, 0xbc,
+	0x78, 0x8e, 0xb7, 0xeb, 0x76, 0x46, 0x81, 0xb8,
 }
 
 type MathIrpcService struct {
@@ -78,20 +78,20 @@ type _irpc_Math_AddReq struct {
 }
 
 func (s _irpc_Math_AddReq) Serialize(e *irpcgen.Encoder) error {
-	if err := e.VarInt(s.a); err != nil {
-		return fmt.Errorf("serialize s.a of type \"int\": %w", err)
+	if err := irpcgen.EncInt(e, s.a); err != nil {
+		return fmt.Errorf("serialize \"a\" of type int: %w", err)
 	}
-	if err := e.VarInt(s.b); err != nil {
-		return fmt.Errorf("serialize s.b of type \"int\": %w", err)
+	if err := irpcgen.EncInt(e, s.b); err != nil {
+		return fmt.Errorf("serialize \"b\" of type int: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_Math_AddReq) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.VarInt(&s.a); err != nil {
-		return fmt.Errorf("deserialize s.a of type \"int\": %w", err)
+	if err := irpcgen.DecInt(d, &s.a); err != nil {
+		return fmt.Errorf("deserialize a of type int: %w", err)
 	}
-	if err := d.VarInt(&s.b); err != nil {
-		return fmt.Errorf("deserialize s.b of type \"int\": %w", err)
+	if err := irpcgen.DecInt(d, &s.b); err != nil {
+		return fmt.Errorf("deserialize b of type int: %w", err)
 	}
 	return nil
 }
@@ -102,50 +102,47 @@ type _irpc_Math_AddResp struct {
 }
 
 func (s _irpc_Math_AddResp) Serialize(e *irpcgen.Encoder) error {
-	if err := e.VarInt(s.p0); err != nil {
-		return fmt.Errorf("serialize s.p0 of type \"int\": %w", err)
+	if err := irpcgen.EncInt(e, s.p0); err != nil {
+		return fmt.Errorf("serialize type int: %w", err)
 	}
-	{
-		var isNil bool
-		if s.p1 == nil {
-			isNil = true
+	if err := func(enc *irpcgen.Encoder, v error) error {
+		isNil := v == nil
+		if err := irpcgen.EncBool(enc, isNil); err != nil {
+			return fmt.Errorf("serialize isNil == %t: %w", isNil, err)
 		}
-		if err := e.Bool(isNil); err != nil {
-			return fmt.Errorf("serialize isNil of type \"bool\": %w", err)
+		if isNil {
+			return nil
 		}
-
-		if !isNil {
-			{ // Error()
-				_Error_0_ := s.p1.Error()
-				if err := e.String(_Error_0_); err != nil {
-					return fmt.Errorf("serialize _Error_0_ of type \"string\": %w", err)
-				}
-			}
+		_Error_0_ := v.Error()
+		if err := irpcgen.EncString(enc, _Error_0_); err != nil {
+			return fmt.Errorf("serialize \"v.Error()\" of type string: %w", err)
 		}
+		return nil
+	}(e, s.p1); err != nil {
+		return fmt.Errorf("serialize type error: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_Math_AddResp) Deserialize(d *irpcgen.Decoder) error {
-	if err := d.VarInt(&s.p0); err != nil {
-		return fmt.Errorf("deserialize s.p0 of type \"int\": %w", err)
+	if err := irpcgen.DecInt(d, &s.p0); err != nil {
+		return fmt.Errorf("deserialize type int: %w", err)
 	}
-	{
+	if err := func(dec *irpcgen.Decoder, s *error) error {
 		var isNil bool
-		if err := d.Bool(&isNil); err != nil {
-			return fmt.Errorf("deserialize isNil of type \"bool\": %w", err)
+		if err := irpcgen.DecBool(dec, &isNil); err != nil {
+			return fmt.Errorf("deserialize isNil: %w:", err)
 		}
-
 		if isNil {
-			s.p1 = nil
-		} else {
-			var impl _error_Math_impl
-			{ // Error()
-				if err := d.String(&impl._Error_0_); err != nil {
-					return fmt.Errorf("deserialize impl._Error_0_ of type \"string\": %w", err)
-				}
-			}
-			s.p1 = impl
+			return nil
 		}
+		var impl _error_Math_impl
+		if err := irpcgen.DecString(dec, &impl._Error_0_); err != nil {
+			return fmt.Errorf("deserialize \"_Error_0_\" string: %w", err)
+		}
+		*s = impl
+		return nil
+	}(d, &s.p1); err != nil {
+		return fmt.Errorf("deserialize type error: %w", err)
 	}
 	return nil
 }

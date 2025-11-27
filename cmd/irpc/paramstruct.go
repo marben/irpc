@@ -93,10 +93,22 @@ func (sg paramStructGenerator) serializeFunc(q *qualifier) string {
 	fmt.Fprintf(sb, "func (s %s)Serialize(e *irpcgen.Encoder) error {\n", sg.structName)
 	if len(sg.params) > 0 {
 		for _, p := range sg.params {
-			sb.WriteString(p.typ.encode("s."+p.structFieldName, nil, q))
+			varId := "s." + p.structFieldName
+			encFunc := p.typ.genEncFunc(varId, q)
+			if encFunc == "" {
+				// some types skip encoding (currently it's context)
+				continue
+			}
+			fmt.Fprintf(sb, "if err := %s(e, %s); err != nil{\n", encFunc, varId)
+			if p.identifier != "" {
+				fmt.Fprintf(sb, "return fmt.Errorf(\"serialize \\\"%s\\\" of type %s: %%w\", err)\n", p.identifier, p.typ.name(q.copy()))
+			} else {
+				fmt.Fprintf(sb, "return fmt.Errorf(\"serialize type %s: %%w\", err)\n", p.typ.name(q.copy()))
+			}
+			sb.WriteString("}\n")
 		}
 	}
-	sb.WriteString("return nil\n}")
+	sb.WriteString("return nil\n}") // end of Serialize
 
 	return sb.String()
 }
@@ -106,7 +118,18 @@ func (sg paramStructGenerator) deserializeFunc(q *qualifier) string {
 	fmt.Fprintf(sb, "func (s *%s)Deserialize(d *irpcgen.Decoder) error {\n", sg.structName)
 	if len(sg.params) > 0 {
 		for _, p := range sg.params {
-			sb.WriteString(p.typ.decode("s."+p.structFieldName, nil, q))
+			varId := "s." + p.structFieldName
+			decFunc := p.typ.genDecFunc(varId, q)
+			if decFunc == "" {
+				continue
+			}
+			fmt.Fprintf(sb, "if err := %s(d, &%s); err != nil {\n", decFunc, varId)
+			if p.identifier != "" {
+				fmt.Fprintf(sb, "return fmt.Errorf(\"deserialize %s of type %s: %%w\", err)\n", p.identifier, p.typ.name(q.copy()))
+			} else {
+				fmt.Fprintf(sb, "return fmt.Errorf(\"deserialize type %s: %%w\", err)\n", p.typ.name(q.copy()))
+			}
+			sb.WriteString("}\n")
 		}
 	}
 	sb.WriteString("return nil\n}")

@@ -1,8 +1,21 @@
+- remove 'variable name' from genEncFunc() - i don't think it's necessary
+- make generators report their imports and only populate qualifier from param structs, not gen functions - if possible?
+- write a function to to batch serialiaton/deserialization/error reporting and call it from generated code instead of the repetitive error checking
+- implement nil encoding/decoding for nillable types (slice, map...)
 - document versioning in README
 - map[int]interface{}
+- not sure about interfaces with multiple return values in function
+    - try something like return value of type error2 interface{Error() (string,int)}
+- test []time.Time  -- test new slice implementation and asymetrical encoder
+- formatting with stdlib produces different (imho worse) than gofmt.
+    - i am not sure why, but it seems to be a common thing. esapecially with nested func definitions like with struct encoding
+    - is there a fix?
 - think about and probably implement nil-ability of slices, maps, etc...
  - perhaps use generics for slices/maps etc? it would simplify generated code greatly
 - make sure passing interface{} != nil returns something that is not nil ??
+- looking at test struct_irpc.go vect3x3 serialization, there is a lot of repetitive code
+    - perhaps we could attach named serialization functions for sub-structures? in this case vect3
+- fuzzy test of Enc/Dec functions to make sure, encodings match
 - interface{} like for instance in map[int]interface{} doesn't need to have a codeblock
 - support files outside of module. it is currently unsupported and fails
 - two interfaces in one file - are service/client hashes the same? maybe we need to add interface name to the hash?
