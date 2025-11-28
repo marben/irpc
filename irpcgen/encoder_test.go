@@ -11,7 +11,7 @@ func BenchmarkVarUint64Enc(b *testing.B) {
 	enc := NewEncoder(buf)
 	encodedInt := uint64(1798453)
 	for range b.N {
-		if err := enc.UvarInt64(encodedInt); err != nil {
+		if err := enc.uVarInt64(encodedInt); err != nil {
 			b.Fatalf("enc: %v", err)
 		}
 		buf.Reset()
@@ -22,14 +22,14 @@ func TestBoolSlice(t *testing.T) {
 	buf := bytes.NewBuffer(nil)
 	enc := NewEncoder(buf)
 	s := []bool{true, false, true, false, false}
-	if err := enc.BoolSlice(s); err != nil {
+	if err := enc.boolSlice(s); err != nil {
 		t.Fatalf("enc.BoolSlice(): %+v", err)
 	}
 	enc.Flush()
 	t.Logf("slice: %v => %b", s, buf.Bytes())
 	dec := NewDecoder(buf)
 	var s_out []bool
-	if err := dec.BoolSlice(&s_out); err != nil {
+	if err := dec.boolSlice(&s_out); err != nil {
 		t.Fatalf("dec.BoolSlice(): %v", err)
 	}
 
@@ -53,7 +53,7 @@ func FuzzBoolSlice(f *testing.F) {
 		bs := bytesToBools(s)
 		// t.Logf("bools: %v", bs)
 
-		if err := enc.BoolSlice(bs); err != nil {
+		if err := enc.boolSlice(bs); err != nil {
 			t.Fatalf("enc.BoolSlice(): %v", err)
 		}
 		if err := enc.Flush(); err != nil {
@@ -64,7 +64,7 @@ func FuzzBoolSlice(f *testing.F) {
 		// we need to prefix the original data with correctly encoded length
 		lenBuf := bytes.NewBuffer(nil)
 		lenEnc := NewEncoder(lenBuf)
-		lenEnc.Len(len(bs))
+		lenEnc.len(len(bs))
 		lenEnc.Flush()
 		lenPrefixedOrig := append(lenBuf.Bytes(), s...)
 		if !slices.Equal(buf.Bytes(), lenPrefixedOrig) {
@@ -73,7 +73,7 @@ func FuzzBoolSlice(f *testing.F) {
 
 		// ok, decode
 		var resBS []bool
-		if err := dec.BoolSlice(&resBS); err != nil {
+		if err := dec.boolSlice(&resBS); err != nil {
 			t.Fatalf("dec.BoolSlice(): %v", err)
 		}
 		if !slices.Equal(resBS, bs) {

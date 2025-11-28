@@ -75,12 +75,12 @@ func TestUint8SliceCasting(t *testing.T) {
 	in := []uint8{4, 2, 6, 255, 0}
 	buf := bytes.NewBuffer(nil)
 	enc := irpcgen.NewEncoder(buf)
-	enc.ByteSlice(in)
+	irpcgen.EncByteSlice(enc, in)
 	enc.Flush()
 
 	var out []uint8
 	dec := irpcgen.NewDecoder(buf)
-	dec.ByteSlice(&out)
+	irpcgen.DecByteSlice(dec, &out)
 	if !slices.Equal(in, out) {
 		t.Fatalf("%v != %v", in, out)
 	}

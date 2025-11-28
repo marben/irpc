@@ -27,7 +27,7 @@ func (e *Encoder) Flush() error {
 	return e.w.Flush()
 }
 
-func (e *Encoder) Bool(v bool) error {
+func (e *Encoder) bool(v bool) error {
 	var b byte
 	if v {
 		b = 1
@@ -38,39 +38,15 @@ func (e *Encoder) Bool(v bool) error {
 	return nil
 }
 
-func (e *Encoder) VarInt(v int) error {
-	return e.VarInt64(int64(v))
+func (e *Encoder) uVarInt(v uint) error {
+	return e.uVarInt64(uint64(v))
 }
 
-func (e *Encoder) UvarInt(v uint) error {
-	return e.UvarInt64(uint64(v))
+func (e *Encoder) byte(b byte) error {
+	return e.w.WriteByte(b)
 }
 
-func (e *Encoder) Int8(v int8) error {
-	return e.w.WriteByte(byte(v))
-}
-
-func (e *Encoder) Uint8(v uint8) error {
-	return e.w.WriteByte(v)
-}
-
-func (e *Encoder) VarInt16(v int16) error {
-	return e.VarInt64(int64(v))
-}
-
-func (e *Encoder) UvarInt16(v uint16) error {
-	return e.UvarInt64(uint64(v))
-}
-
-func (e *Encoder) VarInt32(v int32) error {
-	return e.VarInt64(int64(v))
-}
-
-func (e *Encoder) UvarInt32(v uint32) error {
-	return e.UvarInt64(uint64(v))
-}
-
-func (e *Encoder) VarInt64(v int64) error {
+func (e *Encoder) varInt64(v int64) error {
 	n := binary.PutVarint(e.buf, v)
 	if _, err := e.w.Write(e.buf[:n]); err != nil {
 		return err
@@ -78,7 +54,7 @@ func (e *Encoder) VarInt64(v int64) error {
 	return nil
 }
 
-func (e *Encoder) UvarInt64(v uint64) error {
+func (e *Encoder) uVarInt64(v uint64) error {
 	n := binary.PutUvarint(e.buf, v)
 	if _, err := e.w.Write(e.buf[:n]); err != nil {
 		return err
@@ -86,11 +62,11 @@ func (e *Encoder) UvarInt64(v uint64) error {
 	return nil
 }
 
-func (e *Encoder) Len(l int) error {
-	return e.UvarInt64(uint64(l))
+func (e *Encoder) len(l int) error {
+	return e.uVarInt64(uint64(l))
 }
 
-func (e *Encoder) Float32le(v float32) error {
+func (e *Encoder) float32le(v float32) error {
 	binary.LittleEndian.PutUint32(e.buf, math.Float32bits(v))
 	if _, err := e.w.Write(e.buf[:4]); err != nil {
 		return err
@@ -98,7 +74,7 @@ func (e *Encoder) Float32le(v float32) error {
 	return nil
 }
 
-func (e *Encoder) Float64le(v float64) error {
+func (e *Encoder) float64le(v float64) error {
 	binary.LittleEndian.PutUint64(e.buf, math.Float64bits(v))
 	if _, err := e.w.Write(e.buf[:8]); err != nil {
 		return err
@@ -106,8 +82,9 @@ func (e *Encoder) Float64le(v float64) error {
 	return nil
 }
 
-func (e *Encoder) ByteSlice(v []byte) error {
-	if err := e.Len(len(v)); err != nil {
+func (e *Encoder) byteSlice(v []byte) error {
+	// todo: handle nil
+	if err := e.len(len(v)); err != nil {
 		return fmt.Errorf("slice len: %w", err)
 	}
 	if _, err := e.w.Write(v); err != nil {
@@ -116,20 +93,23 @@ func (e *Encoder) ByteSlice(v []byte) error {
 	return nil
 }
 
-func (e *Encoder) String(v string) error {
-	return e.ByteSlice([]byte(v))
+func (e *Encoder) string(v string) error {
+	// todo: write own function without nil
+	return e.byteSlice([]byte(v))
 }
 
-func (e *Encoder) BinaryMarshaler(bm encoding.BinaryMarshaler) error {
+func (e *Encoder) binaryMarshaler(bm encoding.BinaryMarshaler) error {
+	// todo: implement only in irpcgen.EncBinMarshaler ?
 	data, err := bm.MarshalBinary()
 	if err != nil {
 		return err
 	}
-	return e.ByteSlice(data)
+	return e.byteSlice(data)
 }
 
-func (e *Encoder) BoolSlice(vs []bool) error {
-	if err := e.Len(len(vs)); err != nil {
+func (e *Encoder) boolSlice(vs []bool) error {
+	// todo: handle nil
+	if err := e.len(len(vs)); err != nil {
 		return fmt.Errorf("slice len: %w", err)
 	}
 

@@ -24,7 +24,7 @@ func NewDecoder(r io.Reader) *Decoder {
 	}
 }
 
-func (d *Decoder) Bool(dst *bool) error {
+func (d *Decoder) bool(dst *bool) error {
 	val, err := d.r.ReadByte()
 	if err != nil {
 		return err
@@ -41,17 +41,7 @@ func (d *Decoder) Bool(dst *bool) error {
 	return nil
 }
 
-func (d *Decoder) VarInt(dst *int) error {
-	val64, err := binary.ReadVarint(d.r)
-	if err != nil {
-		return err
-	}
-
-	*dst = int(val64)
-	return nil
-}
-
-func (d *Decoder) UvarInt(dst *uint) error {
+func (d *Decoder) uVarInt(dst *uint) error {
 	val64, err := binary.ReadUvarint(d.r)
 	if err != nil {
 		return err
@@ -60,21 +50,12 @@ func (d *Decoder) UvarInt(dst *uint) error {
 	return nil
 }
 
-func (d *Decoder) Int8(dst *int8) error {
-	b, err := d.r.ReadByte()
+func (d *Decoder) byte(dst *byte) error {
+	v, err := d.r.ReadByte()
 	if err != nil {
 		return err
 	}
-	*dst = int8(b)
-	return nil
-}
-
-func (d *Decoder) Uint8(dst *uint8) error {
-	b, err := d.r.ReadByte()
-	if err != nil {
-		return err
-	}
-	*dst = b
+	*dst = v
 	return nil
 }
 
@@ -89,15 +70,6 @@ func (d *Decoder) varInt64InRange(min, max int64) (int64, error) {
 	return val, nil
 }
 
-func (d *Decoder) VarInt16(dst *int16) error {
-	val64, err := d.varInt64InRange(math.MinInt16, math.MaxInt16)
-	if err != nil {
-		return err
-	}
-	*dst = int16(val64)
-	return nil
-}
-
 func (d *Decoder) uvarInt64InRange(max uint64) (uint64, error) {
 	val, err := binary.ReadUvarint(d.r)
 	if err != nil {
@@ -109,34 +81,7 @@ func (d *Decoder) uvarInt64InRange(max uint64) (uint64, error) {
 	return val, nil
 }
 
-func (d *Decoder) UvarInt16(dst *uint16) error {
-	val64, err := d.uvarInt64InRange(math.MaxUint16)
-	if err != nil {
-		return err
-	}
-	*dst = uint16(val64)
-	return nil
-}
-
-func (d *Decoder) VarInt32(dst *int32) error {
-	val64, err := d.varInt64InRange(math.MinInt32, math.MaxInt32)
-	if err != nil {
-		return err
-	}
-	*dst = int32(val64)
-	return nil
-}
-
-func (d *Decoder) UvarInt32(dst *uint32) error {
-	val64, err := d.uvarInt64InRange(math.MaxUint32)
-	if err != nil {
-		return err
-	}
-	*dst = uint32(val64)
-	return nil
-}
-
-func (d *Decoder) VarInt64(dst *int64) error {
+func (d *Decoder) varInt64(dst *int64) error {
 	val, err := binary.ReadVarint(d.r)
 	if err != nil {
 		return err
@@ -145,7 +90,7 @@ func (d *Decoder) VarInt64(dst *int64) error {
 	return nil
 }
 
-func (d *Decoder) UvarInt64(dst *uint64) error {
+func (d *Decoder) uVarInt64(dst *uint64) error {
 	val, err := binary.ReadUvarint(d.r)
 	if err != nil {
 		return err
@@ -154,16 +99,16 @@ func (d *Decoder) UvarInt64(dst *uint64) error {
 	return nil
 }
 
-func (d *Decoder) Len(l *int) error {
+func (d *Decoder) len(l *int) error {
 	var l64 uint64
-	if err := d.UvarInt64(&l64); err != nil {
+	if err := d.uVarInt64(&l64); err != nil {
 		return fmt.Errorf("slice len: %w", err)
 	}
 	*l = int(l64)
 	return nil
 }
 
-func (d *Decoder) Float32le(dst *float32) error {
+func (d *Decoder) float32le(dst *float32) error {
 	if _, err := io.ReadFull(d.r, d.buf[:4]); err != nil {
 		return err
 	}
@@ -172,7 +117,7 @@ func (d *Decoder) Float32le(dst *float32) error {
 	return nil
 }
 
-func (d *Decoder) Float64le(dst *float64) error {
+func (d *Decoder) float64le(dst *float64) error {
 	if _, err := io.ReadFull(d.r, d.buf[:8]); err != nil {
 		return err
 	}
@@ -181,9 +126,9 @@ func (d *Decoder) Float64le(dst *float64) error {
 	return nil
 }
 
-func (d *Decoder) ByteSlice(dst *[]byte) error {
+func (d *Decoder) byteSlice(dst *[]byte) error {
 	var l int
-	if err := d.Len(&l); err != nil {
+	if err := d.len(&l); err != nil {
 		return fmt.Errorf("slice len: %w", err)
 	}
 	s := make([]byte, l)
@@ -195,26 +140,26 @@ func (d *Decoder) ByteSlice(dst *[]byte) error {
 	return nil
 }
 
-func (d *Decoder) String(dst *string) error {
+func (d *Decoder) string(dst *string) error {
 	var bs []byte
-	if err := d.ByteSlice(&bs); err != nil {
+	if err := d.byteSlice(&bs); err != nil {
 		return err
 	}
 	*dst = string(bs)
 	return nil
 }
 
-func (d *Decoder) BinaryUnmarshaler(dst encoding.BinaryUnmarshaler) error {
+func (d *Decoder) binaryUnmarshaler(dst encoding.BinaryUnmarshaler) error {
 	var data []byte
-	if err := d.ByteSlice(&data); err != nil {
+	if err := d.byteSlice(&data); err != nil {
 		return err
 	}
 	return dst.UnmarshalBinary(data)
 }
 
-func (d *Decoder) BoolSlice(dst *[]bool) error {
+func (d *Decoder) boolSlice(dst *[]bool) error {
 	var l int
-	if err := d.Len(&l); err != nil {
+	if err := d.len(&l); err != nil {
 		return fmt.Errorf("slice len: %w", err)
 	}
 

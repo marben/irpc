@@ -39,6 +39,6 @@ func TestEncDecMap(t *testing.T) {
 	}
 
 	if r2 != nil {
-		t.Fatalf("encoed nil map, but got: %v", r2)
+		t.Fatalf("encoded nil map, but got: %v", r2)
 	}
 }
