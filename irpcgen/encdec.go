@@ -3,6 +3,7 @@ package irpcgen
 import (
 	"encoding"
 	"fmt"
+	"io"
 	"math"
 )
 
@@ -189,9 +190,16 @@ func DecString[T ~string](dec *Decoder, v *T) error {
 	return nil
 }
 
-// todo: put slice parameter first!
-func EncSlice[S ~[]E, E any](enc *Encoder, elemType string, elemEncFnc func(enc *Encoder, v E) error, sl S) error {
-	// todo: handle nil slice
+func EncSlice[S ~[]E, E any](enc *Encoder, sl S, elemType string, elemEncFnc func(enc *Encoder, v E) error) error {
+	if sl == nil {
+		if err := enc.isNil(true); err != nil {
+			return fmt.Errorf("serialize isNil: %w", err)
+		}
+		return nil
+	}
+	if err := enc.isNil(false); err != nil {
+		return fmt.Errorf("serialize isNil: %w", err)
+	}
 	if err := enc.len(len(sl)); err != nil {
 		return fmt.Errorf("serialize slice len: %w", err)
 	}
@@ -204,7 +212,15 @@ func EncSlice[S ~[]E, E any](enc *Encoder, elemType string, elemEncFnc func(enc 
 	return nil
 }
 
-func DecSlice[S ~[]E, E any](dec *Decoder, elemType string, elemDecFnc func(*Decoder, *E) error, sl *S) error {
+func DecSlice[S ~[]E, E any](dec *Decoder, sl *S, elemType string, elemDecFnc func(*Decoder, *E) error) error {
+	isNil, err := dec.isNil()
+	if err != nil {
+		return fmt.Errorf("deserialize isNil: %w", err)
+	}
+	if isNil {
+		sl = nil
+		return nil
+	}
 	var l int
 	if err := dec.len(&l); err != nil {
 		return fmt.Errorf("deserialize slice len: %w", err)
@@ -221,12 +237,12 @@ func DecSlice[S ~[]E, E any](dec *Decoder, elemType string, elemDecFnc func(*Dec
 
 func EncMap[M ~map[K]V, K comparable, V any](enc *Encoder, m M, kType string, kEncFunc func(*Encoder, K) error, vType string, vEncFunc func(*Encoder, V) error) error {
 	if m == nil {
-		if err := enc.bool(true); err != nil {
+		if err := enc.isNil(true); err != nil {
 			return fmt.Errorf("serialize isNil: %w", err)
 		}
 		return nil
 	}
-	if err := enc.bool(false); err != nil {
+	if err := enc.isNil(false); err != nil {
 		return fmt.Errorf("serialize isNil: %w", err)
 	}
 	if err := enc.len(len(m)); err != nil {
@@ -244,8 +260,8 @@ func EncMap[M ~map[K]V, K comparable, V any](enc *Encoder, m M, kType string, kE
 }
 
 func DecMap[M ~map[K]V, K comparable, V any](dec *Decoder, m *M, kName string, kDecFunc func(*Decoder, *K) error, vName string, vDecFunc func(*Decoder, *V) error) error {
-	var isNil bool
-	if err := dec.bool(&isNil); err != nil {
+	isNil, err := dec.isNil()
+	if err != nil {
 		return fmt.Errorf("deserialize isNil: %w", err)
 	}
 	if isNil {
@@ -273,42 +289,127 @@ func DecMap[M ~map[K]V, K comparable, V any](dec *Decoder, m *M, kName string, k
 }
 
 func EncByteSlice[T ~[]byte](enc *Encoder, v T) error {
-	// todo: handle nil slice
-	return enc.byteSlice(v)
+	isNil := v == nil
+	if err := enc.isNil(isNil); err != nil {
+		return fmt.Errorf("serialize isNil: %w", err)
+	}
+	if isNil {
+		return nil
+	}
+
+	if err := enc.len(len(v)); err != nil {
+		return fmt.Errorf("slice len: %w", err)
+	}
+	if _, err := enc.w.Write(v); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func DecByteSlice[T ~[]byte](dec *Decoder, v *T) error {
-	var x []byte
-	if err := dec.byteSlice(&x); err != nil {
+	isNil, err := dec.isNil()
+	if err != nil {
+		return fmt.Errorf("deserialize isNil: %w", err)
+	}
+	if isNil {
+		v = nil
+		return nil
+	}
+
+	var l int
+	if err := dec.len(&l); err != nil {
+		return fmt.Errorf("deserialize len: %w", err)
+	}
+
+	s := make([]byte, l)
+	if _, err := io.ReadFull(dec.r, s); err != nil {
 		return err
 	}
-	*v = T(x)
+	*v = s
+
 	return nil
 }
 
-func EncBoolSlice(enc *Encoder, v []bool) error {
-	// todo: handle nil slice
-	return enc.boolSlice(v)
+func EncBoolSlice[S ~[]bool](enc *Encoder, vs S) error {
+	isNil := vs == nil
+	if err := enc.isNil(isNil); err != nil {
+		return fmt.Errorf("serialize isNil: %w", err)
+	}
+	if isNil {
+		return nil
+	}
+
+	if err := enc.len(len(vs)); err != nil {
+		return fmt.Errorf("slice len: %w", err)
+	}
+
+	// MSB first
+	var b byte
+	bitCount := 0
+
+	for _, v := range vs {
+		b <<= 1
+		if v {
+			b |= 1
+		}
+		bitCount++
+
+		if bitCount == 8 {
+			if err := enc.w.WriteByte(b); err != nil {
+				return err
+			}
+			b, bitCount = 0, 0
+		}
+	}
+
+	if bitCount > 0 {
+		// shift the last partial byte to align bits to the MSB
+		b <<= uint(8 - bitCount)
+		if err := enc.w.WriteByte(b); err != nil {
+			return err
+		}
+	}
+
+	return nil
+
 }
 
 func DecBoolSlice[T ~[]bool](dec *Decoder, v *T) error {
-	var bs []bool
-	if err := dec.boolSlice(&bs); err != nil {
-		return err
+	isNil, err := dec.isNil()
+	if err != nil {
+		return fmt.Errorf("deserialize isNil: %w", err)
 	}
-	*v = bs
+	if isNil {
+		v = nil
+		return nil
+	}
+
+	var l int
+	if err := dec.len(&l); err != nil {
+		return fmt.Errorf("slice len: %w", err)
+	}
+
+	s := make([]bool, 0, l)
+
+	for len(s) < l {
+		b, err := dec.r.ReadByte()
+		if err != nil {
+			return err
+		}
+
+		// extract 8 bits MSB-first.
+		for i := 0; i < 8 && len(s) < l; i++ {
+			mask := byte(1 << (7 - i))
+			s = append(s, b&mask != 0)
+		}
+	}
+	*v = s
 	return nil
 }
 
-func EncLen(enc *Encoder, l int) error {
-	return enc.len(l)
-}
-
-func DecLen(dec *Decoder, l *int) error {
-	return dec.len(l)
-}
-
 func EncBinaryMarshaller(enc *Encoder, v encoding.BinaryMarshaler) error {
+	// todo: test nil interface
 	return enc.binaryMarshaler(v)
 }
 

@@ -22,12 +22,30 @@ type sliceTest interface {
 		B string
 	}) (sumA int)
 	sliceOfErrors(slice []error)
+	isNilSlice(s []string) bool
+	isNilBoolSlice(bs []bool) bool
+	isNilByteSlice(bs []byte) bool
 }
 
 var _ sliceTest = sliceTestImpl{}
 
 type sliceTestImpl struct {
 	skew int
+}
+
+// isNilBoolSlice implements sliceTest.
+func (st sliceTestImpl) isNilBoolSlice(bs []bool) bool {
+	return bs == nil
+}
+
+// isNilByteSlice implements sliceTest.
+func (st sliceTestImpl) isNilByteSlice(bs []byte) bool {
+	return bs == nil
+}
+
+// isNilSlice implements sliceTest.
+func (st sliceTestImpl) isNilSlice(s []string) bool {
+	return s == nil
 }
 
 // sliceOfStructs implements sliceTest.

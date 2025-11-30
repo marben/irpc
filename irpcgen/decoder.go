@@ -41,6 +41,15 @@ func (d *Decoder) bool(dst *bool) error {
 	return nil
 }
 
+func (d *Decoder) isNil() (bool, error) {
+	var isNotNil bool
+	if err := d.bool(&isNotNil); err != nil {
+		return false, err
+	}
+
+	return !isNotNil, nil
+}
+
 func (d *Decoder) uVarInt(dst *uint) error {
 	val64, err := binary.ReadUvarint(d.r)
 	if err != nil {
@@ -99,6 +108,7 @@ func (d *Decoder) uVarInt64(dst *uint64) error {
 	return nil
 }
 
+// todo: make len return int instead of receiving pointer
 func (d *Decoder) len(l *int) error {
 	var l64 uint64
 	if err := d.uVarInt64(&l64); err != nil {
@@ -155,28 +165,4 @@ func (d *Decoder) binaryUnmarshaler(dst encoding.BinaryUnmarshaler) error {
 		return err
 	}
 	return dst.UnmarshalBinary(data)
-}
-
-func (d *Decoder) boolSlice(dst *[]bool) error {
-	var l int
-	if err := d.len(&l); err != nil {
-		return fmt.Errorf("slice len: %w", err)
-	}
-
-	s := make([]bool, 0, l)
-
-	for len(s) < l {
-		b, err := d.r.ReadByte()
-		if err != nil {
-			return err
-		}
-
-		// extract 8 bits MSB-first.
-		for i := 0; i < 8 && len(s) < l; i++ {
-			mask := byte(1 << (7 - i))
-			s = append(s, b&mask != 0)
-		}
-	}
-	*dst = s
-	return nil
 }

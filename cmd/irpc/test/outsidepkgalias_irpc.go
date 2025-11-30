@@ -12,10 +12,10 @@ import (
 )
 
 var _outsidepkgaliasIrpcId = []byte{
-	0x62, 0x14, 0x75, 0xf3, 0x3d, 0x3c, 0x77, 0x36,
-	0xba, 0xb0, 0x36, 0x9b, 0xd7, 0x3b, 0xf7, 0x97,
-	0xeb, 0x6e, 0xd6, 0xce, 0x0b, 0x5e, 0xd7, 0x58,
-	0xe4, 0x0b, 0xd8, 0x36, 0xdc, 0x2e, 0x90, 0xe2,
+	0x96, 0xdd, 0xe1, 0x95, 0xea, 0xa7, 0x7f, 0x22,
+	0xa4, 0x40, 0x1b, 0x43, 0xb3, 0x41, 0x32, 0xac,
+	0x98, 0x7f, 0x4b, 0xbd, 0x91, 0xc9, 0x61, 0x94,
+	0x6e, 0xfb, 0x5c, 0xb0, 0xd7, 0xaa, 0x07, 0xb6,
 }
 
 type outsidepkgaliasIrpcService struct {
@@ -277,7 +277,7 @@ type _irpc_outsidepkgalias_sumReq struct {
 
 func (s _irpc_outsidepkgalias_sumReq) Serialize(e *irpcgen.Encoder) error {
 	if err := func(enc *irpcgen.Encoder, sl out1.AliasedByteSlice) error {
-		return irpcgen.EncSlice(enc, "out_.Uint8", irpcgen.EncUint8, sl)
+		return irpcgen.EncSlice(enc, sl, "out_.Uint8", irpcgen.EncUint8)
 	}(e, s.inSlice); err != nil {
 		return fmt.Errorf("serialize \"inSlice\" of type out1.AliasedByteSlice: %w", err)
 	}
@@ -285,7 +285,7 @@ func (s _irpc_outsidepkgalias_sumReq) Serialize(e *irpcgen.Encoder) error {
 }
 func (s *_irpc_outsidepkgalias_sumReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := func(dec *irpcgen.Decoder, sl *out1.AliasedByteSlice) error {
-		return irpcgen.DecSlice(dec, "out_.Uint8", irpcgen.DecUint8, sl)
+		return irpcgen.DecSlice(dec, sl, "out_.Uint8", irpcgen.DecUint8)
 	}(d, &s.inSlice); err != nil {
 		return fmt.Errorf("deserialize inSlice of type out1.AliasedByteSlice: %w", err)
 	}

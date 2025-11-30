@@ -14,6 +14,8 @@ func TestSlice(t *testing.T) {
 	if err != nil {
 		t.Fatalf("create enpoints: %v", err)
 	}
+	defer localEp.Close()
+	defer remoteEp.Close()
 
 	// service
 	skew := 5
@@ -68,6 +70,40 @@ func TestSlice(t *testing.T) {
 	}{{1, "one"}, {5, "five"}, {10, "ten"}})
 	if resSS != 16 {
 		t.Fatalf("sliceOfStructs(): %d", resSS)
+	}
+}
+
+func TestNilSlices(t *testing.T) {
+	localEp, remoteEp, err := testtools.CreateLocalTcpEndpoints()
+	if err != nil {
+		t.Fatalf("create enpoints: %v", err)
+	}
+	defer localEp.Close()
+	defer remoteEp.Close()
+
+	remoteEp.RegisterService(newSliceTestIrpcService(sliceTestImpl{}))
+	c, err := newSliceTestIrpcClient(localEp)
+	if err != nil {
+		t.Fatalf("failed to create client: %v", err)
+	}
+
+	if !c.isNilSlice(nil) {
+		t.Fatalf("should have been nil")
+	}
+	if c.isNilSlice([]string{}) {
+		t.Fatalf("shouln't have been nil")
+	}
+	if !c.isNilByteSlice(nil) {
+		t.Fatalf("should have been nil")
+	}
+	if c.isNilByteSlice([]byte{}) {
+		t.Fatalf("shouln't have been nil")
+	}
+	if !c.isNilBoolSlice(nil) {
+		t.Fatalf("should have been nil")
+	}
+	if c.isNilBoolSlice([]bool{}) {
+		t.Fatalf("shouln't have been nil")
 	}
 }
 

@@ -30,6 +30,14 @@ func TestMap(t *testing.T) {
 	if valsum != 1.5 {
 		t.Fatalf("valsum: %f", valsum)
 	}
+
+	// Nil Map
+	if !c.isNil(nil) {
+		t.Fatalf("nil map should have been nil")
+	}
+	if c.isNil(make(map[int]string)) {
+		t.Fatalf("empty map should not have been nil")
+	}
 }
 
 func TestSumStructs(t *testing.T) {

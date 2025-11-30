@@ -10,10 +10,10 @@ import (
 )
 
 var _sliceNamedApiIrpcId = []byte{
-	0xd6, 0xf9, 0x80, 0x37, 0x00, 0xec, 0x9a, 0x1c,
-	0xad, 0xfb, 0xd8, 0x99, 0xe5, 0xc6, 0xdf, 0xbb,
-	0xa0, 0x8e, 0xa3, 0x81, 0x7b, 0xb8, 0x6c, 0xc1,
-	0x59, 0x1f, 0xe9, 0xc5, 0xb9, 0xe9, 0xac, 0x55,
+	0x63, 0x2f, 0xa5, 0xad, 0x42, 0xa1, 0x78, 0x1a,
+	0x43, 0xc1, 0x8d, 0x0d, 0x8f, 0x36, 0x43, 0xed,
+	0xa1, 0x32, 0x60, 0xfb, 0xbb, 0x08, 0x88, 0x71,
+	0xcf, 0x51, 0xf9, 0x74, 0xdd, 0x4e, 0xcc, 0x10,
 }
 
 type sliceNamedApiIrpcService struct {
@@ -125,7 +125,7 @@ type _irpc_sliceNamedApi_sumNamedIntsReq struct {
 
 func (s _irpc_sliceNamedApi_sumNamedIntsReq) Serialize(e *irpcgen.Encoder) error {
 	if err := func(enc *irpcgen.Encoder, sl namedSliceOfInts) error {
-		return irpcgen.EncSlice(enc, "int", irpcgen.EncInt, sl)
+		return irpcgen.EncSlice(enc, sl, "int", irpcgen.EncInt)
 	}(e, s.vec); err != nil {
 		return fmt.Errorf("serialize \"vec\" of type namedSliceOfInts: %w", err)
 	}
@@ -133,7 +133,7 @@ func (s _irpc_sliceNamedApi_sumNamedIntsReq) Serialize(e *irpcgen.Encoder) error
 }
 func (s *_irpc_sliceNamedApi_sumNamedIntsReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := func(dec *irpcgen.Decoder, sl *namedSliceOfInts) error {
-		return irpcgen.DecSlice(dec, "int", irpcgen.DecInt, sl)
+		return irpcgen.DecSlice(dec, sl, "int", irpcgen.DecInt)
 	}(d, &s.vec); err != nil {
 		return fmt.Errorf("deserialize vec of type namedSliceOfInts: %w", err)
 	}
@@ -163,7 +163,7 @@ type _irpc_sliceNamedApi_sumOutsideNamedIntsReq struct {
 
 func (s _irpc_sliceNamedApi_sumOutsideNamedIntsReq) Serialize(e *irpcgen.Encoder) error {
 	if err := func(enc *irpcgen.Encoder, sl out.AliasedByteSlice) error {
-		return irpcgen.EncSlice(enc, "out_.Uint8", irpcgen.EncUint8, sl)
+		return irpcgen.EncSlice(enc, sl, "out_.Uint8", irpcgen.EncUint8)
 	}(e, s.vec); err != nil {
 		return fmt.Errorf("serialize \"vec\" of type out.AliasedByteSlice: %w", err)
 	}
@@ -171,7 +171,7 @@ func (s _irpc_sliceNamedApi_sumOutsideNamedIntsReq) Serialize(e *irpcgen.Encoder
 }
 func (s *_irpc_sliceNamedApi_sumOutsideNamedIntsReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := func(dec *irpcgen.Decoder, sl *out.AliasedByteSlice) error {
-		return irpcgen.DecSlice(dec, "out_.Uint8", irpcgen.DecUint8, sl)
+		return irpcgen.DecSlice(dec, sl, "out_.Uint8", irpcgen.DecUint8)
 	}(d, &s.vec); err != nil {
 		return fmt.Errorf("deserialize vec of type out.AliasedByteSlice: %w", err)
 	}
@@ -201,7 +201,7 @@ type _irpc_sliceNamedApi_sumSliceOfNamedIntsReq struct {
 
 func (s _irpc_sliceNamedApi_sumSliceOfNamedIntsReq) Serialize(e *irpcgen.Encoder) error {
 	if err := func(enc *irpcgen.Encoder, sl []out.Uint8) error {
-		return irpcgen.EncSlice(enc, "out.Uint8", irpcgen.EncUint8, sl)
+		return irpcgen.EncSlice(enc, sl, "out.Uint8", irpcgen.EncUint8)
 	}(e, s.vec); err != nil {
 		return fmt.Errorf("serialize \"vec\" of type []out.Uint8: %w", err)
 	}
@@ -209,7 +209,7 @@ func (s _irpc_sliceNamedApi_sumSliceOfNamedIntsReq) Serialize(e *irpcgen.Encoder
 }
 func (s *_irpc_sliceNamedApi_sumSliceOfNamedIntsReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := func(dec *irpcgen.Decoder, sl *[]out.Uint8) error {
-		return irpcgen.DecSlice(dec, "out.Uint8", irpcgen.DecUint8, sl)
+		return irpcgen.DecSlice(dec, sl, "out.Uint8", irpcgen.DecUint8)
 	}(d, &s.vec); err != nil {
 		return fmt.Errorf("deserialize vec of type []out.Uint8: %w", err)
 	}

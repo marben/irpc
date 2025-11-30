@@ -17,11 +17,17 @@ type mapTest interface {
 	namedMapInc(in namedIntFloatMap) namedIntFloatMap               // todo: write a test
 	namedKeySum(in map[mapNamedInt]mapNamedFloat64) mapNamedFloat64 // todo: write a test
 	emptyInterfaceMapReflect(in map[int]interface{}) map[int]interface{}
+	isNil(map[int]string) bool
 }
 
 var _ mapTest = mapTestImpl{}
 
 type mapTestImpl struct {
+}
+
+// isNil implements mapTest.
+func (mt mapTestImpl) isNil(m map[int]string) bool {
+	return m == nil
 }
 
 // emptyInterfaceMapSum implements mapTest.

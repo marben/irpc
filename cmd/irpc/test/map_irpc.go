@@ -9,10 +9,10 @@ import (
 )
 
 var _mapTestIrpcId = []byte{
-	0x3e, 0xf2, 0x85, 0x6e, 0x6d, 0x8d, 0x78, 0x9b,
-	0xfa, 0xe5, 0xc6, 0x2c, 0x3b, 0x60, 0x6b, 0xe5,
-	0x30, 0xe7, 0xa8, 0xf8, 0xe1, 0xbe, 0xae, 0x57,
-	0x71, 0x1f, 0xb4, 0x75, 0x25, 0xd0, 0xe2, 0xea,
+	0x81, 0x6d, 0x48, 0x43, 0x5c, 0xd9, 0x94, 0x4d,
+	0x93, 0x1a, 0x2f, 0x7d, 0x8b, 0x07, 0xd5, 0x65,
+	0x93, 0x81, 0x8e, 0xfe, 0x75, 0x3b, 0xbd, 0x7c,
+	0x09, 0x83, 0x23, 0xdf, 0x3b, 0xaa, 0x9c, 0xb5,
 }
 
 type mapTestIrpcService struct {
@@ -113,6 +113,20 @@ func (s *mapTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDese
 				return resp
 			}, nil
 		}, nil
+	case 6: // isNil
+		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _irpc_mapTest_isNilReq
+			if err := args.Deserialize(d); err != nil {
+				return nil, err
+			}
+			return func(ctx context.Context) irpcgen.Serializable {
+				// EXECUTE
+				var resp _irpc_mapTest_isNilResp
+				resp.p02 = s.impl.isNil(args.p0)
+				return resp
+			}, nil
+		}, nil
 	default:
 		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, s.Id())
 	}
@@ -188,6 +202,16 @@ func (_c *mapTestIrpcClient) emptyInterfaceMapReflect(in map[int]interface{}) ma
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
+}
+func (_c *mapTestIrpcClient) isNil(p0 map[int]string) bool {
+	var req = _irpc_mapTest_isNilReq{
+		p0: p0,
+	}
+	var resp _irpc_mapTest_isNilResp
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _mapTestIrpcId, 6, req, &resp); err != nil {
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
+	}
+	return resp.p02
 }
 
 type _irpc_mapTest_mapSumReq struct {
@@ -357,7 +381,7 @@ func (s _irpc_mapTest_sumSlicesReq) Serialize(e *irpcgen.Encoder) error {
 			}
 			return nil
 		}, "[]intStruct", func(enc *irpcgen.Encoder, sl []intStruct) error {
-			return irpcgen.EncSlice(enc, "intStruct", func(enc *irpcgen.Encoder, s intStruct) error {
+			return irpcgen.EncSlice(enc, sl, "intStruct", func(enc *irpcgen.Encoder, s intStruct) error {
 				if err := irpcgen.EncInt(enc, s.i); err != nil {
 					return fmt.Errorf("serialize s.i of type int: %w", err)
 				}
@@ -371,7 +395,7 @@ func (s _irpc_mapTest_sumSlicesReq) Serialize(e *irpcgen.Encoder) error {
 					return fmt.Errorf("serialize s.l of type int: %w", err)
 				}
 				return nil
-			}, sl)
+			})
 		})
 	}(e, s.in); err != nil {
 		return fmt.Errorf("serialize \"in\" of type map[intStruct][]intStruct: %w", err)
@@ -395,7 +419,7 @@ func (s *_irpc_mapTest_sumSlicesReq) Deserialize(d *irpcgen.Decoder) error {
 			}
 			return nil
 		}, "[]intStruct", func(dec *irpcgen.Decoder, sl *[]intStruct) error {
-			return irpcgen.DecSlice(dec, "intStruct", func(dec *irpcgen.Decoder, s *intStruct) error {
+			return irpcgen.DecSlice(dec, sl, "intStruct", func(dec *irpcgen.Decoder, s *intStruct) error {
 				if err := irpcgen.DecInt(dec, &s.i); err != nil {
 					return fmt.Errorf("deserialize s.i of type int: %w", err)
 				}
@@ -409,7 +433,7 @@ func (s *_irpc_mapTest_sumSlicesReq) Deserialize(d *irpcgen.Decoder) error {
 					return fmt.Errorf("deserialize s.l of type int: %w", err)
 				}
 				return nil
-			}, sl)
+			})
 		})
 	}(d, &s.in); err != nil {
 		return fmt.Errorf("deserialize in of type map[intStruct][]intStruct: %w", err)
@@ -602,6 +626,44 @@ func (s *_irpc_mapTest_emptyInterfaceMapReflectResp) Deserialize(d *irpcgen.Deco
 		})
 	}(d, &s.p0); err != nil {
 		return fmt.Errorf("deserialize type map[int]interface{}: %w", err)
+	}
+	return nil
+}
+
+type _irpc_mapTest_isNilReq struct {
+	p0 map[int]string
+}
+
+func (s _irpc_mapTest_isNilReq) Serialize(e *irpcgen.Encoder) error {
+	if err := func(enc *irpcgen.Encoder, m map[int]string) error {
+		return irpcgen.EncMap(enc, m, "int", irpcgen.EncInt, "string", irpcgen.EncString)
+	}(e, s.p0); err != nil {
+		return fmt.Errorf("serialize \"p0\" of type map[int]string: %w", err)
+	}
+	return nil
+}
+func (s *_irpc_mapTest_isNilReq) Deserialize(d *irpcgen.Decoder) error {
+	if err := func(dec *irpcgen.Decoder, m *map[int]string) error {
+		return irpcgen.DecMap(dec, m, "int", irpcgen.DecInt, "string", irpcgen.DecString)
+	}(d, &s.p0); err != nil {
+		return fmt.Errorf("deserialize p0 of type map[int]string: %w", err)
+	}
+	return nil
+}
+
+type _irpc_mapTest_isNilResp struct {
+	p02 bool
+}
+
+func (s _irpc_mapTest_isNilResp) Serialize(e *irpcgen.Encoder) error {
+	if err := irpcgen.EncBool(e, s.p02); err != nil {
+		return fmt.Errorf("serialize type bool: %w", err)
+	}
+	return nil
+}
+func (s *_irpc_mapTest_isNilResp) Deserialize(d *irpcgen.Decoder) error {
+	if err := irpcgen.DecBool(d, &s.p02); err != nil {
+		return fmt.Errorf("deserialize type bool: %w", err)
 	}
 	return nil
 }

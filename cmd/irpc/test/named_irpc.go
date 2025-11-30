@@ -9,10 +9,10 @@ import (
 )
 
 var _namedTestIrpcId = []byte{
-	0xbd, 0xab, 0xfc, 0xad, 0x05, 0xfe, 0x7e, 0x8d,
-	0xd8, 0x7f, 0x2e, 0x5b, 0xb0, 0xfd, 0x4a, 0x45,
-	0x1e, 0xcc, 0x06, 0x79, 0x97, 0x5c, 0x82, 0xcd,
-	0x05, 0xfb, 0x54, 0xc1, 0xf2, 0xc3, 0x3f, 0x0a,
+	0x1a, 0x97, 0xa6, 0x54, 0xf2, 0xb3, 0xcd, 0x0b,
+	0x94, 0xf9, 0x06, 0x30, 0x19, 0x88, 0x45, 0x56,
+	0x14, 0x8d, 0x33, 0x74, 0xb2, 0x92, 0x90, 0x44,
+	0x8d, 0x24, 0x14, 0xa5, 0xf3, 0x56, 0x93, 0xfd,
 }
 
 type namedTestIrpcService struct {
@@ -264,7 +264,7 @@ type _irpc_namedTest_containsSaturdayReq struct {
 
 func (s _irpc_namedTest_containsSaturdayReq) Serialize(e *irpcgen.Encoder) error {
 	if err := func(enc *irpcgen.Encoder, sl []weekDay) error {
-		return irpcgen.EncSlice(enc, "weekDay", irpcgen.EncUint8, sl)
+		return irpcgen.EncSlice(enc, sl, "weekDay", irpcgen.EncUint8)
 	}(e, s.wds); err != nil {
 		return fmt.Errorf("serialize \"wds\" of type []weekDay: %w", err)
 	}
@@ -272,7 +272,7 @@ func (s _irpc_namedTest_containsSaturdayReq) Serialize(e *irpcgen.Encoder) error
 }
 func (s *_irpc_namedTest_containsSaturdayReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := func(dec *irpcgen.Decoder, sl *[]weekDay) error {
-		return irpcgen.DecSlice(dec, "weekDay", irpcgen.DecUint8, sl)
+		return irpcgen.DecSlice(dec, sl, "weekDay", irpcgen.DecUint8)
 	}(d, &s.wds); err != nil {
 		return fmt.Errorf("deserialize wds of type []weekDay: %w", err)
 	}
@@ -302,7 +302,7 @@ type _irpc_namedTest_containsSaturday2Req struct {
 
 func (s _irpc_namedTest_containsSaturday2Req) Serialize(e *irpcgen.Encoder) error {
 	if err := func(enc *irpcgen.Encoder, sl namedWeekDaysSliceType) error {
-		return irpcgen.EncSlice(enc, "weekDay2", irpcgen.EncUint8, sl)
+		return irpcgen.EncSlice(enc, sl, "weekDay2", irpcgen.EncUint8)
 	}(e, s.wds); err != nil {
 		return fmt.Errorf("serialize \"wds\" of type namedWeekDaysSliceType: %w", err)
 	}
@@ -310,7 +310,7 @@ func (s _irpc_namedTest_containsSaturday2Req) Serialize(e *irpcgen.Encoder) erro
 }
 func (s *_irpc_namedTest_containsSaturday2Req) Deserialize(d *irpcgen.Decoder) error {
 	if err := func(dec *irpcgen.Decoder, sl *namedWeekDaysSliceType) error {
-		return irpcgen.DecSlice(dec, "weekDay2", irpcgen.DecUint8, sl)
+		return irpcgen.DecSlice(dec, sl, "weekDay2", irpcgen.DecUint8)
 	}(d, &s.wds); err != nil {
 		return fmt.Errorf("deserialize wds of type namedWeekDaysSliceType: %w", err)
 	}

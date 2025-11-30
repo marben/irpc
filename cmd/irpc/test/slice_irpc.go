@@ -9,10 +9,10 @@ import (
 )
 
 var _sliceTestIrpcId = []byte{
-	0x72, 0x15, 0xbe, 0x10, 0xc2, 0xfb, 0x05, 0x3e,
-	0x91, 0x44, 0x5b, 0x48, 0x5f, 0xfe, 0xf5, 0x22,
-	0x17, 0xb5, 0x8f, 0x60, 0xa6, 0x49, 0x82, 0xc3,
-	0x77, 0xda, 0xdd, 0x59, 0xa6, 0x4a, 0x01, 0xd8,
+	0x79, 0x93, 0x0a, 0x9a, 0x8d, 0x5b, 0xcd, 0xa5,
+	0x36, 0x5b, 0x94, 0xc6, 0xfe, 0x18, 0xfd, 0x54,
+	0x69, 0xed, 0x9e, 0x73, 0x5e, 0x7e, 0xa0, 0x47,
+	0x6e, 0x2f, 0x3b, 0xd7, 0x26, 0x31, 0xd4, 0xf0,
 }
 
 type sliceTestIrpcService struct {
@@ -181,6 +181,48 @@ func (s *sliceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 				return irpcgen.EmptySerializable{}
 			}, nil
 		}, nil
+	case 11: // isNilSlice
+		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _irpc_sliceTest_isNilSliceReq
+			if err := args.Deserialize(d); err != nil {
+				return nil, err
+			}
+			return func(ctx context.Context) irpcgen.Serializable {
+				// EXECUTE
+				var resp _irpc_sliceTest_isNilSliceResp
+				resp.p0 = s.impl.isNilSlice(args.s)
+				return resp
+			}, nil
+		}, nil
+	case 12: // isNilBoolSlice
+		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _irpc_sliceTest_isNilBoolSliceReq
+			if err := args.Deserialize(d); err != nil {
+				return nil, err
+			}
+			return func(ctx context.Context) irpcgen.Serializable {
+				// EXECUTE
+				var resp _irpc_sliceTest_isNilBoolSliceResp
+				resp.p0 = s.impl.isNilBoolSlice(args.bs)
+				return resp
+			}, nil
+		}, nil
+	case 13: // isNilByteSlice
+		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _irpc_sliceTest_isNilByteSliceReq
+			if err := args.Deserialize(d); err != nil {
+				return nil, err
+			}
+			return func(ctx context.Context) irpcgen.Serializable {
+				// EXECUTE
+				var resp _irpc_sliceTest_isNilByteSliceResp
+				resp.p0 = s.impl.isNilByteSlice(args.bs)
+				return resp
+			}, nil
+		}, nil
 	default:
 		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, s.Id())
 	}
@@ -307,6 +349,36 @@ func (_c *sliceTestIrpcClient) sliceOfErrors(slice []error) {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 }
+func (_c *sliceTestIrpcClient) isNilSlice(s []string) bool {
+	var req = _irpc_sliceTest_isNilSliceReq{
+		s: s,
+	}
+	var resp _irpc_sliceTest_isNilSliceResp
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _sliceTestIrpcId, 11, req, &resp); err != nil {
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
+	}
+	return resp.p0
+}
+func (_c *sliceTestIrpcClient) isNilBoolSlice(bs []bool) bool {
+	var req = _irpc_sliceTest_isNilBoolSliceReq{
+		bs: bs,
+	}
+	var resp _irpc_sliceTest_isNilBoolSliceResp
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _sliceTestIrpcId, 12, req, &resp); err != nil {
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
+	}
+	return resp.p0
+}
+func (_c *sliceTestIrpcClient) isNilByteSlice(bs []byte) bool {
+	var req = _irpc_sliceTest_isNilByteSliceReq{
+		bs: bs,
+	}
+	var resp _irpc_sliceTest_isNilByteSliceResp
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _sliceTestIrpcId, 13, req, &resp); err != nil {
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
+	}
+	return resp.p0
+}
 
 type _irpc_sliceTest_SliceSumReq struct {
 	slice []int
@@ -314,7 +386,7 @@ type _irpc_sliceTest_SliceSumReq struct {
 
 func (s _irpc_sliceTest_SliceSumReq) Serialize(e *irpcgen.Encoder) error {
 	if err := func(enc *irpcgen.Encoder, sl []int) error {
-		return irpcgen.EncSlice(enc, "int", irpcgen.EncInt, sl)
+		return irpcgen.EncSlice(enc, sl, "int", irpcgen.EncInt)
 	}(e, s.slice); err != nil {
 		return fmt.Errorf("serialize \"slice\" of type []int: %w", err)
 	}
@@ -322,7 +394,7 @@ func (s _irpc_sliceTest_SliceSumReq) Serialize(e *irpcgen.Encoder) error {
 }
 func (s *_irpc_sliceTest_SliceSumReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := func(dec *irpcgen.Decoder, sl *[]int) error {
-		return irpcgen.DecSlice(dec, "int", irpcgen.DecInt, sl)
+		return irpcgen.DecSlice(dec, sl, "int", irpcgen.DecInt)
 	}(d, &s.slice); err != nil {
 		return fmt.Errorf("deserialize slice of type []int: %w", err)
 	}
@@ -353,7 +425,7 @@ type _irpc_sliceTest_VectMultReq struct {
 
 func (s _irpc_sliceTest_VectMultReq) Serialize(e *irpcgen.Encoder) error {
 	if err := func(enc *irpcgen.Encoder, sl []int) error {
-		return irpcgen.EncSlice(enc, "int", irpcgen.EncInt, sl)
+		return irpcgen.EncSlice(enc, sl, "int", irpcgen.EncInt)
 	}(e, s.vect); err != nil {
 		return fmt.Errorf("serialize \"vect\" of type []int: %w", err)
 	}
@@ -364,7 +436,7 @@ func (s _irpc_sliceTest_VectMultReq) Serialize(e *irpcgen.Encoder) error {
 }
 func (s *_irpc_sliceTest_VectMultReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := func(dec *irpcgen.Decoder, sl *[]int) error {
-		return irpcgen.DecSlice(dec, "int", irpcgen.DecInt, sl)
+		return irpcgen.DecSlice(dec, sl, "int", irpcgen.DecInt)
 	}(d, &s.vect); err != nil {
 		return fmt.Errorf("deserialize vect of type []int: %w", err)
 	}
@@ -380,7 +452,7 @@ type _irpc_sliceTest_VectMultResp struct {
 
 func (s _irpc_sliceTest_VectMultResp) Serialize(e *irpcgen.Encoder) error {
 	if err := func(enc *irpcgen.Encoder, sl []int) error {
-		return irpcgen.EncSlice(enc, "int", irpcgen.EncInt, sl)
+		return irpcgen.EncSlice(enc, sl, "int", irpcgen.EncInt)
 	}(e, s.p0); err != nil {
 		return fmt.Errorf("serialize type []int: %w", err)
 	}
@@ -388,7 +460,7 @@ func (s _irpc_sliceTest_VectMultResp) Serialize(e *irpcgen.Encoder) error {
 }
 func (s *_irpc_sliceTest_VectMultResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := func(dec *irpcgen.Decoder, sl *[]int) error {
-		return irpcgen.DecSlice(dec, "int", irpcgen.DecInt, sl)
+		return irpcgen.DecSlice(dec, sl, "int", irpcgen.DecInt)
 	}(d, &s.p0); err != nil {
 		return fmt.Errorf("deserialize type []int: %w", err)
 	}
@@ -401,7 +473,7 @@ type _irpc_sliceTest_SliceOfFloat64SumReq struct {
 
 func (s _irpc_sliceTest_SliceOfFloat64SumReq) Serialize(e *irpcgen.Encoder) error {
 	if err := func(enc *irpcgen.Encoder, sl []float64) error {
-		return irpcgen.EncSlice(enc, "float64", irpcgen.EncFloat64, sl)
+		return irpcgen.EncSlice(enc, sl, "float64", irpcgen.EncFloat64)
 	}(e, s.slice); err != nil {
 		return fmt.Errorf("serialize \"slice\" of type []float64: %w", err)
 	}
@@ -409,7 +481,7 @@ func (s _irpc_sliceTest_SliceOfFloat64SumReq) Serialize(e *irpcgen.Encoder) erro
 }
 func (s *_irpc_sliceTest_SliceOfFloat64SumReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := func(dec *irpcgen.Decoder, sl *[]float64) error {
-		return irpcgen.DecSlice(dec, "float64", irpcgen.DecFloat64, sl)
+		return irpcgen.DecSlice(dec, sl, "float64", irpcgen.DecFloat64)
 	}(d, &s.slice); err != nil {
 		return fmt.Errorf("deserialize slice of type []float64: %w", err)
 	}
@@ -439,9 +511,9 @@ type _irpc_sliceTest_SliceOfSlicesSumReq struct {
 
 func (s _irpc_sliceTest_SliceOfSlicesSumReq) Serialize(e *irpcgen.Encoder) error {
 	if err := func(enc *irpcgen.Encoder, sl [][]int) error {
-		return irpcgen.EncSlice(enc, "[]int", func(enc *irpcgen.Encoder, sl []int) error {
-			return irpcgen.EncSlice(enc, "int", irpcgen.EncInt, sl)
-		}, sl)
+		return irpcgen.EncSlice(enc, sl, "[]int", func(enc *irpcgen.Encoder, sl []int) error {
+			return irpcgen.EncSlice(enc, sl, "int", irpcgen.EncInt)
+		})
 	}(e, s.slice); err != nil {
 		return fmt.Errorf("serialize \"slice\" of type [][]int: %w", err)
 	}
@@ -449,9 +521,9 @@ func (s _irpc_sliceTest_SliceOfSlicesSumReq) Serialize(e *irpcgen.Encoder) error
 }
 func (s *_irpc_sliceTest_SliceOfSlicesSumReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := func(dec *irpcgen.Decoder, sl *[][]int) error {
-		return irpcgen.DecSlice(dec, "[]int", func(dec *irpcgen.Decoder, sl *[]int) error {
-			return irpcgen.DecSlice(dec, "int", irpcgen.DecInt, sl)
-		}, sl)
+		return irpcgen.DecSlice(dec, sl, "[]int", func(dec *irpcgen.Decoder, sl *[]int) error {
+			return irpcgen.DecSlice(dec, sl, "int", irpcgen.DecInt)
+		})
 	}(d, &s.slice); err != nil {
 		return fmt.Errorf("deserialize slice of type [][]int: %w", err)
 	}
@@ -617,9 +689,9 @@ type _irpc_sliceTest_sliceOfMapsReq struct {
 
 func (s _irpc_sliceTest_sliceOfMapsReq) Serialize(e *irpcgen.Encoder) error {
 	if err := func(enc *irpcgen.Encoder, sl []map[int]string) error {
-		return irpcgen.EncSlice(enc, "map[int]string", func(enc *irpcgen.Encoder, m map[int]string) error {
+		return irpcgen.EncSlice(enc, sl, "map[int]string", func(enc *irpcgen.Encoder, m map[int]string) error {
 			return irpcgen.EncMap(enc, m, "int", irpcgen.EncInt, "string", irpcgen.EncString)
-		}, sl)
+		})
 	}(e, s.slice); err != nil {
 		return fmt.Errorf("serialize \"slice\" of type []map[int]string: %w", err)
 	}
@@ -627,9 +699,9 @@ func (s _irpc_sliceTest_sliceOfMapsReq) Serialize(e *irpcgen.Encoder) error {
 }
 func (s *_irpc_sliceTest_sliceOfMapsReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := func(dec *irpcgen.Decoder, sl *[]map[int]string) error {
-		return irpcgen.DecSlice(dec, "map[int]string", func(dec *irpcgen.Decoder, m *map[int]string) error {
+		return irpcgen.DecSlice(dec, sl, "map[int]string", func(dec *irpcgen.Decoder, m *map[int]string) error {
 			return irpcgen.DecMap(dec, m, "int", irpcgen.DecInt, "string", irpcgen.DecString)
-		}, sl)
+		})
 	}(d, &s.slice); err != nil {
 		return fmt.Errorf("deserialize slice of type []map[int]string: %w", err)
 	}
@@ -647,14 +719,14 @@ func (s _irpc_sliceTest_sliceOfStructsReq) Serialize(e *irpcgen.Encoder) error {
 	if err := func(enc *irpcgen.Encoder, sl []struct {
 		A int
 		B string
-	}) error { return irpcgen.EncSlice(enc, "struct{A int;B string;}", func(enc *irpcgen.Encoder, s struct {
+	}) error { return irpcgen.EncSlice(enc, sl, "struct{A int;B string;}", func(enc *irpcgen.Encoder, s struct {
 		A int
 		B string
 	}) error { if err := irpcgen.EncInt(enc, s.A); err != nil {
 		return fmt.Errorf("serialize s.A of type int: %w", err)
 	}; if err := irpcgen.EncString(enc, s.B); err != nil {
 		return fmt.Errorf("serialize s.B of type string: %w", err)
-	}; return nil }, sl) }(e, s.slice); err != nil {
+	}; return nil }) }(e, s.slice); err != nil {
 		return fmt.Errorf("serialize \"slice\" of type []struct{A int;B string;}: %w", err)
 	}
 	return nil
@@ -663,14 +735,14 @@ func (s *_irpc_sliceTest_sliceOfStructsReq) Deserialize(d *irpcgen.Decoder) erro
 	if err := func(dec *irpcgen.Decoder, sl *[]struct {
 		A int
 		B string
-	}) error { return irpcgen.DecSlice(dec, "struct{A int;B string;}", func(dec *irpcgen.Decoder, s *struct {
+	}) error { return irpcgen.DecSlice(dec, sl, "struct{A int;B string;}", func(dec *irpcgen.Decoder, s *struct {
 		A int
 		B string
 	}) error { if err := irpcgen.DecInt(dec, &s.A); err != nil {
 		return fmt.Errorf("deserialize s.A of type int: %w", err)
 	}; if err := irpcgen.DecString(dec, &s.B); err != nil {
 		return fmt.Errorf("deserialize s.B of type string: %w", err)
-	}; return nil }, sl) }(d, &s.slice); err != nil {
+	}; return nil }) }(d, &s.slice); err != nil {
 		return fmt.Errorf("deserialize slice of type []struct{A int;B string;}: %w", err)
 	}
 	return nil
@@ -699,7 +771,7 @@ type _irpc_sliceTest_sliceOfErrorsReq struct {
 
 func (s _irpc_sliceTest_sliceOfErrorsReq) Serialize(e *irpcgen.Encoder) error {
 	if err := func(enc *irpcgen.Encoder, sl []error) error {
-		return irpcgen.EncSlice(enc, "error", func(enc *irpcgen.Encoder, v error) error {
+		return irpcgen.EncSlice(enc, sl, "error", func(enc *irpcgen.Encoder, v error) error {
 			isNil := v == nil
 			if err := irpcgen.EncBool(enc, isNil); err != nil {
 				return fmt.Errorf("serialize isNil == %t: %w", isNil, err)
@@ -712,7 +784,7 @@ func (s _irpc_sliceTest_sliceOfErrorsReq) Serialize(e *irpcgen.Encoder) error {
 				return fmt.Errorf("serialize \"v.Error()\" of type string: %w", err)
 			}
 			return nil
-		}, sl)
+		})
 	}(e, s.slice); err != nil {
 		return fmt.Errorf("serialize \"slice\" of type []error: %w", err)
 	}
@@ -720,7 +792,7 @@ func (s _irpc_sliceTest_sliceOfErrorsReq) Serialize(e *irpcgen.Encoder) error {
 }
 func (s *_irpc_sliceTest_sliceOfErrorsReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := func(dec *irpcgen.Decoder, sl *[]error) error {
-		return irpcgen.DecSlice(dec, "error", func(dec *irpcgen.Decoder, s *error) error {
+		return irpcgen.DecSlice(dec, sl, "error", func(dec *irpcgen.Decoder, s *error) error {
 			var isNil bool
 			if err := irpcgen.DecBool(dec, &isNil); err != nil {
 				return fmt.Errorf("deserialize isNil: %w:", err)
@@ -734,7 +806,7 @@ func (s *_irpc_sliceTest_sliceOfErrorsReq) Deserialize(d *irpcgen.Decoder) error
 			}
 			*s = impl
 			return nil
-		}, sl)
+		})
 	}(d, &s.slice); err != nil {
 		return fmt.Errorf("deserialize slice of type []error: %w", err)
 	}
@@ -747,4 +819,110 @@ type _error_sliceTest_impl struct {
 
 func (i _error_sliceTest_impl) Error() string {
 	return i._Error_0_
+}
+
+type _irpc_sliceTest_isNilSliceReq struct {
+	s []string
+}
+
+func (s _irpc_sliceTest_isNilSliceReq) Serialize(e *irpcgen.Encoder) error {
+	if err := func(enc *irpcgen.Encoder, sl []string) error {
+		return irpcgen.EncSlice(enc, sl, "string", irpcgen.EncString)
+	}(e, s.s); err != nil {
+		return fmt.Errorf("serialize \"s\" of type []string: %w", err)
+	}
+	return nil
+}
+func (s *_irpc_sliceTest_isNilSliceReq) Deserialize(d *irpcgen.Decoder) error {
+	if err := func(dec *irpcgen.Decoder, sl *[]string) error {
+		return irpcgen.DecSlice(dec, sl, "string", irpcgen.DecString)
+	}(d, &s.s); err != nil {
+		return fmt.Errorf("deserialize s of type []string: %w", err)
+	}
+	return nil
+}
+
+type _irpc_sliceTest_isNilSliceResp struct {
+	p0 bool
+}
+
+func (s _irpc_sliceTest_isNilSliceResp) Serialize(e *irpcgen.Encoder) error {
+	if err := irpcgen.EncBool(e, s.p0); err != nil {
+		return fmt.Errorf("serialize type bool: %w", err)
+	}
+	return nil
+}
+func (s *_irpc_sliceTest_isNilSliceResp) Deserialize(d *irpcgen.Decoder) error {
+	if err := irpcgen.DecBool(d, &s.p0); err != nil {
+		return fmt.Errorf("deserialize type bool: %w", err)
+	}
+	return nil
+}
+
+type _irpc_sliceTest_isNilBoolSliceReq struct {
+	bs []bool
+}
+
+func (s _irpc_sliceTest_isNilBoolSliceReq) Serialize(e *irpcgen.Encoder) error {
+	if err := irpcgen.EncBoolSlice(e, s.bs); err != nil {
+		return fmt.Errorf("serialize \"bs\" of type []bool: %w", err)
+	}
+	return nil
+}
+func (s *_irpc_sliceTest_isNilBoolSliceReq) Deserialize(d *irpcgen.Decoder) error {
+	if err := irpcgen.DecBoolSlice(d, &s.bs); err != nil {
+		return fmt.Errorf("deserialize bs of type []bool: %w", err)
+	}
+	return nil
+}
+
+type _irpc_sliceTest_isNilBoolSliceResp struct {
+	p0 bool
+}
+
+func (s _irpc_sliceTest_isNilBoolSliceResp) Serialize(e *irpcgen.Encoder) error {
+	if err := irpcgen.EncBool(e, s.p0); err != nil {
+		return fmt.Errorf("serialize type bool: %w", err)
+	}
+	return nil
+}
+func (s *_irpc_sliceTest_isNilBoolSliceResp) Deserialize(d *irpcgen.Decoder) error {
+	if err := irpcgen.DecBool(d, &s.p0); err != nil {
+		return fmt.Errorf("deserialize type bool: %w", err)
+	}
+	return nil
+}
+
+type _irpc_sliceTest_isNilByteSliceReq struct {
+	bs []byte
+}
+
+func (s _irpc_sliceTest_isNilByteSliceReq) Serialize(e *irpcgen.Encoder) error {
+	if err := irpcgen.EncByteSlice(e, s.bs); err != nil {
+		return fmt.Errorf("serialize \"bs\" of type []byte: %w", err)
+	}
+	return nil
+}
+func (s *_irpc_sliceTest_isNilByteSliceReq) Deserialize(d *irpcgen.Decoder) error {
+	if err := irpcgen.DecByteSlice(d, &s.bs); err != nil {
+		return fmt.Errorf("deserialize bs of type []byte: %w", err)
+	}
+	return nil
+}
+
+type _irpc_sliceTest_isNilByteSliceResp struct {
+	p0 bool
+}
+
+func (s _irpc_sliceTest_isNilByteSliceResp) Serialize(e *irpcgen.Encoder) error {
+	if err := irpcgen.EncBool(e, s.p0); err != nil {
+		return fmt.Errorf("serialize type bool: %w", err)
+	}
+	return nil
+}
+func (s *_irpc_sliceTest_isNilByteSliceResp) Deserialize(d *irpcgen.Decoder) error {
+	if err := irpcgen.DecBool(d, &s.p0); err != nil {
+		return fmt.Errorf("deserialize type bool: %w", err)
+	}
+	return nil
 }

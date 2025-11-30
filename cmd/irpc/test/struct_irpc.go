@@ -12,10 +12,10 @@ import (
 )
 
 var _structAPIIrpcId = []byte{
-	0xf0, 0x9b, 0x16, 0x79, 0xde, 0xe3, 0xc7, 0x33,
-	0x7f, 0xbd, 0x4e, 0x04, 0x7d, 0x7d, 0x5f, 0x31,
-	0x3e, 0x76, 0x08, 0x87, 0x35, 0x92, 0xac, 0xb7,
-	0xc6, 0xb0, 0xe7, 0xf6, 0x0d, 0x57, 0x10, 0x86,
+	0x78, 0x3e, 0x92, 0x0a, 0xbd, 0x8b, 0xba, 0xa3,
+	0xe6, 0x7c, 0x8f, 0xd8, 0x17, 0xb9, 0x1c, 0xde,
+	0x86, 0x59, 0x93, 0x8a, 0x10, 0xe6, 0xfe, 0x0f,
+	0xaf, 0x76, 0xed, 0x82, 0x69, 0xa3, 0x3c, 0x54,
 }
 
 type structAPIIrpcService struct {
@@ -464,12 +464,12 @@ type _irpc_structAPI_SumSliceStructReq struct {
 func (s _irpc_structAPI_SumSliceStructReq) Serialize(e *irpcgen.Encoder) error {
 	if err := func(enc *irpcgen.Encoder, s sliceStruct) error {
 		if err := func(enc *irpcgen.Encoder, sl []int) error {
-			return irpcgen.EncSlice(enc, "int", irpcgen.EncInt, sl)
+			return irpcgen.EncSlice(enc, sl, "int", irpcgen.EncInt)
 		}(enc, s.s1); err != nil {
 			return fmt.Errorf("serialize s.s1 of type []int: %w", err)
 		}
 		if err := func(enc *irpcgen.Encoder, sl []int) error {
-			return irpcgen.EncSlice(enc, "int", irpcgen.EncInt, sl)
+			return irpcgen.EncSlice(enc, sl, "int", irpcgen.EncInt)
 		}(enc, s.s2); err != nil {
 			return fmt.Errorf("serialize s.s2 of type []int: %w", err)
 		}
@@ -482,12 +482,12 @@ func (s _irpc_structAPI_SumSliceStructReq) Serialize(e *irpcgen.Encoder) error {
 func (s *_irpc_structAPI_SumSliceStructReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := func(dec *irpcgen.Decoder, s *sliceStruct) error {
 		if err := func(dec *irpcgen.Decoder, sl *[]int) error {
-			return irpcgen.DecSlice(dec, "int", irpcgen.DecInt, sl)
+			return irpcgen.DecSlice(dec, sl, "int", irpcgen.DecInt)
 		}(dec, &s.s1); err != nil {
 			return fmt.Errorf("deserialize s.s1 of type []int: %w", err)
 		}
 		if err := func(dec *irpcgen.Decoder, sl *[]int) error {
-			return irpcgen.DecSlice(dec, "int", irpcgen.DecInt, sl)
+			return irpcgen.DecSlice(dec, sl, "int", irpcgen.DecInt)
 		}(dec, &s.s2); err != nil {
 			return fmt.Errorf("deserialize s.s2 of type []int: %w", err)
 		}

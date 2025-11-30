@@ -38,6 +38,12 @@ func (e *Encoder) bool(v bool) error {
 	return nil
 }
 
+func (e *Encoder) isNil(isNil bool) error {
+	// we encode isNil as 0 and isNotNil(aka data follows) as 1
+	// to be more consistant with general thinking about wire protocols
+	return e.bool(!isNil)
+}
+
 func (e *Encoder) uVarInt(v uint) error {
 	return e.uVarInt64(uint64(v))
 }
@@ -105,40 +111,4 @@ func (e *Encoder) binaryMarshaler(bm encoding.BinaryMarshaler) error {
 		return err
 	}
 	return e.byteSlice(data)
-}
-
-func (e *Encoder) boolSlice(vs []bool) error {
-	// todo: handle nil
-	if err := e.len(len(vs)); err != nil {
-		return fmt.Errorf("slice len: %w", err)
-	}
-
-	// MSB first
-	var b byte
-	bitCount := 0
-
-	for _, v := range vs {
-		b <<= 1
-		if v {
-			b |= 1
-		}
-		bitCount++
-
-		if bitCount == 8 {
-			if err := e.w.WriteByte(b); err != nil {
-				return err
-			}
-			b, bitCount = 0, 0
-		}
-	}
-
-	if bitCount > 0 {
-		// shift the last partial byte to align bits to the MSB
-		b <<= uint(8 - bitCount)
-		if err := e.w.WriteByte(b); err != nil {
-			return err
-		}
-	}
-
-	return nil
 }

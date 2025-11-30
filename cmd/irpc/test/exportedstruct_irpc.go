@@ -9,10 +9,10 @@ import (
 )
 
 var _FileServerIrpcId = []byte{
-	0xdd, 0xd0, 0xb3, 0x75, 0x3a, 0x2b, 0x05, 0xd2,
-	0x23, 0xc2, 0xae, 0x8a, 0xd3, 0xea, 0x20, 0xc7,
-	0xf8, 0x2f, 0xfd, 0xe7, 0xc4, 0x2d, 0x85, 0x10,
-	0xef, 0xef, 0x10, 0xff, 0xd8, 0x8b, 0x91, 0x0b,
+	0x2c, 0x93, 0x4e, 0x11, 0xf5, 0xb9, 0x32, 0xb7,
+	0x1a, 0x08, 0xdc, 0x7a, 0xf2, 0x82, 0xb9, 0x5c,
+	0x69, 0xc0, 0xcc, 0xd3, 0x56, 0x47, 0xdd, 0x59,
+	0xdb, 0x61, 0x3c, 0xf7, 0xda, 0x27, 0xf9, 0x49,
 }
 
 type FileServerIrpcService struct {
@@ -70,12 +70,12 @@ type _irpc_FileServer_ListFilesResp struct {
 
 func (s _irpc_FileServer_ListFilesResp) Serialize(e *irpcgen.Encoder) error {
 	if err := func(enc *irpcgen.Encoder, sl []FileInfo) error {
-		return irpcgen.EncSlice(enc, "FileInfo", func(enc *irpcgen.Encoder, s FileInfo) error {
+		return irpcgen.EncSlice(enc, sl, "FileInfo", func(enc *irpcgen.Encoder, s FileInfo) error {
 			if err := irpcgen.EncUint64(enc, s.FileSize); err != nil {
 				return fmt.Errorf("serialize s.FileSize of type uint64: %w", err)
 			}
 			return nil
-		}, sl)
+		})
 	}(e, s.p0); err != nil {
 		return fmt.Errorf("serialize type []FileInfo: %w", err)
 	}
@@ -99,12 +99,12 @@ func (s _irpc_FileServer_ListFilesResp) Serialize(e *irpcgen.Encoder) error {
 }
 func (s *_irpc_FileServer_ListFilesResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := func(dec *irpcgen.Decoder, sl *[]FileInfo) error {
-		return irpcgen.DecSlice(dec, "FileInfo", func(dec *irpcgen.Decoder, s *FileInfo) error {
+		return irpcgen.DecSlice(dec, sl, "FileInfo", func(dec *irpcgen.Decoder, s *FileInfo) error {
 			if err := irpcgen.DecUint64(dec, &s.FileSize); err != nil {
 				return fmt.Errorf("deserialize s.FileSize of type uint64: %w", err)
 			}
 			return nil
-		}, sl)
+		})
 	}(d, &s.p0); err != nil {
 		return fmt.Errorf("deserialize type []FileInfo: %w", err)
 	}

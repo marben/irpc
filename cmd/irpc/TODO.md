@@ -1,3 +1,6 @@
+- convert decoder functions so that they return values instead of obtaining pointers
+- convert interface enc/dec to use enc.isNil function, to revert the encoding to be concise with slices and maps
+- move binarymarshaller outside of encoder/decoder to irpcgen.Enc/Dec function
 - make generators report their imports and only populate qualifier from param structs, not gen functions - if possible?
 - write a function to to batch serialiaton/deserialization/error reporting and call it from generated code instead of the repetitive error checking
 - implement nil encoding/decoding for nillable types (slice, map...)
