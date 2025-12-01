@@ -43,3 +43,23 @@ func TestTime(t *testing.T) {
 		t.Fatalf("myStructTimeRes: %+v", myStructTimeRes)
 	}
 }
+
+func TestMyMarshalable(t *testing.T) {
+	localEp, remoteEp, err := testtools.CreateLocalTcpEndpoints()
+	if err != nil {
+		t.Fatalf("create enpoints: %v", err)
+	}
+	defer localEp.Close()
+	defer remoteEp.Close()
+
+	remoteEp.RegisterService(newBinMarshalIrpcService(binMarshalImpl{}))
+
+	c, err := newBinMarshalIrpcClient(localEp)
+	if err != nil {
+		t.Fatalf("new client(): %+v", err)
+	}
+
+	if res := c.myMarshalableStructPass(myMarshallableStruct{"test string"}); res != "test string" {
+		t.Fatalf("res: %q", res)
+	}
+}

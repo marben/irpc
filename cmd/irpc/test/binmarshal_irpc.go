@@ -10,10 +10,10 @@ import (
 )
 
 var _binMarshalIrpcId = []byte{
-	0x1a, 0xce, 0x72, 0x53, 0xc7, 0xe1, 0x19, 0xdf,
-	0x17, 0x9b, 0x57, 0x81, 0xa8, 0x54, 0x78, 0xdf,
-	0x6d, 0xd4, 0x2d, 0x74, 0xb8, 0x2f, 0x19, 0x5a,
-	0x48, 0x86, 0x43, 0x9d, 0x18, 0xc1, 0x81, 0xb6,
+	0xde, 0xb9, 0xe0, 0xae, 0xd4, 0x59, 0x44, 0x08,
+	0xf3, 0xe3, 0x22, 0x00, 0x08, 0x05, 0x8a, 0x51,
+	0x8a, 0x60, 0x12, 0x4f, 0x51, 0x25, 0x88, 0x5c,
+	0x74, 0x9e, 0x01, 0xca, 0xca, 0x09, 0xd7, 0x66,
 }
 
 type binMarshalIrpcService struct {
@@ -100,6 +100,20 @@ func (s *binMarshalIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgD
 				return resp
 			}, nil
 		}, nil
+	case 5: // myMarshalableStructPass
+		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _irpc_binMarshal_myMarshalableStructPassReq
+			if err := args.Deserialize(d); err != nil {
+				return nil, err
+			}
+			return func(ctx context.Context) irpcgen.Serializable {
+				// EXECUTE
+				var resp _irpc_binMarshal_myMarshalableStructPassResp
+				resp.p0 = s.impl.myMarshalableStructPass(args.s)
+				return resp
+			}, nil
+		}, nil
 	default:
 		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, s.Id())
 	}
@@ -162,6 +176,16 @@ func (_c *binMarshalIrpcClient) structPass(st structContainingBinMarshallable) s
 	}
 	var resp _irpc_binMarshal_structPassResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _binMarshalIrpcId, 4, req, &resp); err != nil {
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
+	}
+	return resp.p0
+}
+func (_c *binMarshalIrpcClient) myMarshalableStructPass(s myMarshallableStruct) string {
+	var req = _irpc_binMarshal_myMarshalableStructPassReq{
+		s: s,
+	}
+	var resp _irpc_binMarshal_myMarshalableStructPassResp
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _binMarshalIrpcId, 5, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -353,6 +377,50 @@ func (s *_irpc_binMarshal_structPassResp) Deserialize(d *irpcgen.Decoder) error 
 		return nil
 	}(d, &s.p0); err != nil {
 		return fmt.Errorf("deserialize type structContainingBinMarshallable: %w", err)
+	}
+	return nil
+}
+
+type _irpc_binMarshal_myMarshalableStructPassReq struct {
+	s myMarshallableStruct
+}
+
+func (s _irpc_binMarshal_myMarshalableStructPassReq) Serialize(e *irpcgen.Encoder) error {
+	if err := func(enc *irpcgen.Encoder, s myMarshallableStruct) error {
+		if err := irpcgen.EncString(enc, s.str); err != nil {
+			return fmt.Errorf("serialize s.str of type string: %w", err)
+		}
+		return nil
+	}(e, s.s); err != nil {
+		return fmt.Errorf("serialize \"s\" of type myMarshallableStruct: %w", err)
+	}
+	return nil
+}
+func (s *_irpc_binMarshal_myMarshalableStructPassReq) Deserialize(d *irpcgen.Decoder) error {
+	if err := func(dec *irpcgen.Decoder, s *myMarshallableStruct) error {
+		if err := irpcgen.DecString(dec, &s.str); err != nil {
+			return fmt.Errorf("deserialize s.str of type string: %w", err)
+		}
+		return nil
+	}(d, &s.s); err != nil {
+		return fmt.Errorf("deserialize s of type myMarshallableStruct: %w", err)
+	}
+	return nil
+}
+
+type _irpc_binMarshal_myMarshalableStructPassResp struct {
+	p0 string
+}
+
+func (s _irpc_binMarshal_myMarshalableStructPassResp) Serialize(e *irpcgen.Encoder) error {
+	if err := irpcgen.EncString(e, s.p0); err != nil {
+		return fmt.Errorf("serialize type string: %w", err)
+	}
+	return nil
+}
+func (s *_irpc_binMarshal_myMarshalableStructPassResp) Deserialize(d *irpcgen.Decoder) error {
+	if err := irpcgen.DecString(d, &s.p0); err != nil {
+		return fmt.Errorf("deserialize type string: %w", err)
 	}
 	return nil
 }

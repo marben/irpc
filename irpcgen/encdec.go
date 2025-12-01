@@ -409,10 +409,17 @@ func DecBoolSlice[T ~[]bool](dec *Decoder, v *T) error {
 }
 
 func EncBinaryMarshaller(enc *Encoder, v encoding.BinaryMarshaler) error {
-	// todo: test nil interface
-	return enc.binaryMarshaler(v)
+	data, err := v.MarshalBinary()
+	if err != nil {
+		return err
+	}
+	return enc.byteSliceNonNil(data)
 }
 
 func DecBinaryUnmarshaller(dec *Decoder, dst encoding.BinaryUnmarshaler) error {
-	return dec.binaryUnmarshaler(dst)
+	data, err := dec.byteSliceNonNil()
+	if err != nil {
+		return err
+	}
+	return dst.UnmarshalBinary(data)
 }

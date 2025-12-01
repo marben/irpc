@@ -10,6 +10,19 @@ type myStructTime struct {
 	myTime
 }
 
+type myMarshallableStruct struct {
+	str string
+}
+
+func (m *myMarshallableStruct) MarshalBinary() (data []byte, err error) {
+	return []byte(m.str), nil
+}
+
+func (m *myMarshallableStruct) UnmarshalBinary(data []byte) error {
+	m.str = string(data)
+	return nil
+}
+
 func (mt myTime) Add(hour time.Duration) myTime {
 	return myTime(time.Time(mt).Add(hour))
 }
@@ -37,9 +50,15 @@ type binMarshal interface {
 	addMyHour(t myTime) myTime
 	addMyStructHour(t myStructTime) myStructTime
 	structPass(st structContainingBinMarshallable) structContainingBinMarshallable
+	myMarshalableStructPass(s myMarshallableStruct) string
 }
 
 type binMarshalImpl struct{}
+
+// muMarshalableStructPass implements binMarshal.
+func (b binMarshalImpl) myMarshalableStructPass(s myMarshallableStruct) string {
+	return s.str
+}
 
 // structPass implements binMarshal.
 func (b binMarshalImpl) structPass(st structContainingBinMarshallable) structContainingBinMarshallable {
