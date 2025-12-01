@@ -12,10 +12,10 @@ import (
 )
 
 var _structAPIIrpcId = []byte{
-	0x78, 0x3e, 0x92, 0x0a, 0xbd, 0x8b, 0xba, 0xa3,
-	0xe6, 0x7c, 0x8f, 0xd8, 0x17, 0xb9, 0x1c, 0xde,
-	0x86, 0x59, 0x93, 0x8a, 0x10, 0xe6, 0xfe, 0x0f,
-	0xaf, 0x76, 0xed, 0x82, 0x69, 0xa3, 0x3c, 0x54,
+	0x9e, 0x71, 0xa4, 0x39, 0x4c, 0x4b, 0x86, 0xeb,
+	0xaa, 0xea, 0x15, 0x90, 0x22, 0x35, 0xa5, 0x9f,
+	0x46, 0x5c, 0xe4, 0x85, 0xbb, 0x05, 0xeb, 0x81,
+	0xad, 0x83, 0xa7, 0x9e, 0x22, 0xf1, 0x7d, 0x71,
 }
 
 type structAPIIrpcService struct {
@@ -764,7 +764,7 @@ type _irpc_structAPI_ReturnErrResp struct {
 func (s _irpc_structAPI_ReturnErrResp) Serialize(e *irpcgen.Encoder) error {
 	if err := func(enc *irpcgen.Encoder, v error) error {
 		isNil := v == nil
-		if err := irpcgen.EncBool(enc, isNil); err != nil {
+		if err := irpcgen.EncIsNil(enc, isNil); err != nil {
 			return fmt.Errorf("serialize isNil == %t: %w", isNil, err)
 		}
 		if isNil {
@@ -783,7 +783,7 @@ func (s _irpc_structAPI_ReturnErrResp) Serialize(e *irpcgen.Encoder) error {
 func (s *_irpc_structAPI_ReturnErrResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := func(dec *irpcgen.Decoder, s *error) error {
 		var isNil bool
-		if err := irpcgen.DecBool(dec, &isNil); err != nil {
+		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
 			return fmt.Errorf("deserialize isNil: %w:", err)
 		}
 		if isNil {

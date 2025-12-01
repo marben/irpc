@@ -9,10 +9,10 @@ import (
 )
 
 var _mapTestIrpcId = []byte{
-	0x81, 0x6d, 0x48, 0x43, 0x5c, 0xd9, 0x94, 0x4d,
-	0x93, 0x1a, 0x2f, 0x7d, 0x8b, 0x07, 0xd5, 0x65,
-	0x93, 0x81, 0x8e, 0xfe, 0x75, 0x3b, 0xbd, 0x7c,
-	0x09, 0x83, 0x23, 0xdf, 0x3b, 0xaa, 0x9c, 0xb5,
+	0xce, 0xc2, 0x7d, 0x62, 0x11, 0xec, 0x3b, 0x0b,
+	0xe5, 0xcc, 0xfc, 0xba, 0x84, 0xf6, 0x22, 0x1e,
+	0xa6, 0xab, 0x73, 0xa2, 0x9c, 0xa9, 0xd1, 0x02,
+	0x33, 0x77, 0x8f, 0x57, 0x3a, 0x54, 0xa7, 0xdc,
 }
 
 type mapTestIrpcService struct {
@@ -553,7 +553,7 @@ func (s _irpc_mapTest_emptyInterfaceMapReflectReq) Serialize(e *irpcgen.Encoder)
 	if err := func(enc *irpcgen.Encoder, m map[int]interface{}) error {
 		return irpcgen.EncMap(enc, m, "int", irpcgen.EncInt, "interface{}", func(enc *irpcgen.Encoder, v interface{}) error {
 			isNil := v == nil
-			if err := irpcgen.EncBool(enc, isNil); err != nil {
+			if err := irpcgen.EncIsNil(enc, isNil); err != nil {
 				return fmt.Errorf("serialize isNil == %t: %w", isNil, err)
 			}
 			if isNil {
@@ -570,7 +570,7 @@ func (s *_irpc_mapTest_emptyInterfaceMapReflectReq) Deserialize(d *irpcgen.Decod
 	if err := func(dec *irpcgen.Decoder, m *map[int]interface{}) error {
 		return irpcgen.DecMap(dec, m, "int", irpcgen.DecInt, "interface{}", func(dec *irpcgen.Decoder, s *interface{}) error {
 			var isNil bool
-			if err := irpcgen.DecBool(dec, &isNil); err != nil {
+			if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
 				return fmt.Errorf("deserialize isNil: %w:", err)
 			}
 			if isNil {
@@ -597,7 +597,7 @@ func (s _irpc_mapTest_emptyInterfaceMapReflectResp) Serialize(e *irpcgen.Encoder
 	if err := func(enc *irpcgen.Encoder, m map[int]interface{}) error {
 		return irpcgen.EncMap(enc, m, "int", irpcgen.EncInt, "interface{}", func(enc *irpcgen.Encoder, v interface{}) error {
 			isNil := v == nil
-			if err := irpcgen.EncBool(enc, isNil); err != nil {
+			if err := irpcgen.EncIsNil(enc, isNil); err != nil {
 				return fmt.Errorf("serialize isNil == %t: %w", isNil, err)
 			}
 			if isNil {
@@ -614,7 +614,7 @@ func (s *_irpc_mapTest_emptyInterfaceMapReflectResp) Deserialize(d *irpcgen.Deco
 	if err := func(dec *irpcgen.Decoder, m *map[int]interface{}) error {
 		return irpcgen.DecMap(dec, m, "int", irpcgen.DecInt, "interface{}", func(dec *irpcgen.Decoder, s *interface{}) error {
 			var isNil bool
-			if err := irpcgen.DecBool(dec, &isNil); err != nil {
+			if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
 				return fmt.Errorf("deserialize isNil: %w:", err)
 			}
 			if isNil {

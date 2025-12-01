@@ -11,10 +11,10 @@ import (
 )
 
 var _interfaceTestIrpcId = []byte{
-	0xf0, 0x0e, 0x8a, 0xe0, 0x8a, 0xc6, 0x46, 0xb4,
-	0xa2, 0xdb, 0x27, 0x90, 0x8e, 0x0d, 0x12, 0x42,
-	0x94, 0x6c, 0x36, 0x2b, 0x3e, 0x2a, 0x0d, 0x09,
-	0x17, 0xb9, 0xe7, 0x0b, 0x99, 0xe6, 0x14, 0xb3,
+	0xc9, 0x7d, 0x2a, 0xc4, 0xc6, 0x33, 0xd3, 0x82,
+	0x2e, 0x90, 0x7d, 0x7e, 0x68, 0x7e, 0xba, 0xe9,
+	0x3a, 0x1f, 0x16, 0x8c, 0x6d, 0x5d, 0x64, 0x86,
+	0x84, 0x9d, 0x21, 0x11, 0xe9, 0xbb, 0xee, 0xfe,
 }
 
 type interfaceTestIrpcService struct {
@@ -260,7 +260,7 @@ type _irpc_interfaceTest_rtnErrorWithMessageResp struct {
 func (s _irpc_interfaceTest_rtnErrorWithMessageResp) Serialize(e *irpcgen.Encoder) error {
 	if err := func(enc *irpcgen.Encoder, v error) error {
 		isNil := v == nil
-		if err := irpcgen.EncBool(enc, isNil); err != nil {
+		if err := irpcgen.EncIsNil(enc, isNil); err != nil {
 			return fmt.Errorf("serialize isNil == %t: %w", isNil, err)
 		}
 		if isNil {
@@ -279,7 +279,7 @@ func (s _irpc_interfaceTest_rtnErrorWithMessageResp) Serialize(e *irpcgen.Encode
 func (s *_irpc_interfaceTest_rtnErrorWithMessageResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := func(dec *irpcgen.Decoder, s *error) error {
 		var isNil bool
-		if err := irpcgen.DecBool(dec, &isNil); err != nil {
+		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
 			return fmt.Errorf("deserialize isNil: %w:", err)
 		}
 		if isNil {
@@ -312,7 +312,7 @@ type _irpc_interfaceTest_rtnNilErrorResp struct {
 func (s _irpc_interfaceTest_rtnNilErrorResp) Serialize(e *irpcgen.Encoder) error {
 	if err := func(enc *irpcgen.Encoder, v error) error {
 		isNil := v == nil
-		if err := irpcgen.EncBool(enc, isNil); err != nil {
+		if err := irpcgen.EncIsNil(enc, isNil); err != nil {
 			return fmt.Errorf("serialize isNil == %t: %w", isNil, err)
 		}
 		if isNil {
@@ -331,7 +331,7 @@ func (s _irpc_interfaceTest_rtnNilErrorResp) Serialize(e *irpcgen.Encoder) error
 func (s *_irpc_interfaceTest_rtnNilErrorResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := func(dec *irpcgen.Decoder, s *error) error {
 		var isNil bool
-		if err := irpcgen.DecBool(dec, &isNil); err != nil {
+		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
 			return fmt.Errorf("deserialize isNil: %w:", err)
 		}
 		if isNil {
@@ -357,7 +357,7 @@ type _irpc_interfaceTest_rtnTwoErrorsResp struct {
 func (s _irpc_interfaceTest_rtnTwoErrorsResp) Serialize(e *irpcgen.Encoder) error {
 	if err := func(enc *irpcgen.Encoder, v error) error {
 		isNil := v == nil
-		if err := irpcgen.EncBool(enc, isNil); err != nil {
+		if err := irpcgen.EncIsNil(enc, isNil); err != nil {
 			return fmt.Errorf("serialize isNil == %t: %w", isNil, err)
 		}
 		if isNil {
@@ -373,7 +373,7 @@ func (s _irpc_interfaceTest_rtnTwoErrorsResp) Serialize(e *irpcgen.Encoder) erro
 	}
 	if err := func(enc *irpcgen.Encoder, v error) error {
 		isNil := v == nil
-		if err := irpcgen.EncBool(enc, isNil); err != nil {
+		if err := irpcgen.EncIsNil(enc, isNil); err != nil {
 			return fmt.Errorf("serialize isNil == %t: %w", isNil, err)
 		}
 		if isNil {
@@ -392,7 +392,7 @@ func (s _irpc_interfaceTest_rtnTwoErrorsResp) Serialize(e *irpcgen.Encoder) erro
 func (s *_irpc_interfaceTest_rtnTwoErrorsResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := func(dec *irpcgen.Decoder, s *error) error {
 		var isNil bool
-		if err := irpcgen.DecBool(dec, &isNil); err != nil {
+		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
 			return fmt.Errorf("deserialize isNil: %w:", err)
 		}
 		if isNil {
@@ -409,7 +409,7 @@ func (s *_irpc_interfaceTest_rtnTwoErrorsResp) Deserialize(d *irpcgen.Decoder) e
 	}
 	if err := func(dec *irpcgen.Decoder, s *error) error {
 		var isNil bool
-		if err := irpcgen.DecBool(dec, &isNil); err != nil {
+		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
 			return fmt.Errorf("deserialize isNil: %w:", err)
 		}
 		if isNil {
@@ -455,7 +455,7 @@ func (s _irpc_interfaceTest_rtnStringAndErrorResp) Serialize(e *irpcgen.Encoder)
 	}
 	if err := func(enc *irpcgen.Encoder, v error) error {
 		isNil := v == nil
-		if err := irpcgen.EncBool(enc, isNil); err != nil {
+		if err := irpcgen.EncIsNil(enc, isNil); err != nil {
 			return fmt.Errorf("serialize isNil == %t: %w", isNil, err)
 		}
 		if isNil {
@@ -477,7 +477,7 @@ func (s *_irpc_interfaceTest_rtnStringAndErrorResp) Deserialize(d *irpcgen.Decod
 	}
 	if err := func(dec *irpcgen.Decoder, s *error) error {
 		var isNil bool
-		if err := irpcgen.DecBool(dec, &isNil); err != nil {
+		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
 			return fmt.Errorf("deserialize isNil: %w:", err)
 		}
 		if isNil {
@@ -502,7 +502,7 @@ type _irpc_interfaceTest_passCustomInterfaceAndReturnItModifiedReq struct {
 func (s _irpc_interfaceTest_passCustomInterfaceAndReturnItModifiedReq) Serialize(e *irpcgen.Encoder) error {
 	if err := func(enc *irpcgen.Encoder, v customInterface) error {
 		isNil := v == nil
-		if err := irpcgen.EncBool(enc, isNil); err != nil {
+		if err := irpcgen.EncIsNil(enc, isNil); err != nil {
 			return fmt.Errorf("serialize isNil == %t: %w", isNil, err)
 		}
 		if isNil {
@@ -525,7 +525,7 @@ func (s _irpc_interfaceTest_passCustomInterfaceAndReturnItModifiedReq) Serialize
 func (s *_irpc_interfaceTest_passCustomInterfaceAndReturnItModifiedReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := func(dec *irpcgen.Decoder, s *customInterface) error {
 		var isNil bool
-		if err := irpcgen.DecBool(dec, &isNil); err != nil {
+		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
 			return fmt.Errorf("deserialize isNil: %w:", err)
 		}
 		if isNil {
@@ -566,7 +566,7 @@ type _irpc_interfaceTest_passCustomInterfaceAndReturnItModifiedResp struct {
 func (s _irpc_interfaceTest_passCustomInterfaceAndReturnItModifiedResp) Serialize(e *irpcgen.Encoder) error {
 	if err := func(enc *irpcgen.Encoder, v customInterface) error {
 		isNil := v == nil
-		if err := irpcgen.EncBool(enc, isNil); err != nil {
+		if err := irpcgen.EncIsNil(enc, isNil); err != nil {
 			return fmt.Errorf("serialize isNil == %t: %w", isNil, err)
 		}
 		if isNil {
@@ -586,7 +586,7 @@ func (s _irpc_interfaceTest_passCustomInterfaceAndReturnItModifiedResp) Serializ
 	}
 	if err := func(enc *irpcgen.Encoder, v error) error {
 		isNil := v == nil
-		if err := irpcgen.EncBool(enc, isNil); err != nil {
+		if err := irpcgen.EncIsNil(enc, isNil); err != nil {
 			return fmt.Errorf("serialize isNil == %t: %w", isNil, err)
 		}
 		if isNil {
@@ -605,7 +605,7 @@ func (s _irpc_interfaceTest_passCustomInterfaceAndReturnItModifiedResp) Serializ
 func (s *_irpc_interfaceTest_passCustomInterfaceAndReturnItModifiedResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := func(dec *irpcgen.Decoder, s *customInterface) error {
 		var isNil bool
-		if err := irpcgen.DecBool(dec, &isNil); err != nil {
+		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
 			return fmt.Errorf("deserialize isNil: %w:", err)
 		}
 		if isNil {
@@ -625,7 +625,7 @@ func (s *_irpc_interfaceTest_passCustomInterfaceAndReturnItModifiedResp) Deseria
 	}
 	if err := func(dec *irpcgen.Decoder, s *error) error {
 		var isNil bool
-		if err := irpcgen.DecBool(dec, &isNil); err != nil {
+		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
 			return fmt.Errorf("deserialize isNil: %w:", err)
 		}
 		if isNil {
@@ -650,7 +650,7 @@ type _irpc_interfaceTest_passJustCustomInterfaceWithoutErrorReq struct {
 func (s _irpc_interfaceTest_passJustCustomInterfaceWithoutErrorReq) Serialize(e *irpcgen.Encoder) error {
 	if err := func(enc *irpcgen.Encoder, v customInterface) error {
 		isNil := v == nil
-		if err := irpcgen.EncBool(enc, isNil); err != nil {
+		if err := irpcgen.EncIsNil(enc, isNil); err != nil {
 			return fmt.Errorf("serialize isNil == %t: %w", isNil, err)
 		}
 		if isNil {
@@ -673,7 +673,7 @@ func (s _irpc_interfaceTest_passJustCustomInterfaceWithoutErrorReq) Serialize(e 
 func (s *_irpc_interfaceTest_passJustCustomInterfaceWithoutErrorReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := func(dec *irpcgen.Decoder, s *customInterface) error {
 		var isNil bool
-		if err := irpcgen.DecBool(dec, &isNil); err != nil {
+		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
 			return fmt.Errorf("deserialize isNil: %w:", err)
 		}
 		if isNil {
@@ -701,7 +701,7 @@ type _irpc_interfaceTest_passJustCustomInterfaceWithoutErrorResp struct {
 func (s _irpc_interfaceTest_passJustCustomInterfaceWithoutErrorResp) Serialize(e *irpcgen.Encoder) error {
 	if err := func(enc *irpcgen.Encoder, v customInterface) error {
 		isNil := v == nil
-		if err := irpcgen.EncBool(enc, isNil); err != nil {
+		if err := irpcgen.EncIsNil(enc, isNil); err != nil {
 			return fmt.Errorf("serialize isNil == %t: %w", isNil, err)
 		}
 		if isNil {
@@ -724,7 +724,7 @@ func (s _irpc_interfaceTest_passJustCustomInterfaceWithoutErrorResp) Serialize(e
 func (s *_irpc_interfaceTest_passJustCustomInterfaceWithoutErrorResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := func(dec *irpcgen.Decoder, s *customInterface) error {
 		var isNil bool
-		if err := irpcgen.DecBool(dec, &isNil); err != nil {
+		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
 			return fmt.Errorf("deserialize isNil: %w:", err)
 		}
 		if isNil {
@@ -756,7 +756,7 @@ func (s _irpc_interfaceTest_passAnonInterfaceReq) Serialize(e *irpcgen.Encoder) 
 	if err := func(enc *irpcgen.Encoder, v interface {
 		Age() int
 		Name() string
-	}) error { isNil := v == nil; if err := irpcgen.EncBool(enc, isNil); err != nil {
+	}) error { isNil := v == nil; if err := irpcgen.EncIsNil(enc, isNil); err != nil {
 		return fmt.Errorf("serialize isNil == %t: %w", isNil, err)
 	}; if isNil {
 		return nil
@@ -773,7 +773,7 @@ func (s *_irpc_interfaceTest_passAnonInterfaceReq) Deserialize(d *irpcgen.Decode
 	if err := func(dec *irpcgen.Decoder, s *interface {
 		Age() int
 		Name() string
-	}) error { var isNil bool; if err := irpcgen.DecBool(dec, &isNil); err != nil {
+	}) error { var isNil bool; if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
 		return fmt.Errorf("deserialize isNil: %w:", err)
 	}; if isNil {
 		return nil
@@ -829,7 +829,7 @@ func (s _irpc_interfaceTest_passAnonInterfaceWithNamedParamsReq) Serialize(e *ir
 		a() (out.Uint8, int)
 		b() out2.Uint8
 		c() (out2.Uint8, error)
-	}) error { isNil := v == nil; if err := irpcgen.EncBool(enc, isNil); err != nil {
+	}) error { isNil := v == nil; if err := irpcgen.EncIsNil(enc, isNil); err != nil {
 		return fmt.Errorf("serialize isNil == %t: %w", isNil, err)
 	}; if isNil {
 		return nil
@@ -843,7 +843,7 @@ func (s _irpc_interfaceTest_passAnonInterfaceWithNamedParamsReq) Serialize(e *ir
 		return fmt.Errorf("serialize \"v.c()\" of type out2.Uint8: %w", err)
 	}; if err := func(enc *irpcgen.Encoder, v error) error {
 		isNil := v == nil
-		if err := irpcgen.EncBool(enc, isNil); err != nil {
+		if err := irpcgen.EncIsNil(enc, isNil); err != nil {
 			return fmt.Errorf("serialize isNil == %t: %w", isNil, err)
 		}
 		if isNil {
@@ -866,7 +866,7 @@ func (s *_irpc_interfaceTest_passAnonInterfaceWithNamedParamsReq) Deserialize(d 
 		a() (out.Uint8, int)
 		b() out2.Uint8
 		c() (out2.Uint8, error)
-	}) error { var isNil bool; if err := irpcgen.DecBool(dec, &isNil); err != nil {
+	}) error { var isNil bool; if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
 		return fmt.Errorf("deserialize isNil: %w:", err)
 	}; if isNil {
 		return nil
@@ -880,7 +880,7 @@ func (s *_irpc_interfaceTest_passAnonInterfaceWithNamedParamsReq) Deserialize(d 
 		return fmt.Errorf("deserialize \"_c_0_\" out2.Uint8: %w", err)
 	}; if err := func(dec *irpcgen.Decoder, s *error) error {
 		var isNil bool
-		if err := irpcgen.DecBool(dec, &isNil); err != nil {
+		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
 			return fmt.Errorf("deserialize isNil: %w:", err)
 		}
 		if isNil {
@@ -936,10 +936,10 @@ func (s *_irpc_interfaceTest_passAnonInterfaceWithNamedParamsResp) Deserialize(d
 }
 
 var _customInterfaceIrpcId = []byte{
-	0xe6, 0x69, 0x8c, 0xb1, 0xca, 0xc2, 0xb8, 0x7f,
-	0x60, 0xf9, 0xa4, 0xf3, 0x5a, 0x2c, 0xe9, 0x8d,
-	0xa2, 0x33, 0xbd, 0x91, 0x5a, 0xf1, 0x25, 0x4b,
-	0x48, 0xee, 0x2d, 0xfd, 0xeb, 0xe2, 0xa3, 0x57,
+	0x8e, 0x54, 0x44, 0x1f, 0x65, 0x86, 0x72, 0xb1,
+	0xa4, 0x47, 0x6a, 0x2f, 0xe2, 0x76, 0x45, 0x84,
+	0x15, 0x4d, 0x72, 0xd4, 0x78, 0xcb, 0x13, 0x3a,
+	0x0c, 0x36, 0x77, 0x4d, 0xa6, 0xb7, 0xe4, 0x14,
 }
 
 type customInterfaceIrpcService struct {

@@ -115,7 +115,7 @@ func (i interfaceType) genEncFunc(q *qualifier) string {
 	sb := &strings.Builder{}
 	fmt.Fprintf(sb, "func (enc *irpcgen.Encoder, v %s) error {\n", i.name(q))
 	fmt.Fprintf(sb, `isNil := v == nil
-			if err := irpcgen.EncBool(enc, isNil); err != nil {
+			if err := irpcgen.EncIsNil(enc, isNil); err != nil {
 				return fmt.Errorf("serialize isNil == %%t: %%w", isNil, err)
 			}
 			if isNil {
@@ -149,7 +149,7 @@ func (i interfaceType) genDecFunc(q *qualifier) string {
 	sb := &strings.Builder{}
 	fmt.Fprintf(sb, "func (dec *irpcgen.Decoder, s *%s) error {\n", i.name(q))
 	fmt.Fprintf(sb, `var isNil bool
-		if err := irpcgen.DecBool(dec, &isNil); err != nil {
+		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
 			return fmt.Errorf("deserialize isNil: %%w:", err)
 		}
 			if isNil {

@@ -423,3 +423,16 @@ func DecBinaryUnmarshaller(dec *Decoder, dst encoding.BinaryUnmarshaler) error {
 	}
 	return dst.UnmarshalBinary(data)
 }
+
+func EncIsNil(enc *Encoder, isNil bool) error {
+	return enc.isNil(isNil)
+}
+
+func DecIsNil(dec *Decoder, isNil *bool) error {
+	in, err := dec.isNil()
+	if err != nil {
+		return err
+	}
+	*isNil = in
+	return nil
+}

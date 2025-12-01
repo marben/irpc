@@ -9,10 +9,10 @@ import (
 )
 
 var _sliceTestIrpcId = []byte{
-	0x79, 0x93, 0x0a, 0x9a, 0x8d, 0x5b, 0xcd, 0xa5,
-	0x36, 0x5b, 0x94, 0xc6, 0xfe, 0x18, 0xfd, 0x54,
-	0x69, 0xed, 0x9e, 0x73, 0x5e, 0x7e, 0xa0, 0x47,
-	0x6e, 0x2f, 0x3b, 0xd7, 0x26, 0x31, 0xd4, 0xf0,
+	0x02, 0xf0, 0xe2, 0xf6, 0x01, 0x3e, 0x89, 0x0c,
+	0x45, 0x86, 0x0e, 0x49, 0x74, 0x66, 0x82, 0xe6,
+	0x71, 0x6b, 0x15, 0x81, 0xbd, 0x82, 0xca, 0x83,
+	0xee, 0x72, 0x06, 0x87, 0xea, 0x9d, 0x94, 0xb9,
 }
 
 type sliceTestIrpcService struct {
@@ -773,7 +773,7 @@ func (s _irpc_sliceTest_sliceOfErrorsReq) Serialize(e *irpcgen.Encoder) error {
 	if err := func(enc *irpcgen.Encoder, sl []error) error {
 		return irpcgen.EncSlice(enc, sl, "error", func(enc *irpcgen.Encoder, v error) error {
 			isNil := v == nil
-			if err := irpcgen.EncBool(enc, isNil); err != nil {
+			if err := irpcgen.EncIsNil(enc, isNil); err != nil {
 				return fmt.Errorf("serialize isNil == %t: %w", isNil, err)
 			}
 			if isNil {
@@ -794,7 +794,7 @@ func (s *_irpc_sliceTest_sliceOfErrorsReq) Deserialize(d *irpcgen.Decoder) error
 	if err := func(dec *irpcgen.Decoder, sl *[]error) error {
 		return irpcgen.DecSlice(dec, sl, "error", func(dec *irpcgen.Decoder, s *error) error {
 			var isNil bool
-			if err := irpcgen.DecBool(dec, &isNil); err != nil {
+			if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
 				return fmt.Errorf("deserialize isNil: %w:", err)
 			}
 			if isNil {

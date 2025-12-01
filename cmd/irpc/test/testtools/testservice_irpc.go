@@ -9,10 +9,10 @@ import (
 )
 
 var _TestServiceIrpcId = []byte{
-	0x22, 0x38, 0x69, 0xb7, 0x3c, 0x42, 0x93, 0x3a,
-	0xd1, 0x24, 0x0a, 0xd3, 0xde, 0x95, 0x68, 0x95,
-	0xfa, 0xa3, 0xa4, 0x78, 0x9e, 0x28, 0x2c, 0x1d,
-	0x2c, 0x93, 0x4c, 0xe0, 0x29, 0x86, 0x89, 0x99,
+	0x85, 0xfd, 0x59, 0xbc, 0xa2, 0x29, 0x94, 0xe9,
+	0x7e, 0x5f, 0x45, 0x9d, 0xe5, 0xcd, 0x85, 0x51,
+	0x21, 0xaf, 0xb0, 0xb1, 0xc8, 0xdd, 0x38, 0xd3,
+	0xde, 0xef, 0xba, 0xca, 0xee, 0x1c, 0xdb, 0xb4,
 }
 
 type TestServiceIrpcService struct {
@@ -200,7 +200,7 @@ func (s _irpc_TestService_DivErrResp) Serialize(e *irpcgen.Encoder) error {
 	}
 	if err := func(enc *irpcgen.Encoder, v error) error {
 		isNil := v == nil
-		if err := irpcgen.EncBool(enc, isNil); err != nil {
+		if err := irpcgen.EncIsNil(enc, isNil); err != nil {
 			return fmt.Errorf("serialize isNil == %t: %w", isNil, err)
 		}
 		if isNil {
@@ -222,7 +222,7 @@ func (s *_irpc_TestService_DivErrResp) Deserialize(d *irpcgen.Decoder) error {
 	}
 	if err := func(dec *irpcgen.Decoder, s *error) error {
 		var isNil bool
-		if err := irpcgen.DecBool(dec, &isNil); err != nil {
+		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
 			return fmt.Errorf("deserialize isNil: %w:", err)
 		}
 		if isNil {
@@ -284,7 +284,7 @@ func (s _irpc_TestService_DivCtxErrResp) Serialize(e *irpcgen.Encoder) error {
 	}
 	if err := func(enc *irpcgen.Encoder, v error) error {
 		isNil := v == nil
-		if err := irpcgen.EncBool(enc, isNil); err != nil {
+		if err := irpcgen.EncIsNil(enc, isNil); err != nil {
 			return fmt.Errorf("serialize isNil == %t: %w", isNil, err)
 		}
 		if isNil {
@@ -306,7 +306,7 @@ func (s *_irpc_TestService_DivCtxErrResp) Deserialize(d *irpcgen.Decoder) error 
 	}
 	if err := func(dec *irpcgen.Decoder, s *error) error {
 		var isNil bool
-		if err := irpcgen.DecBool(dec, &isNil); err != nil {
+		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
 			return fmt.Errorf("deserialize isNil: %w:", err)
 		}
 		if isNil {
