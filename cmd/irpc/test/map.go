@@ -4,6 +4,8 @@ package irpctestpkg
 
 import (
 	"maps"
+	"slices"
+	"time"
 )
 
 type namedIntFloatMap map[int]float64
@@ -18,11 +20,18 @@ type mapTest interface {
 	namedKeySum(in map[mapNamedInt]mapNamedFloat64) mapNamedFloat64 // todo: write a test
 	emptyInterfaceMapReflect(in map[int]interface{}) map[int]interface{}
 	isNil(map[int]string) bool
+	mapWithTime(map[time.Time]struct{}) []time.Time
 }
 
 var _ mapTest = mapTestImpl{}
 
 type mapTestImpl struct {
+}
+
+// mapWithTime implements mapTest.
+func (mt mapTestImpl) mapWithTime(m map[time.Time]struct{}) []time.Time {
+	keys := maps.Keys(m)
+	return slices.SortedFunc(keys, func(t1, t2 time.Time) int { return t1.Compare(t2) })
 }
 
 // isNil implements mapTest.

@@ -2,7 +2,9 @@ package irpctestpkg
 
 import (
 	"maps"
+	"slices"
 	"testing"
+	"time"
 
 	"github.com/marben/irpc/cmd/irpc/test/testtools"
 )
@@ -94,6 +96,32 @@ func TestSumMapSlices(t *testing.T) {
 	}
 	if valsum != 6*(5+6+7+8) {
 		t.Fatalf("valsum: %d", valsum)
+	}
+}
+
+func TestTimeMap(t *testing.T) {
+	localEp, remoteEp, err := testtools.CreateLocalTcpEndpoints()
+	if err != nil {
+		t.Fatalf("create enpoints: %v", err)
+	}
+	defer localEp.Close()
+
+	remoteEp.RegisterService(newMapTestIrpcService(&mapTestImpl{}))
+
+	c, err := newMapTestIrpcClient(localEp)
+	if err != nil {
+		t.Fatalf("failed to create client: %v", err)
+	}
+
+	m := make(map[time.Time]struct{})
+	m[time.Now()] = struct{}{}
+	m[time.Now().Add(time.Hour)] = struct{}{}
+	keysSorted := slices.SortedFunc(maps.Keys(m), func(t1, t2 time.Time) int { return t1.Compare(t2) })
+
+	keysOut := c.mapWithTime(m)
+
+	if !slices.EqualFunc(keysSorted, keysOut, func(t1, t2 time.Time) bool { return t1.Equal(t2) }) {
+		t.Fatalf("%#v != %#v", keysSorted, keysOut)
 	}
 }
 

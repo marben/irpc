@@ -1,6 +1,9 @@
 package irpctestpkg
 
-import "slices"
+import (
+	"slices"
+	"time"
+)
 
 //go:generate go run ../
 
@@ -25,12 +28,19 @@ type sliceTest interface {
 	isNilSlice(s []string) bool
 	isNilBoolSlice(bs []bool) bool
 	isNilByteSlice(bs []byte) bool
+	sliceOfTimesReverse(in []time.Time) []time.Time
 }
 
 var _ sliceTest = sliceTestImpl{}
 
 type sliceTestImpl struct {
 	skew int
+}
+
+// sliceOfTimesReverse implements sliceTest.
+func (st sliceTestImpl) sliceOfTimesReverse(in []time.Time) []time.Time {
+	slices.Reverse(in)
+	return in
 }
 
 // isNilBoolSlice implements sliceTest.

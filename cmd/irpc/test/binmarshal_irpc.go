@@ -10,10 +10,10 @@ import (
 )
 
 var _binMarshalIrpcId = []byte{
-	0xde, 0xb9, 0xe0, 0xae, 0xd4, 0x59, 0x44, 0x08,
-	0xf3, 0xe3, 0x22, 0x00, 0x08, 0x05, 0x8a, 0x51,
-	0x8a, 0x60, 0x12, 0x4f, 0x51, 0x25, 0x88, 0x5c,
-	0x74, 0x9e, 0x01, 0xca, 0xca, 0x09, 0xd7, 0x66,
+	0x1f, 0xc7, 0x76, 0x26, 0x0b, 0x15, 0xd2, 0x2a,
+	0x14, 0x97, 0xee, 0x31, 0xca, 0xc2, 0xad, 0x19,
+	0x7e, 0xcb, 0x03, 0x75, 0xd1, 0x56, 0x81, 0x36,
+	0x3b, 0xcf, 0x91, 0x96, 0x66, 0xa6, 0x31, 0x69,
 }
 
 type binMarshalIrpcService struct {
@@ -196,13 +196,13 @@ type _irpc_binMarshal_reflectReq struct {
 }
 
 func (s _irpc_binMarshal_reflectReq) Serialize(e *irpcgen.Encoder) error {
-	if err := irpcgen.EncBinaryMarshaller(e, s.t); err != nil {
+	if err := irpcgen.EncBinaryMarshaler(e, s.t); err != nil {
 		return fmt.Errorf("serialize \"t\" of type time.Time: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_binMarshal_reflectReq) Deserialize(d *irpcgen.Decoder) error {
-	if err := irpcgen.DecBinaryUnmarshaller(d, &s.t); err != nil {
+	if err := irpcgen.DecBinaryUnmarshaler(d, &s.t); err != nil {
 		return fmt.Errorf("deserialize t of type time.Time: %w", err)
 	}
 	return nil
@@ -213,13 +213,13 @@ type _irpc_binMarshal_reflectResp struct {
 }
 
 func (s _irpc_binMarshal_reflectResp) Serialize(e *irpcgen.Encoder) error {
-	if err := irpcgen.EncBinaryMarshaller(e, s.p0); err != nil {
+	if err := irpcgen.EncBinaryMarshaler(e, s.p0); err != nil {
 		return fmt.Errorf("serialize type time.Time: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_binMarshal_reflectResp) Deserialize(d *irpcgen.Decoder) error {
-	if err := irpcgen.DecBinaryUnmarshaller(d, &s.p0); err != nil {
+	if err := irpcgen.DecBinaryUnmarshaler(d, &s.p0); err != nil {
 		return fmt.Errorf("deserialize type time.Time: %w", err)
 	}
 	return nil
@@ -230,13 +230,13 @@ type _irpc_binMarshal_addHourReq struct {
 }
 
 func (s _irpc_binMarshal_addHourReq) Serialize(e *irpcgen.Encoder) error {
-	if err := irpcgen.EncBinaryMarshaller(e, s.t); err != nil {
+	if err := irpcgen.EncBinaryMarshaler(e, s.t); err != nil {
 		return fmt.Errorf("serialize \"t\" of type time.Time: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_binMarshal_addHourReq) Deserialize(d *irpcgen.Decoder) error {
-	if err := irpcgen.DecBinaryUnmarshaller(d, &s.t); err != nil {
+	if err := irpcgen.DecBinaryUnmarshaler(d, &s.t); err != nil {
 		return fmt.Errorf("deserialize t of type time.Time: %w", err)
 	}
 	return nil
@@ -247,13 +247,13 @@ type _irpc_binMarshal_addHourResp struct {
 }
 
 func (s _irpc_binMarshal_addHourResp) Serialize(e *irpcgen.Encoder) error {
-	if err := irpcgen.EncBinaryMarshaller(e, s.p0); err != nil {
+	if err := irpcgen.EncBinaryMarshaler(e, s.p0); err != nil {
 		return fmt.Errorf("serialize type time.Time: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_binMarshal_addHourResp) Deserialize(d *irpcgen.Decoder) error {
-	if err := irpcgen.DecBinaryUnmarshaller(d, &s.p0); err != nil {
+	if err := irpcgen.DecBinaryUnmarshaler(d, &s.p0); err != nil {
 		return fmt.Errorf("deserialize type time.Time: %w", err)
 	}
 	return nil
@@ -264,13 +264,13 @@ type _irpc_binMarshal_addMyHourReq struct {
 }
 
 func (s _irpc_binMarshal_addMyHourReq) Serialize(e *irpcgen.Encoder) error {
-	if err := irpcgen.EncBinaryMarshaller(e, s.t); err != nil {
+	if err := irpcgen.EncBinaryMarshaler(e, s.t); err != nil {
 		return fmt.Errorf("serialize \"t\" of type myTime: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_binMarshal_addMyHourReq) Deserialize(d *irpcgen.Decoder) error {
-	if err := irpcgen.DecBinaryUnmarshaller(d, &s.t); err != nil {
+	if err := irpcgen.DecBinaryUnmarshaler(d, &s.t); err != nil {
 		return fmt.Errorf("deserialize t of type myTime: %w", err)
 	}
 	return nil
@@ -281,13 +281,13 @@ type _irpc_binMarshal_addMyHourResp struct {
 }
 
 func (s _irpc_binMarshal_addMyHourResp) Serialize(e *irpcgen.Encoder) error {
-	if err := irpcgen.EncBinaryMarshaller(e, s.p0); err != nil {
+	if err := irpcgen.EncBinaryMarshaler(e, s.p0); err != nil {
 		return fmt.Errorf("serialize type myTime: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_binMarshal_addMyHourResp) Deserialize(d *irpcgen.Decoder) error {
-	if err := irpcgen.DecBinaryUnmarshaller(d, &s.p0); err != nil {
+	if err := irpcgen.DecBinaryUnmarshaler(d, &s.p0); err != nil {
 		return fmt.Errorf("deserialize type myTime: %w", err)
 	}
 	return nil
@@ -298,13 +298,13 @@ type _irpc_binMarshal_addMyStructHourReq struct {
 }
 
 func (s _irpc_binMarshal_addMyStructHourReq) Serialize(e *irpcgen.Encoder) error {
-	if err := irpcgen.EncBinaryMarshaller(e, s.t); err != nil {
+	if err := irpcgen.EncBinaryMarshaler(e, s.t); err != nil {
 		return fmt.Errorf("serialize \"t\" of type myStructTime: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_binMarshal_addMyStructHourReq) Deserialize(d *irpcgen.Decoder) error {
-	if err := irpcgen.DecBinaryUnmarshaller(d, &s.t); err != nil {
+	if err := irpcgen.DecBinaryUnmarshaler(d, &s.t); err != nil {
 		return fmt.Errorf("deserialize t of type myStructTime: %w", err)
 	}
 	return nil
@@ -315,13 +315,13 @@ type _irpc_binMarshal_addMyStructHourResp struct {
 }
 
 func (s _irpc_binMarshal_addMyStructHourResp) Serialize(e *irpcgen.Encoder) error {
-	if err := irpcgen.EncBinaryMarshaller(e, s.p0); err != nil {
+	if err := irpcgen.EncBinaryMarshaler(e, s.p0); err != nil {
 		return fmt.Errorf("serialize type myStructTime: %w", err)
 	}
 	return nil
 }
 func (s *_irpc_binMarshal_addMyStructHourResp) Deserialize(d *irpcgen.Decoder) error {
-	if err := irpcgen.DecBinaryUnmarshaller(d, &s.p0); err != nil {
+	if err := irpcgen.DecBinaryUnmarshaler(d, &s.p0); err != nil {
 		return fmt.Errorf("deserialize type myStructTime: %w", err)
 	}
 	return nil
@@ -333,7 +333,7 @@ type _irpc_binMarshal_structPassReq struct {
 
 func (s _irpc_binMarshal_structPassReq) Serialize(e *irpcgen.Encoder) error {
 	if err := func(enc *irpcgen.Encoder, s structContainingBinMarshallable) error {
-		if err := irpcgen.EncBinaryMarshaller(enc, s.t); err != nil {
+		if err := irpcgen.EncBinaryMarshaler(enc, s.t); err != nil {
 			return fmt.Errorf("serialize s.t of type time.Time: %w", err)
 		}
 		return nil
@@ -344,7 +344,7 @@ func (s _irpc_binMarshal_structPassReq) Serialize(e *irpcgen.Encoder) error {
 }
 func (s *_irpc_binMarshal_structPassReq) Deserialize(d *irpcgen.Decoder) error {
 	if err := func(dec *irpcgen.Decoder, s *structContainingBinMarshallable) error {
-		if err := irpcgen.DecBinaryUnmarshaller(dec, &s.t); err != nil {
+		if err := irpcgen.DecBinaryUnmarshaler(dec, &s.t); err != nil {
 			return fmt.Errorf("deserialize s.t of type time.Time: %w", err)
 		}
 		return nil
@@ -360,7 +360,7 @@ type _irpc_binMarshal_structPassResp struct {
 
 func (s _irpc_binMarshal_structPassResp) Serialize(e *irpcgen.Encoder) error {
 	if err := func(enc *irpcgen.Encoder, s structContainingBinMarshallable) error {
-		if err := irpcgen.EncBinaryMarshaller(enc, s.t); err != nil {
+		if err := irpcgen.EncBinaryMarshaler(enc, s.t); err != nil {
 			return fmt.Errorf("serialize s.t of type time.Time: %w", err)
 		}
 		return nil
@@ -371,7 +371,7 @@ func (s _irpc_binMarshal_structPassResp) Serialize(e *irpcgen.Encoder) error {
 }
 func (s *_irpc_binMarshal_structPassResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := func(dec *irpcgen.Decoder, s *structContainingBinMarshallable) error {
-		if err := irpcgen.DecBinaryUnmarshaller(dec, &s.t); err != nil {
+		if err := irpcgen.DecBinaryUnmarshaler(dec, &s.t); err != nil {
 			return fmt.Errorf("deserialize s.t of type time.Time: %w", err)
 		}
 		return nil

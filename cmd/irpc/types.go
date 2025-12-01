@@ -69,7 +69,7 @@ func (tr typeResolver) newBinaryMarshalerType(ni *namedInfo) (Type, error) {
 	if ni == nil { // todo: perhaps possible? no time to test now
 		return nil, fmt.Errorf("obtained binary marshaller with no named info. that is not supported atm")
 	}
-	return newDirectCallType("irpcgen.EncBinaryMarshaller", "irpcgen.DecBinaryUnmarshaller", ni.namedName, ni), nil
+	return newDirectCallType("irpcgen.EncBinaryMarshaler", "irpcgen.DecBinaryUnmarshaler", ni.namedName, ni), nil
 }
 
 var _ Type = directCallType{}

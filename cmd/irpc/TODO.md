@@ -2,8 +2,7 @@
 - write a function to to batch serialiaton/deserialization/error reporting and call it from generated code instead of the repetitive error checking
 - document versioning in README
 - map[int]interface{}
-- not sure about interfaces with multiple return values in function
-    - try something like return value of type error2 interface{Error() (string,int)}
+- interface{} like for instance in map[int]interface{} doesn't need to have a codeblock
 - test []time.Time  -- test new slice implementation and asymetrical encoder
 - formatting with stdlib produces different (imho worse) than gofmt.
     - i am not sure why, but it seems to be a common thing. esapecially with nested func definitions like with struct encoding
@@ -14,7 +13,6 @@
 - looking at test struct_irpc.go vect3x3 serialization, there is a lot of repetitive code
     - perhaps we could attach named serialization functions for sub-structures? in this case vect3
 - fuzzy test of Enc/Dec functions to make sure, encodings match
-- interface{} like for instance in map[int]interface{} doesn't need to have a codeblock
 - support files outside of module. it is currently unsupported and fails
 - two interfaces in one file - are service/client hashes the same? maybe we need to add interface name to the hash?
 - get rid of "var zero" declarations for some cases, where we know the zero value (nil for inerface/slice/map, "" for string etc...)

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"slices"
 	"testing"
+	"time"
 
 	"github.com/marben/irpc/cmd/irpc/test/testtools"
 	"github.com/marben/irpc/irpcgen"
@@ -70,6 +71,14 @@ func TestSlice(t *testing.T) {
 	}{{1, "one"}, {5, "five"}, {10, "ten"}})
 	if resSS != 16 {
 		t.Fatalf("sliceOfStructs(): %d", resSS)
+	}
+
+	t.Log("slice of times")
+	tsIn := []time.Time{time.Now(), time.Now().Add(1 * time.Hour)}
+	resTS := c.sliceOfTimesReverse(tsIn)
+	slices.Reverse(tsIn)
+	if !slices.EqualFunc(resTS, tsIn, func(t1, t2 time.Time) bool { return t1.Equal(t2) }) {
+		t.Fatalf("%v != %v", resTS, tsIn)
 	}
 }
 

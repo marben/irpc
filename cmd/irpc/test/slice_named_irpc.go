@@ -10,10 +10,10 @@ import (
 )
 
 var _sliceNamedApiIrpcId = []byte{
-	0x63, 0x2f, 0xa5, 0xad, 0x42, 0xa1, 0x78, 0x1a,
-	0x43, 0xc1, 0x8d, 0x0d, 0x8f, 0x36, 0x43, 0xed,
-	0xa1, 0x32, 0x60, 0xfb, 0xbb, 0x08, 0x88, 0x71,
-	0xcf, 0x51, 0xf9, 0x74, 0xdd, 0x4e, 0xcc, 0x10,
+	0xc1, 0xc4, 0xcb, 0x9a, 0x26, 0x64, 0xa8, 0xbe,
+	0xde, 0x84, 0x25, 0xf2, 0xd2, 0x48, 0x39, 0x2f,
+	0xd6, 0xfe, 0xab, 0xd0, 0xc6, 0x9a, 0x15, 0xe7,
+	0xd5, 0x71, 0x72, 0x6e, 0xb4, 0x26, 0x5a, 0x61,
 }
 
 type sliceNamedApiIrpcService struct {
@@ -72,6 +72,20 @@ func (s *sliceNamedApiIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.A
 				return resp
 			}, nil
 		}, nil
+	case 3: // reverseNamedSliceOfTime
+		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _irpc_sliceNamedApi_reverseNamedSliceOfTimeReq
+			if err := args.Deserialize(d); err != nil {
+				return nil, err
+			}
+			return func(ctx context.Context) irpcgen.Serializable {
+				// EXECUTE
+				var resp _irpc_sliceNamedApi_reverseNamedSliceOfTimeResp
+				resp.p0 = s.impl.reverseNamedSliceOfTime(args.in)
+				return resp
+			}, nil
+		}, nil
 	default:
 		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, s.Id())
 	}
@@ -114,6 +128,16 @@ func (_c *sliceNamedApiIrpcClient) sumSliceOfNamedInts(vec []out.Uint8) out.Uint
 	}
 	var resp _irpc_sliceNamedApi_sumSliceOfNamedIntsResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _sliceNamedApiIrpcId, 2, req, &resp); err != nil {
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
+	}
+	return resp.p0
+}
+func (_c *sliceNamedApiIrpcClient) reverseNamedSliceOfTime(in namedSliceOfTime) namedSliceOfTime {
+	var req = _irpc_sliceNamedApi_reverseNamedSliceOfTimeReq{
+		in: in,
+	}
+	var resp _irpc_sliceNamedApi_reverseNamedSliceOfTimeResp
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _sliceNamedApiIrpcId, 3, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -229,6 +253,48 @@ func (s _irpc_sliceNamedApi_sumSliceOfNamedIntsResp) Serialize(e *irpcgen.Encode
 func (s *_irpc_sliceNamedApi_sumSliceOfNamedIntsResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := irpcgen.DecUint8(d, &s.p0); err != nil {
 		return fmt.Errorf("deserialize type out.Uint8: %w", err)
+	}
+	return nil
+}
+
+type _irpc_sliceNamedApi_reverseNamedSliceOfTimeReq struct {
+	in namedSliceOfTime
+}
+
+func (s _irpc_sliceNamedApi_reverseNamedSliceOfTimeReq) Serialize(e *irpcgen.Encoder) error {
+	if err := func(enc *irpcgen.Encoder, sl namedSliceOfTime) error {
+		return irpcgen.EncSlice(enc, sl, "time.Time", irpcgen.EncBinaryMarshaler)
+	}(e, s.in); err != nil {
+		return fmt.Errorf("serialize \"in\" of type namedSliceOfTime: %w", err)
+	}
+	return nil
+}
+func (s *_irpc_sliceNamedApi_reverseNamedSliceOfTimeReq) Deserialize(d *irpcgen.Decoder) error {
+	if err := func(dec *irpcgen.Decoder, sl *namedSliceOfTime) error {
+		return irpcgen.DecSlice(dec, sl, "time.Time", irpcgen.DecBinaryUnmarshaler)
+	}(d, &s.in); err != nil {
+		return fmt.Errorf("deserialize in of type namedSliceOfTime: %w", err)
+	}
+	return nil
+}
+
+type _irpc_sliceNamedApi_reverseNamedSliceOfTimeResp struct {
+	p0 namedSliceOfTime
+}
+
+func (s _irpc_sliceNamedApi_reverseNamedSliceOfTimeResp) Serialize(e *irpcgen.Encoder) error {
+	if err := func(enc *irpcgen.Encoder, sl namedSliceOfTime) error {
+		return irpcgen.EncSlice(enc, sl, "time.Time", irpcgen.EncBinaryMarshaler)
+	}(e, s.p0); err != nil {
+		return fmt.Errorf("serialize type namedSliceOfTime: %w", err)
+	}
+	return nil
+}
+func (s *_irpc_sliceNamedApi_reverseNamedSliceOfTimeResp) Deserialize(d *irpcgen.Decoder) error {
+	if err := func(dec *irpcgen.Decoder, sl *namedSliceOfTime) error {
+		return irpcgen.DecSlice(dec, sl, "time.Time", irpcgen.DecBinaryUnmarshaler)
+	}(d, &s.p0); err != nil {
+		return fmt.Errorf("deserialize type namedSliceOfTime: %w", err)
 	}
 	return nil
 }

@@ -6,13 +6,14 @@ import (
 	"context"
 	"fmt"
 	"github.com/marben/irpc/irpcgen"
+	"time"
 )
 
 var _mapTestIrpcId = []byte{
-	0xce, 0xc2, 0x7d, 0x62, 0x11, 0xec, 0x3b, 0x0b,
-	0xe5, 0xcc, 0xfc, 0xba, 0x84, 0xf6, 0x22, 0x1e,
-	0xa6, 0xab, 0x73, 0xa2, 0x9c, 0xa9, 0xd1, 0x02,
-	0x33, 0x77, 0x8f, 0x57, 0x3a, 0x54, 0xa7, 0xdc,
+	0x59, 0x0b, 0x21, 0xb4, 0x10, 0x02, 0xb4, 0x77,
+	0xf1, 0x84, 0x46, 0x00, 0x60, 0xcc, 0x94, 0x8c,
+	0xcc, 0xe5, 0xb6, 0x87, 0xd5, 0xa7, 0x61, 0xa9,
+	0x07, 0x88, 0x2d, 0x1a, 0x43, 0x38, 0xbc, 0x8e,
 }
 
 type mapTestIrpcService struct {
@@ -127,6 +128,20 @@ func (s *mapTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDese
 				return resp
 			}, nil
 		}, nil
+	case 7: // mapWithTime
+		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _irpc_mapTest_mapWithTimeReq
+			if err := args.Deserialize(d); err != nil {
+				return nil, err
+			}
+			return func(ctx context.Context) irpcgen.Serializable {
+				// EXECUTE
+				var resp _irpc_mapTest_mapWithTimeResp
+				resp.p02 = s.impl.mapWithTime(args.p0)
+				return resp
+			}, nil
+		}, nil
 	default:
 		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, s.Id())
 	}
@@ -209,6 +224,16 @@ func (_c *mapTestIrpcClient) isNil(p0 map[int]string) bool {
 	}
 	var resp _irpc_mapTest_isNilResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _mapTestIrpcId, 6, req, &resp); err != nil {
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
+	}
+	return resp.p02
+}
+func (_c *mapTestIrpcClient) mapWithTime(p0 map[time.Time]struct{}) []time.Time {
+	var req = _irpc_mapTest_mapWithTimeReq{
+		p0: p0,
+	}
+	var resp _irpc_mapTest_mapWithTimeResp
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _mapTestIrpcId, 7, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p02
@@ -664,6 +689,52 @@ func (s _irpc_mapTest_isNilResp) Serialize(e *irpcgen.Encoder) error {
 func (s *_irpc_mapTest_isNilResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := irpcgen.DecBool(d, &s.p02); err != nil {
 		return fmt.Errorf("deserialize type bool: %w", err)
+	}
+	return nil
+}
+
+type _irpc_mapTest_mapWithTimeReq struct {
+	p0 map[time.Time]struct{}
+}
+
+func (s _irpc_mapTest_mapWithTimeReq) Serialize(e *irpcgen.Encoder) error {
+	if err := func(enc *irpcgen.Encoder, m map[time.Time]struct{}) error {
+		return irpcgen.EncMap(enc, m, "time.Time", irpcgen.EncBinaryMarshaler, "struct{}", func(enc *irpcgen.Encoder, s struct{}) error {
+			return nil
+		})
+	}(e, s.p0); err != nil {
+		return fmt.Errorf("serialize \"p0\" of type map[time.Time]struct{}: %w", err)
+	}
+	return nil
+}
+func (s *_irpc_mapTest_mapWithTimeReq) Deserialize(d *irpcgen.Decoder) error {
+	if err := func(dec *irpcgen.Decoder, m *map[time.Time]struct{}) error {
+		return irpcgen.DecMap(dec, m, "time.Time", irpcgen.DecBinaryUnmarshaler, "struct{}", func(dec *irpcgen.Decoder, s *struct{}) error {
+			return nil
+		})
+	}(d, &s.p0); err != nil {
+		return fmt.Errorf("deserialize p0 of type map[time.Time]struct{}: %w", err)
+	}
+	return nil
+}
+
+type _irpc_mapTest_mapWithTimeResp struct {
+	p02 []time.Time
+}
+
+func (s _irpc_mapTest_mapWithTimeResp) Serialize(e *irpcgen.Encoder) error {
+	if err := func(enc *irpcgen.Encoder, sl []time.Time) error {
+		return irpcgen.EncSlice(enc, sl, "time.Time", irpcgen.EncBinaryMarshaler)
+	}(e, s.p02); err != nil {
+		return fmt.Errorf("serialize type []time.Time: %w", err)
+	}
+	return nil
+}
+func (s *_irpc_mapTest_mapWithTimeResp) Deserialize(d *irpcgen.Decoder) error {
+	if err := func(dec *irpcgen.Decoder, sl *[]time.Time) error {
+		return irpcgen.DecSlice(dec, sl, "time.Time", irpcgen.DecBinaryUnmarshaler)
+	}(d, &s.p02); err != nil {
+		return fmt.Errorf("deserialize type []time.Time: %w", err)
 	}
 	return nil
 }

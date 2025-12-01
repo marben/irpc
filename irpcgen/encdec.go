@@ -408,7 +408,7 @@ func DecBoolSlice[T ~[]bool](dec *Decoder, v *T) error {
 	return nil
 }
 
-func EncBinaryMarshaller(enc *Encoder, v encoding.BinaryMarshaler) error {
+func EncBinaryMarshaler[T encoding.BinaryMarshaler](enc *Encoder, v T) error {
 	data, err := v.MarshalBinary()
 	if err != nil {
 		return err
@@ -416,7 +416,7 @@ func EncBinaryMarshaller(enc *Encoder, v encoding.BinaryMarshaler) error {
 	return enc.byteSliceNonNil(data)
 }
 
-func DecBinaryUnmarshaller(dec *Decoder, dst encoding.BinaryUnmarshaler) error {
+func DecBinaryUnmarshaler[T encoding.BinaryUnmarshaler](dec *Decoder, dst T) error {
 	data, err := dec.byteSliceNonNil()
 	if err != nil {
 		return err

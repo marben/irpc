@@ -6,13 +6,14 @@ import (
 	"context"
 	"fmt"
 	"github.com/marben/irpc/irpcgen"
+	"time"
 )
 
 var _sliceTestIrpcId = []byte{
-	0x02, 0xf0, 0xe2, 0xf6, 0x01, 0x3e, 0x89, 0x0c,
-	0x45, 0x86, 0x0e, 0x49, 0x74, 0x66, 0x82, 0xe6,
-	0x71, 0x6b, 0x15, 0x81, 0xbd, 0x82, 0xca, 0x83,
-	0xee, 0x72, 0x06, 0x87, 0xea, 0x9d, 0x94, 0xb9,
+	0xc5, 0x0d, 0x07, 0x94, 0x02, 0x75, 0x39, 0x62,
+	0x8d, 0xab, 0x7f, 0x88, 0x55, 0x84, 0x89, 0xc5,
+	0x08, 0x44, 0x52, 0xa4, 0x54, 0x5d, 0x64, 0xd0,
+	0xd2, 0xe9, 0x01, 0x82, 0xbc, 0x5b, 0x0e, 0xef,
 }
 
 type sliceTestIrpcService struct {
@@ -223,6 +224,20 @@ func (s *sliceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 				return resp
 			}, nil
 		}, nil
+	case 14: // sliceOfTimesReverse
+		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
+			// DESERIALIZE
+			var args _irpc_sliceTest_sliceOfTimesReverseReq
+			if err := args.Deserialize(d); err != nil {
+				return nil, err
+			}
+			return func(ctx context.Context) irpcgen.Serializable {
+				// EXECUTE
+				var resp _irpc_sliceTest_sliceOfTimesReverseResp
+				resp.p0 = s.impl.sliceOfTimesReverse(args.in)
+				return resp
+			}, nil
+		}, nil
 	default:
 		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, s.Id())
 	}
@@ -375,6 +390,16 @@ func (_c *sliceTestIrpcClient) isNilByteSlice(bs []byte) bool {
 	}
 	var resp _irpc_sliceTest_isNilByteSliceResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _sliceTestIrpcId, 13, req, &resp); err != nil {
+		panic(err) // to avoid panic, make your func return error and regenerate irpc code
+	}
+	return resp.p0
+}
+func (_c *sliceTestIrpcClient) sliceOfTimesReverse(in []time.Time) []time.Time {
+	var req = _irpc_sliceTest_sliceOfTimesReverseReq{
+		in: in,
+	}
+	var resp _irpc_sliceTest_sliceOfTimesReverseResp
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _sliceTestIrpcId, 14, req, &resp); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 	return resp.p0
@@ -923,6 +948,48 @@ func (s _irpc_sliceTest_isNilByteSliceResp) Serialize(e *irpcgen.Encoder) error 
 func (s *_irpc_sliceTest_isNilByteSliceResp) Deserialize(d *irpcgen.Decoder) error {
 	if err := irpcgen.DecBool(d, &s.p0); err != nil {
 		return fmt.Errorf("deserialize type bool: %w", err)
+	}
+	return nil
+}
+
+type _irpc_sliceTest_sliceOfTimesReverseReq struct {
+	in []time.Time
+}
+
+func (s _irpc_sliceTest_sliceOfTimesReverseReq) Serialize(e *irpcgen.Encoder) error {
+	if err := func(enc *irpcgen.Encoder, sl []time.Time) error {
+		return irpcgen.EncSlice(enc, sl, "time.Time", irpcgen.EncBinaryMarshaler)
+	}(e, s.in); err != nil {
+		return fmt.Errorf("serialize \"in\" of type []time.Time: %w", err)
+	}
+	return nil
+}
+func (s *_irpc_sliceTest_sliceOfTimesReverseReq) Deserialize(d *irpcgen.Decoder) error {
+	if err := func(dec *irpcgen.Decoder, sl *[]time.Time) error {
+		return irpcgen.DecSlice(dec, sl, "time.Time", irpcgen.DecBinaryUnmarshaler)
+	}(d, &s.in); err != nil {
+		return fmt.Errorf("deserialize in of type []time.Time: %w", err)
+	}
+	return nil
+}
+
+type _irpc_sliceTest_sliceOfTimesReverseResp struct {
+	p0 []time.Time
+}
+
+func (s _irpc_sliceTest_sliceOfTimesReverseResp) Serialize(e *irpcgen.Encoder) error {
+	if err := func(enc *irpcgen.Encoder, sl []time.Time) error {
+		return irpcgen.EncSlice(enc, sl, "time.Time", irpcgen.EncBinaryMarshaler)
+	}(e, s.p0); err != nil {
+		return fmt.Errorf("serialize type []time.Time: %w", err)
+	}
+	return nil
+}
+func (s *_irpc_sliceTest_sliceOfTimesReverseResp) Deserialize(d *irpcgen.Decoder) error {
+	if err := func(dec *irpcgen.Decoder, sl *[]time.Time) error {
+		return irpcgen.DecSlice(dec, sl, "time.Time", irpcgen.DecBinaryUnmarshaler)
+	}(d, &s.p0); err != nil {
+		return fmt.Errorf("deserialize type []time.Time: %w", err)
 	}
 	return nil
 }
