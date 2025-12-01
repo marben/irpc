@@ -12,11 +12,11 @@ func EncBool[T ~bool](enc *Encoder, v T) error {
 }
 
 func DecBool[T ~bool](dec *Decoder, v *T) error {
-	var x bool
-	if err := dec.bool(&x); err != nil {
+	b, err := dec.bool()
+	if err != nil {
 		return err
 	}
-	*v = T(x)
+	*v = T(b)
 	return nil
 }
 
@@ -25,8 +25,8 @@ func EncUint8[T ~uint8](enc *Encoder, v T) error {
 }
 
 func DecUint8[T ~uint8](dec *Decoder, v *T) error {
-	var b byte
-	if err := dec.byte(&b); err != nil {
+	b, err := dec.byte()
+	if err != nil {
 		return err
 	}
 	*v = T(b)
@@ -38,11 +38,11 @@ func EncInt[T ~int](enc *Encoder, v T) error {
 }
 
 func DecInt[T ~int](dec *Decoder, v *T) error {
-	var x int64
-	if err := dec.varInt64(&x); err != nil {
+	i64, err := dec.varInt64()
+	if err != nil {
 		return err
 	}
-	*v = T(x)
+	*v = T(i64)
 	return nil
 }
 
@@ -51,11 +51,11 @@ func EncUint[T ~uint](enc *Encoder, v T) error {
 }
 
 func DecUint[T ~uint](dec *Decoder, v *T) error {
-	var x uint
-	if err := dec.uVarInt(&x); err != nil {
+	ui64, err := dec.uVarInt64()
+	if err != nil {
 		return err
 	}
-	*v = T(x)
+	*v = T(ui64)
 	return nil
 }
 
@@ -64,11 +64,11 @@ func EncInt8[T ~int8](enc *Encoder, v T) error {
 }
 
 func DecInt8[T ~int8](dec *Decoder, v *T) error {
-	var x byte
-	if err := dec.byte(&x); err != nil {
+	b, err := dec.byte()
+	if err != nil {
 		return err
 	}
-	*v = T(x)
+	*v = T(b)
 	return nil
 }
 
@@ -130,11 +130,11 @@ func EncInt64[T ~int64](enc *Encoder, v T) error {
 }
 
 func DecInt64[T ~int64](dec *Decoder, v *T) error {
-	var x int64
-	if err := dec.varInt64(&x); err != nil {
+	i64, err := dec.varInt64()
+	if err != nil {
 		return err
 	}
-	*v = T(x)
+	*v = T(i64)
 	return nil
 }
 
@@ -143,11 +143,11 @@ func EncUint64[T ~uint64](enc *Encoder, v T) error {
 }
 
 func DecUint64[T ~uint64](dec *Decoder, v *T) error {
-	var x uint64
-	if err := dec.uVarInt64(&x); err != nil {
+	ui64, err := dec.uVarInt64()
+	if err != nil {
 		return err
 	}
-	*v = T(x)
+	*v = T(ui64)
 	return nil
 }
 
@@ -156,11 +156,11 @@ func EncFloat32[T ~float32](enc *Encoder, v T) error {
 }
 
 func DecFloat32[T ~float32](dec *Decoder, v *T) error {
-	var x float32
-	if err := dec.float32le(&x); err != nil {
+	f, err := dec.float32le()
+	if err != nil {
 		return err
 	}
-	*v = T(x)
+	*v = T(f)
 	return nil
 }
 
@@ -169,11 +169,11 @@ func EncFloat64[T ~float64](enc *Encoder, v T) error {
 }
 
 func DecFloat64[T ~float64](dec *Decoder, v *T) error {
-	var x float64
-	if err := dec.float64le(&x); err != nil {
+	f, err := dec.float64le()
+	if err != nil {
 		return err
 	}
-	*v = T(x)
+	*v = T(f)
 	return nil
 }
 
@@ -182,11 +182,11 @@ func EncString[T ~string](enc *Encoder, v T) error {
 }
 
 func DecString[T ~string](dec *Decoder, v *T) error {
-	var x string
-	if err := dec.string(&x); err != nil {
+	str, err := dec.string()
+	if err != nil {
 		return err
 	}
-	*v = T(x)
+	*v = T(str)
 	return nil
 }
 
@@ -221,8 +221,8 @@ func DecSlice[S ~[]E, E any](dec *Decoder, sl *S, elemType string, elemDecFnc fu
 		sl = nil
 		return nil
 	}
-	var l int
-	if err := dec.len(&l); err != nil {
+	l, err := dec.len()
+	if err != nil {
 		return fmt.Errorf("deserialize slice len: %w", err)
 	}
 	lsl := make(S, l)
@@ -268,8 +268,8 @@ func DecMap[M ~map[K]V, K comparable, V any](dec *Decoder, m *M, kName string, k
 		m = nil
 		return nil
 	}
-	var l int
-	if err := dec.len(&l); err != nil {
+	l, err := dec.len()
+	if err != nil {
 		return fmt.Errorf("deserialize map len: %w", err)
 	}
 	lm := make(M, l)
@@ -317,8 +317,8 @@ func DecByteSlice[T ~[]byte](dec *Decoder, v *T) error {
 		return nil
 	}
 
-	var l int
-	if err := dec.len(&l); err != nil {
+	l, err := dec.len()
+	if err != nil {
 		return fmt.Errorf("deserialize len: %w", err)
 	}
 
@@ -385,8 +385,8 @@ func DecBoolSlice[T ~[]bool](dec *Decoder, v *T) error {
 		return nil
 	}
 
-	var l int
-	if err := dec.len(&l); err != nil {
+	l, err := dec.len()
+	if err != nil {
 		return fmt.Errorf("slice len: %w", err)
 	}
 

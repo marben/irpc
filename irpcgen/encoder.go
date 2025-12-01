@@ -40,7 +40,7 @@ func (e *Encoder) bool(v bool) error {
 
 func (e *Encoder) isNil(isNil bool) error {
 	// we encode isNil as 0 and isNotNil(aka data follows) as 1
-	// to be more consistant with general thinking about wire protocols
+	// to be more consistent with general thinking about wire protocols
 	return e.bool(!isNil)
 }
 
@@ -88,8 +88,7 @@ func (e *Encoder) float64le(v float64) error {
 	return nil
 }
 
-func (e *Encoder) byteSlice(v []byte) error {
-	// todo: handle nil
+func (e *Encoder) byteSliceNonNil(v []byte) error {
 	if err := e.len(len(v)); err != nil {
 		return fmt.Errorf("slice len: %w", err)
 	}
@@ -100,8 +99,7 @@ func (e *Encoder) byteSlice(v []byte) error {
 }
 
 func (e *Encoder) string(v string) error {
-	// todo: write own function without nil
-	return e.byteSlice([]byte(v))
+	return e.byteSliceNonNil([]byte(v))
 }
 
 func (e *Encoder) binaryMarshaler(bm encoding.BinaryMarshaler) error {
@@ -110,5 +108,5 @@ func (e *Encoder) binaryMarshaler(bm encoding.BinaryMarshaler) error {
 	if err != nil {
 		return err
 	}
-	return e.byteSlice(data)
+	return e.byteSliceNonNil(data)
 }
