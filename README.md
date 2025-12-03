@@ -1,3 +1,97 @@
+# irpc — Interface-based RPC generator for Go
+
+irpc is a lightweight RPC framework for Go that generates client and server implementations directly from Go interfaces.  
+You implement your interface once, and irpc generates the network glue: encoding, decoding, dispatch, and a type-safe client.
+
+**No wrappers. No boilerplate. Just interfaces.**
+
+---
+
+## ✨ Features
+
+- **Interface-first design** — define a Go interface, and irpc generates:
+  - A server implementation that exposes it over a connection
+  - A client that implements the same interface and calls the server remotely
+- **Zero JSON / reflection overhead** — compact binary encoding with versioned payload metadata
+- **Fast startup** — minimal handshake, no schema registry, no IDL
+- **Type-safe:** client has the exact same method signatures as your interface
+- **Transport-agnostic:** works with any `io.ReadWriteCloser` (TCP, WebSocket, pipes, process stdio…)
+- **Small and dependency-free** — no heavy runtime
+
+---
+
+## ⚠️ Status
+
+**Experimental (v0.x).**  
+APIs may change until v1. Feedback and contributions are welcome.
+
+---
+
+## 🚀 Quickstart
+
+### 1. Install the generator
+
+```bash
+go install github.com/marben/irpc/cmd/irpc@latest
+```
+### 2. Define a Go interface
+``` go
+// math.go
+package mathsvc
+
+type Math interface {
+    Add(a, b int) (int, error)
+    Mul(a, b int) (int, error)
+}
+```
+
+### 3. Generate RPC code
+```bash
+irpc math.go
+```
+This produces math_irpc.go with:
+
+```go
+NewMathIrpcClient(endpoint irpcgen.Endpoint) (*MathIrpcClient, error)
+```
+where MathIrpcClient implements Math interface
+
+```go
+NewMathIrpcService(impl Math) *MathIrpcService
+```
+
+### 4. Use it — Server
+```go
+ln, _ := net.Listen("tcp", ":9000")
+```
+
+### 5. Use it — Client
+```go
+res, err := cli.Add(2, 3)
+fmt.Println(res) // => 5
+```
+
+📦 Example Project
+
+A working example with client/server code is here:
+
+👉 https://github.com/marben/irpc-examples
+
+
+(including build scripts and generated code)
+
+📡 Protocol
+
+
+📄 License
+
+MIT — see LICENSE
+
+🤝 Contributing
+
+PRs, issues, and feedback are welcome.
+
+**old readme**
 # IRPC - interface based rpc generator for go programming language
 
 IRPC is a library and code generator that generates network code based on your go interface definition.
