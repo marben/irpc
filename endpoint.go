@@ -119,7 +119,7 @@ func (e *Endpoint) serve(ctx context.Context) {
 
 // Close immediately stops serving any requests,
 // signals closing of our endpoint, closes the underlying connection
-// returns nil on successfull closing
+// returns nil on successful closing
 // Close returns ErrEndpointClosed if the Endpoint was already closed
 func (e *Endpoint) Close() error {
 	// if the context was already canceled, there was already an error

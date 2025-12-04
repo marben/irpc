@@ -184,7 +184,7 @@ func (i interfaceType) codeblocks(q *qualifier) []string {
 	}
 	sb.WriteString("}\n")
 
-	// we implement each interface function and return value stored withing the struct
+	// we implement each interface function and return value stored within the struct
 	for _, f := range i.fncs {
 		fmt.Fprintf(sb, "func (i %s)%s()(%s){\n", i.implTypeName, f.name, f.listNamesWithTypes(q))
 		fmt.Fprintf(sb, "return %s\n", f.listImplNamesPrefixed("i."))

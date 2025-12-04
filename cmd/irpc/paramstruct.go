@@ -186,7 +186,7 @@ func (sg paramStructGenerator) types() []Type {
 
 // genParam descibes a function parameter and it's representation in our req/resp structure
 type genParam struct {
-	// identifier. eg: 'a' in func(a int){}. if it's ommited or '_', we generate a name, because we must allow it in our client
+	// identifier. eg: 'a' in func(a int){}. if it's omited or '_', we generate a name, because we must allow it in our client
 	// unique within func definition
 	identifier string
 

@@ -11,7 +11,7 @@ import (
 )
 
 // id len specifies how long our service's id will be. currently the max is 32 bytes as we are using sha256 to generate them
-// actual id to negotiate between endpoints doesn't have to be full lenght (currently it's only 4 bytes)
+// actual id to negotiate between endpoints doesn't have to be full length (currently it's only 4 bytes)
 const generatedIdLen = 32
 
 type generator struct {

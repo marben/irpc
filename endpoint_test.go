@@ -289,7 +289,7 @@ func TestMaxWorkersNumber(t *testing.T) {
 		t.Fatalf("new client: %+v", err)
 	}
 
-	// start max parrallel workers + 1 calls in parallel goroutines
+	// start max parallel workers + 1 calls in parallel goroutines
 	wg := sync.WaitGroup{}
 	for i := range parallelWorkers + 1 {
 		wg.Add(1)

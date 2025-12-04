@@ -7,8 +7,6 @@
 - formatting with stdlib produces different (imho worse) than gofmt.
     - i am not sure why, but it seems to be a common thing. esapecially with nested func definitions like with struct encoding
     - is there a fix?
-- think about and probably implement nil-ability of slices, maps, etc...
- - perhaps use generics for slices/maps etc? it would simplify generated code greatly
 - make sure passing interface{} != nil returns something that is not nil ??
 - looking at test struct_irpc.go vect3x3 serialization, there is a lot of repetitive code
     - perhaps we could attach named serialization functions for sub-structures? in this case vect3

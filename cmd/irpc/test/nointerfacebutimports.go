@@ -6,7 +6,7 @@ import (
 	"github.com/marben/irpc/cmd/irpc/test/out"
 )
 
-// this file tests, whether imports are properly ommited
+// this file tests, whether imports are properly omitted
 
 //go:generate go run ../
 
