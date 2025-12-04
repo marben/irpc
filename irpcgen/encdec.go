@@ -218,7 +218,6 @@ func DecSlice[S ~[]E, E any](dec *Decoder, sl *S, elemType string, elemDecFnc fu
 		return fmt.Errorf("deserialize isNil: %w", err)
 	}
 	if isNil {
-		sl = nil
 		return nil
 	}
 	l, err := dec.len()
@@ -265,7 +264,6 @@ func DecMap[M ~map[K]V, K comparable, V any](dec *Decoder, m *M, kName string, k
 		return fmt.Errorf("deserialize isNil: %w", err)
 	}
 	if isNil {
-		m = nil
 		return nil
 	}
 	l, err := dec.len()
@@ -313,7 +311,6 @@ func DecByteSlice[T ~[]byte](dec *Decoder, v *T) error {
 		return fmt.Errorf("deserialize isNil: %w", err)
 	}
 	if isNil {
-		v = nil
 		return nil
 	}
 
@@ -381,7 +378,6 @@ func DecBoolSlice[T ~[]bool](dec *Decoder, v *T) error {
 		return fmt.Errorf("deserialize isNil: %w", err)
 	}
 	if isNil {
-		v = nil
 		return nil
 	}
 
