@@ -150,7 +150,7 @@ func (i interfaceType) genDecFunc(q *qualifier) string {
 	fmt.Fprintf(sb, "func (dec *irpcgen.Decoder, s *%s) error {\n", i.name(q))
 	fmt.Fprintf(sb, `var isNil bool
 		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
-			return fmt.Errorf("deserialize isNil: %%w:", err)
+			return fmt.Errorf("deserialize isNil: %%w", err)
 		}
 			if isNil {
 				return nil

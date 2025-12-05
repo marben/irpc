@@ -10,10 +10,10 @@ import (
 )
 
 var _mapTestIrpcId = []byte{
-	0x59, 0x0b, 0x21, 0xb4, 0x10, 0x02, 0xb4, 0x77,
-	0xf1, 0x84, 0x46, 0x00, 0x60, 0xcc, 0x94, 0x8c,
-	0xcc, 0xe5, 0xb6, 0x87, 0xd5, 0xa7, 0x61, 0xa9,
-	0x07, 0x88, 0x2d, 0x1a, 0x43, 0x38, 0xbc, 0x8e,
+	0x50, 0xba, 0xe7, 0xe1, 0xc7, 0x29, 0x10, 0x8f,
+	0xde, 0x85, 0x5e, 0x35, 0xd8, 0x80, 0x67, 0x08,
+	0xda, 0xbb, 0x31, 0x33, 0xd3, 0x68, 0x25, 0x8d,
+	0x96, 0x84, 0x4e, 0x0f, 0x46, 0x82, 0xb4, 0x95,
 }
 
 type mapTestIrpcService struct {
@@ -596,7 +596,7 @@ func (s *_irpc_mapTest_emptyInterfaceMapReflectReq) Deserialize(d *irpcgen.Decod
 		return irpcgen.DecMap(dec, m, "int", irpcgen.DecInt, "interface{}", func(dec *irpcgen.Decoder, s *interface{}) error {
 			var isNil bool
 			if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
-				return fmt.Errorf("deserialize isNil: %w:", err)
+				return fmt.Errorf("deserialize isNil: %w", err)
 			}
 			if isNil {
 				return nil
@@ -640,7 +640,7 @@ func (s *_irpc_mapTest_emptyInterfaceMapReflectResp) Deserialize(d *irpcgen.Deco
 		return irpcgen.DecMap(dec, m, "int", irpcgen.DecInt, "interface{}", func(dec *irpcgen.Decoder, s *interface{}) error {
 			var isNil bool
 			if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
-				return fmt.Errorf("deserialize isNil: %w:", err)
+				return fmt.Errorf("deserialize isNil: %w", err)
 			}
 			if isNil {
 				return nil

@@ -11,10 +11,10 @@ import (
 )
 
 var _interfaceTestIrpcId = []byte{
-	0xc9, 0x7d, 0x2a, 0xc4, 0xc6, 0x33, 0xd3, 0x82,
-	0x2e, 0x90, 0x7d, 0x7e, 0x68, 0x7e, 0xba, 0xe9,
-	0x3a, 0x1f, 0x16, 0x8c, 0x6d, 0x5d, 0x64, 0x86,
-	0x84, 0x9d, 0x21, 0x11, 0xe9, 0xbb, 0xee, 0xfe,
+	0xe8, 0x7b, 0x51, 0xd2, 0x29, 0x16, 0x2e, 0x97,
+	0x23, 0x3c, 0x79, 0x03, 0x35, 0x37, 0xa6, 0x5b,
+	0xf6, 0x82, 0x92, 0xa5, 0x1a, 0xdd, 0xf7, 0xd4,
+	0x0d, 0xc2, 0x2d, 0x21, 0x76, 0xee, 0x22, 0x4d,
 }
 
 type interfaceTestIrpcService struct {
@@ -280,7 +280,7 @@ func (s *_irpc_interfaceTest_rtnErrorWithMessageResp) Deserialize(d *irpcgen.Dec
 	if err := func(dec *irpcgen.Decoder, s *error) error {
 		var isNil bool
 		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
-			return fmt.Errorf("deserialize isNil: %w:", err)
+			return fmt.Errorf("deserialize isNil: %w", err)
 		}
 		if isNil {
 			return nil
@@ -332,7 +332,7 @@ func (s *_irpc_interfaceTest_rtnNilErrorResp) Deserialize(d *irpcgen.Decoder) er
 	if err := func(dec *irpcgen.Decoder, s *error) error {
 		var isNil bool
 		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
-			return fmt.Errorf("deserialize isNil: %w:", err)
+			return fmt.Errorf("deserialize isNil: %w", err)
 		}
 		if isNil {
 			return nil
@@ -393,7 +393,7 @@ func (s *_irpc_interfaceTest_rtnTwoErrorsResp) Deserialize(d *irpcgen.Decoder) e
 	if err := func(dec *irpcgen.Decoder, s *error) error {
 		var isNil bool
 		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
-			return fmt.Errorf("deserialize isNil: %w:", err)
+			return fmt.Errorf("deserialize isNil: %w", err)
 		}
 		if isNil {
 			return nil
@@ -410,7 +410,7 @@ func (s *_irpc_interfaceTest_rtnTwoErrorsResp) Deserialize(d *irpcgen.Decoder) e
 	if err := func(dec *irpcgen.Decoder, s *error) error {
 		var isNil bool
 		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
-			return fmt.Errorf("deserialize isNil: %w:", err)
+			return fmt.Errorf("deserialize isNil: %w", err)
 		}
 		if isNil {
 			return nil
@@ -478,7 +478,7 @@ func (s *_irpc_interfaceTest_rtnStringAndErrorResp) Deserialize(d *irpcgen.Decod
 	if err := func(dec *irpcgen.Decoder, s *error) error {
 		var isNil bool
 		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
-			return fmt.Errorf("deserialize isNil: %w:", err)
+			return fmt.Errorf("deserialize isNil: %w", err)
 		}
 		if isNil {
 			return nil
@@ -526,7 +526,7 @@ func (s *_irpc_interfaceTest_passCustomInterfaceAndReturnItModifiedReq) Deserial
 	if err := func(dec *irpcgen.Decoder, s *customInterface) error {
 		var isNil bool
 		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
-			return fmt.Errorf("deserialize isNil: %w:", err)
+			return fmt.Errorf("deserialize isNil: %w", err)
 		}
 		if isNil {
 			return nil
@@ -606,7 +606,7 @@ func (s *_irpc_interfaceTest_passCustomInterfaceAndReturnItModifiedResp) Deseria
 	if err := func(dec *irpcgen.Decoder, s *customInterface) error {
 		var isNil bool
 		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
-			return fmt.Errorf("deserialize isNil: %w:", err)
+			return fmt.Errorf("deserialize isNil: %w", err)
 		}
 		if isNil {
 			return nil
@@ -626,7 +626,7 @@ func (s *_irpc_interfaceTest_passCustomInterfaceAndReturnItModifiedResp) Deseria
 	if err := func(dec *irpcgen.Decoder, s *error) error {
 		var isNil bool
 		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
-			return fmt.Errorf("deserialize isNil: %w:", err)
+			return fmt.Errorf("deserialize isNil: %w", err)
 		}
 		if isNil {
 			return nil
@@ -674,7 +674,7 @@ func (s *_irpc_interfaceTest_passJustCustomInterfaceWithoutErrorReq) Deserialize
 	if err := func(dec *irpcgen.Decoder, s *customInterface) error {
 		var isNil bool
 		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
-			return fmt.Errorf("deserialize isNil: %w:", err)
+			return fmt.Errorf("deserialize isNil: %w", err)
 		}
 		if isNil {
 			return nil
@@ -725,7 +725,7 @@ func (s *_irpc_interfaceTest_passJustCustomInterfaceWithoutErrorResp) Deserializ
 	if err := func(dec *irpcgen.Decoder, s *customInterface) error {
 		var isNil bool
 		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
-			return fmt.Errorf("deserialize isNil: %w:", err)
+			return fmt.Errorf("deserialize isNil: %w", err)
 		}
 		if isNil {
 			return nil
@@ -774,7 +774,7 @@ func (s *_irpc_interfaceTest_passAnonInterfaceReq) Deserialize(d *irpcgen.Decode
 		Age() int
 		Name() string
 	}) error { var isNil bool; if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
-		return fmt.Errorf("deserialize isNil: %w:", err)
+		return fmt.Errorf("deserialize isNil: %w", err)
 	}; if isNil {
 		return nil
 	}; var impl _iface_Age_Name_interfaceTest_impl; if err := irpcgen.DecInt(dec, &impl._Age_0_); err != nil {
@@ -867,7 +867,7 @@ func (s *_irpc_interfaceTest_passAnonInterfaceWithNamedParamsReq) Deserialize(d 
 		b() out2.Uint8
 		c() (out2.Uint8, error)
 	}) error { var isNil bool; if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
-		return fmt.Errorf("deserialize isNil: %w:", err)
+		return fmt.Errorf("deserialize isNil: %w", err)
 	}; if isNil {
 		return nil
 	}; var impl _iface_a_b_c_interfaceTest_impl; if err := irpcgen.DecUint8(dec, &impl._a_0_); err != nil {
@@ -881,7 +881,7 @@ func (s *_irpc_interfaceTest_passAnonInterfaceWithNamedParamsReq) Deserialize(d 
 	}; if err := func(dec *irpcgen.Decoder, s *error) error {
 		var isNil bool
 		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
-			return fmt.Errorf("deserialize isNil: %w:", err)
+			return fmt.Errorf("deserialize isNil: %w", err)
 		}
 		if isNil {
 			return nil
@@ -936,10 +936,10 @@ func (s *_irpc_interfaceTest_passAnonInterfaceWithNamedParamsResp) Deserialize(d
 }
 
 var _customInterfaceIrpcId = []byte{
-	0x8e, 0x54, 0x44, 0x1f, 0x65, 0x86, 0x72, 0xb1,
-	0xa4, 0x47, 0x6a, 0x2f, 0xe2, 0x76, 0x45, 0x84,
-	0x15, 0x4d, 0x72, 0xd4, 0x78, 0xcb, 0x13, 0x3a,
-	0x0c, 0x36, 0x77, 0x4d, 0xa6, 0xb7, 0xe4, 0x14,
+	0x22, 0x1e, 0x30, 0x46, 0x5c, 0x1a, 0xa3, 0x07,
+	0x84, 0xda, 0xa4, 0x9d, 0x8a, 0xd2, 0xcc, 0x5f,
+	0x47, 0x6e, 0xad, 0x09, 0x37, 0xdd, 0xa5, 0xe2,
+	0xee, 0xe1, 0x82, 0x24, 0x1d, 0x14, 0xa0, 0xa7,
 }
 
 type customInterfaceIrpcService struct {
