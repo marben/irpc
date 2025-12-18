@@ -1,63 +1,144 @@
-# IRPC - interface based rpc generator for go programming language
+# IRPC - Interface-based RPC Code Generator for Go
 
-IRPC is a library and code generator that generates network code based on your go interface definition.
+`irpc` is a small, dependency-free RPC generator for Go.  
+You write a Go interface, and `irpc` generates:
 
-It aims to make the network code as invisible as possible, allowing you to treat the generated client code as any other implementation of your interface. No wrappers needed.
+- A **client stub** that implements the same interface and forwards calls over a connection
+- A **server adapter** that dispatches incoming requests to your implementation
+- **Binary serialization** code for method parameters and return values
 
-IRPC is very efficient as it doesn't transfer metadata. Payload layout is defined in the generated code, which is used by both client and server. Layout definition/api version is verified upon network handshake.
+IRPC is built around **simplicity**, **type safety**, and **readable generated code**.  
+No reflection. No schema files. No external IDLs.
 
-IRPC allows for bidirectional rpc calls over any io.ReadWriteCloser such as Tcp socket or Websocket etc
 
-### Example network api definition:
-```go
-// api definition inside math.go
-type Math interface {
-    Add(a, b int) (int, error)
-}
+---
+
+## ✨ Features
+
+- Generate RPC clients and servers directly from plain Go interfaces
+- Duplex (bidirectional) RPC — both sides can call each other
+- Works with any `io.ReadWriteCloser` (TCP, pipes, WebSockets ...)
+- No reflection, no hidden magic
+- Supports:
+  - primitives
+  - structs
+  - slices, maps
+  - `time.Time`
+  - context.Context
+  - some interfaces (`error`)
+
+---
+
+## 🚀 Getting Started
+
+Install:
+
+```bash
+go install github.com/marben/irpc/cmd/irpc@latest
 ```
 
-Running IRPC command tool`irpc math.go` generates file `math_irpc.go` with client and service implementation.
-
-### Generated client
-A working client, that implements Math interface, meaning we can directly call Add(1,2) on it
-```go
-// inside math_irpc.go
-func NewMathIrpcClient(endpoint *irpc.Endpoint) (*MathIrpcClient, error) {...}
-```
-```go
-// example use:
-client, err := NewMathIrpcClient(ep)
-result, err := client.Add(1,2) // a network call
-fmt.Println(result)    // "3"  (presuming our implementation did a simple addition)
+Generate code:
+``` bash
+irpc api.go
 ```
 
-### Generated service
-Service that takes `Math` interface implementation and forward incoming network requests to it, returning the results back over network
-```go
-// inside math_irpc.go
-func NewMathIrpcService(impl Math) *MathIrpcService
+Generated file:
+```
+api_irpc.go
 ```
 
 
-# Installation
-IRPC code generator tool is installed by:  
-`go install github.com/marben/irpc/cmd/irpc@latest`  
+## 📘 Example: KV Store Using net.Pipe
 
-You may need to add go bin directory (typically `~/go/bin`) to your `PATH` env variable.  
-IRPC command tool is called `irpc`
+Here is a minimal, self-contained example demonstrating:
+- how to create endpoints
+- how to register a service
+- how to call generated client methods
+- how RPC works over an in-memory pipe (no TCP needed)
 
-IRPC library needs to be added as dependency to your go module:  
-`go get github.com/marben/irpc`
+`main.go`
 ```go
-// import
-import "github.com/marben/irpc"
+package main
 
+import (
+	"fmt"
+	"log"
+	"net"
+	"time"
+
+	"github.com/marben/irpc"
+)
+
+// --------------------------------------------------------------
+// Example usage of the generated RPC client & service
+// --------------------------------------------------------------
 func main() {
-	// irpc package name is 'irpc'
-	srvr, err := irpc.NewServer(...)
+	// For a self-contained example, we use net.Pipe instead
+	// of actual TCP: no ports, no concurrency issues.
+	clientConn, serverConn := net.Pipe()
+
+	// Each side of the connection needs an Endpoint to handle RPC.
+	serverEp := irpc.NewEndpoint(serverConn)
+	defer serverEp.Close()
+	clientEp := irpc.NewEndpoint(clientConn)
+	defer clientEp.Close()
+
+	// In-memory implementation of the KV store.
+	kvStore := newKVMemory()
+
+	// Wrap our implementation in a generated service adapter.
+	service := NewKVStoreIrpcService(kvStore)
+
+	// Registering service on server endpoint makes it available to the client endpoint
+	// After this, the client endpoint can call KVStore methods remotely.
+	serverEp.RegisterService(service)
+
+	// Create the generated client-side proxy.
+	// Client implements KVStore interface, so it can be passed around as such
+	client, err := NewKVStoreIrpcClient(clientEp)
+	if err != nil {
+		log.Fatalf("NewKVStoreIrpcClient: %v", err)
+	}
+
+	fmt.Println("Putting key 'hello'")
+	if err := client.Put("hello", []byte("world"), 2*time.Minute); err != nil {
+		log.Fatalf("client.Put: %v", err)
+	}
+
+	value, err := client.Get("hello")
+	if err != nil {
+		log.Fatalf("client.Get: %v", err)
+	}
+	fmt.Println("Value: ", string(value))
+
+	oneMinuteAgo := time.Now().Add(-1 * time.Minute)
+
+	// Since we just wrote the key, this will always return ["hello"].
+	keys, err := client.ModifiedSince(oneMinuteAgo)
+	if err != nil {
+		log.Fatalf("client.ModifiedSince: %v", err)
+	}
+	fmt.Println("Modified keys:", keys)
 }
+
+
 ```
 
-# Working example
-Have a look to see, how easy it is:  
-[github.com/marben/irpc_tcp_example](https://github.com/marben/irpc_tcp_example) - easy to read example code
+## 🔁 Bidirectional RPC
+Both sides of a connection can:
+- register services
+- call each other’s methods
+
+This allows patterns like:
+- distributed workers
+- server-initiated callbacks
+- remote control interfaces
+- push notifications
+- multi-node computation
+
+## 📅 Roadmap
+- Project is in failrly well working state, but needs api finalization and version definition
+
+## 🤝 Contributing
+PRs and issues are welcome!
+If you build something cool with IRPC, please share it.

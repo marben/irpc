@@ -36,5 +36,6 @@
 - Document versioning strategy in the README.
 
 ### Message Handling
+- Decide, whether call panicking on a server should crash whole server, or just do some logging?
 - Implement and test sending large messages with varying `endpoint.MaxMsgLen`.  
   The client should split messages as needed.

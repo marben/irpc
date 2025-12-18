@@ -27,7 +27,6 @@ type Server struct {
 	listenersWg  sync.WaitGroup
 }
 
-// todo: pass services in constructor?
 func NewServer(services ...irpcgen.Service) *Server {
 	return &Server{
 		listeners: make(map[net.Listener]struct{}),
