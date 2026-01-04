@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"sync"
 
 	"github.com/marben/irpc/irpcgen"
@@ -24,18 +25,31 @@ var DefaultParallelClientCalls = DefaultParallelWorkers + 1
 
 // Endpoint related errors
 var (
-	ErrEndpointClosed              = errors.New("endpoint is closed")
-	ErrEndpointClosedByCounterpart = errors.Join(ErrEndpointClosed, errors.New("endpoint closed by counterpart"))
-	ErrServiceNotFound             = errors.New("service not found")
+	ErrEndpointClosed              = errors.New("irpc: endpoint is closed")
+	ErrEndpointClosedByCounterpart = errors.New("irpc: endpoint closed by counterpart")
+	ErrServiceNotFound             = errors.New("irpc: service not found") // todo: not used?
 	errProtocolError               = errors.New("protocol error")
 )
 
-// Endpoint represents one side of a socket connection.
-// There needs to be a serving endpoint on both sides of connection for communication to work.
+// Endpoint represents one side of an active RPC connection.
+//
+// Endpoint owns the lifetime of the underlying connection and the goroutines
+// servicing it. The lifetime is exposed via Context().
+//
+// The context returned by Context() is canceled when:
+//   - Close is called locally
+//   - the remote endpoint closes the connection
+//   - a protocol or I/O error occurs
+//
+// The cancellation cause can be inspected using context.Cause.
 type Endpoint struct {
 	// maps serviceId to service. uses array, because slices are not comparable in maps
 	services    map[[serviceHashLen]byte]irpcgen.Service
 	servicesMux sync.Mutex
+
+	// localAddr and remoteAddr are nil, when not set with Option
+	localAddr  net.Addr // our network address if available
+	remoteAddr net.Addr // counterpar network address if available
 
 	enc    *irpcgen.Encoder // encoder for writing messages to the connection
 	encMux sync.Mutex
@@ -46,8 +60,10 @@ type Endpoint struct {
 
 	connCloser io.Closer // closes our connection
 
+	closeOnce sync.Once
+
 	// context is Done() after the endpoint is closed
-	Ctx       context.Context
+	ctx       context.Context
 	ctxCancel context.CancelCauseFunc
 
 	// some options - possibly move to a separate struct?
@@ -57,8 +73,8 @@ type Endpoint struct {
 
 // NewEndpoint creates and runs a new Endpoint with the given connection and options.
 // It immeditely starts a go routine servicing the communication.
-// Services provided by this enpoint can be added as with [WithService] oprtion, or can be registered later with [Endpoint.RegisterService] call
-func NewEndpoint(conn io.ReadWriteCloser, opts ...Option) *Endpoint {
+// Services provided by this enpoint can be added as with [WithEndpointServices] oprtion, or can be registered later with [Endpoint.RegisterService] call
+func NewEndpoint(conn io.ReadWriteCloser, opts ...EndpointOption) *Endpoint {
 	epCtx, endpointContextCancel := context.WithCancelCause(context.Background())
 
 	ep := &Endpoint{
@@ -66,7 +82,7 @@ func NewEndpoint(conn io.ReadWriteCloser, opts ...Option) *Endpoint {
 		enc:                 irpcgen.NewEncoder(conn),
 		dec:                 irpcgen.NewDecoder(conn),
 		connCloser:          conn,
-		Ctx:                 epCtx,
+		ctx:                 epCtx,
 		ctxCancel:           endpointContextCancel,
 		parallelWorkers:     DefaultParallelWorkers,
 		parallelClientCalls: DefaultParallelClientCalls,
@@ -85,31 +101,29 @@ func NewEndpoint(conn io.ReadWriteCloser, opts ...Option) *Endpoint {
 	return ep
 }
 
-// Done returns a channel that's closed when work of this endpoint is done
-func (e *Endpoint) Done() <-chan struct{} {
-	return e.Ctx.Done()
-}
-
-// Err returns the underlying cause for ending of this endpoint
-func (e *Endpoint) Err() error {
-	return context.Cause(e.Ctx)
+// Context returns a context that is canceled when the endpoint is closed.
+//
+// The cancellation cause describes why the endpoint terminated and can be
+// retrieved using context.Cause.
+func (e *Endpoint) Context() context.Context {
+	return e.ctx
 }
 
 func (e *Endpoint) serve(ctx context.Context) {
 	exec := newExecutor(ctx, e.parallelWorkers)
 	readC := make(chan error, 1)
 	go func() {
-		readC <- e.readMsgs(exec)
+		readC <- e.readLoop(exec)
 	}()
 
 	var err error
 	select {
 	case <-ctx.Done():
-	// Close() was called
+	// termination already initiated (Close or other path)
 	case err = <-readC:
-		e.ctxCancel(errors.Join(ErrEndpointClosed, err))
+		e.handleIOError(err)
 	case err = <-exec.errC:
-		e.ctxCancel(errors.Join(ErrEndpointClosed, err))
+		e.terminate(errors.Join(ErrEndpointClosed, err))
 	}
 
 	// following 2 calls may fail for various reasons, but we want to be sure, they were made
@@ -117,24 +131,51 @@ func (e *Endpoint) serve(ctx context.Context) {
 	e.connCloser.Close()
 }
 
-// Close immediately stops serving any requests,
-// signals closing of our endpoint, closes the underlying connection
-// returns nil on successful closing
-// Close returns ErrEndpointClosed if the Endpoint was already closed
-func (e *Endpoint) Close() error {
-	// if the context was already canceled, there was already an error
-	if e.Err() != nil {
-		return e.Err()
-	}
+func (e *Endpoint) terminate(cause error) {
+	e.closeOnce.Do(func() {
+		// Always close transport first to unblock goroutines
+		_ = e.connCloser.Close()
 
-	e.ctxCancel(ErrEndpointClosed)
+		e.ctxCancel(cause)
+	})
+}
+
+func (e *Endpoint) handleIOError(err error) {
+	e.closeOnce.Do(func() {
+		var cause error
+
+		switch {
+		case errors.Is(err, ErrEndpointClosedByCounterpart),
+			errors.Is(err, io.EOF), errors.Is(err, net.ErrClosed):
+			// Clean remote shutdown
+			cause = ErrEndpointClosedByCounterpart
+
+		default:
+			// Transport or protocol error
+			cause = errors.Join(ErrEndpointClosed, err)
+		}
+
+		_ = e.connCloser.Close()
+		e.ctxCancel(cause)
+	})
+}
+
+// Close initiates shutdown of the endpoint.
+//
+// Close is idempotent. Calling Close cancels the endpoint's context with
+// ErrEndpointClosed as the cause.
+func (e *Endpoint) Close() error {
+	if cause := context.Cause(e.ctx); cause != nil {
+		return cause
+	}
+	e.terminate(ErrEndpointClosed)
 	return nil
 }
 
 // RegisterClient registers client on remote endpoint - currently a no-op
 func (e *Endpoint) RegisterClient(serviceId []byte) error {
 	// currently a no-op
-	// we could use this call to negotiate shortcut for serviceId to reduce further service data
+	// we could use this call to negotiate shortcut for serviceId to further reduce service data
 	// we could also use this to make sure service is registered on remote ep. this would increase initial latency, so perhaps make it configurable?
 	return nil
 }
@@ -232,8 +273,8 @@ func (e *Endpoint) CallRemoteFunc(ctx context.Context, serviceId []byte, funcId 
 	pendingReq, err := e.sendRpcRequest(ctx, serviceId[:serviceHashLen], funcId, reqData, respData)
 	if err != nil {
 		// check if endpoint was closed
-		if e.Err() != nil {
-			return e.Err()
+		if cause := context.Cause(e.ctx); cause != nil {
+			return cause
 		}
 		return err
 	}
@@ -244,22 +285,23 @@ func (e *Endpoint) CallRemoteFunc(ctx context.Context, serviceId []byte, funcId 
 		return err
 
 	// global endpoint's context ended
-	case <-e.Done():
-		return e.Err()
+	case <-e.ctx.Done():
+		return context.Cause(e.ctx)
 
 	// the client provided context expired
 	case <-ctx.Done():
 		// we notify the remote endpoint to speed up the function completion.
 		// otherwise we still just wait for response (or endpoint exit)
 		if err := e.sendRequestContextCancelation(pendingReq.reqNum, context.Cause(ctx)); err != nil {
-			return fmt.Errorf("failed to cancel request %d: %w", pendingReq.reqNum, err)
+			e.handleIOError(err)
+			return context.Cause(e.ctx)
 		}
 
 		select {
 		case err := <-pendingReq.deserErrC:
 			return err
-		case <-e.Ctx.Done():
-			return context.Cause(e.Ctx)
+		case <-e.ctx.Done():
+			return context.Cause(e.ctx)
 		}
 	}
 }
@@ -273,6 +315,14 @@ func (e *Endpoint) RegisterService(services ...irpcgen.Service) {
 		copy(hashArray[:], s.Id())
 		e.services[hashArray] = s
 	}
+}
+
+func (e *Endpoint) LocalAddr() net.Addr {
+	return e.localAddr
+}
+
+func (e *Endpoint) RemoteAddr() net.Addr {
+	return e.remoteAddr
 }
 
 func (e *Endpoint) processRequest(dec *irpcgen.Decoder, exec *executor) error {
@@ -304,8 +354,8 @@ func (e *Endpoint) processRequest(dec *irpcgen.Decoder, exec *executor) error {
 	return nil
 }
 
-// readMsgs is the main incoming messages processing loop
-func (e *Endpoint) readMsgs(exec *executor) error {
+// readLoop is the main incoming messages processing loop
+func (e *Endpoint) readLoop(exec *executor) error {
 	for {
 		var h packetHeader
 		if err := h.Deserialize(e.dec); err != nil {
@@ -334,7 +384,7 @@ func (e *Endpoint) readMsgs(exec *executor) error {
 
 		// counterpart is closing
 		case closingNowPacketType:
-			return ErrEndpointClosedByCounterpart
+			e.terminate(ErrEndpointClosedByCounterpart)
 
 		// counterpart informed us that context of some function it requested us to execute, has expired
 		// we cancel corresponting worker's context
@@ -354,20 +404,32 @@ func (e *Endpoint) readMsgs(exec *executor) error {
 	}
 }
 
-type Option func(*Endpoint)
+type EndpointOption func(*Endpoint)
 
-func WithService(s ...irpcgen.Service) Option {
+func WithEndpointServices(s ...irpcgen.Service) EndpointOption {
 	return func(ep *Endpoint) {
 		ep.RegisterService(s...)
 	}
 }
 
-func WithParallelWorkers(parallelWorkers int) Option {
+func WithLocalAddress(addr net.Addr) EndpointOption {
+	return func(ep *Endpoint) {
+		ep.localAddr = addr
+	}
+}
+
+func WithRemoteAddress(addr net.Addr) EndpointOption {
+	return func(ep *Endpoint) {
+		ep.remoteAddr = addr
+	}
+}
+
+func WithParallelWorkers(parallelWorkers int) EndpointOption {
 	return func(ep *Endpoint) {
 		ep.parallelWorkers = parallelWorkers
 	}
 }
-func WithParallelClientCalls(parallelClientCalls int) Option {
+func WithParallelClientCalls(parallelClientCalls int) EndpointOption {
 	return func(ep *Endpoint) {
 		ep.parallelClientCalls = parallelClientCalls
 	}

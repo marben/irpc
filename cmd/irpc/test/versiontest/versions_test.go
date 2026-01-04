@@ -25,7 +25,7 @@ func TestOneRegisteredVersion(t *testing.T) {
 	addr := tcpListener.Addr().String()
 	t.Logf("listening on addr: %v", addr)
 
-	irpcServer := irpc.NewServer(api.NewApiIrpcService(api.ApiImpl{}))
+	irpcServer := irpc.NewServer(irpc.WithServices(api.NewApiIrpcService(api.ApiImpl{})))
 	go func() {
 		if err := irpcServer.Serve(tcpListener); err != nil {
 			t.Logf("irpcServer.Serve(): %v", err)

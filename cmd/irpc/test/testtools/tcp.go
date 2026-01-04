@@ -37,7 +37,7 @@ func CreateLocalTcpConnPipe() (net.Conn, net.Conn, error) {
 	}
 }
 
-func CreateLocalTcpEndpoints(opts ...irpc.Option) (*irpc.Endpoint, *irpc.Endpoint, error) {
+func CreateLocalTcpEndpoints(opts ...irpc.EndpointOption) (*irpc.Endpoint, *irpc.Endpoint, error) {
 	c1, c2, err := CreateLocalTcpConnPipe()
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to create local tcp pipe")

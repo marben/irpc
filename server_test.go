@@ -16,7 +16,7 @@ func TestServeOnMultipleListeners(t *testing.T) {
 	// SERVER
 	skew := 3
 	service := testtools.NewTestServiceIrpcService(testtools.NewTestServiceImpl(skew))
-	server := irpc.NewServer(service)
+	server := irpc.NewServer(irpc.WithServices(service))
 
 	l1, err := net.Listen("tcp", ":")
 	if err != nil {
@@ -105,9 +105,9 @@ func TestServeOnMultipleListeners(t *testing.T) {
 		t.Fatal("conn1.Close():", err)
 	}
 
-	<-c1Ep.Done()
+	<-c1Ep.Context().Done()
 	t.Log("trying client call on closed connection")
-	if _, err := client1.DivErr(2, 1); !errors.Is(err, irpc.ErrEndpointClosed) {
+	if _, err := client1.DivErr(2, 1); !errors.Is(err, irpc.ErrEndpointClosedByCounterpart) {
 		t.Fatalf("client1.DivErr(): %+v", err)
 	}
 
@@ -125,10 +125,10 @@ func TestServeOnMultipleListeners(t *testing.T) {
 		t.Fatal("server.Close()", err)
 	}
 
-	<-c2Ep.Done()
+	<-c2Ep.Context().Done()
 	t.Log("testing client2 after server.Close()")
 	// time.Sleep(5*time.Millisecond)
-	if _, err := client2.DivErr(8, 4); !errors.Is(err, irpc.ErrEndpointClosed) {
+	if _, err := client2.DivErr(8, 4); !errors.Is(err, irpc.ErrEndpointClosedByCounterpart) {
 		t.Fatal("client2.DivErr()", err)
 	}
 }
@@ -137,7 +137,7 @@ func TestTcpServerDialClose(t *testing.T) {
 	// SERVER
 	skew := 2
 	service := testtools.NewTestServiceIrpcService(testtools.NewTestServiceImpl(skew))
-	server := irpc.NewServer(service)
+	server := irpc.NewServer(irpc.WithServices(service))
 
 	l, err := net.Listen("tcp", ":")
 	if err != nil {
@@ -181,7 +181,7 @@ func TestClientClosesOnServerClose(t *testing.T) {
 	// SERVER
 	skew := 2
 	service := testtools.NewTestServiceIrpcService(testtools.NewTestServiceImpl(skew))
-	server := irpc.NewServer(service)
+	server := irpc.NewServer(irpc.WithServices(service))
 
 	l, err := net.Listen("tcp", ":")
 	if err != nil {
@@ -220,9 +220,9 @@ func TestClientClosesOnServerClose(t *testing.T) {
 		t.Fatalf("server.Close(): %+v", err)
 	}
 
-	<-cEp.Done()
+	<-cEp.Context().Done()
 	t.Log("making client call with closed server")
-	if _, err := client.DivErr(6, 2); !errors.Is(err, irpc.ErrEndpointClosed) {
+	if _, err := client.DivErr(6, 2); !errors.Is(err, irpc.ErrEndpointClosedByCounterpart) {
 		t.Fatalf("unexpected error when calling client on closed server: %+v", err)
 	}
 }
@@ -235,7 +235,7 @@ func TestIrpcServerSimpleCall(t *testing.T) {
 
 	skew := 8
 	mathService := irpctestpkg.NewMathIrpcService(irpctestpkg.MathImpl{Skew: skew})
-	server := irpc.NewServer(mathService)
+	server := irpc.NewServer(irpc.WithServices(mathService))
 
 	localAddr := l.Addr().String()
 	clientConn, err := net.Dial("tcp", localAddr)
@@ -269,7 +269,7 @@ func TestIrpcServerSimpleCall(t *testing.T) {
 	}
 
 	time.Sleep(5 * time.Millisecond)
-	if err := clientEp.Close(); !errors.Is(err, irpc.ErrEndpointClosed) {
+	if err := clientEp.Close(); !errors.Is(err, irpc.ErrEndpointClosedByCounterpart) {
 		t.Fatalf("clientEp.Close(): %+v", err)
 	}
 }

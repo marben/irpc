@@ -3,7 +3,6 @@ package irpc
 import (
 	"errors"
 	"fmt"
-	"log"
 	"net"
 	"sync"
 	"sync/atomic"
@@ -14,11 +13,13 @@ import (
 var ErrServerClosed error = errors.New("irpc: server closed")
 
 type Server struct {
-	services []irpcgen.Service // immutable
+	services []irpcgen.Service // don't mutate after Serve()
 
 	clients    map[*Endpoint]struct{}
 	clientsMux sync.Mutex
 	clientsWg  sync.WaitGroup
+
+	onConnect func(*Endpoint)
 
 	inShutdown atomic.Bool
 
@@ -27,12 +28,21 @@ type Server struct {
 	listenersWg  sync.WaitGroup
 }
 
-func NewServer(services ...irpcgen.Service) *Server {
-	return &Server{
+func NewServer(opts ...ServerOption) *Server {
+	s := &Server{
 		listeners: make(map[net.Listener]struct{}),
 		clients:   make(map[*Endpoint]struct{}),
-		services:  services,
 	}
+	for _, opt := range opts {
+		opt(s)
+	}
+
+	return s
+}
+
+// Do not call after Serve
+func (s *Server) AddService(svc ...irpcgen.Service) {
+	s.services = append(s.services, svc...)
 }
 
 func (s *Server) isShuttingDown() bool {
@@ -72,7 +82,6 @@ func (s *Server) Serve(lis net.Listener) error {
 	for {
 		conn, err := lis.Accept()
 		if err != nil {
-			// log.Printf("Server accept err: %v", err)
 			if s.isShuttingDown() {
 				return ErrServerClosed
 			}
@@ -80,7 +89,16 @@ func (s *Server) Serve(lis net.Listener) error {
 		}
 		// log.Println("Accept: ", conn.LocalAddr())
 
-		ep := NewEndpoint(conn, WithService(s.services...))
+		if s.isShuttingDown() {
+			conn.Close()
+			return ErrServerClosed
+		}
+
+		ep := NewEndpoint(conn,
+			WithEndpointServices(s.services...),
+			WithLocalAddress(conn.LocalAddr()),
+			WithRemoteAddress(conn.RemoteAddr()),
+		)
 
 		s.clientsMux.Lock()
 		s.clients[ep] = struct{}{}
@@ -89,13 +107,17 @@ func (s *Server) Serve(lis net.Listener) error {
 		s.clientsWg.Add(1)
 		go func() {
 			defer s.clientsWg.Done()
+			if s.onConnect != nil {
+				s.onConnect(ep)
+			}
 
-			<-ep.Ctx.Done()
+			<-ep.ctx.Done()
 			// log.Printf("endpoint ended with: %v", err)
 			// not sure what to do about errors (serve loop of http.Server doesn't seem to care, so we will follow suit for now)
 			s.clientsMux.Lock()
-			defer s.clientsMux.Unlock()
 			delete(s.clients, ep)
+			s.clientsMux.Unlock()
+
 		}()
 	}
 }
@@ -104,21 +126,22 @@ func (s *Server) Serve(lis net.Listener) error {
 // Close returns any errors returned by the underlying listeners
 func (s *Server) Close() error {
 	s.inShutdown.Store(true)
+
 	var multiError error
 
 	// close all listeners
 	s.listenersMux.Lock()
 	for l := range s.listeners {
-		lErr := l.Close()
-		multiError = errors.Join(multiError, lErr)
+		if err := l.Close(); err != nil {
+			multiError = errors.Join(multiError, err)
+		}
 	}
 	s.listenersMux.Unlock()
 
 	s.clientsMux.Lock()
 	for c := range s.clients {
-		//c.Close()
 		if err := c.Close(); err != nil {
-			log.Fatalf("c.Close(): %+v", err)
+			multiError = errors.Join(multiError, err)
 		}
 	}
 	s.clientsMux.Unlock()
@@ -127,4 +150,19 @@ func (s *Server) Close() error {
 	s.clientsWg.Wait()
 
 	return multiError
+}
+
+type ServerOption func(*Server)
+
+// OnConnect is called synchronously for each accepted connection.
+func WithOnConnect(f func(ep *Endpoint)) ServerOption {
+	return func(s *Server) {
+		s.onConnect = f
+	}
+}
+
+func WithServices(svcs ...irpcgen.Service) ServerOption {
+	return func(s *Server) {
+		s.services = append(s.services, svcs...)
+	}
 }
