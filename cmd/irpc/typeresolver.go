@@ -203,6 +203,8 @@ func (tr typeResolver) newType(apiName string, t types.Type, astExpr ast.Expr) (
 		return tr.newStructType(apiName, ni, ut, utAst)
 	case *types.Interface:
 		return tr.newInterfaceType(apiName, ni, ut, utAst)
+	case *types.Pointer:
+		return tr.newPointerType(apiName, ni, ut, astExpr)
 	default:
 		return nil, fmt.Errorf("unsupported type: %T", ut)
 	}

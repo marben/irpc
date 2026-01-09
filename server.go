@@ -74,7 +74,7 @@ func (s *Server) rmListener(l net.Listener) {
 
 // Serve always returns a non-nil error. After [Server.Close], the returned error is [ErrServerClosed]
 func (s *Server) Serve(lis net.Listener) error {
-	// log.Printf("irpc server: serving on port %v", lis.Addr())
+	// log.Printf("irpc server: serving %s on addr %s", lis.Addr().Network(), lis.Addr())
 	if err := s.addListener(lis); err != nil {
 		return err
 	}
@@ -112,7 +112,6 @@ func (s *Server) Serve(lis net.Listener) error {
 			}
 
 			<-ep.ctx.Done()
-			// log.Printf("endpoint ended with: %v", err)
 			// not sure what to do about errors (serve loop of http.Server doesn't seem to care, so we will follow suit for now)
 			s.clientsMux.Lock()
 			delete(s.clients, ep)

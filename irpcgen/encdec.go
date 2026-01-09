@@ -205,7 +205,7 @@ func EncSlice[S ~[]E, E any](enc *Encoder, sl S, elemType string, elemEncFnc fun
 	}
 	for _, e := range sl {
 		if err := elemEncFnc(enc, e); err != nil {
-			return fmt.Errorf("serialize element of type %q: %w", elemType, err)
+			return fmt.Errorf("serialize slice element of type %q: %w", elemType, err)
 		}
 	}
 
@@ -218,6 +218,7 @@ func DecSlice[S ~[]E, E any](dec *Decoder, sl *S, elemType string, elemDecFnc fu
 		return fmt.Errorf("deserialize isNil: %w", err)
 	}
 	if isNil {
+		*sl = nil
 		return nil
 	}
 	l, err := dec.len()
@@ -264,6 +265,7 @@ func DecMap[M ~map[K]V, K comparable, V any](dec *Decoder, m *M, kName string, k
 		return fmt.Errorf("deserialize isNil: %w", err)
 	}
 	if isNil {
+		*m = nil
 		return nil
 	}
 	l, err := dec.len()
@@ -283,6 +285,41 @@ func DecMap[M ~map[K]V, K comparable, V any](dec *Decoder, m *M, kName string, k
 		lm[k] = v
 	}
 	*m = lm
+	return nil
+}
+
+func EncPointer[T any](enc *Encoder, p *T, elemType string, encFnc func(enc *Encoder, v T) error) error {
+	isNil := p == nil
+	if err := enc.isNil(isNil); err != nil {
+		return fmt.Errorf("serialize isNil: %w", err)
+	}
+	if isNil {
+		return nil
+	}
+
+	if err := encFnc(enc, *p); err != nil {
+		return fmt.Errorf("serialize pointer element of type %q: %w", elemType, err)
+	}
+
+	return nil
+}
+
+func DecPointer[T any](dec *Decoder, p **T, elemType string, decFnc func(dec *Decoder, v *T) error) error {
+	isNil, err := dec.isNil()
+	if err != nil {
+		return fmt.Errorf("deserialize isNil: %w", err)
+	}
+	if isNil {
+		*p = nil
+		return nil
+	}
+
+	*p = new(T)
+
+	if err := decFnc(dec, *p); err != nil {
+		return fmt.Errorf("deserialize pointer element of type %q: %w", elemType, err)
+	}
+
 	return nil
 }
 
@@ -311,6 +348,7 @@ func DecByteSlice[T ~[]byte](dec *Decoder, v *T) error {
 		return fmt.Errorf("deserialize isNil: %w", err)
 	}
 	if isNil {
+		*v = nil
 		return nil
 	}
 
@@ -378,6 +416,7 @@ func DecBoolSlice[T ~[]bool](dec *Decoder, v *T) error {
 		return fmt.Errorf("deserialize isNil: %w", err)
 	}
 	if isNil {
+		*v = nil
 		return nil
 	}
 

@@ -21,12 +21,12 @@ func (tr *typeResolver) newSliceType(apiName string, ni *namedInfo, st *types.Sl
 	return tr.newGenericSliceType(apiName, ni, st, astExpr)
 }
 
-// []byte
+// []byte - a special case
 func (tr *typeResolver) newByteSliceType(ni *namedInfo) (Type, error) {
 	return newDirectCallType("irpcgen.EncByteSlice", "irpcgen.DecByteSlice", "[]byte", ni), nil
 }
 
-// []bool
+// []bool - a special case
 func (tr *typeResolver) newBoolSliceType(ni *namedInfo) (Type, error) {
 	return newDirectCallType("irpcgen.EncBoolSlice", "irpcgen.DecBoolSlice", "[]bool", ni), nil
 }

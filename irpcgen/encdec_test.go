@@ -33,7 +33,7 @@ func TestEncDecMap(t *testing.T) {
 		t.Fatalf("EncMap: %+v", err)
 	}
 	enc.Flush()
-	var r2 map[int]string
+	var r2 map[int]string = make(map[int]string)
 	if err := DecMap(dec, &r2, "int", DecInt, "string", DecString); err != nil {
 		t.Fatalf("DecMap: %+v", err)
 	}
@@ -41,4 +41,52 @@ func TestEncDecMap(t *testing.T) {
 	if r2 != nil {
 		t.Fatalf("encoded nil map, but got: %v", r2)
 	}
+}
+
+func TestEncDecPointer(t *testing.T) {
+	buf := bytes.NewBuffer(nil)
+	enc := NewEncoder(buf)
+	dec := NewDecoder(buf)
+
+	var val int = 2
+	p1 := &val
+
+	if err := EncPointer(enc, p1, "int", EncInt); err != nil {
+		t.Fatalf("encode *int: %+v", err)
+	}
+	enc.Flush()
+
+	var p1_rtn *int
+	if err := DecPointer(dec, &p1_rtn, "int", DecInt); err != nil {
+		t.Fatalf("decode *int: %+v", err)
+	}
+
+	if *p1 != *p1_rtn {
+		t.Fatalf("%d != %d", *p1, *p1_rtn)
+	}
+}
+
+func TestEncDecPreinitializedPointer(t *testing.T) {
+	buf := bytes.NewBuffer(nil)
+	enc := NewEncoder(buf)
+	dec := NewDecoder(buf)
+
+	// nil pointer
+	var val int = 2
+	var p *int = nil
+	if err := EncPointer(enc, p, "int", EncInt); err != nil {
+		t.Fatalf("encode second *int: %+v", err)
+	}
+	enc.Flush()
+
+	// pre-initialize to check if the Decoder corretly sets it to nil
+	var p_rtn = &val
+	if err := DecPointer(dec, &p_rtn, "int", DecInt); err != nil {
+		t.Fatalf("decode  *int: %v", err)
+	}
+
+	if p_rtn != nil {
+		t.Fatalf("rtn was supposed to be nil, but is: %v", p_rtn)
+	}
+	t.Logf("val == %d", val)
 }

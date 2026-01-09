@@ -25,7 +25,7 @@ func TestSlice(t *testing.T) {
 	// client
 	c, err := newSliceTestIrpcClient(localEp)
 	if err != nil {
-		t.Fatalf("failed to create client: %v", err)
+		t.Fatalf("create client: %v", err)
 	}
 
 	// SLICE SUM (PASS SLICE)
