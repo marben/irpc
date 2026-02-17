@@ -2,6 +2,7 @@ package irpctestpkg
 
 //go:generate go run ../
 type Math interface {
+	// Returns a + b
 	Add(a, b int) (int, error)
 }
 

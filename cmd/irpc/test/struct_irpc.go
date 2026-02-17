@@ -12,35 +12,39 @@ import (
 )
 
 var _structAPIIrpcId = []byte{
-	0x0c, 0xad, 0xb5, 0xd3, 0x7c, 0x47, 0x43, 0xd2,
-	0x8c, 0xb9, 0xa8, 0x1d, 0x1e, 0xd8, 0x7f, 0xae,
-	0x4a, 0x6a, 0xd4, 0x8c, 0xca, 0xc2, 0xd3, 0xa6,
-	0xc8, 0x63, 0x48, 0xe7, 0x2f, 0x2d, 0xbc, 0x5f,
+	0x04, 0x9d, 0xa0, 0xba, 0x96, 0xf7, 0x2b, 0x41,
+	0xf8, 0x2c, 0x45, 0x85, 0xfa, 0x31, 0x95, 0xc9,
+	0xc3, 0x8a, 0xe3, 0x62, 0x6b, 0x07, 0x69, 0xf2,
+	0x65, 0x0e, 0x0b, 0xf1, 0xbc, 0x10, 0xb5, 0xfa,
 }
 
+// structAPIIrpcService provides [structAPI] interface over irpc
 type structAPIIrpcService struct {
 	impl structAPI
 }
 
+// newStructAPIIrpcService returns new [irpcgen.Service] forwarding [structAPI] network calls to impl
 func newStructAPIIrpcService(impl structAPI) *structAPIIrpcService {
 	return &structAPIIrpcService{
 		impl: impl,
 	}
 }
+
+// Id implements [irpcgen.Service] interface.
 func (s *structAPIIrpcService) Id() []byte {
 	return _structAPIIrpcId
 }
+
+// GetFuncCall implements [irpcgen.Service] interface
 func (s *structAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // VectSum
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_structAPI_VectSumReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_structAPI_VectSumResp
 				resp.p0 = s.impl.VectSum(args.v)
 				return resp
@@ -48,13 +52,11 @@ func (s *structAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 		}, nil
 	case 1: // Vect3x3Sum
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_structAPI_Vect3x3SumReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_structAPI_Vect3x3SumResp
 				resp.p0 = s.impl.Vect3x3Sum(args.v)
 				return resp
@@ -62,13 +64,11 @@ func (s *structAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 		}, nil
 	case 2: // SumSliceStruct
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_structAPI_SumSliceStructReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_structAPI_SumSliceStructResp
 				resp.p0 = s.impl.SumSliceStruct(args.s)
 				return resp
@@ -76,13 +76,11 @@ func (s *structAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 		}, nil
 	case 3: // InlineParams
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_structAPI_InlineParamsReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_structAPI_InlineParamsResp
 				resp.p0 = s.impl.InlineParams(args.s)
 				return resp
@@ -90,26 +88,22 @@ func (s *structAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 		}, nil
 	case 4: // InlineParamsNamed
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_structAPI_InlineParamsNamedReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				s.impl.InlineParamsNamed(args.s)
 				return irpcgen.EmptySerializable{}
 			}, nil
 		}, nil
 	case 5: // InlineInlineParams
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_structAPI_InlineInlineParamsReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_structAPI_InlineInlineParamsResp
 				resp.p0 = s.impl.InlineInlineParams(args.s)
 				return resp
@@ -117,13 +111,11 @@ func (s *structAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 		}, nil
 	case 6: // InlineReturn
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_structAPI_InlineReturnReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_structAPI_InlineReturnResp
 				resp.p0 = s.impl.InlineReturn(args.a)
 				return resp
@@ -131,13 +123,11 @@ func (s *structAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 		}, nil
 	case 7: // PointNeg
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_structAPI_PointNegReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_structAPI_PointNegResp
 				resp.p0 = s.impl.PointNeg(args.p)
 				return resp
@@ -146,7 +136,6 @@ func (s *structAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 	case 8: // ReturnErr
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_structAPI_ReturnErrResp
 				resp.p0 = s.impl.ReturnErr()
 				return resp
@@ -157,7 +146,7 @@ func (s *structAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 	}
 }
 
-// structAPIIrpcClient implements structAPI
+// structAPIIrpcClient implements [structAPI] interface. It by forwards calls over network to [structAPIIrpcService] that provides the implementation.
 type structAPIIrpcClient struct {
 	endpoint irpcgen.Endpoint
 }
@@ -168,6 +157,9 @@ func newStructAPIIrpcClient(endpoint irpcgen.Endpoint) (*structAPIIrpcClient, er
 	}
 	return &structAPIIrpcClient{endpoint: endpoint}, nil
 }
+
+// VectSum implements [structAPI]
+//
 func (_c *structAPIIrpcClient) VectSum(v vect3) int {
 	var req = _irpc_structAPI_VectSumReq{
 		v: v,
@@ -178,6 +170,8 @@ func (_c *structAPIIrpcClient) VectSum(v vect3) int {
 	}
 	return resp.p0
 }
+
+// Vect3x3Sum implements [structAPI]
 func (_c *structAPIIrpcClient) Vect3x3Sum(v vect3x3) vect3 {
 	var req = _irpc_structAPI_Vect3x3SumReq{
 		v: v,
@@ -188,6 +182,8 @@ func (_c *structAPIIrpcClient) Vect3x3Sum(v vect3x3) vect3 {
 	}
 	return resp.p0
 }
+
+// SumSliceStruct implements [structAPI]
 func (_c *structAPIIrpcClient) SumSliceStruct(s sliceStruct) int {
 	var req = _irpc_structAPI_SumSliceStructReq{
 		s: s,
@@ -198,6 +194,8 @@ func (_c *structAPIIrpcClient) SumSliceStruct(s sliceStruct) int {
 	}
 	return resp.p0
 }
+
+// InlineParams implements [structAPI]
 func (_c *structAPIIrpcClient) InlineParams(s struct{ a int }) int {
 	var req = _irpc_structAPI_InlineParamsReq{
 		s: s,
@@ -208,6 +206,8 @@ func (_c *structAPIIrpcClient) InlineParams(s struct{ a int }) int {
 	}
 	return resp.p0
 }
+
+// InlineParamsNamed implements [structAPI]
 func (_c *structAPIIrpcClient) InlineParamsNamed(s struct {
 	a out.Uint8
 	b out2.Uint8
@@ -219,6 +219,8 @@ func (_c *structAPIIrpcClient) InlineParamsNamed(s struct {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 }
+
+// InlineInlineParams implements [structAPI]
 func (_c *structAPIIrpcClient) InlineInlineParams(s struct{ a struct{ b int } }) int {
 	var req = _irpc_structAPI_InlineInlineParamsReq{
 		s: s,
@@ -229,6 +231,8 @@ func (_c *structAPIIrpcClient) InlineInlineParams(s struct{ a struct{ b int } })
 	}
 	return resp.p0
 }
+
+// InlineReturn implements [structAPI]
 func (_c *structAPIIrpcClient) InlineReturn(a int) struct{ b int } {
 	var req = _irpc_structAPI_InlineReturnReq{
 		a: a,
@@ -239,6 +243,8 @@ func (_c *structAPIIrpcClient) InlineReturn(a int) struct{ b int } {
 	}
 	return resp.p0
 }
+
+// PointNeg implements [structAPI]
 func (_c *structAPIIrpcClient) PointNeg(p image.Point) image.Point {
 	var req = _irpc_structAPI_PointNegReq{
 		p: p,
@@ -249,6 +255,8 @@ func (_c *structAPIIrpcClient) PointNeg(p image.Point) image.Point {
 	}
 	return resp.p0
 }
+
+// ReturnErr implements [structAPI]
 func (_c *structAPIIrpcClient) ReturnErr() error {
 	var resp _irpc_structAPI_ReturnErrResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _structAPIIrpcId, 8, irpcgen.EmptySerializable{}, &resp); err != nil {

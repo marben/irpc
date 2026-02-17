@@ -10,30 +10,35 @@ import (
 )
 
 var _pointerTestIrpcId = []byte{
-	0x77, 0x0a, 0x97, 0x93, 0xee, 0xc2, 0x92, 0xc9,
-	0xf7, 0x97, 0xd2, 0xeb, 0xb7, 0x69, 0xf8, 0x2d,
-	0x37, 0x0a, 0x11, 0xb2, 0xfe, 0xcc, 0xcd, 0x00,
-	0xbd, 0x4f, 0x13, 0x66, 0xd4, 0xee, 0xd6, 0x03,
+	0xe2, 0x88, 0x7c, 0x4b, 0xa9, 0xc0, 0x9e, 0x40,
+	0x14, 0x7b, 0xf2, 0xe3, 0xd3, 0x46, 0xa3, 0x03,
+	0x1e, 0x40, 0x7e, 0x3a, 0x60, 0x9c, 0x56, 0x12,
+	0x85, 0xf0, 0x6e, 0xc8, 0x7e, 0xf0, 0x8b, 0xf1,
 }
 
+// pointerTestIrpcService provides [pointerTest] interface over irpc
 type pointerTestIrpcService struct {
 	impl pointerTest
 }
 
+// newPointerTestIrpcService returns new [irpcgen.Service] forwarding [pointerTest] network calls to impl
 func newPointerTestIrpcService(impl pointerTest) *pointerTestIrpcService {
 	return &pointerTestIrpcService{
 		impl: impl,
 	}
 }
+
+// Id implements [irpcgen.Service] interface.
 func (s *pointerTestIrpcService) Id() []byte {
 	return _pointerTestIrpcId
 }
+
+// GetFuncCall implements [irpcgen.Service] interface
 func (s *pointerTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // getImage
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_pointerTest_getImageResp
 				resp.p0 = s.impl.getImage()
 				return resp
@@ -42,7 +47,6 @@ func (s *pointerTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.Arg
 	case 1: // getNilImage
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_pointerTest_getNilImageResp
 				resp.p0 = s.impl.getNilImage()
 				return resp
@@ -50,13 +54,11 @@ func (s *pointerTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.Arg
 		}, nil
 	case 2: // isNil
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_pointerTest_isNilReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_pointerTest_isNilResp
 				resp.p0 = s.impl.isNil(args.ptr)
 				return resp
@@ -67,7 +69,7 @@ func (s *pointerTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.Arg
 	}
 }
 
-// pointerTestIrpcClient implements pointerTest
+// pointerTestIrpcClient implements [pointerTest] interface. It by forwards calls over network to [pointerTestIrpcService] that provides the implementation.
 type pointerTestIrpcClient struct {
 	endpoint irpcgen.Endpoint
 }
@@ -78,6 +80,9 @@ func newPointerTestIrpcClient(endpoint irpcgen.Endpoint) (*pointerTestIrpcClient
 	}
 	return &pointerTestIrpcClient{endpoint: endpoint}, nil
 }
+
+// getImage implements [pointerTest]
+//
 func (_c *pointerTestIrpcClient) getImage() *image.RGBA {
 	var resp _irpc_pointerTest_getImageResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _pointerTestIrpcId, 0, irpcgen.EmptySerializable{}, &resp); err != nil {
@@ -85,6 +90,8 @@ func (_c *pointerTestIrpcClient) getImage() *image.RGBA {
 	}
 	return resp.p0
 }
+
+// getNilImage implements [pointerTest]
 func (_c *pointerTestIrpcClient) getNilImage() *image.RGBA {
 	var resp _irpc_pointerTest_getNilImageResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _pointerTestIrpcId, 1, irpcgen.EmptySerializable{}, &resp); err != nil {
@@ -92,6 +99,8 @@ func (_c *pointerTestIrpcClient) getNilImage() *image.RGBA {
 	}
 	return resp.p0
 }
+
+// isNil implements [pointerTest]
 func (_c *pointerTestIrpcClient) isNil(ptr *int) bool {
 	var req = _irpc_pointerTest_isNilReq{
 		ptr: ptr,

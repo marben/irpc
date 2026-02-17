@@ -9,35 +9,39 @@ import (
 )
 
 var _basicAPIIrpcId = []byte{
-	0x48, 0x1b, 0x16, 0x5c, 0x59, 0x38, 0xf8, 0x19,
-	0xad, 0xab, 0x1c, 0xd5, 0xad, 0x9f, 0x33, 0xb5,
-	0x38, 0x45, 0x2f, 0x26, 0xa2, 0xf3, 0x90, 0xb1,
-	0x47, 0x86, 0x0e, 0xea, 0xd2, 0x3c, 0x66, 0xc1,
+	0x4a, 0x8e, 0x5d, 0x48, 0xa1, 0x39, 0x8f, 0x05,
+	0xf1, 0x76, 0x75, 0x8a, 0x6d, 0x59, 0xe6, 0xfa,
+	0x42, 0x1e, 0x0c, 0x53, 0x87, 0xd6, 0xe4, 0x73,
+	0xac, 0x51, 0x72, 0x06, 0x3c, 0x32, 0x75, 0xf7,
 }
 
+// basicAPIIrpcService provides [basicAPI] interface over irpc
 type basicAPIIrpcService struct {
 	impl basicAPI
 }
 
+// newBasicAPIIrpcService returns new [irpcgen.Service] forwarding [basicAPI] network calls to impl
 func newBasicAPIIrpcService(impl basicAPI) *basicAPIIrpcService {
 	return &basicAPIIrpcService{
 		impl: impl,
 	}
 }
+
+// Id implements [irpcgen.Service] interface.
 func (s *basicAPIIrpcService) Id() []byte {
 	return _basicAPIIrpcId
 }
+
+// GetFuncCall implements [irpcgen.Service] interface
 func (s *basicAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // addByte
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_basicAPI_addByteReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_basicAPI_addByteResp
 				resp.p0 = s.impl.addByte(args.a, args.b)
 				return resp
@@ -45,13 +49,11 @@ func (s *basicAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 		}, nil
 	case 1: // addInt
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_basicAPI_addIntReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_basicAPI_addIntResp
 				resp.p0 = s.impl.addInt(args.a, args.b)
 				return resp
@@ -59,13 +61,11 @@ func (s *basicAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 		}, nil
 	case 2: // swapInt
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_basicAPI_swapIntReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_basicAPI_swapIntResp
 				resp.p0, resp.p1 = s.impl.swapInt(args.a, args.b)
 				return resp
@@ -73,13 +73,11 @@ func (s *basicAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 		}, nil
 	case 3: // subUint
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_basicAPI_subUintReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_basicAPI_subUintResp
 				resp.p0 = s.impl.subUint(args.a, args.b)
 				return resp
@@ -87,13 +85,11 @@ func (s *basicAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 		}, nil
 	case 4: // addInt8
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_basicAPI_addInt8Req
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_basicAPI_addInt8Resp
 				resp.p0 = s.impl.addInt8(args.a, args.b)
 				return resp
@@ -101,13 +97,11 @@ func (s *basicAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 		}, nil
 	case 5: // addUint8
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_basicAPI_addUint8Req
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_basicAPI_addUint8Resp
 				resp.p0 = s.impl.addUint8(args.a, args.b)
 				return resp
@@ -115,13 +109,11 @@ func (s *basicAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 		}, nil
 	case 6: // addInt16
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_basicAPI_addInt16Req
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_basicAPI_addInt16Resp
 				resp.p0 = s.impl.addInt16(args.a, args.b)
 				return resp
@@ -129,13 +121,11 @@ func (s *basicAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 		}, nil
 	case 7: // addUint16
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_basicAPI_addUint16Req
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_basicAPI_addUint16Resp
 				resp.p0 = s.impl.addUint16(args.a, args.b)
 				return resp
@@ -143,13 +133,11 @@ func (s *basicAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 		}, nil
 	case 8: // addInt32
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_basicAPI_addInt32Req
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_basicAPI_addInt32Resp
 				resp.p0 = s.impl.addInt32(args.a, args.b)
 				return resp
@@ -157,13 +145,11 @@ func (s *basicAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 		}, nil
 	case 9: // addUint32
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_basicAPI_addUint32Req
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_basicAPI_addUint32Resp
 				resp.p0 = s.impl.addUint32(args.a, args.b)
 				return resp
@@ -171,13 +157,11 @@ func (s *basicAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 		}, nil
 	case 10: // addInt64
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_basicAPI_addInt64Req
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_basicAPI_addInt64Resp
 				resp.p0 = s.impl.addInt64(args.a, args.b)
 				return resp
@@ -185,13 +169,11 @@ func (s *basicAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 		}, nil
 	case 11: // addUint64
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_basicAPI_addUint64Req
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_basicAPI_addUint64Resp
 				resp.p0 = s.impl.addUint64(args.a, args.b)
 				return resp
@@ -199,13 +181,11 @@ func (s *basicAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 		}, nil
 	case 12: // addFloat64
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_basicAPI_addFloat64Req
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_basicAPI_addFloat64Resp
 				resp.p0 = s.impl.addFloat64(args.a, args.b)
 				return resp
@@ -213,13 +193,11 @@ func (s *basicAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 		}, nil
 	case 13: // addFloat32
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_basicAPI_addFloat32Req
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_basicAPI_addFloat32Resp
 				resp.p0 = s.impl.addFloat32(args.a, args.b)
 				return resp
@@ -227,13 +205,11 @@ func (s *basicAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 		}, nil
 	case 14: // toUpper
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_basicAPI_toUpperReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_basicAPI_toUpperResp
 				resp.p0 = s.impl.toUpper(args.c)
 				return resp
@@ -241,13 +217,11 @@ func (s *basicAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 		}, nil
 	case 15: // toUpperString
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_basicAPI_toUpperStringReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_basicAPI_toUpperStringResp
 				resp.p0 = s.impl.toUpperString(args.s)
 				return resp
@@ -255,13 +229,11 @@ func (s *basicAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 		}, nil
 	case 16: // negBool
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_basicAPI_negBoolReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_basicAPI_negBoolResp
 				resp.p0 = s.impl.negBool(args.ok)
 				return resp
@@ -272,7 +244,7 @@ func (s *basicAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 	}
 }
 
-// basicAPIIrpcClient implements basicAPI
+// basicAPIIrpcClient implements [basicAPI] interface. It by forwards calls over network to [basicAPIIrpcService] that provides the implementation.
 //
 // basicAPI tests types.Basic types
 // and this is a two line description
@@ -286,6 +258,9 @@ func newBasicAPIIrpcClient(endpoint irpcgen.Endpoint) (*basicAPIIrpcClient, erro
 	}
 	return &basicAPIIrpcClient{endpoint: endpoint}, nil
 }
+
+// addByte implements [basicAPI]
+//
 func (_c *basicAPIIrpcClient) addByte(a byte, b byte) byte {
 	var req = _irpc_basicAPI_addByteReq{
 		a: a,
@@ -297,6 +272,8 @@ func (_c *basicAPIIrpcClient) addByte(a byte, b byte) byte {
 	}
 	return resp.p0
 }
+
+// addInt implements [basicAPI]
 func (_c *basicAPIIrpcClient) addInt(a int, b int) int {
 	var req = _irpc_basicAPI_addIntReq{
 		a: a,
@@ -309,6 +286,8 @@ func (_c *basicAPIIrpcClient) addInt(a int, b int) int {
 	return resp.p0
 }
 
+// swapInt implements [basicAPI]
+//
 // multiple return values
 func (_c *basicAPIIrpcClient) swapInt(a int, b int) (int, int) {
 	var req = _irpc_basicAPI_swapIntReq{
@@ -321,6 +300,8 @@ func (_c *basicAPIIrpcClient) swapInt(a int, b int) (int, int) {
 	}
 	return resp.p0, resp.p1
 }
+
+// subUint implements [basicAPI]
 func (_c *basicAPIIrpcClient) subUint(a uint, b uint) uint {
 	var req = _irpc_basicAPI_subUintReq{
 		a: a,
@@ -332,6 +313,8 @@ func (_c *basicAPIIrpcClient) subUint(a uint, b uint) uint {
 	}
 	return resp.p0
 }
+
+// addInt8 implements [basicAPI]
 func (_c *basicAPIIrpcClient) addInt8(a int8, b int8) int8 {
 	var req = _irpc_basicAPI_addInt8Req{
 		a: a,
@@ -343,6 +326,8 @@ func (_c *basicAPIIrpcClient) addInt8(a int8, b int8) int8 {
 	}
 	return resp.p0
 }
+
+// addUint8 implements [basicAPI]
 func (_c *basicAPIIrpcClient) addUint8(a uint8, b uint8) uint8 {
 	var req = _irpc_basicAPI_addUint8Req{
 		a: a,
@@ -354,6 +339,8 @@ func (_c *basicAPIIrpcClient) addUint8(a uint8, b uint8) uint8 {
 	}
 	return resp.p0
 }
+
+// addInt16 implements [basicAPI]
 func (_c *basicAPIIrpcClient) addInt16(a int16, b int16) int16 {
 	var req = _irpc_basicAPI_addInt16Req{
 		a: a,
@@ -365,6 +352,8 @@ func (_c *basicAPIIrpcClient) addInt16(a int16, b int16) int16 {
 	}
 	return resp.p0
 }
+
+// addUint16 implements [basicAPI]
 func (_c *basicAPIIrpcClient) addUint16(a uint16, b uint16) uint16 {
 	var req = _irpc_basicAPI_addUint16Req{
 		a: a,
@@ -376,6 +365,8 @@ func (_c *basicAPIIrpcClient) addUint16(a uint16, b uint16) uint16 {
 	}
 	return resp.p0
 }
+
+// addInt32 implements [basicAPI]
 func (_c *basicAPIIrpcClient) addInt32(a int32, b int32) int32 {
 	var req = _irpc_basicAPI_addInt32Req{
 		a: a,
@@ -387,6 +378,8 @@ func (_c *basicAPIIrpcClient) addInt32(a int32, b int32) int32 {
 	}
 	return resp.p0
 }
+
+// addUint32 implements [basicAPI]
 func (_c *basicAPIIrpcClient) addUint32(a uint32, b uint32) uint32 {
 	var req = _irpc_basicAPI_addUint32Req{
 		a: a,
@@ -398,6 +391,8 @@ func (_c *basicAPIIrpcClient) addUint32(a uint32, b uint32) uint32 {
 	}
 	return resp.p0
 }
+
+// addInt64 implements [basicAPI]
 func (_c *basicAPIIrpcClient) addInt64(a int64, b int64) int64 {
 	var req = _irpc_basicAPI_addInt64Req{
 		a: a,
@@ -409,6 +404,8 @@ func (_c *basicAPIIrpcClient) addInt64(a int64, b int64) int64 {
 	}
 	return resp.p0
 }
+
+// addUint64 implements [basicAPI]
 func (_c *basicAPIIrpcClient) addUint64(a uint64, b uint64) uint64 {
 	var req = _irpc_basicAPI_addUint64Req{
 		a: a,
@@ -420,6 +417,8 @@ func (_c *basicAPIIrpcClient) addUint64(a uint64, b uint64) uint64 {
 	}
 	return resp.p0
 }
+
+// addFloat64 implements [basicAPI]
 func (_c *basicAPIIrpcClient) addFloat64(a float64, b float64) float64 {
 	var req = _irpc_basicAPI_addFloat64Req{
 		a: a,
@@ -431,6 +430,8 @@ func (_c *basicAPIIrpcClient) addFloat64(a float64, b float64) float64 {
 	}
 	return resp.p0
 }
+
+// addFloat32 implements [basicAPI]
 func (_c *basicAPIIrpcClient) addFloat32(a float32, b float32) float32 {
 	var req = _irpc_basicAPI_addFloat32Req{
 		a: a,
@@ -442,6 +443,8 @@ func (_c *basicAPIIrpcClient) addFloat32(a float32, b float32) float32 {
 	}
 	return resp.p0
 }
+
+// toUpper implements [basicAPI]
 func (_c *basicAPIIrpcClient) toUpper(c rune) rune {
 	var req = _irpc_basicAPI_toUpperReq{
 		c: c,
@@ -452,6 +455,8 @@ func (_c *basicAPIIrpcClient) toUpper(c rune) rune {
 	}
 	return resp.p0
 }
+
+// toUpperString implements [basicAPI]
 func (_c *basicAPIIrpcClient) toUpperString(s string) string {
 	var req = _irpc_basicAPI_toUpperStringReq{
 		s: s,
@@ -462,6 +467,8 @@ func (_c *basicAPIIrpcClient) toUpperString(s string) string {
 	}
 	return resp.p0
 }
+
+// negBool implements [basicAPI]
 func (_c *basicAPIIrpcClient) negBool(ok bool) bool {
 	var req = _irpc_basicAPI_negBoolReq{
 		ok: ok,

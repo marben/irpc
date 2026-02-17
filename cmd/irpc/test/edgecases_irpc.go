@@ -9,24 +9,30 @@ import (
 )
 
 var _emptyAPIIrpcId = []byte{
-	0x8d, 0x0d, 0xce, 0x8f, 0xa2, 0x0c, 0x81, 0xeb,
-	0x79, 0xc3, 0xbe, 0xe7, 0x77, 0xb6, 0x30, 0x78,
-	0xe9, 0x46, 0x1c, 0x3f, 0xdd, 0x82, 0x6b, 0xfc,
-	0xc0, 0xe6, 0xb0, 0x6a, 0x79, 0xc7, 0x3a, 0x84,
+	0x96, 0x61, 0xa8, 0x81, 0xed, 0x6b, 0x6e, 0xdb,
+	0x0e, 0x63, 0xe4, 0xfa, 0x95, 0xd6, 0xf3, 0xa1,
+	0xbe, 0x63, 0x11, 0x39, 0x1a, 0xbf, 0xa2, 0xce,
+	0x6a, 0x48, 0x5d, 0xf0, 0xeb, 0x92, 0x96, 0xf8,
 }
 
+// emptyAPIIrpcService provides [emptyAPI] interface over irpc
 type emptyAPIIrpcService struct {
 	impl emptyAPI
 }
 
+// newEmptyAPIIrpcService returns new [irpcgen.Service] forwarding [emptyAPI] network calls to impl
 func newEmptyAPIIrpcService(impl emptyAPI) *emptyAPIIrpcService {
 	return &emptyAPIIrpcService{
 		impl: impl,
 	}
 }
+
+// Id implements [irpcgen.Service] interface.
 func (s *emptyAPIIrpcService) Id() []byte {
 	return _emptyAPIIrpcId
 }
+
+// GetFuncCall implements [irpcgen.Service] interface
 func (s *emptyAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	default:
@@ -34,7 +40,7 @@ func (s *emptyAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDes
 	}
 }
 
-// emptyAPIIrpcClient implements emptyAPI
+// emptyAPIIrpcClient implements [emptyAPI] interface. It by forwards calls over network to [emptyAPIIrpcService] that provides the implementation.
 type emptyAPIIrpcClient struct {
 	endpoint irpcgen.Endpoint
 }
@@ -47,35 +53,39 @@ func newEmptyAPIIrpcClient(endpoint irpcgen.Endpoint) (*emptyAPIIrpcClient, erro
 }
 
 var _edgeCasesIrpcId = []byte{
-	0x55, 0xa3, 0x33, 0x44, 0x68, 0xea, 0x40, 0x8f,
-	0xd3, 0x73, 0x71, 0x5e, 0xcd, 0x3a, 0xf1, 0xda,
-	0x01, 0xdb, 0x33, 0x4b, 0xd5, 0x24, 0x9f, 0xc8,
-	0x6a, 0x4a, 0x07, 0x7a, 0xe2, 0x8a, 0xc1, 0x1a,
+	0x4f, 0xbe, 0x40, 0x33, 0x40, 0xa0, 0x54, 0x65,
+	0x7c, 0x6f, 0x0e, 0xc0, 0x5d, 0xa4, 0x89, 0x07,
+	0xcf, 0x37, 0x45, 0x3a, 0x19, 0x08, 0xc8, 0xe9,
+	0xc4, 0x22, 0xb2, 0x1d, 0x3b, 0x23, 0x06, 0xd9,
 }
 
+// edgeCasesIrpcService provides [edgeCases] interface over irpc
 type edgeCasesIrpcService struct {
 	impl edgeCases
 }
 
+// newEdgeCasesIrpcService returns new [irpcgen.Service] forwarding [edgeCases] network calls to impl
 func newEdgeCasesIrpcService(impl edgeCases) *edgeCasesIrpcService {
 	return &edgeCasesIrpcService{
 		impl: impl,
 	}
 }
+
+// Id implements [irpcgen.Service] interface.
 func (s *edgeCasesIrpcService) Id() []byte {
 	return _edgeCasesIrpcId
 }
+
+// GetFuncCall implements [irpcgen.Service] interface
 func (s *edgeCasesIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // noReturn
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_edgeCases_noReturnReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				s.impl.noReturn(args.i)
 				return irpcgen.EmptySerializable{}
 			}, nil
@@ -83,7 +93,6 @@ func (s *edgeCasesIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 	case 1: // noParams
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_edgeCases_noParamsResp
 				resp.p0 = s.impl.noParams()
 				return resp
@@ -92,46 +101,39 @@ func (s *edgeCasesIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 	case 2: // nothingAtAll
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				s.impl.nothingAtAll()
 				return irpcgen.EmptySerializable{}
 			}, nil
 		}, nil
 	case 3: // unnamedIntParam
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_edgeCases_unnamedIntParamReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				s.impl.unnamedIntParam(args.p0, args.p1)
 				return irpcgen.EmptySerializable{}
 			}, nil
 		}, nil
 	case 4: // mixedParamIds
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_edgeCases_mixedParamIdsReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				s.impl.mixedParamIds(args.p02, args.p0, args.p2)
 				return irpcgen.EmptySerializable{}
 			}, nil
 		}, nil
 	case 5: // underscoreParamNames
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_edgeCases_underscoreParamNamesReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_edgeCases_underscoreParamNamesResp
 				resp.p03 = s.impl.underscoreParamNames(args.p02, args.p0, args.p2)
 				return resp
@@ -139,13 +141,11 @@ func (s *edgeCasesIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 		}, nil
 	case 6: // underscoreRtnName
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_edgeCases_underscoreRtnNameReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_edgeCases_underscoreRtnNameResp
 				resp.p02, resp.p1 = s.impl.underscoreRtnName(args.p0)
 				return resp
@@ -153,13 +153,11 @@ func (s *edgeCasesIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 		}, nil
 	case 7: // paramNamedAsReceiver
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_edgeCases_paramNamedAsReceiverReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				s.impl.paramNamedAsReceiver(args._c)
 				return irpcgen.EmptySerializable{}
 			}, nil
@@ -169,7 +167,7 @@ func (s *edgeCasesIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 	}
 }
 
-// edgeCasesIrpcClient implements edgeCases
+// edgeCasesIrpcClient implements [edgeCases] interface. It by forwards calls over network to [edgeCasesIrpcService] that provides the implementation.
 type edgeCasesIrpcClient struct {
 	endpoint irpcgen.Endpoint
 }
@@ -180,6 +178,9 @@ func newEdgeCasesIrpcClient(endpoint irpcgen.Endpoint) (*edgeCasesIrpcClient, er
 	}
 	return &edgeCasesIrpcClient{endpoint: endpoint}, nil
 }
+
+// noReturn implements [edgeCases]
+//
 func (_c *edgeCasesIrpcClient) noReturn(i int) {
 	var req = _irpc_edgeCases_noReturnReq{
 		i: i,
@@ -189,6 +190,8 @@ func (_c *edgeCasesIrpcClient) noReturn(i int) {
 	}
 }
 
+// noParams implements [edgeCases]
+//
 // noParams is function with no params lol. and this is godoc just above it
 func (_c *edgeCasesIrpcClient) noParams() int {
 	var resp _irpc_edgeCases_noParamsResp
@@ -197,11 +200,15 @@ func (_c *edgeCasesIrpcClient) noParams() int {
 	}
 	return resp.p0
 }
+
+// nothingAtAll implements [edgeCases]
 func (_c *edgeCasesIrpcClient) nothingAtAll() {
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _edgeCasesIrpcId, 2, irpcgen.EmptySerializable{}, &irpcgen.EmptyDeserializable{}); err != nil {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 }
+
+// unnamedIntParam implements [edgeCases]
 func (_c *edgeCasesIrpcClient) unnamedIntParam(p0 int, p1 int) {
 	var req = _irpc_edgeCases_unnamedIntParamReq{
 		p0: p0,
@@ -211,6 +218,8 @@ func (_c *edgeCasesIrpcClient) unnamedIntParam(p0 int, p1 int) {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 }
+
+// mixedParamIds implements [edgeCases]
 func (_c *edgeCasesIrpcClient) mixedParamIds(p02 int, p0 uint8, p2 struct{ a int }) {
 	var req = _irpc_edgeCases_mixedParamIdsReq{
 		p02: p02,
@@ -221,6 +230,8 @@ func (_c *edgeCasesIrpcClient) mixedParamIds(p02 int, p0 uint8, p2 struct{ a int
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 }
+
+// underscoreParamNames implements [edgeCases]
 func (_c *edgeCasesIrpcClient) underscoreParamNames(p02 int, p0 uint8, p2 float64) (_ float64) {
 	var req = _irpc_edgeCases_underscoreParamNamesReq{
 		p02: p02,
@@ -233,6 +244,8 @@ func (_c *edgeCasesIrpcClient) underscoreParamNames(p02 int, p0 uint8, p2 float6
 	}
 	return resp.p03
 }
+
+// underscoreRtnName implements [edgeCases]
 func (_c *edgeCasesIrpcClient) underscoreRtnName(p0 int) (_ int, _ uint8) {
 	var req = _irpc_edgeCases_underscoreRtnNameReq{
 		p0: p0,
@@ -243,6 +256,8 @@ func (_c *edgeCasesIrpcClient) underscoreRtnName(p0 int) (_ int, _ uint8) {
 	}
 	return resp.p02, resp.p1
 }
+
+// paramNamedAsReceiver implements [edgeCases]
 func (_c2 *edgeCasesIrpcClient) paramNamedAsReceiver(_c int) {
 	var req = _irpc_edgeCases_paramNamedAsReceiverReq{
 		_c: _c,
@@ -458,35 +473,39 @@ func (s *_irpc_edgeCases_paramNamedAsReceiverReq) Deserialize(d *irpcgen.Decoder
 }
 
 var _anotherInterfaceIrpcId = []byte{
-	0x62, 0xbf, 0xfb, 0x5b, 0x1b, 0x0b, 0xa4, 0xde,
-	0xee, 0x46, 0xbe, 0xa3, 0x43, 0xc4, 0xa6, 0x4f,
-	0x5a, 0x59, 0x7f, 0xee, 0xdc, 0x74, 0x60, 0xd1,
-	0x3f, 0x20, 0x74, 0x41, 0x76, 0x9c, 0x85, 0xc7,
+	0x30, 0x42, 0x3f, 0x5c, 0xaa, 0xa7, 0xf6, 0x7a,
+	0x9f, 0x00, 0xe6, 0xb6, 0xc6, 0xa0, 0x8f, 0xd5,
+	0xa1, 0x26, 0x12, 0x8a, 0x8f, 0x08, 0x7e, 0x4f,
+	0xc7, 0xc9, 0xda, 0xc2, 0xb0, 0x0b, 0x86, 0x08,
 }
 
+// anotherInterfaceIrpcService provides [anotherInterface] interface over irpc
 type anotherInterfaceIrpcService struct {
 	impl anotherInterface
 }
 
+// newAnotherInterfaceIrpcService returns new [irpcgen.Service] forwarding [anotherInterface] network calls to impl
 func newAnotherInterfaceIrpcService(impl anotherInterface) *anotherInterfaceIrpcService {
 	return &anotherInterfaceIrpcService{
 		impl: impl,
 	}
 }
+
+// Id implements [irpcgen.Service] interface.
 func (s *anotherInterfaceIrpcService) Id() []byte {
 	return _anotherInterfaceIrpcId
 }
+
+// GetFuncCall implements [irpcgen.Service] interface
 func (s *anotherInterfaceIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // anotherAdd
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_anotherInterface_anotherAddReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_anotherInterface_anotherAddResp
 				resp.p0 = s.impl.anotherAdd(args.a, args.b)
 				return resp
@@ -497,7 +516,7 @@ func (s *anotherInterfaceIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcge
 	}
 }
 
-// anotherInterfaceIrpcClient implements anotherInterface
+// anotherInterfaceIrpcClient implements [anotherInterface] interface. It by forwards calls over network to [anotherInterfaceIrpcService] that provides the implementation.
 type anotherInterfaceIrpcClient struct {
 	endpoint irpcgen.Endpoint
 }
@@ -508,6 +527,9 @@ func newAnotherInterfaceIrpcClient(endpoint irpcgen.Endpoint) (*anotherInterface
 	}
 	return &anotherInterfaceIrpcClient{endpoint: endpoint}, nil
 }
+
+// anotherAdd implements [anotherInterface]
+//
 func (_c *anotherInterfaceIrpcClient) anotherAdd(a int, b int) int {
 	var req = _irpc_anotherInterface_anotherAddReq{
 		a: a,

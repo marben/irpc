@@ -9,35 +9,39 @@ import (
 )
 
 var _tbInterfaceAIrpcId = []byte{
-	0x31, 0x76, 0xfc, 0x21, 0xcc, 0x64, 0xbb, 0x4d,
-	0xe8, 0x7c, 0x56, 0xd0, 0xd9, 0x05, 0x08, 0x16,
-	0xb0, 0x36, 0x39, 0x0b, 0xdd, 0x16, 0x3a, 0x27,
-	0x6b, 0x79, 0x29, 0x8c, 0x3c, 0x3d, 0x38, 0xac,
+	0xa4, 0xa5, 0xf1, 0x00, 0xb5, 0x8c, 0x53, 0x02,
+	0xfb, 0x27, 0x74, 0xeb, 0x50, 0xa3, 0xe7, 0x4a,
+	0xdc, 0x25, 0x52, 0xf5, 0x3d, 0x51, 0x88, 0xce,
+	0xc3, 0xf7, 0x57, 0x90, 0x44, 0x95, 0x4b, 0x1f,
 }
 
+// tbInterfaceAIrpcService provides [tbInterfaceA] interface over irpc
 type tbInterfaceAIrpcService struct {
 	impl tbInterfaceA
 }
 
+// newTbInterfaceAIrpcService returns new [irpcgen.Service] forwarding [tbInterfaceA] network calls to impl
 func newTbInterfaceAIrpcService(impl tbInterfaceA) *tbInterfaceAIrpcService {
 	return &tbInterfaceAIrpcService{
 		impl: impl,
 	}
 }
+
+// Id implements [irpcgen.Service] interface.
 func (s *tbInterfaceAIrpcService) Id() []byte {
 	return _tbInterfaceAIrpcId
 }
+
+// GetFuncCall implements [irpcgen.Service] interface
 func (s *tbInterfaceAIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // reverse
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_tbInterfaceA_reverseReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_tbInterfaceA_reverseResp
 				resp.p02 = s.impl.reverse(args.p0)
 				return resp
@@ -48,7 +52,7 @@ func (s *tbInterfaceAIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.Ar
 	}
 }
 
-// tbInterfaceAIrpcClient implements tbInterfaceA
+// tbInterfaceAIrpcClient implements [tbInterfaceA] interface. It by forwards calls over network to [tbInterfaceAIrpcService] that provides the implementation.
 //
 // tbInterfaceA deals with string
 type tbInterfaceAIrpcClient struct {
@@ -61,6 +65,9 @@ func newTbInterfaceAIrpcClient(endpoint irpcgen.Endpoint) (*tbInterfaceAIrpcClie
 	}
 	return &tbInterfaceAIrpcClient{endpoint: endpoint}, nil
 }
+
+// reverse implements [tbInterfaceA]
+//
 func (_c *tbInterfaceAIrpcClient) reverse(p0 string) string {
 	var req = _irpc_tbInterfaceA_reverseReq{
 		p0: p0,
@@ -107,35 +114,39 @@ func (s *_irpc_tbInterfaceA_reverseResp) Deserialize(d *irpcgen.Decoder) error {
 }
 
 var _tvInterfaceBIrpcId = []byte{
-	0xc6, 0x44, 0xfb, 0x40, 0xd3, 0x7b, 0x69, 0xe4,
-	0xd7, 0x7c, 0xb6, 0x97, 0x30, 0x05, 0x50, 0x90,
-	0xf3, 0x5e, 0x44, 0x26, 0x6c, 0xdb, 0x64, 0x03,
-	0xb8, 0x5d, 0x08, 0xec, 0xb5, 0xfc, 0xf6, 0x6f,
+	0xc1, 0x26, 0xca, 0x93, 0xba, 0x99, 0x24, 0x35,
+	0xaf, 0xb7, 0x1a, 0x14, 0x80, 0xea, 0xea, 0xa1,
+	0x04, 0xa3, 0x2a, 0x53, 0x35, 0x6d, 0xae, 0x73,
+	0xa3, 0x19, 0x38, 0x22, 0x0d, 0x23, 0x8e, 0x6a,
 }
 
+// tvInterfaceBIrpcService provides [tvInterfaceB] interface over irpc
 type tvInterfaceBIrpcService struct {
 	impl tvInterfaceB
 }
 
+// newTvInterfaceBIrpcService returns new [irpcgen.Service] forwarding [tvInterfaceB] network calls to impl
 func newTvInterfaceBIrpcService(impl tvInterfaceB) *tvInterfaceBIrpcService {
 	return &tvInterfaceBIrpcService{
 		impl: impl,
 	}
 }
+
+// Id implements [irpcgen.Service] interface.
 func (s *tvInterfaceBIrpcService) Id() []byte {
 	return _tvInterfaceBIrpcId
 }
+
+// GetFuncCall implements [irpcgen.Service] interface
 func (s *tvInterfaceBIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // add
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_tvInterfaceB_addReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_tvInterfaceB_addResp
 				resp.p0 = s.impl.add(args.a, args.b)
 				return resp
@@ -146,7 +157,7 @@ func (s *tvInterfaceBIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.Ar
 	}
 }
 
-// tvInterfaceBIrpcClient implements tvInterfaceB
+// tvInterfaceBIrpcClient implements [tvInterfaceB] interface. It by forwards calls over network to [tvInterfaceBIrpcService] that provides the implementation.
 //
 // however this one deals with ints
 // and also has
@@ -164,6 +175,9 @@ func newTvInterfaceBIrpcClient(endpoint irpcgen.Endpoint) (*tvInterfaceBIrpcClie
 	}
 	return &tvInterfaceBIrpcClient{endpoint: endpoint}, nil
 }
+
+// add implements [tvInterfaceB]
+//
 func (_c *tvInterfaceBIrpcClient) add(a int, b int) int {
 	var req = _irpc_tvInterfaceB_addReq{
 		a: a,

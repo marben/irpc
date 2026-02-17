@@ -10,35 +10,39 @@ import (
 )
 
 var _KVStoreIrpcId = []byte{
-	0xea, 0x67, 0x4d, 0x79, 0xb5, 0x12, 0xab, 0x39,
-	0xf5, 0x8a, 0x5d, 0xc8, 0x54, 0x8e, 0x8d, 0x03,
-	0x58, 0x01, 0x68, 0x6b, 0x1c, 0x0f, 0xff, 0xe8,
-	0x4c, 0xa9, 0x74, 0x78, 0x19, 0x0c, 0x62, 0x33,
+	0x1c, 0xa2, 0xab, 0x88, 0xe9, 0x54, 0x67, 0x34,
+	0xdd, 0x7a, 0x32, 0x7e, 0x0f, 0xd2, 0xb8, 0x5d,
+	0x7d, 0xeb, 0x19, 0x3c, 0xab, 0x1c, 0xc6, 0x32,
+	0xcc, 0xf0, 0xb9, 0xb4, 0xa8, 0x97, 0x38, 0x0c,
 }
 
+// KVStoreIrpcService provides [KVStore] interface over irpc
 type KVStoreIrpcService struct {
 	impl KVStore
 }
 
+// NewKVStoreIrpcService returns new [irpcgen.Service] forwarding [KVStore] network calls to impl
 func NewKVStoreIrpcService(impl KVStore) *KVStoreIrpcService {
 	return &KVStoreIrpcService{
 		impl: impl,
 	}
 }
+
+// Id implements [irpcgen.Service] interface.
 func (s *KVStoreIrpcService) Id() []byte {
 	return _KVStoreIrpcId
 }
+
+// GetFuncCall implements [irpcgen.Service] interface
 func (s *KVStoreIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // Put
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_KVStore_PutReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_KVStore_PutResp
 				resp.p0 = s.impl.Put(args.key, args.value, args.ttl)
 				return resp
@@ -46,13 +50,11 @@ func (s *KVStoreIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDese
 		}, nil
 	case 1: // Get
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_KVStore_GetReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_KVStore_GetResp
 				resp.p0, resp.p1 = s.impl.Get(args.key)
 				return resp
@@ -60,13 +62,11 @@ func (s *KVStoreIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDese
 		}, nil
 	case 2: // Delete
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_KVStore_DeleteReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_KVStore_DeleteResp
 				resp.p0 = s.impl.Delete(args.key)
 				return resp
@@ -74,13 +74,11 @@ func (s *KVStoreIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDese
 		}, nil
 	case 3: // ModifiedSince
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_KVStore_ModifiedSinceReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_KVStore_ModifiedSinceResp
 				resp.p0, resp.p1 = s.impl.ModifiedSince(args.since)
 				return resp
@@ -91,7 +89,7 @@ func (s *KVStoreIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDese
 	}
 }
 
-// KVStoreIrpcClient implements KVStore
+// KVStoreIrpcClient implements [KVStore] interface. It by forwards calls over network to [KVStoreIrpcService] that provides the implementation.
 //
 // KVStore is the interface irpc will generate an RPC client & server for.
 type KVStoreIrpcClient struct {
@@ -104,6 +102,9 @@ func NewKVStoreIrpcClient(endpoint irpcgen.Endpoint) (*KVStoreIrpcClient, error)
 	}
 	return &KVStoreIrpcClient{endpoint: endpoint}, nil
 }
+
+// Put implements [KVStore]
+//
 func (_c *KVStoreIrpcClient) Put(key string, value []byte, ttl time.Duration) error {
 	var req = _irpc_KVStore_PutReq{
 		key:   key,
@@ -116,6 +117,8 @@ func (_c *KVStoreIrpcClient) Put(key string, value []byte, ttl time.Duration) er
 	}
 	return resp.p0
 }
+
+// Get implements [KVStore]
 func (_c *KVStoreIrpcClient) Get(key string) ([]byte, error) {
 	var req = _irpc_KVStore_GetReq{
 		key: key,
@@ -127,6 +130,8 @@ func (_c *KVStoreIrpcClient) Get(key string) ([]byte, error) {
 	}
 	return resp.p0, resp.p1
 }
+
+// Delete implements [KVStore]
 func (_c *KVStoreIrpcClient) Delete(key string) error {
 	var req = _irpc_KVStore_DeleteReq{
 		key: key,
@@ -137,6 +142,8 @@ func (_c *KVStoreIrpcClient) Delete(key string) error {
 	}
 	return resp.p0
 }
+
+// ModifiedSince implements [KVStore]
 func (_c *KVStoreIrpcClient) ModifiedSince(since time.Time) ([]string, error) {
 	var req = _irpc_KVStore_ModifiedSinceReq{
 		since: since,

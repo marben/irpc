@@ -2,9 +2,11 @@ package irpcgen
 
 import "context"
 
+// Endpoint represents one side of an active RPC connection.
+// Each Endpoint communicates with one peer Endpoint on the other side.
 type Endpoint interface {
-	// RegisterClient registers the client with the server.
+	// RegisterClient registers a client with the peer Endpoint.
 	RegisterClient(serviceId []byte) error
-	// CallRemoteFunc calls a remote function on the server.
+	// CallRemoteFunc invokes a function on the peer Endpoint.
 	CallRemoteFunc(ctx context.Context, serviceId []byte, funcId FuncId, params Serializable, resp Deserializable) error
 }

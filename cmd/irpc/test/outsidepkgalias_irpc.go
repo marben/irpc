@@ -12,35 +12,39 @@ import (
 )
 
 var _outsidepkgaliasIrpcId = []byte{
-	0x96, 0xdd, 0xe1, 0x95, 0xea, 0xa7, 0x7f, 0x22,
-	0xa4, 0x40, 0x1b, 0x43, 0xb3, 0x41, 0x32, 0xac,
-	0x98, 0x7f, 0x4b, 0xbd, 0x91, 0xc9, 0x61, 0x94,
-	0x6e, 0xfb, 0x5c, 0xb0, 0xd7, 0xaa, 0x07, 0xb6,
+	0x59, 0xbf, 0x0d, 0x51, 0x82, 0x54, 0x3e, 0x94,
+	0xcf, 0xc1, 0x6f, 0x18, 0x2b, 0x84, 0xab, 0x63,
+	0xfd, 0xde, 0xe6, 0xd9, 0xcc, 0x41, 0xf2, 0xd0,
+	0x04, 0x7c, 0x25, 0xe8, 0x85, 0x2c, 0x99, 0x30,
 }
 
+// outsidepkgaliasIrpcService provides [outsidepkgalias] interface over irpc
 type outsidepkgaliasIrpcService struct {
 	impl outsidepkgalias
 }
 
+// newOutsidepkgaliasIrpcService returns new [irpcgen.Service] forwarding [outsidepkgalias] network calls to impl
 func newOutsidepkgaliasIrpcService(impl outsidepkgalias) *outsidepkgaliasIrpcService {
 	return &outsidepkgaliasIrpcService{
 		impl: impl,
 	}
 }
+
+// Id implements [irpcgen.Service] interface.
 func (s *outsidepkgaliasIrpcService) Id() []byte {
 	return _outsidepkgaliasIrpcId
 }
+
+// GetFuncCall implements [irpcgen.Service] interface
 func (s *outsidepkgaliasIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // add
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_outsidepkgalias_addReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_outsidepkgalias_addResp
 				resp.p0 = s.impl.add(args.a, args.b)
 				return resp
@@ -48,13 +52,11 @@ func (s *outsidepkgaliasIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen
 		}, nil
 	case 1: // add2
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_outsidepkgalias_add2Req
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_outsidepkgalias_add2Resp
 				resp.p0 = s.impl.add2(args.a, args.b)
 				return resp
@@ -62,13 +64,11 @@ func (s *outsidepkgaliasIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen
 		}, nil
 	case 2: // add3
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_outsidepkgalias_add3Req
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_outsidepkgalias_add3Resp
 				resp.p0 = s.impl.add3(args.a, args.b)
 				return resp
@@ -76,13 +76,11 @@ func (s *outsidepkgaliasIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen
 		}, nil
 	case 3: // sum
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_outsidepkgalias_sumReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_outsidepkgalias_sumResp
 				resp.p0 = s.impl.sum(args.inSlice)
 				return resp
@@ -93,7 +91,7 @@ func (s *outsidepkgaliasIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen
 	}
 }
 
-// outsidepkgaliasIrpcClient implements outsidepkgalias
+// outsidepkgaliasIrpcClient implements [outsidepkgalias] interface. It by forwards calls over network to [outsidepkgaliasIrpcService] that provides the implementation.
 type outsidepkgaliasIrpcClient struct {
 	endpoint irpcgen.Endpoint
 }
@@ -104,6 +102,9 @@ func newOutsidepkgaliasIrpcClient(endpoint irpcgen.Endpoint) (*outsidepkgaliasIr
 	}
 	return &outsidepkgaliasIrpcClient{endpoint: endpoint}, nil
 }
+
+// add implements [outsidepkgalias]
+//
 func (_c *outsidepkgaliasIrpcClient) add(a out1.Uint8, b out1.Uint8) int {
 	var req = _irpc_outsidepkgalias_addReq{
 		a: a,
@@ -115,6 +116,8 @@ func (_c *outsidepkgaliasIrpcClient) add(a out1.Uint8, b out1.Uint8) int {
 	}
 	return resp.p0
 }
+
+// add2 implements [outsidepkgalias]
 func (_c *outsidepkgaliasIrpcClient) add2(a out1.Uint8, b out.Uint8) int {
 	var req = _irpc_outsidepkgalias_add2Req{
 		a: a,
@@ -126,6 +129,8 @@ func (_c *outsidepkgaliasIrpcClient) add2(a out1.Uint8, b out.Uint8) int {
 	}
 	return resp.p0
 }
+
+// add3 implements [outsidepkgalias]
 func (_c *outsidepkgaliasIrpcClient) add3(a int, b out.Uint8) out2.Uint8 {
 	var req = _irpc_outsidepkgalias_add3Req{
 		a: a,
@@ -137,6 +142,8 @@ func (_c *outsidepkgaliasIrpcClient) add3(a int, b out.Uint8) out2.Uint8 {
 	}
 	return resp.p0
 }
+
+// sum implements [outsidepkgalias]
 func (_c *outsidepkgaliasIrpcClient) sum(inSlice out1.AliasedByteSlice) int {
 	var req = _irpc_outsidepkgalias_sumReq{
 		inSlice: inSlice,

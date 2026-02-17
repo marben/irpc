@@ -22,6 +22,7 @@ func NewEncoder(w io.Writer) *Encoder {
 	}
 }
 
+// Flush writes any buffered data to the underlying io.Writer.
 func (e *Encoder) Flush() error {
 	return e.w.Flush()
 }

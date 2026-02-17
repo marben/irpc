@@ -9,35 +9,39 @@ import (
 )
 
 var _tcpTestApiIrpcId = []byte{
-	0x66, 0xc9, 0x4f, 0x6d, 0x36, 0x59, 0x1a, 0x2d,
-	0x13, 0x3a, 0x6a, 0x8f, 0xc2, 0x47, 0xd1, 0xad,
-	0xf4, 0x52, 0x88, 0x70, 0x4a, 0x92, 0x73, 0x12,
-	0xb4, 0xa8, 0x2c, 0xaa, 0xcb, 0xe1, 0x45, 0xe3,
+	0x18, 0x5f, 0x38, 0xa6, 0x8c, 0xed, 0xc7, 0x0c,
+	0x31, 0xa7, 0xad, 0xf5, 0x51, 0xa9, 0xab, 0xc8,
+	0x4b, 0xdc, 0xa3, 0x96, 0xde, 0x7e, 0xe4, 0xe3,
+	0xb3, 0x38, 0x4f, 0x72, 0xb6, 0xf8, 0x69, 0x38,
 }
 
+// tcpTestApiIrpcService provides [tcpTestApi] interface over irpc
 type tcpTestApiIrpcService struct {
 	impl tcpTestApi
 }
 
+// newTcpTestApiIrpcService returns new [irpcgen.Service] forwarding [tcpTestApi] network calls to impl
 func newTcpTestApiIrpcService(impl tcpTestApi) *tcpTestApiIrpcService {
 	return &tcpTestApiIrpcService{
 		impl: impl,
 	}
 }
+
+// Id implements [irpcgen.Service] interface.
 func (s *tcpTestApiIrpcService) Id() []byte {
 	return _tcpTestApiIrpcId
 }
+
+// GetFuncCall implements [irpcgen.Service] interface
 func (s *tcpTestApiIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // Div
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_tcpTestApi_DivReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_tcpTestApi_DivResp
 				resp.p0, resp.p1 = s.impl.Div(args.a, args.b)
 				return resp
@@ -48,7 +52,7 @@ func (s *tcpTestApiIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgD
 	}
 }
 
-// tcpTestApiIrpcClient implements tcpTestApi
+// tcpTestApiIrpcClient implements [tcpTestApi] interface. It by forwards calls over network to [tcpTestApiIrpcService] that provides the implementation.
 type tcpTestApiIrpcClient struct {
 	endpoint irpcgen.Endpoint
 }
@@ -59,6 +63,9 @@ func newTcpTestApiIrpcClient(endpoint irpcgen.Endpoint) (*tcpTestApiIrpcClient, 
 	}
 	return &tcpTestApiIrpcClient{endpoint: endpoint}, nil
 }
+
+// Div implements [tcpTestApi]
+//
 func (_c *tcpTestApiIrpcClient) Div(a float64, b float64) (float64, error) {
 	var req = _irpc_tcpTestApi_DivReq{
 		a: a,

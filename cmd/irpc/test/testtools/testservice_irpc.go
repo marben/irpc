@@ -9,35 +9,39 @@ import (
 )
 
 var _TestServiceIrpcId = []byte{
-	0xf6, 0xc3, 0x88, 0x37, 0x4d, 0x39, 0xc4, 0xc9,
-	0xc0, 0x59, 0xce, 0x55, 0xd0, 0xa7, 0xb3, 0x9d,
-	0x25, 0xa8, 0x8f, 0xb4, 0x08, 0xc4, 0xca, 0xf8,
-	0xb6, 0xed, 0xe9, 0x42, 0x0c, 0xa7, 0x00, 0x86,
+	0x96, 0xf8, 0xf4, 0x6d, 0x84, 0xd0, 0x09, 0x03,
+	0xe6, 0x14, 0x33, 0x48, 0x50, 0x6f, 0x80, 0xe7,
+	0xfe, 0x86, 0x37, 0xbc, 0x45, 0xa8, 0x87, 0x52,
+	0x56, 0xeb, 0x6f, 0x8a, 0x50, 0x26, 0x1f, 0x35,
 }
 
+// TestServiceIrpcService provides [TestService] interface over irpc
 type TestServiceIrpcService struct {
 	impl TestService
 }
 
+// NewTestServiceIrpcService returns new [irpcgen.Service] forwarding [TestService] network calls to impl
 func NewTestServiceIrpcService(impl TestService) *TestServiceIrpcService {
 	return &TestServiceIrpcService{
 		impl: impl,
 	}
 }
+
+// Id implements [irpcgen.Service] interface.
 func (s *TestServiceIrpcService) Id() []byte {
 	return _TestServiceIrpcId
 }
+
+// GetFuncCall implements [irpcgen.Service] interface
 func (s *TestServiceIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // Div
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_TestService_DivReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_TestService_DivResp
 				resp.p0 = s.impl.Div(args.a, args.b)
 				return resp
@@ -45,13 +49,11 @@ func (s *TestServiceIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.Arg
 		}, nil
 	case 1: // DivErr
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_TestService_DivErrReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_TestService_DivErrResp
 				resp.p0, resp.p1 = s.impl.DivErr(args.a, args.b)
 				return resp
@@ -59,13 +61,11 @@ func (s *TestServiceIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.Arg
 		}, nil
 	case 2: // DivCtxErr
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_TestService_DivCtxErrReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_TestService_DivCtxErrResp
 				resp.p0, resp.p1 = s.impl.DivCtxErr(ctx, args.a, args.b)
 				return resp
@@ -76,7 +76,7 @@ func (s *TestServiceIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.Arg
 	}
 }
 
-// TestServiceIrpcClient implements TestService
+// TestServiceIrpcClient implements [TestService] interface. It by forwards calls over network to [TestServiceIrpcService] that provides the implementation.
 type TestServiceIrpcClient struct {
 	endpoint irpcgen.Endpoint
 }
@@ -87,6 +87,9 @@ func NewTestServiceIrpcClient(endpoint irpcgen.Endpoint) (*TestServiceIrpcClient
 	}
 	return &TestServiceIrpcClient{endpoint: endpoint}, nil
 }
+
+// Div implements [TestService]
+//
 func (_c *TestServiceIrpcClient) Div(a int, b int) int {
 	var req = _irpc_TestService_DivReq{
 		a: a,
@@ -98,6 +101,8 @@ func (_c *TestServiceIrpcClient) Div(a int, b int) int {
 	}
 	return resp.p0
 }
+
+// DivErr implements [TestService]
 func (_c *TestServiceIrpcClient) DivErr(a int, b int) (int, error) {
 	var req = _irpc_TestService_DivErrReq{
 		a: a,
@@ -110,6 +115,8 @@ func (_c *TestServiceIrpcClient) DivErr(a int, b int) (int, error) {
 	}
 	return resp.p0, resp.p1
 }
+
+// DivCtxErr implements [TestService]
 func (_c *TestServiceIrpcClient) DivCtxErr(ctx context.Context, a int, b int) (int, error) {
 	var req = _irpc_TestService_DivCtxErrReq{
 		// ctx: ctx,

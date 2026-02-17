@@ -10,35 +10,39 @@ import (
 )
 
 var _binMarshalIrpcId = []byte{
-	0x1f, 0xc7, 0x76, 0x26, 0x0b, 0x15, 0xd2, 0x2a,
-	0x14, 0x97, 0xee, 0x31, 0xca, 0xc2, 0xad, 0x19,
-	0x7e, 0xcb, 0x03, 0x75, 0xd1, 0x56, 0x81, 0x36,
-	0x3b, 0xcf, 0x91, 0x96, 0x66, 0xa6, 0x31, 0x69,
+	0x7d, 0x5e, 0xb7, 0x84, 0xa8, 0x95, 0x43, 0xc6,
+	0xc2, 0x6c, 0x17, 0xc5, 0x74, 0xf5, 0xdd, 0x91,
+	0x2e, 0x99, 0xd8, 0xe8, 0x0d, 0x55, 0xa2, 0xda,
+	0xbf, 0xb1, 0x1d, 0xff, 0x25, 0xd8, 0x97, 0x63,
 }
 
+// binMarshalIrpcService provides [binMarshal] interface over irpc
 type binMarshalIrpcService struct {
 	impl binMarshal
 }
 
+// newBinMarshalIrpcService returns new [irpcgen.Service] forwarding [binMarshal] network calls to impl
 func newBinMarshalIrpcService(impl binMarshal) *binMarshalIrpcService {
 	return &binMarshalIrpcService{
 		impl: impl,
 	}
 }
+
+// Id implements [irpcgen.Service] interface.
 func (s *binMarshalIrpcService) Id() []byte {
 	return _binMarshalIrpcId
 }
+
+// GetFuncCall implements [irpcgen.Service] interface
 func (s *binMarshalIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // reflect
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_binMarshal_reflectReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_binMarshal_reflectResp
 				resp.p0 = s.impl.reflect(args.t)
 				return resp
@@ -46,13 +50,11 @@ func (s *binMarshalIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgD
 		}, nil
 	case 1: // addHour
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_binMarshal_addHourReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_binMarshal_addHourResp
 				resp.p0 = s.impl.addHour(args.t)
 				return resp
@@ -60,13 +62,11 @@ func (s *binMarshalIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgD
 		}, nil
 	case 2: // addMyHour
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_binMarshal_addMyHourReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_binMarshal_addMyHourResp
 				resp.p0 = s.impl.addMyHour(args.t)
 				return resp
@@ -74,13 +74,11 @@ func (s *binMarshalIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgD
 		}, nil
 	case 3: // addMyStructHour
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_binMarshal_addMyStructHourReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_binMarshal_addMyStructHourResp
 				resp.p0 = s.impl.addMyStructHour(args.t)
 				return resp
@@ -88,13 +86,11 @@ func (s *binMarshalIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgD
 		}, nil
 	case 4: // structPass
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_binMarshal_structPassReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_binMarshal_structPassResp
 				resp.p0 = s.impl.structPass(args.st)
 				return resp
@@ -102,13 +98,11 @@ func (s *binMarshalIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgD
 		}, nil
 	case 5: // myMarshalableStructPass
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_binMarshal_myMarshalableStructPassReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_binMarshal_myMarshalableStructPassResp
 				resp.p0 = s.impl.myMarshalableStructPass(args.s)
 				return resp
@@ -119,7 +113,7 @@ func (s *binMarshalIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgD
 	}
 }
 
-// binMarshalIrpcClient implements binMarshal
+// binMarshalIrpcClient implements [binMarshal] interface. It by forwards calls over network to [binMarshalIrpcService] that provides the implementation.
 type binMarshalIrpcClient struct {
 	endpoint irpcgen.Endpoint
 }
@@ -130,6 +124,9 @@ func newBinMarshalIrpcClient(endpoint irpcgen.Endpoint) (*binMarshalIrpcClient, 
 	}
 	return &binMarshalIrpcClient{endpoint: endpoint}, nil
 }
+
+// reflect implements [binMarshal]
+//
 func (_c *binMarshalIrpcClient) reflect(t time.Time) time.Time {
 	var req = _irpc_binMarshal_reflectReq{
 		t: t,
@@ -140,6 +137,8 @@ func (_c *binMarshalIrpcClient) reflect(t time.Time) time.Time {
 	}
 	return resp.p0
 }
+
+// addHour implements [binMarshal]
 func (_c *binMarshalIrpcClient) addHour(t time.Time) time.Time {
 	var req = _irpc_binMarshal_addHourReq{
 		t: t,
@@ -150,6 +149,8 @@ func (_c *binMarshalIrpcClient) addHour(t time.Time) time.Time {
 	}
 	return resp.p0
 }
+
+// addMyHour implements [binMarshal]
 func (_c *binMarshalIrpcClient) addMyHour(t myTime) myTime {
 	var req = _irpc_binMarshal_addMyHourReq{
 		t: t,
@@ -160,6 +161,8 @@ func (_c *binMarshalIrpcClient) addMyHour(t myTime) myTime {
 	}
 	return resp.p0
 }
+
+// addMyStructHour implements [binMarshal]
 func (_c *binMarshalIrpcClient) addMyStructHour(t myStructTime) myStructTime {
 	var req = _irpc_binMarshal_addMyStructHourReq{
 		t: t,
@@ -170,6 +173,8 @@ func (_c *binMarshalIrpcClient) addMyStructHour(t myStructTime) myStructTime {
 	}
 	return resp.p0
 }
+
+// structPass implements [binMarshal]
 func (_c *binMarshalIrpcClient) structPass(st structContainingBinMarshallable) structContainingBinMarshallable {
 	var req = _irpc_binMarshal_structPassReq{
 		st: st,
@@ -180,6 +185,8 @@ func (_c *binMarshalIrpcClient) structPass(st structContainingBinMarshallable) s
 	}
 	return resp.p0
 }
+
+// myMarshalableStructPass implements [binMarshal]
 func (_c *binMarshalIrpcClient) myMarshalableStructPass(s myMarshallableStruct) string {
 	var req = _irpc_binMarshal_myMarshalableStructPassReq{
 		s: s,

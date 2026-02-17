@@ -43,12 +43,19 @@ func (ag apiGenerator) serviceIdVarDefinition(hash []byte) string {
 	return fmt.Sprintf("var %s = %s", ag.serviceIdVarName, byteSliceLiteral(ag.serviceId(hash)))
 }
 
+func (ag apiGenerator) clientTypeName() string {
+	return ag.apiName + "IrpcClient"
+}
+
+func (ag apiGenerator) serviceTypeName() string {
+	return ag.apiName + "IrpcService"
+}
+
 func (ag apiGenerator) clientCode(q *qualifier) string {
-	clientTypeName := ag.apiName + "IrpcClient"
 	sb := &strings.Builder{}
 
 	// GoDoc comment
-	fmt.Fprintf(sb, "// %s implements %s\n", clientTypeName, ag.apiName)
+	fmt.Fprintf(sb, "// %s implements [%s] interface. It by forwards calls over network to [%s] that provides the implementation.\n", ag.clientTypeName(), ag.apiName, ag.serviceTypeName())
 	if ag.goDoc != "" {
 		sb.WriteString("// \n")
 		sb.WriteString(ag.goDoc)
@@ -65,7 +72,7 @@ func (ag apiGenerator) clientCode(q *qualifier) string {
 		}
 		return &%[1]s{endpoint: endpoint}, nil
 	}
-	`, clientTypeName, generateStructConstructorName(clientTypeName), ag.serviceIdVarName)
+	`, ag.clientTypeName(), generateStructConstructorName(ag.clientTypeName()), ag.serviceIdVarName)
 
 	// func calls
 	for _, m := range ag.methods {
@@ -80,8 +87,9 @@ func (ag apiGenerator) clientCode(q *qualifier) string {
 		fncReceiverName := allVarIds.generateUniqueVarName("_c")
 
 		// func header
+		fmt.Fprintf(sb, "// %s implements [%s]\n//\n", m.name, ag.apiName)
 		sb.WriteString(m.goDoc)
-		fmt.Fprintf(sb, "func(%s *%s)%s(%s)(%s){\n", fncReceiverName, clientTypeName, m.name, m.req.funcCallParams(q), m.resp.funcCallParams(q))
+		fmt.Fprintf(sb, "func(%s *%s)%s(%s)(%s){\n", fncReceiverName, ag.clientTypeName(), m.name, m.req.funcCallParams(q), m.resp.funcCallParams(q))
 
 		// request
 		var reqVarName string
@@ -149,32 +157,34 @@ func (ag apiGenerator) clientCode(q *qualifier) string {
 func (ag apiGenerator) serviceCode(q *qualifier) string {
 	w := &strings.Builder{}
 
-	serviceTypeName := ag.apiName + "IrpcService"
-
 	// type definition
-	fmt.Fprintf(w, `type %s struct{
+	fmt.Fprintf(w, `// %s provides [%[2]s] interface over irpc 
+	type %[1]s struct{
 		impl %s
 	}
-	`, serviceTypeName, ag.apiName)
+	`, ag.serviceTypeName(), ag.apiName)
 
 	// constructor
-	fmt.Fprintf(w, `func %s (impl %s) *%[3]s {
+	fmt.Fprintf(w, `// %s returns new [irpcgen.Service] forwarding [%[2]s] network calls to impl
+	func %[1]s (impl %[2]s) *%[3]s {
 		return &%[3]s{
 			impl:impl,
 		}
 	}
-	`, generateStructConstructorName(serviceTypeName), ag.apiName, serviceTypeName)
+	`, generateStructConstructorName(ag.serviceTypeName()), ag.apiName, ag.serviceTypeName())
 
 	// Id() func
-	fmt.Fprintf(w, `func (s *%s) Id() []byte {
+	fmt.Fprintf(w, `// Id implements [irpcgen.Service] interface.
+	func (s *%s) Id() []byte {
 		return %s
 	}
-	`, serviceTypeName, ag.serviceIdVarName)
+	`, ag.serviceTypeName(), ag.serviceIdVarName)
 
 	// Call func call switch
-	fmt.Fprintf(w, `func (s *%s) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error){
+	fmt.Fprintf(w, `// GetFuncCall implements [irpcgen.Service] interface
+	func (s *%s) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error){
 		switch funcId {
-			`, serviceTypeName)
+			`, ag.serviceTypeName())
 
 	q.addUsedImport(irpcGenImport, fmtImport)
 
@@ -184,8 +194,7 @@ func (ag apiGenerator) serviceCode(q *qualifier) string {
 
 		// deserialize, if not empty
 		if !m.req.isEmpty() {
-			fmt.Fprintf(w, `// DESERIALIZE
-		 	var args %s
+			fmt.Fprintf(w, `var args %s
 		 	if err := args.Deserialize(d); err != nil {
 		 		return nil, err
 		 	}

@@ -9,5 +9,6 @@ type FileInfo struct {
 }
 
 type FileServer interface {
+	// ListFiles lists all the files yo
 	ListFiles() ([]FileInfo, error)
 }

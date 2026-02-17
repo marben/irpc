@@ -9,30 +9,35 @@ import (
 )
 
 var _FileServerIrpcId = []byte{
-	0xb4, 0x70, 0x77, 0x68, 0xd9, 0xbd, 0x42, 0x83,
-	0x3f, 0x07, 0x3d, 0xa6, 0x70, 0xf7, 0x2d, 0x1d,
-	0x5f, 0x3b, 0x86, 0xd2, 0xef, 0x9c, 0x19, 0xf5,
-	0x73, 0xc9, 0x6f, 0x51, 0x9a, 0x78, 0xd2, 0xf4,
+	0x03, 0xe0, 0x40, 0x75, 0x45, 0x3d, 0x57, 0xfb,
+	0xca, 0x39, 0xb3, 0x98, 0x3e, 0xb1, 0xd0, 0x7a,
+	0x23, 0xe9, 0xd2, 0x03, 0x70, 0xbc, 0x83, 0x2c,
+	0x0f, 0xa6, 0x46, 0xd6, 0x9b, 0x4f, 0x8f, 0x00,
 }
 
+// FileServerIrpcService provides [FileServer] interface over irpc
 type FileServerIrpcService struct {
 	impl FileServer
 }
 
+// NewFileServerIrpcService returns new [irpcgen.Service] forwarding [FileServer] network calls to impl
 func NewFileServerIrpcService(impl FileServer) *FileServerIrpcService {
 	return &FileServerIrpcService{
 		impl: impl,
 	}
 }
+
+// Id implements [irpcgen.Service] interface.
 func (s *FileServerIrpcService) Id() []byte {
 	return _FileServerIrpcId
 }
+
+// GetFuncCall implements [irpcgen.Service] interface
 func (s *FileServerIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // ListFiles
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_FileServer_ListFilesResp
 				resp.p0, resp.p1 = s.impl.ListFiles()
 				return resp
@@ -43,7 +48,7 @@ func (s *FileServerIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgD
 	}
 }
 
-// FileServerIrpcClient implements FileServer
+// FileServerIrpcClient implements [FileServer] interface. It by forwards calls over network to [FileServerIrpcService] that provides the implementation.
 type FileServerIrpcClient struct {
 	endpoint irpcgen.Endpoint
 }
@@ -54,6 +59,10 @@ func NewFileServerIrpcClient(endpoint irpcgen.Endpoint) (*FileServerIrpcClient, 
 	}
 	return &FileServerIrpcClient{endpoint: endpoint}, nil
 }
+
+// ListFiles implements [FileServer]
+//
+// ListFiles lists all the files yo
 func (_c *FileServerIrpcClient) ListFiles() ([]FileInfo, error) {
 	var resp _irpc_FileServer_ListFilesResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _FileServerIrpcId, 0, irpcgen.EmptySerializable{}, &resp); err != nil {

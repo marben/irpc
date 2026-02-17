@@ -93,14 +93,12 @@ func (mg methodGenerator) executorFuncCode(q *qualifier) string {
 	q.addUsedImport(contextImport)
 	if mg.resp.isEmpty() {
 		return fmt.Sprintf(`func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				s.impl.%[2]s(%[3]s)
 				return irpcgen.EmptySerializable{}
 			}`, mg.resp.structName, mg.name, mg.requestParamsListPrefixed("args.", "ctx"))
 	}
 
 	return fmt.Sprintf(`func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp %[1]s
 				%[2]s = s.impl.%[3]s(%[4]s)
 				return resp

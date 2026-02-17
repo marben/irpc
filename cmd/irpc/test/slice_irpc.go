@@ -10,35 +10,39 @@ import (
 )
 
 var _sliceTestIrpcId = []byte{
-	0x87, 0x26, 0x32, 0xca, 0x0c, 0xd7, 0x1a, 0x27,
-	0x20, 0xd5, 0xce, 0x1a, 0x20, 0x5c, 0x42, 0x2a,
-	0x87, 0xc2, 0x46, 0x10, 0x8a, 0x5d, 0xcf, 0x3c,
-	0xb6, 0xb3, 0xeb, 0x4c, 0x62, 0x36, 0x5d, 0x41,
+	0x78, 0x26, 0xd7, 0xab, 0x2c, 0xa1, 0x27, 0x75,
+	0x05, 0x3e, 0x4b, 0x24, 0xfc, 0xe7, 0x45, 0x8d,
+	0x6e, 0xc4, 0xe7, 0x1d, 0xd9, 0x7c, 0x3e, 0x47,
+	0x0a, 0xc7, 0xdb, 0xc8, 0xd5, 0x4f, 0xf2, 0xcf,
 }
 
+// sliceTestIrpcService provides [sliceTest] interface over irpc
 type sliceTestIrpcService struct {
 	impl sliceTest
 }
 
+// newSliceTestIrpcService returns new [irpcgen.Service] forwarding [sliceTest] network calls to impl
 func newSliceTestIrpcService(impl sliceTest) *sliceTestIrpcService {
 	return &sliceTestIrpcService{
 		impl: impl,
 	}
 }
+
+// Id implements [irpcgen.Service] interface.
 func (s *sliceTestIrpcService) Id() []byte {
 	return _sliceTestIrpcId
 }
+
+// GetFuncCall implements [irpcgen.Service] interface
 func (s *sliceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // SliceSum
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_sliceTest_SliceSumReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_sliceTest_SliceSumResp
 				resp.p0 = s.impl.SliceSum(args.slice)
 				return resp
@@ -46,13 +50,11 @@ func (s *sliceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 		}, nil
 	case 1: // VectMult
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_sliceTest_VectMultReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_sliceTest_VectMultResp
 				resp.p0 = s.impl.VectMult(args.vect, args.s)
 				return resp
@@ -60,13 +62,11 @@ func (s *sliceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 		}, nil
 	case 2: // SliceOfFloat64Sum
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_sliceTest_SliceOfFloat64SumReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_sliceTest_SliceOfFloat64SumResp
 				resp.p0 = s.impl.SliceOfFloat64Sum(args.slice)
 				return resp
@@ -74,13 +74,11 @@ func (s *sliceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 		}, nil
 	case 3: // SliceOfSlicesSum
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_sliceTest_SliceOfSlicesSumReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_sliceTest_SliceOfSlicesSumResp
 				resp.p0 = s.impl.SliceOfSlicesSum(args.slice)
 				return resp
@@ -88,13 +86,11 @@ func (s *sliceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 		}, nil
 	case 4: // SliceOfBytesSum
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_sliceTest_SliceOfBytesSumReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_sliceTest_SliceOfBytesSumResp
 				resp.p0 = s.impl.SliceOfBytesSum(args.slice)
 				return resp
@@ -102,13 +98,11 @@ func (s *sliceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 		}, nil
 	case 5: // namedByteSlice
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_sliceTest_namedByteSliceReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_sliceTest_namedByteSliceResp
 				resp.p0 = s.impl.namedByteSlice(args.slice)
 				return resp
@@ -116,13 +110,11 @@ func (s *sliceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 		}, nil
 	case 6: // sliceOfBools
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_sliceTest_sliceOfBoolsReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_sliceTest_sliceOfBoolsResp
 				resp.p0 = s.impl.sliceOfBools(args.slice)
 				return resp
@@ -130,13 +122,11 @@ func (s *sliceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 		}, nil
 	case 7: // sliceOfUint8
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_sliceTest_sliceOfUint8Req
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_sliceTest_sliceOfUint8Resp
 				resp.p0 = s.impl.sliceOfUint8(args.slice)
 				return resp
@@ -144,26 +134,22 @@ func (s *sliceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 		}, nil
 	case 8: // sliceOfMaps
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_sliceTest_sliceOfMapsReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				s.impl.sliceOfMaps(args.slice)
 				return irpcgen.EmptySerializable{}
 			}, nil
 		}, nil
 	case 9: // sliceOfStructs
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_sliceTest_sliceOfStructsReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_sliceTest_sliceOfStructsResp
 				resp.sumA = s.impl.sliceOfStructs(args.slice)
 				return resp
@@ -171,26 +157,22 @@ func (s *sliceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 		}, nil
 	case 10: // sliceOfErrors
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_sliceTest_sliceOfErrorsReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				s.impl.sliceOfErrors(args.slice)
 				return irpcgen.EmptySerializable{}
 			}, nil
 		}, nil
 	case 11: // isNilSlice
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_sliceTest_isNilSliceReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_sliceTest_isNilSliceResp
 				resp.p0 = s.impl.isNilSlice(args.s)
 				return resp
@@ -198,13 +180,11 @@ func (s *sliceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 		}, nil
 	case 12: // isNilBoolSlice
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_sliceTest_isNilBoolSliceReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_sliceTest_isNilBoolSliceResp
 				resp.p0 = s.impl.isNilBoolSlice(args.bs)
 				return resp
@@ -212,13 +192,11 @@ func (s *sliceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 		}, nil
 	case 13: // isNilByteSlice
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_sliceTest_isNilByteSliceReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_sliceTest_isNilByteSliceResp
 				resp.p0 = s.impl.isNilByteSlice(args.bs)
 				return resp
@@ -226,13 +204,11 @@ func (s *sliceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 		}, nil
 	case 14: // sliceOfTimesReverse
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_sliceTest_sliceOfTimesReverseReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_sliceTest_sliceOfTimesReverseResp
 				resp.p0 = s.impl.sliceOfTimesReverse(args.in)
 				return resp
@@ -243,7 +219,7 @@ func (s *sliceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 	}
 }
 
-// sliceTestIrpcClient implements sliceTest
+// sliceTestIrpcClient implements [sliceTest] interface. It by forwards calls over network to [sliceTestIrpcService] that provides the implementation.
 type sliceTestIrpcClient struct {
 	endpoint irpcgen.Endpoint
 }
@@ -254,6 +230,9 @@ func newSliceTestIrpcClient(endpoint irpcgen.Endpoint) (*sliceTestIrpcClient, er
 	}
 	return &sliceTestIrpcClient{endpoint: endpoint}, nil
 }
+
+// SliceSum implements [sliceTest]
+//
 func (_c *sliceTestIrpcClient) SliceSum(slice []int) int {
 	var req = _irpc_sliceTest_SliceSumReq{
 		slice: slice,
@@ -264,6 +243,8 @@ func (_c *sliceTestIrpcClient) SliceSum(slice []int) int {
 	}
 	return resp.p0
 }
+
+// VectMult implements [sliceTest]
 func (_c *sliceTestIrpcClient) VectMult(vect []int, s int) []int {
 	var req = _irpc_sliceTest_VectMultReq{
 		vect: vect,
@@ -275,6 +256,8 @@ func (_c *sliceTestIrpcClient) VectMult(vect []int, s int) []int {
 	}
 	return resp.p0
 }
+
+// SliceOfFloat64Sum implements [sliceTest]
 func (_c *sliceTestIrpcClient) SliceOfFloat64Sum(slice []float64) float64 {
 	var req = _irpc_sliceTest_SliceOfFloat64SumReq{
 		slice: slice,
@@ -285,6 +268,8 @@ func (_c *sliceTestIrpcClient) SliceOfFloat64Sum(slice []float64) float64 {
 	}
 	return resp.p0
 }
+
+// SliceOfSlicesSum implements [sliceTest]
 func (_c *sliceTestIrpcClient) SliceOfSlicesSum(slice [][]int) int {
 	var req = _irpc_sliceTest_SliceOfSlicesSumReq{
 		slice: slice,
@@ -295,6 +280,8 @@ func (_c *sliceTestIrpcClient) SliceOfSlicesSum(slice [][]int) int {
 	}
 	return resp.p0
 }
+
+// SliceOfBytesSum implements [sliceTest]
 func (_c *sliceTestIrpcClient) SliceOfBytesSum(slice []byte) int {
 	var req = _irpc_sliceTest_SliceOfBytesSumReq{
 		slice: slice,
@@ -305,6 +292,8 @@ func (_c *sliceTestIrpcClient) SliceOfBytesSum(slice []byte) int {
 	}
 	return resp.p0
 }
+
+// namedByteSlice implements [sliceTest]
 func (_c *sliceTestIrpcClient) namedByteSlice(slice namedByteSlice) int {
 	var req = _irpc_sliceTest_namedByteSliceReq{
 		slice: slice,
@@ -315,6 +304,8 @@ func (_c *sliceTestIrpcClient) namedByteSlice(slice namedByteSlice) int {
 	}
 	return resp.p0
 }
+
+// sliceOfBools implements [sliceTest]
 func (_c *sliceTestIrpcClient) sliceOfBools(slice []bool) namedBoolSlice {
 	var req = _irpc_sliceTest_sliceOfBoolsReq{
 		slice: slice,
@@ -325,6 +316,8 @@ func (_c *sliceTestIrpcClient) sliceOfBools(slice []bool) namedBoolSlice {
 	}
 	return resp.p0
 }
+
+// sliceOfUint8 implements [sliceTest]
 func (_c *sliceTestIrpcClient) sliceOfUint8(slice []uint8) []byte {
 	var req = _irpc_sliceTest_sliceOfUint8Req{
 		slice: slice,
@@ -335,6 +328,8 @@ func (_c *sliceTestIrpcClient) sliceOfUint8(slice []uint8) []byte {
 	}
 	return resp.p0
 }
+
+// sliceOfMaps implements [sliceTest]
 func (_c *sliceTestIrpcClient) sliceOfMaps(slice []map[int]string) {
 	var req = _irpc_sliceTest_sliceOfMapsReq{
 		slice: slice,
@@ -343,6 +338,8 @@ func (_c *sliceTestIrpcClient) sliceOfMaps(slice []map[int]string) {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 }
+
+// sliceOfStructs implements [sliceTest]
 func (_c *sliceTestIrpcClient) sliceOfStructs(slice []struct {
 	A int
 	B string
@@ -356,6 +353,8 @@ func (_c *sliceTestIrpcClient) sliceOfStructs(slice []struct {
 	}
 	return resp.sumA
 }
+
+// sliceOfErrors implements [sliceTest]
 func (_c *sliceTestIrpcClient) sliceOfErrors(slice []error) {
 	var req = _irpc_sliceTest_sliceOfErrorsReq{
 		slice: slice,
@@ -364,6 +363,8 @@ func (_c *sliceTestIrpcClient) sliceOfErrors(slice []error) {
 		panic(err) // to avoid panic, make your func return error and regenerate irpc code
 	}
 }
+
+// isNilSlice implements [sliceTest]
 func (_c *sliceTestIrpcClient) isNilSlice(s []string) bool {
 	var req = _irpc_sliceTest_isNilSliceReq{
 		s: s,
@@ -374,6 +375,8 @@ func (_c *sliceTestIrpcClient) isNilSlice(s []string) bool {
 	}
 	return resp.p0
 }
+
+// isNilBoolSlice implements [sliceTest]
 func (_c *sliceTestIrpcClient) isNilBoolSlice(bs []bool) bool {
 	var req = _irpc_sliceTest_isNilBoolSliceReq{
 		bs: bs,
@@ -384,6 +387,8 @@ func (_c *sliceTestIrpcClient) isNilBoolSlice(bs []bool) bool {
 	}
 	return resp.p0
 }
+
+// isNilByteSlice implements [sliceTest]
 func (_c *sliceTestIrpcClient) isNilByteSlice(bs []byte) bool {
 	var req = _irpc_sliceTest_isNilByteSliceReq{
 		bs: bs,
@@ -394,6 +399,8 @@ func (_c *sliceTestIrpcClient) isNilByteSlice(bs []byte) bool {
 	}
 	return resp.p0
 }
+
+// sliceOfTimesReverse implements [sliceTest]
 func (_c *sliceTestIrpcClient) sliceOfTimesReverse(in []time.Time) []time.Time {
 	var req = _irpc_sliceTest_sliceOfTimesReverseReq{
 		in: in,

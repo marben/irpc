@@ -10,35 +10,39 @@ import (
 )
 
 var _mapTestIrpcId = []byte{
-	0x50, 0xba, 0xe7, 0xe1, 0xc7, 0x29, 0x10, 0x8f,
-	0xde, 0x85, 0x5e, 0x35, 0xd8, 0x80, 0x67, 0x08,
-	0xda, 0xbb, 0x31, 0x33, 0xd3, 0x68, 0x25, 0x8d,
-	0x96, 0x84, 0x4e, 0x0f, 0x46, 0x82, 0xb4, 0x95,
+	0x9f, 0xe1, 0xed, 0xc3, 0x7f, 0xa8, 0xa8, 0x18,
+	0x68, 0x8b, 0x37, 0x93, 0x63, 0x8f, 0x0d, 0xe7,
+	0x95, 0x15, 0xc5, 0x05, 0x51, 0xd1, 0x85, 0xbc,
+	0x15, 0xb8, 0x03, 0xf7, 0x7f, 0xe9, 0x51, 0x3f,
 }
 
+// mapTestIrpcService provides [mapTest] interface over irpc
 type mapTestIrpcService struct {
 	impl mapTest
 }
 
+// newMapTestIrpcService returns new [irpcgen.Service] forwarding [mapTest] network calls to impl
 func newMapTestIrpcService(impl mapTest) *mapTestIrpcService {
 	return &mapTestIrpcService{
 		impl: impl,
 	}
 }
+
+// Id implements [irpcgen.Service] interface.
 func (s *mapTestIrpcService) Id() []byte {
 	return _mapTestIrpcId
 }
+
+// GetFuncCall implements [irpcgen.Service] interface
 func (s *mapTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // mapSum
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_mapTest_mapSumReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_mapTest_mapSumResp
 				resp.keysSum, resp.valsSum = s.impl.mapSum(args.in)
 				return resp
@@ -46,13 +50,11 @@ func (s *mapTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDese
 		}, nil
 	case 1: // sumStructs
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_mapTest_sumStructsReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_mapTest_sumStructsResp
 				resp.keysSum, resp.valsSum = s.impl.sumStructs(args.in)
 				return resp
@@ -60,13 +62,11 @@ func (s *mapTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDese
 		}, nil
 	case 2: // sumSlices
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_mapTest_sumSlicesReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_mapTest_sumSlicesResp
 				resp.keysSum, resp.valsSum = s.impl.sumSlices(args.in)
 				return resp
@@ -74,13 +74,11 @@ func (s *mapTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDese
 		}, nil
 	case 3: // namedMapInc
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_mapTest_namedMapIncReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_mapTest_namedMapIncResp
 				resp.p0 = s.impl.namedMapInc(args.in)
 				return resp
@@ -88,13 +86,11 @@ func (s *mapTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDese
 		}, nil
 	case 4: // namedKeySum
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_mapTest_namedKeySumReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_mapTest_namedKeySumResp
 				resp.p0 = s.impl.namedKeySum(args.in)
 				return resp
@@ -102,13 +98,11 @@ func (s *mapTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDese
 		}, nil
 	case 5: // emptyInterfaceMapReflect
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_mapTest_emptyInterfaceMapReflectReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_mapTest_emptyInterfaceMapReflectResp
 				resp.p0 = s.impl.emptyInterfaceMapReflect(args.in)
 				return resp
@@ -116,13 +110,11 @@ func (s *mapTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDese
 		}, nil
 	case 6: // isNil
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_mapTest_isNilReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_mapTest_isNilResp
 				resp.p02 = s.impl.isNil(args.p0)
 				return resp
@@ -130,13 +122,11 @@ func (s *mapTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDese
 		}, nil
 	case 7: // mapWithTime
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_mapTest_mapWithTimeReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_mapTest_mapWithTimeResp
 				resp.p02 = s.impl.mapWithTime(args.p0)
 				return resp
@@ -147,7 +137,7 @@ func (s *mapTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDese
 	}
 }
 
-// mapTestIrpcClient implements mapTest
+// mapTestIrpcClient implements [mapTest] interface. It by forwards calls over network to [mapTestIrpcService] that provides the implementation.
 type mapTestIrpcClient struct {
 	endpoint irpcgen.Endpoint
 }
@@ -158,6 +148,9 @@ func newMapTestIrpcClient(endpoint irpcgen.Endpoint) (*mapTestIrpcClient, error)
 	}
 	return &mapTestIrpcClient{endpoint: endpoint}, nil
 }
+
+// mapSum implements [mapTest]
+//
 func (_c *mapTestIrpcClient) mapSum(in map[int]float64) (keysSum int, valsSum float64) {
 	var req = _irpc_mapTest_mapSumReq{
 		in: in,
@@ -168,6 +161,8 @@ func (_c *mapTestIrpcClient) mapSum(in map[int]float64) (keysSum int, valsSum fl
 	}
 	return resp.keysSum, resp.valsSum
 }
+
+// sumStructs implements [mapTest]
 func (_c *mapTestIrpcClient) sumStructs(in map[intStruct]intStruct) (keysSum int, valsSum int) {
 	var req = _irpc_mapTest_sumStructsReq{
 		in: in,
@@ -178,6 +173,8 @@ func (_c *mapTestIrpcClient) sumStructs(in map[intStruct]intStruct) (keysSum int
 	}
 	return resp.keysSum, resp.valsSum
 }
+
+// sumSlices implements [mapTest]
 func (_c *mapTestIrpcClient) sumSlices(in map[intStruct][]intStruct) (keysSum int, valsSum int) {
 	var req = _irpc_mapTest_sumSlicesReq{
 		in: in,
@@ -188,6 +185,8 @@ func (_c *mapTestIrpcClient) sumSlices(in map[intStruct][]intStruct) (keysSum in
 	}
 	return resp.keysSum, resp.valsSum
 }
+
+// namedMapInc implements [mapTest]
 func (_c *mapTestIrpcClient) namedMapInc(in namedIntFloatMap) namedIntFloatMap {
 	var req = _irpc_mapTest_namedMapIncReq{
 		in: in,
@@ -198,6 +197,8 @@ func (_c *mapTestIrpcClient) namedMapInc(in namedIntFloatMap) namedIntFloatMap {
 	}
 	return resp.p0
 }
+
+// namedKeySum implements [mapTest]
 func (_c *mapTestIrpcClient) namedKeySum(in map[mapNamedInt]mapNamedFloat64) mapNamedFloat64 {
 	var req = _irpc_mapTest_namedKeySumReq{
 		in: in,
@@ -208,6 +209,8 @@ func (_c *mapTestIrpcClient) namedKeySum(in map[mapNamedInt]mapNamedFloat64) map
 	}
 	return resp.p0
 }
+
+// emptyInterfaceMapReflect implements [mapTest]
 func (_c *mapTestIrpcClient) emptyInterfaceMapReflect(in map[int]interface{}) map[int]interface{} {
 	var req = _irpc_mapTest_emptyInterfaceMapReflectReq{
 		in: in,
@@ -218,6 +221,8 @@ func (_c *mapTestIrpcClient) emptyInterfaceMapReflect(in map[int]interface{}) ma
 	}
 	return resp.p0
 }
+
+// isNil implements [mapTest]
 func (_c *mapTestIrpcClient) isNil(p0 map[int]string) bool {
 	var req = _irpc_mapTest_isNilReq{
 		p0: p0,
@@ -228,6 +233,8 @@ func (_c *mapTestIrpcClient) isNil(p0 map[int]string) bool {
 	}
 	return resp.p02
 }
+
+// mapWithTime implements [mapTest]
 func (_c *mapTestIrpcClient) mapWithTime(p0 map[time.Time]struct{}) []time.Time {
 	var req = _irpc_mapTest_mapWithTimeReq{
 		p0: p0,

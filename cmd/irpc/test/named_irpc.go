@@ -9,35 +9,39 @@ import (
 )
 
 var _namedTestIrpcId = []byte{
-	0x1a, 0x97, 0xa6, 0x54, 0xf2, 0xb3, 0xcd, 0x0b,
-	0x94, 0xf9, 0x06, 0x30, 0x19, 0x88, 0x45, 0x56,
-	0x14, 0x8d, 0x33, 0x74, 0xb2, 0x92, 0x90, 0x44,
-	0x8d, 0x24, 0x14, 0xa5, 0xf3, 0x56, 0x93, 0xfd,
+	0x7e, 0x03, 0x27, 0x25, 0x46, 0x0d, 0x0a, 0xf4,
+	0xce, 0xac, 0x93, 0x13, 0x8a, 0x4f, 0x39, 0x73,
+	0xd5, 0x03, 0x22, 0x7b, 0xfe, 0xb5, 0x88, 0x1b,
+	0xa7, 0x1b, 0x77, 0xd9, 0x04, 0xd1, 0x51, 0xfd,
 }
 
+// namedTestIrpcService provides [namedTest] interface over irpc
 type namedTestIrpcService struct {
 	impl namedTest
 }
 
+// newNamedTestIrpcService returns new [irpcgen.Service] forwarding [namedTest] network calls to impl
 func newNamedTestIrpcService(impl namedTest) *namedTestIrpcService {
 	return &namedTestIrpcService{
 		impl: impl,
 	}
 }
+
+// Id implements [irpcgen.Service] interface.
 func (s *namedTestIrpcService) Id() []byte {
 	return _namedTestIrpcId
 }
+
+// GetFuncCall implements [irpcgen.Service] interface
 func (s *namedTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // isWeekend
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_namedTest_isWeekendReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_namedTest_isWeekendResp
 				resp.p0 = s.impl.isWeekend(args.wd)
 				return resp
@@ -45,13 +49,11 @@ func (s *namedTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 		}, nil
 	case 1: // isWeekend2
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_namedTest_isWeekend2Req
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_namedTest_isWeekend2Resp
 				resp.p0 = s.impl.isWeekend2(args.wd)
 				return resp
@@ -59,13 +61,11 @@ func (s *namedTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 		}, nil
 	case 2: // containsSaturday
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_namedTest_containsSaturdayReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_namedTest_containsSaturdayResp
 				resp.p0 = s.impl.containsSaturday(args.wds)
 				return resp
@@ -73,13 +73,11 @@ func (s *namedTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 		}, nil
 	case 3: // containsSaturday2
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_namedTest_containsSaturday2Req
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_namedTest_containsSaturday2Resp
 				resp.p0 = s.impl.containsSaturday2(args.wds)
 				return resp
@@ -87,13 +85,11 @@ func (s *namedTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 		}, nil
 	case 4: // namedBytesSum
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_namedTest_namedBytesSumReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_namedTest_namedBytesSumResp
 				resp.p0 = s.impl.namedBytesSum(args.nb)
 				return resp
@@ -101,13 +97,11 @@ func (s *namedTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 		}, nil
 	case 5: // namedMapSum
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_namedTest_namedMapSumReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_namedTest_namedMapSumResp
 				resp.p02 = s.impl.namedMapSum(args.p0)
 				return resp
@@ -118,7 +112,7 @@ func (s *namedTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDe
 	}
 }
 
-// namedTestIrpcClient implements namedTest
+// namedTestIrpcClient implements [namedTest] interface. It by forwards calls over network to [namedTestIrpcService] that provides the implementation.
 type namedTestIrpcClient struct {
 	endpoint irpcgen.Endpoint
 }
@@ -129,6 +123,9 @@ func newNamedTestIrpcClient(endpoint irpcgen.Endpoint) (*namedTestIrpcClient, er
 	}
 	return &namedTestIrpcClient{endpoint: endpoint}, nil
 }
+
+// isWeekend implements [namedTest]
+//
 func (_c *namedTestIrpcClient) isWeekend(wd weekDay) bool {
 	var req = _irpc_namedTest_isWeekendReq{
 		wd: wd,
@@ -139,6 +136,8 @@ func (_c *namedTestIrpcClient) isWeekend(wd weekDay) bool {
 	}
 	return resp.p0
 }
+
+// isWeekend2 implements [namedTest]
 func (_c *namedTestIrpcClient) isWeekend2(wd weekDay2) bool {
 	var req = _irpc_namedTest_isWeekend2Req{
 		wd: wd,
@@ -149,6 +148,8 @@ func (_c *namedTestIrpcClient) isWeekend2(wd weekDay2) bool {
 	}
 	return resp.p0
 }
+
+// containsSaturday implements [namedTest]
 func (_c *namedTestIrpcClient) containsSaturday(wds []weekDay) bool {
 	var req = _irpc_namedTest_containsSaturdayReq{
 		wds: wds,
@@ -159,6 +160,8 @@ func (_c *namedTestIrpcClient) containsSaturday(wds []weekDay) bool {
 	}
 	return resp.p0
 }
+
+// containsSaturday2 implements [namedTest]
 func (_c *namedTestIrpcClient) containsSaturday2(wds namedWeekDaysSliceType) bool {
 	var req = _irpc_namedTest_containsSaturday2Req{
 		wds: wds,
@@ -169,6 +172,8 @@ func (_c *namedTestIrpcClient) containsSaturday2(wds namedWeekDaysSliceType) boo
 	}
 	return resp.p0
 }
+
+// namedBytesSum implements [namedTest]
 func (_c *namedTestIrpcClient) namedBytesSum(nb namedByteSliceType) int {
 	var req = _irpc_namedTest_namedBytesSumReq{
 		nb: nb,
@@ -179,6 +184,8 @@ func (_c *namedTestIrpcClient) namedBytesSum(nb namedByteSliceType) int {
 	}
 	return resp.p0
 }
+
+// namedMapSum implements [namedTest]
 func (_c *namedTestIrpcClient) namedMapSum(p0 namedMap) float64 {
 	var req = _irpc_namedTest_namedMapSumReq{
 		p0: p0,

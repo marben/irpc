@@ -10,35 +10,39 @@ import (
 )
 
 var _basicNamedAPIIrpcId = []byte{
-	0x94, 0xe0, 0x80, 0x53, 0xed, 0xbc, 0xa8, 0xef,
-	0xf7, 0xfe, 0x8f, 0x36, 0x5e, 0x9e, 0x00, 0x39,
-	0x0b, 0x67, 0xc1, 0xe4, 0x42, 0xc1, 0x3b, 0xba,
-	0xf7, 0x6f, 0x21, 0x17, 0xf2, 0x43, 0xa9, 0x4f,
+	0x2a, 0x14, 0xa1, 0x00, 0xc4, 0x18, 0x01, 0xc0,
+	0x9a, 0x30, 0xed, 0x0b, 0x4c, 0x80, 0x01, 0x78,
+	0xc3, 0xd4, 0x96, 0x66, 0x60, 0xad, 0x58, 0x2c,
+	0x3b, 0x89, 0x35, 0x20, 0x7c, 0x3e, 0x05, 0x2f,
 }
 
+// basicNamedAPIIrpcService provides [basicNamedAPI] interface over irpc
 type basicNamedAPIIrpcService struct {
 	impl basicNamedAPI
 }
 
+// newBasicNamedAPIIrpcService returns new [irpcgen.Service] forwarding [basicNamedAPI] network calls to impl
 func newBasicNamedAPIIrpcService(impl basicNamedAPI) *basicNamedAPIIrpcService {
 	return &basicNamedAPIIrpcService{
 		impl: impl,
 	}
 }
+
+// Id implements [irpcgen.Service] interface.
 func (s *basicNamedAPIIrpcService) Id() []byte {
 	return _basicNamedAPIIrpcId
 }
+
+// GetFuncCall implements [irpcgen.Service] interface
 func (s *basicNamedAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // addFakeUint8
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_basicNamedAPI_addFakeUint8Req
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_basicNamedAPI_addFakeUint8Resp
 				resp.p0 = s.impl.addFakeUint8(args.a, args.b)
 				return resp
@@ -46,13 +50,11 @@ func (s *basicNamedAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.A
 		}, nil
 	case 1: // addUint8
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_basicNamedAPI_addUint8Req
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_basicNamedAPI_addUint8Resp
 				resp.p0 = s.impl.addUint8(args.a, args.b)
 				return resp
@@ -60,13 +62,11 @@ func (s *basicNamedAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.A
 		}, nil
 	case 2: // addByte
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_basicNamedAPI_addByteReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_basicNamedAPI_addByteResp
 				resp.p0 = s.impl.addByte(args.a, args.b)
 				return resp
@@ -74,13 +74,11 @@ func (s *basicNamedAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.A
 		}, nil
 	case 3: // retNamedString
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_basicNamedAPI_retNamedStringReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_basicNamedAPI_retNamedStringResp
 				resp.p0 = s.impl.retNamedString(args.ns)
 				return resp
@@ -91,7 +89,7 @@ func (s *basicNamedAPIIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.A
 	}
 }
 
-// basicNamedAPIIrpcClient implements basicNamedAPI
+// basicNamedAPIIrpcClient implements [basicNamedAPI] interface. It by forwards calls over network to [basicNamedAPIIrpcService] that provides the implementation.
 type basicNamedAPIIrpcClient struct {
 	endpoint irpcgen.Endpoint
 }
@@ -102,6 +100,9 @@ func newBasicNamedAPIIrpcClient(endpoint irpcgen.Endpoint) (*basicNamedAPIIrpcCl
 	}
 	return &basicNamedAPIIrpcClient{endpoint: endpoint}, nil
 }
+
+// addFakeUint8 implements [basicNamedAPI]
+//
 func (_c *basicNamedAPIIrpcClient) addFakeUint8(a out2.Uint8, b out2.Uint8) FakeUint8 {
 	var req = _irpc_basicNamedAPI_addFakeUint8Req{
 		a: a,
@@ -113,6 +114,8 @@ func (_c *basicNamedAPIIrpcClient) addFakeUint8(a out2.Uint8, b out2.Uint8) Fake
 	}
 	return resp.p0
 }
+
+// addUint8 implements [basicNamedAPI]
 func (_c *basicNamedAPIIrpcClient) addUint8(a uint8, b uint8) uint8 {
 	var req = _irpc_basicNamedAPI_addUint8Req{
 		a: a,
@@ -124,6 +127,8 @@ func (_c *basicNamedAPIIrpcClient) addUint8(a uint8, b uint8) uint8 {
 	}
 	return resp.p0
 }
+
+// addByte implements [basicNamedAPI]
 func (_c *basicNamedAPIIrpcClient) addByte(a byte, b byte) byte {
 	var req = _irpc_basicNamedAPI_addByteReq{
 		a: a,
@@ -135,6 +140,8 @@ func (_c *basicNamedAPIIrpcClient) addByte(a byte, b byte) byte {
 	}
 	return resp.p0
 }
+
+// retNamedString implements [basicNamedAPI]
 func (_c *basicNamedAPIIrpcClient) retNamedString(ns NamedString) string {
 	var req = _irpc_basicNamedAPI_retNamedStringReq{
 		ns: ns,

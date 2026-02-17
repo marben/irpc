@@ -11,35 +11,39 @@ import (
 )
 
 var _interfaceTestIrpcId = []byte{
-	0xe8, 0x7b, 0x51, 0xd2, 0x29, 0x16, 0x2e, 0x97,
-	0x23, 0x3c, 0x79, 0x03, 0x35, 0x37, 0xa6, 0x5b,
-	0xf6, 0x82, 0x92, 0xa5, 0x1a, 0xdd, 0xf7, 0xd4,
-	0x0d, 0xc2, 0x2d, 0x21, 0x76, 0xee, 0x22, 0x4d,
+	0xef, 0x4e, 0x77, 0xd4, 0x55, 0x8a, 0x99, 0x5b,
+	0x6b, 0x26, 0xc7, 0xc6, 0xc4, 0x4b, 0x63, 0x1e,
+	0xb7, 0x69, 0x0f, 0x33, 0xc4, 0x4a, 0x5c, 0x9d,
+	0x68, 0x96, 0x2e, 0x14, 0xd8, 0x4b, 0x79, 0xd4,
 }
 
+// interfaceTestIrpcService provides [interfaceTest] interface over irpc
 type interfaceTestIrpcService struct {
 	impl interfaceTest
 }
 
+// newInterfaceTestIrpcService returns new [irpcgen.Service] forwarding [interfaceTest] network calls to impl
 func newInterfaceTestIrpcService(impl interfaceTest) *interfaceTestIrpcService {
 	return &interfaceTestIrpcService{
 		impl: impl,
 	}
 }
+
+// Id implements [irpcgen.Service] interface.
 func (s *interfaceTestIrpcService) Id() []byte {
 	return _interfaceTestIrpcId
 }
+
+// GetFuncCall implements [irpcgen.Service] interface
 func (s *interfaceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // rtnErrorWithMessage
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_interfaceTest_rtnErrorWithMessageReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_interfaceTest_rtnErrorWithMessageResp
 				resp.p0 = s.impl.rtnErrorWithMessage(args.msg)
 				return resp
@@ -48,7 +52,6 @@ func (s *interfaceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.A
 	case 1: // rtnNilError
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_interfaceTest_rtnNilErrorResp
 				resp.p0 = s.impl.rtnNilError()
 				return resp
@@ -57,7 +60,6 @@ func (s *interfaceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.A
 	case 2: // rtnTwoErrors
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_interfaceTest_rtnTwoErrorsResp
 				resp.p0, resp.p1 = s.impl.rtnTwoErrors()
 				return resp
@@ -65,13 +67,11 @@ func (s *interfaceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.A
 		}, nil
 	case 3: // rtnStringAndError
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_interfaceTest_rtnStringAndErrorReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_interfaceTest_rtnStringAndErrorResp
 				resp.s, resp.err = s.impl.rtnStringAndError(args.msg)
 				return resp
@@ -79,13 +79,11 @@ func (s *interfaceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.A
 		}, nil
 	case 4: // passCustomInterfaceAndReturnItModified
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_interfaceTest_passCustomInterfaceAndReturnItModifiedReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_interfaceTest_passCustomInterfaceAndReturnItModifiedResp
 				resp.p0, resp.p1 = s.impl.passCustomInterfaceAndReturnItModified(args.ci)
 				return resp
@@ -93,13 +91,11 @@ func (s *interfaceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.A
 		}, nil
 	case 5: // passJustCustomInterfaceWithoutError
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_interfaceTest_passJustCustomInterfaceWithoutErrorReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_interfaceTest_passJustCustomInterfaceWithoutErrorResp
 				resp.p0 = s.impl.passJustCustomInterfaceWithoutError(args.ci)
 				return resp
@@ -107,13 +103,11 @@ func (s *interfaceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.A
 		}, nil
 	case 6: // passAnonInterface
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_interfaceTest_passAnonInterfaceReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_interfaceTest_passAnonInterfaceResp
 				resp.p0 = s.impl.passAnonInterface(args.input)
 				return resp
@@ -121,13 +115,11 @@ func (s *interfaceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.A
 		}, nil
 	case 7: // passAnonInterfaceWithNamedParams
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_interfaceTest_passAnonInterfaceWithNamedParamsReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_interfaceTest_passAnonInterfaceWithNamedParamsResp
 				resp.p0 = s.impl.passAnonInterfaceWithNamedParams(args.input)
 				return resp
@@ -138,7 +130,7 @@ func (s *interfaceTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.A
 	}
 }
 
-// interfaceTestIrpcClient implements interfaceTest
+// interfaceTestIrpcClient implements [interfaceTest] interface. It by forwards calls over network to [interfaceTestIrpcService] that provides the implementation.
 type interfaceTestIrpcClient struct {
 	endpoint irpcgen.Endpoint
 }
@@ -149,6 +141,9 @@ func newInterfaceTestIrpcClient(endpoint irpcgen.Endpoint) (*interfaceTestIrpcCl
 	}
 	return &interfaceTestIrpcClient{endpoint: endpoint}, nil
 }
+
+// rtnErrorWithMessage implements [interfaceTest]
+//
 func (_c *interfaceTestIrpcClient) rtnErrorWithMessage(msg string) error {
 	var req = _irpc_interfaceTest_rtnErrorWithMessageReq{
 		msg: msg,
@@ -159,6 +154,8 @@ func (_c *interfaceTestIrpcClient) rtnErrorWithMessage(msg string) error {
 	}
 	return resp.p0
 }
+
+// rtnNilError implements [interfaceTest]
 func (_c *interfaceTestIrpcClient) rtnNilError() error {
 	var resp _irpc_interfaceTest_rtnNilErrorResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _interfaceTestIrpcId, 1, irpcgen.EmptySerializable{}, &resp); err != nil {
@@ -166,6 +163,8 @@ func (_c *interfaceTestIrpcClient) rtnNilError() error {
 	}
 	return resp.p0
 }
+
+// rtnTwoErrors implements [interfaceTest]
 func (_c *interfaceTestIrpcClient) rtnTwoErrors() (error, error) {
 	var resp _irpc_interfaceTest_rtnTwoErrorsResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _interfaceTestIrpcId, 2, irpcgen.EmptySerializable{}, &resp); err != nil {
@@ -174,6 +173,8 @@ func (_c *interfaceTestIrpcClient) rtnTwoErrors() (error, error) {
 	}
 	return resp.p0, resp.p1
 }
+
+// rtnStringAndError implements [interfaceTest]
 func (_c *interfaceTestIrpcClient) rtnStringAndError(msg string) (s string, err error) {
 	var req = _irpc_interfaceTest_rtnStringAndErrorReq{
 		msg: msg,
@@ -185,6 +186,8 @@ func (_c *interfaceTestIrpcClient) rtnStringAndError(msg string) (s string, err 
 	}
 	return resp.s, resp.err
 }
+
+// passCustomInterfaceAndReturnItModified implements [interfaceTest]
 func (_c *interfaceTestIrpcClient) passCustomInterfaceAndReturnItModified(ci customInterface) (customInterface, error) {
 	var req = _irpc_interfaceTest_passCustomInterfaceAndReturnItModifiedReq{
 		ci: ci,
@@ -196,6 +199,8 @@ func (_c *interfaceTestIrpcClient) passCustomInterfaceAndReturnItModified(ci cus
 	}
 	return resp.p0, resp.p1
 }
+
+// passJustCustomInterfaceWithoutError implements [interfaceTest]
 func (_c *interfaceTestIrpcClient) passJustCustomInterfaceWithoutError(ci customInterface) customInterface {
 	var req = _irpc_interfaceTest_passJustCustomInterfaceWithoutErrorReq{
 		ci: ci,
@@ -207,6 +212,8 @@ func (_c *interfaceTestIrpcClient) passJustCustomInterfaceWithoutError(ci custom
 	return resp.p0
 }
 
+// passAnonInterface implements [interfaceTest]
+//
 // anonymous interface: // todo: write a test
 func (_c *interfaceTestIrpcClient) passAnonInterface(input interface {
 	Age() int
@@ -221,6 +228,8 @@ func (_c *interfaceTestIrpcClient) passAnonInterface(input interface {
 	}
 	return resp.p0
 }
+
+// passAnonInterfaceWithNamedParams implements [interfaceTest]
 func (_c *interfaceTestIrpcClient) passAnonInterfaceWithNamedParams(input interface {
 	a() (out.Uint8, int)
 	b() out2.Uint8
@@ -936,30 +945,35 @@ func (s *_irpc_interfaceTest_passAnonInterfaceWithNamedParamsResp) Deserialize(d
 }
 
 var _customInterfaceIrpcId = []byte{
-	0x22, 0x1e, 0x30, 0x46, 0x5c, 0x1a, 0xa3, 0x07,
-	0x84, 0xda, 0xa4, 0x9d, 0x8a, 0xd2, 0xcc, 0x5f,
-	0x47, 0x6e, 0xad, 0x09, 0x37, 0xdd, 0xa5, 0xe2,
-	0xee, 0xe1, 0x82, 0x24, 0x1d, 0x14, 0xa0, 0xa7,
+	0xb1, 0xdd, 0x44, 0x0c, 0x00, 0x37, 0x67, 0xb1,
+	0x98, 0x5c, 0xf6, 0x7d, 0xf6, 0x4a, 0x73, 0x12,
+	0x85, 0x24, 0xc3, 0xc4, 0x9e, 0xb6, 0x92, 0x3d,
+	0x54, 0x51, 0xf3, 0x40, 0x43, 0xdb, 0xca, 0x2d,
 }
 
+// customInterfaceIrpcService provides [customInterface] interface over irpc
 type customInterfaceIrpcService struct {
 	impl customInterface
 }
 
+// newCustomInterfaceIrpcService returns new [irpcgen.Service] forwarding [customInterface] network calls to impl
 func newCustomInterfaceIrpcService(impl customInterface) *customInterfaceIrpcService {
 	return &customInterfaceIrpcService{
 		impl: impl,
 	}
 }
+
+// Id implements [irpcgen.Service] interface.
 func (s *customInterfaceIrpcService) Id() []byte {
 	return _customInterfaceIrpcId
 }
+
+// GetFuncCall implements [irpcgen.Service] interface
 func (s *customInterfaceIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // IntFunc
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_customInterface_IntFuncResp
 				resp.p0 = s.impl.IntFunc()
 				return resp
@@ -968,7 +982,6 @@ func (s *customInterfaceIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen
 	case 1: // StringFunc
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_customInterface_StringFuncResp
 				resp.p0 = s.impl.StringFunc()
 				return resp
@@ -979,7 +992,7 @@ func (s *customInterfaceIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen
 	}
 }
 
-// customInterfaceIrpcClient implements customInterface
+// customInterfaceIrpcClient implements [customInterface] interface. It by forwards calls over network to [customInterfaceIrpcService] that provides the implementation.
 //
 // todo: currently we are also generating service and client for this interface. perhaps we don't want that?
 type customInterfaceIrpcClient struct {
@@ -992,6 +1005,9 @@ func newCustomInterfaceIrpcClient(endpoint irpcgen.Endpoint) (*customInterfaceIr
 	}
 	return &customInterfaceIrpcClient{endpoint: endpoint}, nil
 }
+
+// IntFunc implements [customInterface]
+//
 func (_c *customInterfaceIrpcClient) IntFunc() int {
 	var resp _irpc_customInterface_IntFuncResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _customInterfaceIrpcId, 0, irpcgen.EmptySerializable{}, &resp); err != nil {
@@ -999,6 +1015,8 @@ func (_c *customInterfaceIrpcClient) IntFunc() int {
 	}
 	return resp.p0
 }
+
+// StringFunc implements [customInterface]
 func (_c *customInterfaceIrpcClient) StringFunc() string {
 	var resp _irpc_customInterface_StringFuncResp
 	if err := _c.endpoint.CallRemoteFunc(context.Background(), _customInterfaceIrpcId, 1, irpcgen.EmptySerializable{}, &resp); err != nil {

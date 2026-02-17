@@ -10,35 +10,39 @@ import (
 )
 
 var _sliceNamedApiIrpcId = []byte{
-	0xc1, 0xc4, 0xcb, 0x9a, 0x26, 0x64, 0xa8, 0xbe,
-	0xde, 0x84, 0x25, 0xf2, 0xd2, 0x48, 0x39, 0x2f,
-	0xd6, 0xfe, 0xab, 0xd0, 0xc6, 0x9a, 0x15, 0xe7,
-	0xd5, 0x71, 0x72, 0x6e, 0xb4, 0x26, 0x5a, 0x61,
+	0x7e, 0xba, 0x28, 0xd7, 0x7b, 0x0b, 0x6c, 0x8f,
+	0x76, 0x88, 0x4c, 0x2e, 0x66, 0xc6, 0xce, 0xd8,
+	0x4f, 0x7b, 0x64, 0xb2, 0xf4, 0x48, 0x7d, 0x0f,
+	0x80, 0x9c, 0x08, 0xb4, 0xa6, 0x96, 0x0c, 0x44,
 }
 
+// sliceNamedApiIrpcService provides [sliceNamedApi] interface over irpc
 type sliceNamedApiIrpcService struct {
 	impl sliceNamedApi
 }
 
+// newSliceNamedApiIrpcService returns new [irpcgen.Service] forwarding [sliceNamedApi] network calls to impl
 func newSliceNamedApiIrpcService(impl sliceNamedApi) *sliceNamedApiIrpcService {
 	return &sliceNamedApiIrpcService{
 		impl: impl,
 	}
 }
+
+// Id implements [irpcgen.Service] interface.
 func (s *sliceNamedApiIrpcService) Id() []byte {
 	return _sliceNamedApiIrpcId
 }
+
+// GetFuncCall implements [irpcgen.Service] interface
 func (s *sliceNamedApiIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // sumNamedInts
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_sliceNamedApi_sumNamedIntsReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_sliceNamedApi_sumNamedIntsResp
 				resp.p0 = s.impl.sumNamedInts(args.vec)
 				return resp
@@ -46,13 +50,11 @@ func (s *sliceNamedApiIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.A
 		}, nil
 	case 1: // sumOutsideNamedInts
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_sliceNamedApi_sumOutsideNamedIntsReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_sliceNamedApi_sumOutsideNamedIntsResp
 				resp.p0 = s.impl.sumOutsideNamedInts(args.vec)
 				return resp
@@ -60,13 +62,11 @@ func (s *sliceNamedApiIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.A
 		}, nil
 	case 2: // sumSliceOfNamedInts
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_sliceNamedApi_sumSliceOfNamedIntsReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_sliceNamedApi_sumSliceOfNamedIntsResp
 				resp.p0 = s.impl.sumSliceOfNamedInts(args.vec)
 				return resp
@@ -74,13 +74,11 @@ func (s *sliceNamedApiIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.A
 		}, nil
 	case 3: // reverseNamedSliceOfTime
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_sliceNamedApi_reverseNamedSliceOfTimeReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_sliceNamedApi_reverseNamedSliceOfTimeResp
 				resp.p0 = s.impl.reverseNamedSliceOfTime(args.in)
 				return resp
@@ -91,7 +89,7 @@ func (s *sliceNamedApiIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.A
 	}
 }
 
-// sliceNamedApiIrpcClient implements sliceNamedApi
+// sliceNamedApiIrpcClient implements [sliceNamedApi] interface. It by forwards calls over network to [sliceNamedApiIrpcService] that provides the implementation.
 type sliceNamedApiIrpcClient struct {
 	endpoint irpcgen.Endpoint
 }
@@ -102,6 +100,9 @@ func newSliceNamedApiIrpcClient(endpoint irpcgen.Endpoint) (*sliceNamedApiIrpcCl
 	}
 	return &sliceNamedApiIrpcClient{endpoint: endpoint}, nil
 }
+
+// sumNamedInts implements [sliceNamedApi]
+//
 func (_c *sliceNamedApiIrpcClient) sumNamedInts(vec namedSliceOfInts) int {
 	var req = _irpc_sliceNamedApi_sumNamedIntsReq{
 		vec: vec,
@@ -112,6 +113,8 @@ func (_c *sliceNamedApiIrpcClient) sumNamedInts(vec namedSliceOfInts) int {
 	}
 	return resp.p0
 }
+
+// sumOutsideNamedInts implements [sliceNamedApi]
 func (_c *sliceNamedApiIrpcClient) sumOutsideNamedInts(vec out.AliasedByteSlice) int {
 	var req = _irpc_sliceNamedApi_sumOutsideNamedIntsReq{
 		vec: vec,
@@ -122,6 +125,8 @@ func (_c *sliceNamedApiIrpcClient) sumOutsideNamedInts(vec out.AliasedByteSlice)
 	}
 	return resp.p0
 }
+
+// sumSliceOfNamedInts implements [sliceNamedApi]
 func (_c *sliceNamedApiIrpcClient) sumSliceOfNamedInts(vec []out.Uint8) out.Uint8 {
 	var req = _irpc_sliceNamedApi_sumSliceOfNamedIntsReq{
 		vec: vec,
@@ -132,6 +137,8 @@ func (_c *sliceNamedApiIrpcClient) sumSliceOfNamedInts(vec []out.Uint8) out.Uint
 	}
 	return resp.p0
 }
+
+// reverseNamedSliceOfTime implements [sliceNamedApi]
 func (_c *sliceNamedApiIrpcClient) reverseNamedSliceOfTime(in namedSliceOfTime) namedSliceOfTime {
 	var req = _irpc_sliceNamedApi_reverseNamedSliceOfTimeReq{
 		in: in,

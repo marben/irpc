@@ -8,24 +8,30 @@ import (
 )
 
 var _emptyInterfaceIrpcId = []byte{
-	0x17, 0x2f, 0xbf, 0x9c, 0x4a, 0xc5, 0x63, 0x85,
-	0x6d, 0xc4, 0x79, 0x09, 0x00, 0xbc, 0x0a, 0x73,
-	0x9e, 0x18, 0xff, 0x15, 0xaa, 0x20, 0x4a, 0x7c,
-	0x96, 0xe9, 0x49, 0x04, 0xa4, 0x57, 0x4d, 0x18,
+	0x87, 0x55, 0x47, 0x2c, 0x0a, 0x21, 0x5d, 0x95,
+	0x3e, 0xdb, 0x86, 0x58, 0xfb, 0x80, 0x36, 0xf3,
+	0xc3, 0x4b, 0x6c, 0x54, 0x03, 0x11, 0xe5, 0x86,
+	0x24, 0x25, 0x19, 0x4c, 0x02, 0x29, 0xac, 0xd4,
 }
 
+// emptyInterfaceIrpcService provides [emptyInterface] interface over irpc
 type emptyInterfaceIrpcService struct {
 	impl emptyInterface
 }
 
+// newEmptyInterfaceIrpcService returns new [irpcgen.Service] forwarding [emptyInterface] network calls to impl
 func newEmptyInterfaceIrpcService(impl emptyInterface) *emptyInterfaceIrpcService {
 	return &emptyInterfaceIrpcService{
 		impl: impl,
 	}
 }
+
+// Id implements [irpcgen.Service] interface.
 func (s *emptyInterfaceIrpcService) Id() []byte {
 	return _emptyInterfaceIrpcId
 }
+
+// GetFuncCall implements [irpcgen.Service] interface
 func (s *emptyInterfaceIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	default:
@@ -33,7 +39,7 @@ func (s *emptyInterfaceIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.
 	}
 }
 
-// emptyInterfaceIrpcClient implements emptyInterface
+// emptyInterfaceIrpcClient implements [emptyInterface] interface. It by forwards calls over network to [emptyInterfaceIrpcService] that provides the implementation.
 type emptyInterfaceIrpcClient struct {
 	endpoint irpcgen.Endpoint
 }

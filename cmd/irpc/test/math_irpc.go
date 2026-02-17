@@ -9,35 +9,39 @@ import (
 )
 
 var _MathIrpcId = []byte{
-	0xda, 0x33, 0x0b, 0xa3, 0x69, 0x7e, 0x1a, 0x97,
-	0x98, 0x48, 0x2d, 0xf8, 0x6b, 0xe4, 0x8f, 0x83,
-	0x31, 0x0c, 0xe5, 0x86, 0x6e, 0x00, 0x9e, 0x44,
-	0xd8, 0xb0, 0xfc, 0x5e, 0x0c, 0xb8, 0x7f, 0x9d,
+	0x1f, 0xdb, 0xc9, 0xab, 0x47, 0x6a, 0xbc, 0x46,
+	0x0a, 0x22, 0x73, 0x05, 0x87, 0x85, 0xfe, 0xab,
+	0x7c, 0xba, 0xee, 0xdd, 0x5d, 0x69, 0x45, 0xa9,
+	0x42, 0x82, 0xc3, 0xc0, 0xa0, 0xde, 0x7d, 0x99,
 }
 
+// MathIrpcService provides [Math] interface over irpc
 type MathIrpcService struct {
 	impl Math
 }
 
+// NewMathIrpcService returns new [irpcgen.Service] forwarding [Math] network calls to impl
 func NewMathIrpcService(impl Math) *MathIrpcService {
 	return &MathIrpcService{
 		impl: impl,
 	}
 }
+
+// Id implements [irpcgen.Service] interface.
 func (s *MathIrpcService) Id() []byte {
 	return _MathIrpcId
 }
+
+// GetFuncCall implements [irpcgen.Service] interface
 func (s *MathIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // Add
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_Math_AddReq
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_Math_AddResp
 				resp.p0, resp.p1 = s.impl.Add(args.a, args.b)
 				return resp
@@ -48,7 +52,7 @@ func (s *MathIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeseria
 	}
 }
 
-// MathIrpcClient implements Math
+// MathIrpcClient implements [Math] interface. It by forwards calls over network to [MathIrpcService] that provides the implementation.
 type MathIrpcClient struct {
 	endpoint irpcgen.Endpoint
 }
@@ -59,6 +63,10 @@ func NewMathIrpcClient(endpoint irpcgen.Endpoint) (*MathIrpcClient, error) {
 	}
 	return &MathIrpcClient{endpoint: endpoint}, nil
 }
+
+// Add implements [Math]
+//
+// Returns a + b
 func (_c *MathIrpcClient) Add(a int, b int) (int, error) {
 	var req = _irpc_Math_AddReq{
 		a: a,

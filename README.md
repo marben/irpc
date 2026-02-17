@@ -1,14 +1,14 @@
-# IRPC - Interface-based RPC Code Generator for Go
+# iRPC - Interface-based RPC Code Generator for Go
 
 `irpc` is a small, dependency-free RPC generator for Go.  
 You write a Go interface, and `irpc` generates:
 
-- A **client stub** that implements the same interface and forwards calls over a connection
+- A **client** that implements the same interface and forwards calls over a connection
 - A **server adapter** that dispatches incoming requests to your implementation
 - **Binary serialization** code for method parameters and return values
 
-IRPC is built around **simplicity**, **type safety**, and **readable generated code**.  
-No reflection. No schema files. No external IDLs.
+iRPC is built around **simplicity**, **type safety**, and **readable generated code**.  
+No reflection. No schema files.
 
 
 ---

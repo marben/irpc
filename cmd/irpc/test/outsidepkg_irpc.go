@@ -10,35 +10,39 @@ import (
 )
 
 var _outsideTestIrpcId = []byte{
-	0x32, 0xfc, 0x51, 0x02, 0x58, 0x69, 0x08, 0x5a,
-	0xde, 0xcb, 0x58, 0x70, 0x0f, 0x00, 0x20, 0xbe,
-	0x0d, 0xba, 0xbd, 0x70, 0xc4, 0xfc, 0xe7, 0x2c,
-	0x43, 0x74, 0x00, 0x35, 0x97, 0xa8, 0xa0, 0xb1,
+	0x94, 0xc2, 0xae, 0xe9, 0x05, 0xa4, 0x91, 0xe0,
+	0xe1, 0x34, 0x7b, 0x8d, 0x6a, 0x4c, 0xd4, 0x90,
+	0xd1, 0x9f, 0xb9, 0x40, 0xe6, 0xfa, 0x39, 0x78,
+	0x78, 0x71, 0x42, 0x0a, 0xae, 0xdb, 0x7c, 0x8e,
 }
 
+// outsideTestIrpcService provides [outsideTest] interface over irpc
 type outsideTestIrpcService struct {
 	impl outsideTest
 }
 
+// newOutsideTestIrpcService returns new [irpcgen.Service] forwarding [outsideTest] network calls to impl
 func newOutsideTestIrpcService(impl outsideTest) *outsideTestIrpcService {
 	return &outsideTestIrpcService{
 		impl: impl,
 	}
 }
+
+// Id implements [irpcgen.Service] interface.
 func (s *outsideTestIrpcService) Id() []byte {
 	return _outsideTestIrpcId
 }
+
+// GetFuncCall implements [irpcgen.Service] interface
 func (s *outsideTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDeserializer, error) {
 	switch funcId {
 	case 0: // addUint8
 		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
-			// DESERIALIZE
 			var args _irpc_outsideTest_addUint8Req
 			if err := args.Deserialize(d); err != nil {
 				return nil, err
 			}
 			return func(ctx context.Context) irpcgen.Serializable {
-				// EXECUTE
 				var resp _irpc_outsideTest_addUint8Resp
 				resp.p0 = s.impl.addUint8(args.a, args.b)
 				return resp
@@ -49,7 +53,7 @@ func (s *outsideTestIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.Arg
 	}
 }
 
-// outsideTestIrpcClient implements outsideTest
+// outsideTestIrpcClient implements [outsideTest] interface. It by forwards calls over network to [outsideTestIrpcService] that provides the implementation.
 type outsideTestIrpcClient struct {
 	endpoint irpcgen.Endpoint
 }
@@ -60,6 +64,9 @@ func newOutsideTestIrpcClient(endpoint irpcgen.Endpoint) (*outsideTestIrpcClient
 	}
 	return &outsideTestIrpcClient{endpoint: endpoint}, nil
 }
+
+// addUint8 implements [outsideTest]
+//
 func (_c *outsideTestIrpcClient) addUint8(a out.Uint8, b out.Uint8) out.Uint8 {
 	var req = _irpc_outsideTest_addUint8Req{
 		a: a,

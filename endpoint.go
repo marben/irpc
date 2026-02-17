@@ -19,14 +19,14 @@ const serviceHashLen = 4
 // It can be overridden for each endpoint with [WithParallelWorkers] option
 var DefaultParallelWorkers = 3
 
-// DefaultParallelClientCalls is the number of parallel calls we allow to our counterpart at the same time.
+// DefaultParallelClientCalls is the number of parallel calls we allow to our peer at the same time.
 // It can be overridden for each endpoint with [WithParallelClientCalls] option
 var DefaultParallelClientCalls = DefaultParallelWorkers + 1
 
 // Endpoint related errors
 var (
 	ErrEndpointClosed              = errors.New("irpc: endpoint is closed")
-	ErrEndpointClosedByCounterpart = errors.New("irpc: endpoint closed by counterpart")
+	ErrEndpointClosedByCounterpart = errors.New("irpc: endpoint closed by peer")
 	ErrServiceNotFound             = errors.New("irpc: service not found") // todo: not used?
 	errProtocolError               = errors.New("protocol error")
 )
@@ -38,10 +38,12 @@ var (
 //
 // The context returned by Context() is canceled when:
 //   - Close is called locally
-//   - the remote endpoint closes the connection
+//   - the remote endpoint (peer) closes the connection
 //   - a protocol or I/O error occurs
 //
-// The cancellation cause can be inspected using context.Cause.
+// The cancellation cause can be inspected using [context.Cause].
+//
+// Endpoint implements [irpcgen.Endpoint].
 type Endpoint struct {
 	// maps serviceId to service. uses array, because slices are not comparable in maps
 	services    map[[serviceHashLen]byte]irpcgen.Service
@@ -49,7 +51,7 @@ type Endpoint struct {
 
 	// localAddr and remoteAddr are nil, when not set with Option
 	localAddr  net.Addr // our network address if available
-	remoteAddr net.Addr // counterpar network address if available
+	remoteAddr net.Addr // peer network address if available
 
 	enc    *irpcgen.Encoder // encoder for writing messages to the connection
 	encMux sync.Mutex
@@ -73,7 +75,7 @@ type Endpoint struct {
 
 // NewEndpoint creates and runs a new Endpoint with the given connection and options.
 // It immeditely starts a go routine servicing the communication.
-// Services provided by this enpoint can be added as with [WithEndpointServices] oprtion, or can be registered later with [Endpoint.RegisterService] call
+// Services provided by this endpoint can be added as with [WithEndpointServices] option, or can be registered later with [Endpoint.RegisterService] call
 func NewEndpoint(conn io.ReadWriteCloser, opts ...EndpointOption) *Endpoint {
 	epCtx, endpointContextCancel := context.WithCancelCause(context.Background())
 
@@ -104,7 +106,7 @@ func NewEndpoint(conn io.ReadWriteCloser, opts ...EndpointOption) *Endpoint {
 // Context returns a context that is canceled when the endpoint is closed.
 //
 // The cancellation cause describes why the endpoint terminated and can be
-// retrieved using context.Cause.
+// retrieved using [context.Cause].
 func (e *Endpoint) Context() context.Context {
 	return e.ctx
 }
@@ -269,6 +271,9 @@ func (e *Endpoint) serializePacket(data ...irpcgen.Serializable) error {
 	return nil
 }
 
+// CallRemoteFunc invokes a function on the peer Endpoint.
+//
+// CallRemoteFunc implements [irpcgen.Service]
 func (e *Endpoint) CallRemoteFunc(ctx context.Context, serviceId []byte, funcId irpcgen.FuncId, reqData irpcgen.Serializable, respData irpcgen.Deserializable) error {
 	pendingReq, err := e.sendRpcRequest(ctx, serviceId[:serviceHashLen], funcId, reqData, respData)
 	if err != nil {
@@ -363,13 +368,12 @@ func (e *Endpoint) readLoop(exec *executor) error {
 		}
 
 		switch h.typ {
-		// counterpart requested us to run a function
+		// peer requested us to run a function
 		case rpcRequestPacketType:
 			if err := e.processRequest(e.dec, exec); err != nil {
 				return fmt.Errorf("processRequest: %w", err)
 			}
-
-		// response from a function we requested from counterpart
+			// response from a function we requested from peer
 		case rpcResponsePacketType:
 			var resp responsePacket
 			if err := resp.Deserialize(e.dec); err != nil {
@@ -382,14 +386,14 @@ func (e *Endpoint) readLoop(exec *executor) error {
 
 			pr.deserErrC <- pr.resp.Deserialize(e.dec)
 
-		// counterpart is closing
+		// peer is closing
 		case closingNowPacketType:
 			e.terminate(ErrEndpointClosedByCounterpart)
 
-		// counterpart informed us that context of some function it requested us to execute, has expired
-		// we cancel corresponting worker's context
-		// this doesn't mean the work will stop immediately. we don't have such power over goroutines.
-		// goroutine needs to notice the context cancelation and stop itself
+		// peer informed us that context of some function it requested us to execute has expired
+		// we cancel corresponding worker's context.
+		// this doesn't mean the work will stop immediately
+		// goroutine needs to notice the context cancellation and stop itself
 		case ctxEndPacketType:
 			var cancelRequest ctxEndPacket
 			if err := cancelRequest.Deserialize(e.dec); err != nil {
