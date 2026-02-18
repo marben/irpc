@@ -3,12 +3,11 @@ package irpc
 import "github.com/marben/irpc/irpcgen"
 
 // todo: serialization/deserialization code should be generated, not hand written
-// todo: and it should propably be moved to separate package and also versioned?
 
 const (
 	rpcRequestPacketType packetType = iota + 1
 	rpcResponsePacketType
-	closingNowPacketType // inform counterpart that we will immediately close the connection
+	closingNowPacketType // informs peer that we will immediately close the connection
 	ctxEndPacketType     // informs service runner that the provided function context expired
 )
 

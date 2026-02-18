@@ -15,7 +15,7 @@ import (
 // services have longer ids, but we just us the first n bytes of it
 const serviceHashLen = 4
 
-// DefaultParallelWorkers is the default number of parallel workers servicing our counterpart's requests
+// DefaultParallelWorkers is the default number of parallel workers servicing our peer's requests
 // It can be overridden for each endpoint with [WithParallelWorkers] option
 var DefaultParallelWorkers = 3
 
@@ -25,10 +25,10 @@ var DefaultParallelClientCalls = DefaultParallelWorkers + 1
 
 // Endpoint related errors
 var (
-	ErrEndpointClosed              = errors.New("irpc: endpoint is closed")
-	ErrEndpointClosedByCounterpart = errors.New("irpc: endpoint closed by peer")
-	ErrServiceNotFound             = errors.New("irpc: service not found") // todo: not used?
-	errProtocolError               = errors.New("protocol error")
+	ErrEndpointClosed       = errors.New("irpc: endpoint is closed")
+	ErrEndpointClosedByPeer = errors.New("irpc: endpoint closed by peer")
+	ErrServiceNotFound      = errors.New("irpc: service not found") // todo: not used?
+	errProtocolError        = errors.New("protocol error")
 )
 
 // Endpoint represents one side of an active RPC connection.
@@ -69,8 +69,8 @@ type Endpoint struct {
 	ctxCancel context.CancelCauseFunc
 
 	// some options - possibly move to a separate struct?
-	parallelWorkers     int // number of parallel workers servicing counterpart's requests
-	parallelClientCalls int // number of parallel calls we allow to our counterpart at the same time
+	parallelWorkers     int // number of parallel workers servicing peer's requests
+	parallelClientCalls int // number of parallel calls we allow to our peer at the same time
 }
 
 // NewEndpoint creates and runs a new Endpoint with the given connection and options.
@@ -147,10 +147,10 @@ func (e *Endpoint) handleIOError(err error) {
 		var cause error
 
 		switch {
-		case errors.Is(err, ErrEndpointClosedByCounterpart),
+		case errors.Is(err, ErrEndpointClosedByPeer),
 			errors.Is(err, io.EOF), errors.Is(err, net.ErrClosed):
 			// Clean remote shutdown
-			cause = ErrEndpointClosedByCounterpart
+			cause = ErrEndpointClosedByPeer
 
 		default:
 			// Transport or protocol error
@@ -388,7 +388,7 @@ func (e *Endpoint) readLoop(exec *executor) error {
 
 		// peer is closing
 		case closingNowPacketType:
-			e.terminate(ErrEndpointClosedByCounterpart)
+			e.terminate(ErrEndpointClosedByPeer)
 
 		// peer informed us that context of some function it requested us to execute has expired
 		// we cancel corresponding worker's context.

@@ -8,7 +8,7 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-// executor executes procedure calls requested from our counterpart
+// executor executes procedure calls requested from our peer
 type executor struct {
 	wrkrQueue chan struct{}
 

@@ -45,7 +45,7 @@ func TestEndpointClientRegister(t *testing.T) {
 
 	<-ep2.Context().Done() // wait for the close signal to arrive
 	t.Log("ep2 closing")
-	if err := ep2.Close(); !errors.Is(err, irpc.ErrEndpointClosedByCounterpart) {
+	if err := ep2.Close(); !errors.Is(err, irpc.ErrEndpointClosedByPeer) {
 		t.Fatalf("ep2.Close(): %+v", err)
 	}
 }
@@ -203,7 +203,7 @@ func TestClosingServiceEpWithWaitingFuncCalls(t *testing.T) {
 	}
 
 	// the blocked client.DivErr should now err out
-	if err := <-rtnC; !errors.Is(err, irpc.ErrEndpointClosedByCounterpart) {
+	if err := <-rtnC; !errors.Is(err, irpc.ErrEndpointClosedByPeer) {
 		t.Fatalf("DivErr(): %+v", err)
 	}
 
@@ -474,7 +474,7 @@ func TestServiceEndpointClosingEndsRunningWorkers(t *testing.T) {
 		case <-time.After(2 * time.Second):
 			t.Fatalf("waiting for client to cancel on context timed out")
 		case clientErr := <-clientErrC:
-			if !errors.Is(clientErr, irpc.ErrEndpointClosedByCounterpart) {
+			if !errors.Is(clientErr, irpc.ErrEndpointClosedByPeer) {
 				t.Fatalf("unexpected client error: %v", clientErr)
 			}
 		}
@@ -569,7 +569,7 @@ func TestClientEndpointClosingEndsRunningWorkers(t *testing.T) {
 		case <-time.After(1 * time.Second):
 			t.Fatalf("waiting for service to cancel context timed out")
 		case err := <-serviceErrC:
-			if !errors.Is(err, irpc.ErrEndpointClosedByCounterpart) {
+			if !errors.Is(err, irpc.ErrEndpointClosedByPeer) {
 				t.Fatalf("unexpected service error: %v", err)
 			}
 		}
@@ -722,26 +722,26 @@ func TestOutsideConnectionClose(t *testing.T) {
 	}
 
 	t.Log("testing client's errors")
-	if err := <-client1Err; !errors.Is(err, irpc.ErrEndpointClosedByCounterpart) {
+	if err := <-client1Err; !errors.Is(err, irpc.ErrEndpointClosedByPeer) {
 		t.Fatalf("unexpected client1 error: %v", err)
 	}
-	if err := <-client2Err; !errors.Is(err, irpc.ErrEndpointClosedByCounterpart) {
+	if err := <-client2Err; !errors.Is(err, irpc.ErrEndpointClosedByPeer) {
 		t.Fatalf("unexpected client2 error: %v", err)
 	}
 
 	t.Log("trying to close endpoints that were already closed")
-	if err := ep1.Close(); !errors.Is(err, irpc.ErrEndpointClosedByCounterpart) {
+	if err := ep1.Close(); !errors.Is(err, irpc.ErrEndpointClosedByPeer) {
 		t.Fatalf("ep1.Close(): %v", err)
 	}
-	if err := ep2.Close(); !errors.Is(err, irpc.ErrEndpointClosedByCounterpart) {
+	if err := ep2.Close(); !errors.Is(err, irpc.ErrEndpointClosedByPeer) {
 		t.Fatalf("ep2.Close(): %v", err)
 	}
 
 	t.Log("trying to make a call on client")
-	if _, err := client1.DivCtxErr(ctx, 1, 2); !errors.Is(err, irpc.ErrEndpointClosedByCounterpart) {
+	if _, err := client1.DivCtxErr(ctx, 1, 2); !errors.Is(err, irpc.ErrEndpointClosedByPeer) {
 		t.Fatalf("client1.DivCtxErr(): %v", err)
 	}
-	if _, err := client2.DivCtxErr(ctx, 1, 2); !errors.Is(err, irpc.ErrEndpointClosedByCounterpart) {
+	if _, err := client2.DivCtxErr(ctx, 1, 2); !errors.Is(err, irpc.ErrEndpointClosedByPeer) {
 		t.Fatalf("client2.DivCtxErr(): %v", err)
 	}
 }
@@ -761,12 +761,12 @@ func TestCallingUnregisteredService(t *testing.T) {
 	}
 
 	_, err = client.DivErr(1, 2)
-	if !errors.Is(err, irpc.ErrEndpointClosedByCounterpart) {
+	if !errors.Is(err, irpc.ErrEndpointClosedByPeer) {
 		t.Fatalf("unexpected client error: %q", err)
 	}
 
 	_, err = client.DivErr(1, 2)
-	if !errors.Is(err, irpc.ErrEndpointClosedByCounterpart) {
+	if !errors.Is(err, irpc.ErrEndpointClosedByPeer) {
 		t.Fatalf("unexpected client error: %q", err)
 	}
 
@@ -802,7 +802,7 @@ func TestCallingNonexistentFunction(t *testing.T) {
 
 	t.Logf("testing non-existent function call")
 	err = clientEp.CallRemoteFunc(context.Background(), testtools.TestServiceId(), 666, testtools.DummySerializable{}, testtools.DummyDeserializable{})
-	if !errors.Is(err, irpc.ErrEndpointClosedByCounterpart) {
+	if !errors.Is(err, irpc.ErrEndpointClosedByPeer) {
 		t.Fatalf("err: %+v", err)
 	}
 }

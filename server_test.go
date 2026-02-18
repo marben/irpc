@@ -107,7 +107,7 @@ func TestServeOnMultipleListeners(t *testing.T) {
 
 	<-c1Ep.Context().Done()
 	t.Log("trying client call on closed connection")
-	if _, err := client1.DivErr(2, 1); !errors.Is(err, irpc.ErrEndpointClosedByCounterpart) {
+	if _, err := client1.DivErr(2, 1); !errors.Is(err, irpc.ErrEndpointClosedByPeer) {
 		t.Fatalf("client1.DivErr(): %+v", err)
 	}
 
@@ -128,7 +128,7 @@ func TestServeOnMultipleListeners(t *testing.T) {
 	<-c2Ep.Context().Done()
 	t.Log("testing client2 after server.Close()")
 	// time.Sleep(5*time.Millisecond)
-	if _, err := client2.DivErr(8, 4); !errors.Is(err, irpc.ErrEndpointClosedByCounterpart) {
+	if _, err := client2.DivErr(8, 4); !errors.Is(err, irpc.ErrEndpointClosedByPeer) {
 		t.Fatal("client2.DivErr()", err)
 	}
 }
@@ -222,7 +222,7 @@ func TestClientClosesOnServerClose(t *testing.T) {
 
 	<-cEp.Context().Done()
 	t.Log("making client call with closed server")
-	if _, err := client.DivErr(6, 2); !errors.Is(err, irpc.ErrEndpointClosedByCounterpart) {
+	if _, err := client.DivErr(6, 2); !errors.Is(err, irpc.ErrEndpointClosedByPeer) {
 		t.Fatalf("unexpected error when calling client on closed server: %+v", err)
 	}
 }
@@ -269,7 +269,7 @@ func TestIrpcServerSimpleCall(t *testing.T) {
 	}
 
 	time.Sleep(5 * time.Millisecond)
-	if err := clientEp.Close(); !errors.Is(err, irpc.ErrEndpointClosedByCounterpart) {
+	if err := clientEp.Close(); !errors.Is(err, irpc.ErrEndpointClosedByPeer) {
 		t.Fatalf("clientEp.Close(): %+v", err)
 	}
 }
