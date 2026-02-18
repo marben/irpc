@@ -8,17 +8,19 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-// executor executes procedure calls requested from our peer
+// executor runs rpcExecutor functions in go routine
+// limits the maximum number of parallel go routines
+// allows for cancellation of running rpcExecutors through context
 type executor struct {
 	wrkrQueue chan struct{}
 
 	ctx context.Context // all workers derive their context from this context
 
 	// active running workers
-	// lock m before accessing
 	serviceWorkers map[reqNumT]serviceWorker
-	m              sync.Mutex // todo: clear up usage
-	errC           chan error
+	m              sync.Mutex
+
+	errC chan error
 }
 
 func newExecutor(ctx context.Context, parallelWorkers int) *executor {
@@ -30,8 +32,23 @@ func newExecutor(ctx context.Context, parallelWorkers int) *executor {
 	}
 }
 
-// todo: rename to 'execute' or something like that
-func (e *executor) startServiceWorker(reqNum reqNumT, rpcExecutor irpcgen.FuncExecutor, sendResponseF func(reqNum reqNumT, respData irpcgen.Serializable) error) error {
+func (e *executor) addWorker(reqNum reqNumT, wrkr serviceWorker) {
+	e.m.Lock()
+	defer e.m.Unlock()
+
+	e.serviceWorkers[reqNum] = wrkr
+}
+
+func (e *executor) delWorker(reqNum reqNumT) {
+	e.m.Lock()
+	defer e.m.Unlock()
+
+	delete(e.serviceWorkers, reqNum)
+}
+
+// runServiceWorker waits for worker slot and then runs rpcExecutor in a new goroutine
+// returns once work was succesfully started
+func (e *executor) runServiceWorker(reqNum reqNumT, rpcExecutor irpcgen.FuncExecutor, sendResponseF func(reqNum reqNumT, respData irpcgen.Serializable) error) error {
 	// waits until worker slot is available (blocks here on too many long rpcs)
 	select {
 	case e.wrkrQueue <- struct{}{}:
@@ -43,25 +60,18 @@ func (e *executor) startServiceWorker(reqNum reqNumT, rpcExecutor irpcgen.FuncEx
 	// cancelling it doesn't mean end of executor
 	workerCtx, cancelWorker := context.WithCancelCause(e.ctx)
 
-	rw := serviceWorker{
+	wrkr := serviceWorker{
 		cancel: cancelWorker,
 	}
 
 	// a goroutine is created for each remote call
 
-	e.m.Lock()
-	e.serviceWorkers[reqNum] = rw
-	e.m.Unlock()
-
+	e.addWorker(reqNum, wrkr)
 	go func() {
 		// release the worker queue
 		defer func() { <-e.wrkrQueue }()
 
-		defer func() {
-			e.m.Lock()
-			delete(e.serviceWorkers, reqNum)
-			e.m.Unlock()
-		}()
+		defer e.delWorker(reqNum)
 
 		resp := rpcExecutor(workerCtx)
 

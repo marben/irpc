@@ -330,6 +330,8 @@ func (e *Endpoint) RemoteAddr() net.Addr {
 	return e.remoteAddr
 }
 
+// processRequest decodes the request and runs the function in separate goroutine
+// blocks until worker slot is available
 func (e *Endpoint) processRequest(dec *irpcgen.Decoder, exec *executor) error {
 	var req requestPacket
 	if err := req.Deserialize(dec); err != nil {
@@ -350,8 +352,7 @@ func (e *Endpoint) processRequest(dec *irpcgen.Decoder, exec *executor) error {
 		return fmt.Errorf("argDeserialize: %w", err)
 	}
 
-	// waits until worker slot is available (blocks here on too many long rpcs)
-	err = exec.startServiceWorker(req.ReqNum, funcExec, e.sendResponse)
+	err = exec.runServiceWorker(req.ReqNum, funcExec, e.sendResponse)
 	if err != nil {
 		return fmt.Errorf("new worker: %w", err)
 	}
