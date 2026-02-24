@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime/debug"
 	"slices"
 	"strconv"
 	"strings"
@@ -186,4 +187,27 @@ func canonicalSrcFilePath(file string, srcPkg *packages.Package) (string, error)
 
 		return filepath.ToSlash(rel), nil
 	}
+}
+
+// generatorVersion loads the version info from binary debug symbols
+func generatorVersion() string {
+	info, ok := debug.ReadBuildInfo()
+	if !ok || info == nil {
+		return "(unknown)"
+	}
+
+	v := info.Main.Version
+	sum := info.Main.Sum
+
+	// Development build (local, replace, no tag, etc.)
+	if v == "" || v == "(devel)" {
+		return "(devel)"
+	}
+
+	// Tagged module build
+	if sum != "" {
+		return fmt.Sprintf("%s %s", v, sum)
+	}
+
+	return v
 }
