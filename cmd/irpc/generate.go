@@ -206,7 +206,10 @@ func generatorVersion() string {
 
 	// Tagged module build
 	if sum != "" {
-		return fmt.Sprintf("%s %s", v, sum)
+		if len(sum) > 12 {
+			sum = sum[:9] + "..."
+		}
+		return fmt.Sprintf("%s (%s)", v, sum)
 	}
 
 	return v
