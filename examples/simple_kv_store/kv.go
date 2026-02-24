@@ -7,6 +7,8 @@ import (
 
 //go:generate go run ../../cmd/irpc
 
+// For external projects, use: go:generate go run github.com/marben/irpc/cmd/irpc@latest $GOFILE
+
 // KVStore is the interface iRPC will generate an RPC client & server for.
 type KVStore interface {
 	Put(key string, value []byte, ttl time.Duration) error
