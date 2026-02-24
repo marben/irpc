@@ -5,9 +5,9 @@ import (
 	"time"
 )
 
-//go:generate go run ../../irpc
+//go:generate go run ../../cmd/irpc
 
-// KVStore is the interface irpc will generate an RPC client & server for.
+// KVStore is the interface iRPC will generate an RPC client & server for.
 type KVStore interface {
 	Put(key string, value []byte, ttl time.Duration) error
 	Get(key string) ([]byte, error)
