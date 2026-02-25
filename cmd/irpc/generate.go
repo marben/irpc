@@ -205,7 +205,7 @@ func generatorVersion() string {
 	}
 
 	if sum != "" {
-		const max = 18
+		const max = 25
 		if len(sum) > max {
 			sum = sum[:max-3] + "..."
 		}
