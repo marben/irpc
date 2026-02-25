@@ -204,10 +204,10 @@ func generatorVersion() string {
 		return "(devel)"
 	}
 
-	// Tagged module build
 	if sum != "" {
-		if len(sum) > 12 {
-			sum = sum[:9] + "..."
+		const max = 18
+		if len(sum) > max {
+			sum = sum[:max-3] + "..."
 		}
 		return fmt.Sprintf("%s (%s)", v, sum)
 	}
