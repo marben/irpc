@@ -1,60 +1,80 @@
-# iRPC - Interface-based RPC Code Generator for Go
+# iRPC
+## Interface-Driven RPC Code Generator for Go
 
-`irpc` is a small, dependency-free RPC generator for Go.  
-You write a Go interface, and `irpc` generates:
+`irpc` is a light RPC code generator for Go.
 
-- A **client** that implements the same interface and forwards calls over a connection
-- A **server adapter** that dispatches incoming requests to your implementation
-- **Binary serialization** code for method parameters and return values
+From a Go interface, `irpc` generates:
+- A client implementation that forwards calls over a connection
+- A server adapter that dispatches requests to your implementation
+- Binary serialization code for parameters and return values
 
-iRPC is built around **simplicity**, **type safety**, and **readable generated code**.  
-No reflection. No schema files.
+The project focuses on type safety and readable generated code, without reflection or schema files.
 
 
----
+## Features
 
-## ✨ Features
-
-- Generate RPC clients and servers directly from plain Go interfaces
-- Duplex (bidirectional) RPC — both sides can call each other
-- Works with any `io.ReadWriteCloser` (TCP, pipes, WebSockets ...)
-- No reflection, no hidden magic
-- Supports:
+- Generates RPC clients and server adapters from standard Go interfaces
+- Supports bidirectional RPC on the same connection
+- Works with any `io.ReadWriteCloser` implementation (for example TCP, pipes, or WebSockets)
+- Does not rely on reflection
+- Supports common Go types:
   - primitives
   - structs
-  - slices, maps
-  - `time.Time`
-  - context.Context
-  - some interfaces (`error`)
+  - slices and maps
+  - `time.Time` or any type implementing `encoding.BinaryMarshaler`
+  - `context.Context`
+  - `error` and other simple interfaces
+  - pointers
 
----
 
-## 🚀 Getting Started
+## Installation
 
-Install:
+Add the runtime dependency to your project:
+```bash
+go get github.com/marben/irpc
+```
 
+Install the `irpc` binary into your Go bin path (for example `$HOME/go/bin`):
 ```bash
 go install github.com/marben/irpc/cmd/irpc@latest
 ```
 
-Generate code:
-``` bash
+## Usage
+
+Generate code from an interface file:
+
+```bash
 irpc api.go
 ```
 
-Generated file:
-```
+Output file:
+
+```text
 api_irpc.go
 ```
 
+Alternatively, use `go generate` to build and run the `irpc` binary by adding a `go:generate` directive to your `api.go` interface definition file:
+```go
+//go:generate go run github.com/marben/irpc/cmd/irpc@latest $GOFILE
+```
+Then run:
+```bash
+go generate api.go
+```
 
-## 📘 Example: KV Store Using net.Pipe
 
-Here is a minimal, self-contained example demonstrating:
-- how to create endpoints
-- how to register a service
-- how to call generated client methods
-- how RPC works over an in-memory pipe (no TCP needed)
+## Example: KV Store Using `net.Pipe`
+A complete runnable example is available in [examples/simple_kv_store/](examples/simple_kv_store/).
+
+`kv.go` (api definition):
+```go
+type KVStore interface {
+	Put(key string, value []byte, ttl time.Duration) error
+	Get(key string) ([]byte, error)
+	Delete(key string) error
+	ModifiedSince(since time.Time) ([]string, error)
+}
+```
 
 `main.go`
 ```go
@@ -69,12 +89,7 @@ import (
 	"github.com/marben/irpc"
 )
 
-// --------------------------------------------------------------
-// Example usage of the generated RPC client & service
-// --------------------------------------------------------------
 func main() {
-	// For a self-contained example, we use net.Pipe instead
-	// of actual TCP: no ports, no concurrency issues.
 	clientConn, serverConn := net.Pipe()
 
 	// Each side of the connection needs an Endpoint to handle RPC.
@@ -124,21 +139,17 @@ func main() {
 
 ```
 
-## 🔁 Bidirectional RPC
+## Bidirectional RPC
+
 Both sides of a connection can:
 - register services
-- call each other’s methods
+- call methods on the other side
 
-This allows patterns like:
-- distributed workers
-- server-initiated callbacks
-- remote control interfaces
-- push notifications
-- multi-node computation
+This supports patterns such as distributed workers, callbacks, and push-style interfaces.
 
-## 📅 Roadmap
-- Project is in failrly well working state, but needs api finalization and version definition
+## Roadmap
 
-## 🤝 Contributing
-PRs and issues are welcome!
-If you build something cool with IRPC, please share it.
+The project is functional but still requires API finalization and versioning decisions.
+
+## Contributing
+Issues and pull requests are welcome.
