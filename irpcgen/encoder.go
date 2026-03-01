@@ -81,11 +81,7 @@ func (e *Encoder) float32le(v float32) error {
 }
 
 func (e *Encoder) float64le(v float64) error {
-	binary.LittleEndian.PutUint64(e.buf, math.Float64bits(v))
-	if _, err := e.w.Write(e.buf[:8]); err != nil {
-		return err
-	}
-	return nil
+	return e.uint64le(math.Float64bits(v))
 }
 
 func (e *Encoder) byteSliceNonNil(v []byte) error {
@@ -100,4 +96,12 @@ func (e *Encoder) byteSliceNonNil(v []byte) error {
 
 func (e *Encoder) string(v string) error {
 	return e.byteSliceNonNil([]byte(v))
+}
+
+func (e *Encoder) uint64le(v uint64) error {
+	binary.LittleEndian.PutUint64(e.buf, v)
+	if _, err := e.w.Write(e.buf[:8]); err != nil {
+		return err
+	}
+	return nil
 }

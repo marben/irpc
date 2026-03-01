@@ -149,7 +149,7 @@ This supports patterns such as distributed workers, callbacks, and push-style in
 
 ## Roadmap
 
-The project is functional but still requires API finalization and versioning decisions.
+The project is functional but still requires API finalization.
 
 ## Contributing
 Issues and pull requests are welcome.

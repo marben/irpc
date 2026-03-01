@@ -8,12 +8,7 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-var _FileServerIrpcId = []byte{
-	0x32, 0xa7, 0x40, 0x12, 0x0c, 0xe6, 0x0e, 0xe6,
-	0x79, 0x41, 0xf8, 0x7d, 0xf3, 0x7f, 0x8e, 0x45,
-	0x35, 0x54, 0x8f, 0x20, 0xa3, 0x08, 0x90, 0x2b,
-	0x06, 0xd7, 0xec, 0xd3, 0x51, 0x59, 0xfc, 0xc5,
-}
+var _FileServerIrpcId = irpcgen.ServiceId(0xf9c2008fc6311534)
 
 // FileServerIrpcService provides [FileServer] interface over irpc
 type FileServerIrpcService struct {
@@ -28,7 +23,7 @@ func NewFileServerIrpcService(impl FileServer) *FileServerIrpcService {
 }
 
 // Id implements [irpcgen.Service] interface.
-func (s *FileServerIrpcService) Id() []byte {
+func (s *FileServerIrpcService) Id() irpcgen.ServiceId {
 	return _FileServerIrpcId
 }
 

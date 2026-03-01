@@ -9,12 +9,7 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-var _outsideTestIrpcId = []byte{
-	0xfc, 0x32, 0x07, 0xab, 0xdd, 0x50, 0xa3, 0x13,
-	0x87, 0x80, 0xd5, 0xb0, 0x1e, 0x23, 0x3f, 0xe4,
-	0x07, 0xf5, 0x5c, 0x67, 0x96, 0x87, 0x82, 0xfd,
-	0xde, 0x68, 0x75, 0x79, 0xc4, 0xae, 0xcf, 0x00,
-}
+var _outsideTestIrpcId = irpcgen.ServiceId(0x51bfcab6c817b34a)
 
 // outsideTestIrpcService provides [outsideTest] interface over irpc
 type outsideTestIrpcService struct {
@@ -29,7 +24,7 @@ func newOutsideTestIrpcService(impl outsideTest) *outsideTestIrpcService {
 }
 
 // Id implements [irpcgen.Service] interface.
-func (s *outsideTestIrpcService) Id() []byte {
+func (s *outsideTestIrpcService) Id() irpcgen.ServiceId {
 	return _outsideTestIrpcId
 }
 

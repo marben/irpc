@@ -133,6 +133,14 @@ func byteSliceLiteral(in []byte) string {
 	}
 }
 
+func serviceIdLiteralFromBytes(in []byte) string {
+	var val uint64
+	for i := 0; i < 8 && i < len(in); i++ {
+		val = val<<8 | uint64(in[i])
+	}
+	return fmt.Sprintf("%#016x", val)
+}
+
 // parses godoc comment group, does some sanitization and returns godoc as string
 func godocFromAstCommentGroup(cg *ast.CommentGroup) string {
 	if cg == nil {

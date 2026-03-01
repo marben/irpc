@@ -10,12 +10,7 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-var _interfaceTestIrpcId = []byte{
-	0x4e, 0x22, 0xff, 0xe0, 0x6b, 0x1f, 0x62, 0xe8,
-	0x88, 0x0d, 0x70, 0xa3, 0x70, 0x9f, 0xb5, 0x09,
-	0x97, 0x7c, 0xc8, 0xf0, 0x6b, 0xe3, 0x8a, 0x23,
-	0x7a, 0xd7, 0x3d, 0xe5, 0x98, 0xfc, 0x59, 0xdb,
-}
+var _interfaceTestIrpcId = irpcgen.ServiceId(0xfac359b5f053a3bf)
 
 // interfaceTestIrpcService provides [interfaceTest] interface over irpc
 type interfaceTestIrpcService struct {
@@ -30,7 +25,7 @@ func newInterfaceTestIrpcService(impl interfaceTest) *interfaceTestIrpcService {
 }
 
 // Id implements [irpcgen.Service] interface.
-func (s *interfaceTestIrpcService) Id() []byte {
+func (s *interfaceTestIrpcService) Id() irpcgen.ServiceId {
 	return _interfaceTestIrpcId
 }
 
@@ -944,12 +939,7 @@ func (s *_irpc_interfaceTest_passAnonInterfaceWithNamedParamsResp) Deserialize(d
 	return nil
 }
 
-var _customInterfaceIrpcId = []byte{
-	0x0a, 0x14, 0xa5, 0x44, 0x7d, 0x66, 0xe1, 0x0a,
-	0xac, 0x6c, 0xbc, 0x97, 0x40, 0xda, 0xce, 0x91,
-	0x31, 0xdd, 0x00, 0x0c, 0x7c, 0x1b, 0x8b, 0x4d,
-	0xc9, 0x61, 0xf3, 0xba, 0xee, 0xc1, 0x51, 0xec,
-}
+var _customInterfaceIrpcId = irpcgen.ServiceId(0x1d3ffec69fe19082)
 
 // customInterfaceIrpcService provides [customInterface] interface over irpc
 type customInterfaceIrpcService struct {
@@ -964,7 +954,7 @@ func newCustomInterfaceIrpcService(impl customInterface) *customInterfaceIrpcSer
 }
 
 // Id implements [irpcgen.Service] interface.
-func (s *customInterfaceIrpcService) Id() []byte {
+func (s *customInterfaceIrpcService) Id() irpcgen.ServiceId {
 	return _customInterfaceIrpcId
 }
 

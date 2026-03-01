@@ -9,12 +9,7 @@ import (
 	"time"
 )
 
-var _sliceTestIrpcId = []byte{
-	0x47, 0xa5, 0x2c, 0x9f, 0x1b, 0xb5, 0xe9, 0xab,
-	0x4d, 0x70, 0xdf, 0x50, 0xbb, 0x58, 0xff, 0x0f,
-	0x38, 0x23, 0x64, 0xa8, 0x6c, 0x2c, 0xce, 0xb9,
-	0x7a, 0xb1, 0x8e, 0xe6, 0x2f, 0xc7, 0x7f, 0x1d,
-}
+var _sliceTestIrpcId = irpcgen.ServiceId(0x99986de08eb4f665)
 
 // sliceTestIrpcService provides [sliceTest] interface over irpc
 type sliceTestIrpcService struct {
@@ -29,7 +24,7 @@ func newSliceTestIrpcService(impl sliceTest) *sliceTestIrpcService {
 }
 
 // Id implements [irpcgen.Service] interface.
-func (s *sliceTestIrpcService) Id() []byte {
+func (s *sliceTestIrpcService) Id() irpcgen.ServiceId {
 	return _sliceTestIrpcId
 }
 

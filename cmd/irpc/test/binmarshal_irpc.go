@@ -9,12 +9,7 @@ import (
 	"time"
 )
 
-var _binMarshalIrpcId = []byte{
-	0xd7, 0x6c, 0x78, 0x91, 0x72, 0x1d, 0xc1, 0x73,
-	0x6e, 0x90, 0x99, 0xbb, 0x09, 0xb1, 0x41, 0x98,
-	0x2e, 0x85, 0xd5, 0x5a, 0x2e, 0x8e, 0xec, 0x38,
-	0x72, 0xd9, 0x17, 0xb6, 0x26, 0xf6, 0xb7, 0x11,
-}
+var _binMarshalIrpcId = irpcgen.ServiceId(0xd5ca4d0a6338597a)
 
 // binMarshalIrpcService provides [binMarshal] interface over irpc
 type binMarshalIrpcService struct {
@@ -29,7 +24,7 @@ func newBinMarshalIrpcService(impl binMarshal) *binMarshalIrpcService {
 }
 
 // Id implements [irpcgen.Service] interface.
-func (s *binMarshalIrpcService) Id() []byte {
+func (s *binMarshalIrpcService) Id() irpcgen.ServiceId {
 	return _binMarshalIrpcId
 }
 

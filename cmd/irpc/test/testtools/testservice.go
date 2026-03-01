@@ -3,6 +3,8 @@ package testtools
 import (
 	"context"
 	"errors"
+
+	"github.com/marben/irpc/irpcgen"
 )
 
 //go:generate go run ../../
@@ -12,7 +14,7 @@ type TestService interface {
 	DivCtxErr(ctx context.Context, a, b int) (int, error)
 }
 
-func TestServiceId() []byte {
+func TestServiceId() irpcgen.ServiceId {
 	impl := NewTestServiceImpl(0)
 	service := NewTestServiceIrpcService(impl)
 	return service.Id()

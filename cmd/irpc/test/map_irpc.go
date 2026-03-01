@@ -9,12 +9,7 @@ import (
 	"time"
 )
 
-var _mapTestIrpcId = []byte{
-	0xe5, 0xf3, 0x1c, 0x49, 0xb7, 0x75, 0x99, 0xe9,
-	0x3f, 0x2d, 0x19, 0x2c, 0x1c, 0x54, 0x48, 0x20,
-	0x49, 0xff, 0x8d, 0xce, 0x6c, 0xe6, 0x10, 0x65,
-	0xcd, 0x81, 0xe2, 0x47, 0x86, 0xa7, 0x2c, 0x77,
-}
+var _mapTestIrpcId = irpcgen.ServiceId(0x75ae19e2bccd1e27)
 
 // mapTestIrpcService provides [mapTest] interface over irpc
 type mapTestIrpcService struct {
@@ -29,7 +24,7 @@ func newMapTestIrpcService(impl mapTest) *mapTestIrpcService {
 }
 
 // Id implements [irpcgen.Service] interface.
-func (s *mapTestIrpcService) Id() []byte {
+func (s *mapTestIrpcService) Id() irpcgen.ServiceId {
 	return _mapTestIrpcId
 }
 

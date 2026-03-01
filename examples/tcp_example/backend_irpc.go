@@ -9,12 +9,7 @@ import (
 	"time"
 )
 
-var _BackendIrpcId = []byte{
-	0xa0, 0xe4, 0xe3, 0xb6, 0x0d, 0xb3, 0x7e, 0x6e,
-	0x03, 0x08, 0x9a, 0x11, 0x90, 0xab, 0x07, 0x9e,
-	0x00, 0xff, 0x1a, 0x2d, 0x81, 0x8b, 0xa0, 0xf3,
-	0xa2, 0x72, 0x07, 0x86, 0x7c, 0x59, 0xcb, 0xdd,
-}
+var _BackendIrpcId = irpcgen.ServiceId(0xc1f650de6c375dab)
 
 // BackendIrpcService provides [Backend] interface over irpc
 type BackendIrpcService struct {
@@ -29,7 +24,7 @@ func NewBackendIrpcService(impl Backend) *BackendIrpcService {
 }
 
 // Id implements [irpcgen.Service] interface.
-func (s *BackendIrpcService) Id() []byte {
+func (s *BackendIrpcService) Id() irpcgen.ServiceId {
 	return _BackendIrpcId
 }
 

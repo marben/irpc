@@ -8,12 +8,7 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-var _tcpTestApiIrpcId = []byte{
-	0xe4, 0x6e, 0x6c, 0xa5, 0x0f, 0x45, 0x03, 0x8f,
-	0x20, 0xfc, 0x51, 0xb3, 0xf5, 0x5d, 0x84, 0x75,
-	0x10, 0x96, 0x23, 0x20, 0xf9, 0xa4, 0x25, 0xdb,
-	0x69, 0x46, 0x50, 0xe6, 0x37, 0xb3, 0xab, 0x94,
-}
+var _tcpTestApiIrpcId = irpcgen.ServiceId(0xbbd92bd72a3c278e)
 
 // tcpTestApiIrpcService provides [tcpTestApi] interface over irpc
 type tcpTestApiIrpcService struct {
@@ -28,7 +23,7 @@ func newTcpTestApiIrpcService(impl tcpTestApi) *tcpTestApiIrpcService {
 }
 
 // Id implements [irpcgen.Service] interface.
-func (s *tcpTestApiIrpcService) Id() []byte {
+func (s *tcpTestApiIrpcService) Id() irpcgen.ServiceId {
 	return _tcpTestApiIrpcId
 }
 

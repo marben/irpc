@@ -11,12 +11,7 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-var _outsidepkgaliasIrpcId = []byte{
-	0x05, 0x99, 0x48, 0xf9, 0x09, 0x80, 0xb1, 0x38,
-	0x6d, 0xc0, 0x3b, 0xa6, 0xe8, 0xd5, 0x06, 0xf3,
-	0xe8, 0x4d, 0x2f, 0x9b, 0xa4, 0x13, 0x69, 0x70,
-	0x2e, 0x03, 0x1f, 0x88, 0x43, 0x66, 0xd6, 0xa4,
-}
+var _outsidepkgaliasIrpcId = irpcgen.ServiceId(0xf5722afd8d346b15)
 
 // outsidepkgaliasIrpcService provides [outsidepkgalias] interface over irpc
 type outsidepkgaliasIrpcService struct {
@@ -31,7 +26,7 @@ func newOutsidepkgaliasIrpcService(impl outsidepkgalias) *outsidepkgaliasIrpcSer
 }
 
 // Id implements [irpcgen.Service] interface.
-func (s *outsidepkgaliasIrpcService) Id() []byte {
+func (s *outsidepkgaliasIrpcService) Id() irpcgen.ServiceId {
 	return _outsidepkgaliasIrpcId
 }
 

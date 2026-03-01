@@ -9,12 +9,7 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-var _sliceNamedApiIrpcId = []byte{
-	0x28, 0x7f, 0xc6, 0x81, 0x2c, 0x88, 0x47, 0xbf,
-	0xc9, 0x99, 0x9c, 0x0f, 0x4c, 0x06, 0x1e, 0x5e,
-	0x57, 0xf8, 0xd4, 0x7f, 0xc2, 0xf6, 0xd6, 0xbe,
-	0xe0, 0x93, 0x4b, 0xc0, 0x57, 0x15, 0x82, 0x54,
-}
+var _sliceNamedApiIrpcId = irpcgen.ServiceId(0xeabcae2dd9420463)
 
 // sliceNamedApiIrpcService provides [sliceNamedApi] interface over irpc
 type sliceNamedApiIrpcService struct {
@@ -29,7 +24,7 @@ func newSliceNamedApiIrpcService(impl sliceNamedApi) *sliceNamedApiIrpcService {
 }
 
 // Id implements [irpcgen.Service] interface.
-func (s *sliceNamedApiIrpcService) Id() []byte {
+func (s *sliceNamedApiIrpcService) Id() irpcgen.ServiceId {
 	return _sliceNamedApiIrpcId
 }
 

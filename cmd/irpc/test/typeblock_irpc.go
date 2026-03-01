@@ -8,12 +8,7 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-var _tbInterfaceAIrpcId = []byte{
-	0x37, 0x9d, 0x46, 0x68, 0xa4, 0x57, 0x94, 0xfe,
-	0x2c, 0x01, 0xd1, 0xa7, 0xa6, 0xfd, 0xb6, 0x74,
-	0x37, 0xc3, 0x80, 0x2a, 0xe1, 0x77, 0x58, 0x3b,
-	0x74, 0x87, 0xde, 0xcf, 0x4c, 0xc5, 0x81, 0x67,
-}
+var _tbInterfaceAIrpcId = irpcgen.ServiceId(0x4a241868f67b2e45)
 
 // tbInterfaceAIrpcService provides [tbInterfaceA] interface over irpc
 type tbInterfaceAIrpcService struct {
@@ -28,7 +23,7 @@ func newTbInterfaceAIrpcService(impl tbInterfaceA) *tbInterfaceAIrpcService {
 }
 
 // Id implements [irpcgen.Service] interface.
-func (s *tbInterfaceAIrpcService) Id() []byte {
+func (s *tbInterfaceAIrpcService) Id() irpcgen.ServiceId {
 	return _tbInterfaceAIrpcId
 }
 
@@ -113,12 +108,7 @@ func (s *_irpc_tbInterfaceA_reverseResp) Deserialize(d *irpcgen.Decoder) error {
 	return nil
 }
 
-var _tvInterfaceBIrpcId = []byte{
-	0xf1, 0x7e, 0xf1, 0x3a, 0x66, 0x47, 0x30, 0x75,
-	0x41, 0x87, 0xab, 0x11, 0x1b, 0xa0, 0xe2, 0x30,
-	0xc8, 0xf6, 0x08, 0x9d, 0xb7, 0xe2, 0x00, 0xb6,
-	0x15, 0xfe, 0x7f, 0xa0, 0x42, 0x82, 0x32, 0xad,
-}
+var _tvInterfaceBIrpcId = irpcgen.ServiceId(0x87b85d0507dc55ec)
 
 // tvInterfaceBIrpcService provides [tvInterfaceB] interface over irpc
 type tvInterfaceBIrpcService struct {
@@ -133,7 +123,7 @@ func newTvInterfaceBIrpcService(impl tvInterfaceB) *tvInterfaceBIrpcService {
 }
 
 // Id implements [irpcgen.Service] interface.
-func (s *tvInterfaceBIrpcService) Id() []byte {
+func (s *tvInterfaceBIrpcService) Id() irpcgen.ServiceId {
 	return _tvInterfaceBIrpcId
 }
 

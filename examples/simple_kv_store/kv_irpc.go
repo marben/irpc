@@ -9,12 +9,7 @@ import (
 	"time"
 )
 
-var _KVStoreIrpcId = []byte{
-	0x4c, 0x3a, 0x2a, 0xff, 0xac, 0xd8, 0x11, 0x85,
-	0x3a, 0x2c, 0x19, 0x57, 0x95, 0x06, 0xd2, 0xd1,
-	0x7f, 0xb3, 0x37, 0x26, 0x38, 0x84, 0x90, 0x9e,
-	0x56, 0x5b, 0x98, 0xd5, 0x50, 0x75, 0x83, 0x6e,
-}
+var _KVStoreIrpcId = irpcgen.ServiceId(0x5e67f5ff0678eac0)
 
 // KVStoreIrpcService provides [KVStore] interface over irpc
 type KVStoreIrpcService struct {
@@ -29,7 +24,7 @@ func NewKVStoreIrpcService(impl KVStore) *KVStoreIrpcService {
 }
 
 // Id implements [irpcgen.Service] interface.
-func (s *KVStoreIrpcService) Id() []byte {
+func (s *KVStoreIrpcService) Id() irpcgen.ServiceId {
 	return _KVStoreIrpcId
 }
 

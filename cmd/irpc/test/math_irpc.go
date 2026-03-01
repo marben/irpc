@@ -8,12 +8,7 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-var _MathIrpcId = []byte{
-	0xda, 0xf8, 0x95, 0xa7, 0xef, 0x81, 0x91, 0xa0,
-	0x79, 0xe4, 0x21, 0xf8, 0x78, 0x39, 0x8b, 0xb9,
-	0xe4, 0x8c, 0xe3, 0x18, 0x5f, 0xfe, 0xdd, 0xe6,
-	0xfa, 0xba, 0xc4, 0xd0, 0x4a, 0x2c, 0xc7, 0x6f,
-}
+var _MathIrpcId = irpcgen.ServiceId(0xdf980cbd4fd01486)
 
 // MathIrpcService provides [Math] interface over irpc
 type MathIrpcService struct {
@@ -28,7 +23,7 @@ func NewMathIrpcService(impl Math) *MathIrpcService {
 }
 
 // Id implements [irpcgen.Service] interface.
-func (s *MathIrpcService) Id() []byte {
+func (s *MathIrpcService) Id() irpcgen.ServiceId {
 	return _MathIrpcId
 }
 

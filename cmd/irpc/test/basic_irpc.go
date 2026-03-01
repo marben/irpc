@@ -8,12 +8,7 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-var _basicAPIIrpcId = []byte{
-	0x22, 0x0e, 0x7c, 0x73, 0xb3, 0x14, 0xe5, 0xd0,
-	0x11, 0x5a, 0xf9, 0x09, 0xee, 0xad, 0x2d, 0xf9,
-	0x02, 0x1b, 0xaf, 0x6a, 0xc2, 0xd4, 0xa6, 0xae,
-	0xa6, 0xd3, 0xa9, 0x8f, 0xb9, 0x19, 0xed, 0x35,
-}
+var _basicAPIIrpcId = irpcgen.ServiceId(0xa4bbb6d292fbd8fb)
 
 // basicAPIIrpcService provides [basicAPI] interface over irpc
 type basicAPIIrpcService struct {
@@ -28,7 +23,7 @@ func newBasicAPIIrpcService(impl basicAPI) *basicAPIIrpcService {
 }
 
 // Id implements [irpcgen.Service] interface.
-func (s *basicAPIIrpcService) Id() []byte {
+func (s *basicAPIIrpcService) Id() irpcgen.ServiceId {
 	return _basicAPIIrpcId
 }
 

@@ -99,12 +99,20 @@ func (d *Decoder) float32le() (float32, error) {
 }
 
 func (d *Decoder) float64le() (float64, error) {
+	ui64, err := d.uint64le()
+	if err != nil {
+		return 0, err
+	}
+	f := math.Float64frombits(ui64)
+	return f, nil
+}
+
+func (d *Decoder) uint64le() (uint64, error) {
 	if _, err := io.ReadFull(d.r, d.buf[:8]); err != nil {
 		return 0, err
 	}
-	f := math.Float64frombits(binary.LittleEndian.Uint64(d.buf[:8]))
-
-	return f, nil
+	v := binary.LittleEndian.Uint64(d.buf[:8])
+	return v, nil
 }
 
 func (d *Decoder) byteSliceNonNil() ([]byte, error) {

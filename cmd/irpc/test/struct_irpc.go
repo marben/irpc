@@ -11,12 +11,7 @@ import (
 	"image"
 )
 
-var _structAPIIrpcId = []byte{
-	0x5d, 0x4f, 0x65, 0x4e, 0xd0, 0xbe, 0x4d, 0x3e,
-	0xad, 0x90, 0x53, 0x7b, 0xe8, 0x3a, 0x82, 0x06,
-	0x45, 0xdd, 0xad, 0x33, 0x61, 0xf9, 0xbd, 0x95,
-	0x61, 0x49, 0x4f, 0xec, 0xc2, 0x31, 0xb4, 0x28,
-}
+var _structAPIIrpcId = irpcgen.ServiceId(0x51be231d9ba010f6)
 
 // structAPIIrpcService provides [structAPI] interface over irpc
 type structAPIIrpcService struct {
@@ -31,7 +26,7 @@ func newStructAPIIrpcService(impl structAPI) *structAPIIrpcService {
 }
 
 // Id implements [irpcgen.Service] interface.
-func (s *structAPIIrpcService) Id() []byte {
+func (s *structAPIIrpcService) Id() irpcgen.ServiceId {
 	return _structAPIIrpcId
 }
 

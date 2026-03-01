@@ -11,10 +11,6 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-// serviceHashLen is the length of the service hash used to identify services in the Endpoint.
-// services have longer ids, but we just us the first n bytes of it
-const serviceHashLen = 4
-
 // DefaultParallelWorkers is the default number of parallel workers servicing our peer's requests
 // It can be overridden for each endpoint with [WithParallelWorkers] option
 var DefaultParallelWorkers = 3
@@ -46,7 +42,7 @@ var (
 // Endpoint implements [irpcgen.Endpoint].
 type Endpoint struct {
 	// maps serviceId to service. uses array, because slices are not comparable in maps
-	services    map[[serviceHashLen]byte]irpcgen.Service
+	services    map[irpcgen.ServiceId]irpcgen.Service
 	servicesMux sync.Mutex
 
 	// localAddr and remoteAddr are nil, when not set with Option
@@ -80,7 +76,7 @@ func NewEndpoint(conn io.ReadWriteCloser, opts ...EndpointOption) *Endpoint {
 	epCtx, endpointContextCancel := context.WithCancelCause(context.Background())
 
 	ep := &Endpoint{
-		services:            make(map[[serviceHashLen]byte]irpcgen.Service),
+		services:            make(map[irpcgen.ServiceId]irpcgen.Service),
 		enc:                 irpcgen.NewEncoder(conn),
 		dec:                 irpcgen.NewDecoder(conn),
 		connCloser:          conn,
@@ -175,7 +171,7 @@ func (e *Endpoint) Close() error {
 }
 
 // RegisterClient registers client on remote endpoint - currently a no-op
-func (e *Endpoint) RegisterClient(serviceId []byte) error {
+func (e *Endpoint) RegisterClient(serviceId irpcgen.ServiceId) error {
 	// currently a no-op
 	// we could use this call to negotiate shortcut for serviceId to further reduce service data
 	// we could also use this to make sure service is registered on remote ep. this would increase initial latency, so perhaps make it configurable?
@@ -183,21 +179,15 @@ func (e *Endpoint) RegisterClient(serviceId []byte) error {
 }
 
 // getService returns false if id was not found,
-func (e *Endpoint) getService(serviceHash []byte) (s irpcgen.Service, found bool) {
-	if len(serviceHash) != serviceHashLen {
-		return nil, false
-	}
-
+func (e *Endpoint) getService(sid irpcgen.ServiceId) (s irpcgen.Service, found bool) {
 	e.servicesMux.Lock()
 	defer e.servicesMux.Unlock()
 
-	hashArray := [serviceHashLen]byte{}
-	copy(hashArray[:], serviceHash)
-	s, found = e.services[hashArray]
+	s, found = e.services[sid]
 	return s, found
 }
 
-func (e *Endpoint) sendRpcRequest(ctx context.Context, serviceId []byte, funcId irpcgen.FuncId, reqData irpcgen.Serializable, respData irpcgen.Deserializable) (ourPendingRequest, error) {
+func (e *Endpoint) sendRpcRequest(ctx context.Context, serviceId irpcgen.ServiceId, funcId irpcgen.FuncId, reqData irpcgen.Serializable, respData irpcgen.Deserializable) (ourPendingRequest, error) {
 	pr, err := e.ourPendingRequests.addPendingRequest(ctx, respData)
 	if err != nil {
 		return ourPendingRequest{}, fmt.Errorf("addPendingRequest(): %w", err)
@@ -274,8 +264,8 @@ func (e *Endpoint) serializePacket(data ...irpcgen.Serializable) error {
 // CallRemoteFunc invokes a function on the peer Endpoint.
 //
 // CallRemoteFunc implements [irpcgen.Service]
-func (e *Endpoint) CallRemoteFunc(ctx context.Context, serviceId []byte, funcId irpcgen.FuncId, reqData irpcgen.Serializable, respData irpcgen.Deserializable) error {
-	pendingReq, err := e.sendRpcRequest(ctx, serviceId[:serviceHashLen], funcId, reqData, respData)
+func (e *Endpoint) CallRemoteFunc(ctx context.Context, serviceId irpcgen.ServiceId, funcId irpcgen.FuncId, reqData irpcgen.Serializable, respData irpcgen.Deserializable) error {
+	pendingReq, err := e.sendRpcRequest(ctx, serviceId, funcId, reqData, respData)
 	if err != nil {
 		// check if endpoint was closed
 		if cause := context.Cause(e.ctx); cause != nil {
@@ -316,9 +306,7 @@ func (e *Endpoint) RegisterService(services ...irpcgen.Service) {
 	defer e.servicesMux.Unlock()
 
 	for _, s := range services {
-		hashArray := [serviceHashLen]byte{}
-		copy(hashArray[:], s.Id())
-		e.services[hashArray] = s
+		e.services[s.Id()] = s
 	}
 }
 

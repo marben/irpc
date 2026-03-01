@@ -40,7 +40,7 @@ func (ag apiGenerator) paramStructs() []paramStructGenerator {
 }
 
 func (ag apiGenerator) serviceIdVarDefinition(hash []byte) string {
-	return fmt.Sprintf("var %s = %s", ag.serviceIdVarName, byteSliceLiteral(ag.serviceId(hash)))
+	return fmt.Sprintf("var %s = irpcgen.ServiceId(%s)", ag.serviceIdVarName, serviceIdLiteralFromBytes(ag.serviceId(hash)))
 }
 
 func (ag apiGenerator) clientTypeName() string {
@@ -175,7 +175,7 @@ func (ag apiGenerator) serviceCode(q *qualifier) string {
 
 	// Id() func
 	fmt.Fprintf(w, `// Id implements [irpcgen.Service] interface.
-	func (s *%s) Id() []byte {
+	func (s *%s) Id() irpcgen.ServiceId {
 		return %s
 	}
 	`, ag.serviceTypeName(), ag.serviceIdVarName)

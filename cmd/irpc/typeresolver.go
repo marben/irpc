@@ -5,6 +5,7 @@ import (
 	"go/ast"
 	"go/importer"
 	"go/types"
+	"os"
 	"path/filepath"
 	"strconv"
 
@@ -32,7 +33,15 @@ func newTypeResolver(filename string) (typeResolver, error) {
 		return typeResolver{}, fmt.Errorf("filepath.Abs(): %w", err)
 	}
 
+	// start at the directory containing the file, but if we can find the module
+	// root (a directory containing go.mod) then use that instead.  packages.Load
+	// will then load *all* packages in the module, which means imports such as
+	// "github.com/marben/irpc/irpcgen" will be available in `allPackages` and we
+	// won't fall back to importer.Default (which knows nothing about modules).
 	dir := filepath.Dir(absFilePath)
+	if modRoot, err := findModuleRoot(dir); err == nil {
+		dir = modRoot
+	}
 
 	cfg := &packages.Config{
 		Mode: packages.NeedTypes | packages.NeedDeps | packages.NeedImports | packages.NeedSyntax | packages.NeedTypesInfo |
@@ -41,7 +50,7 @@ func newTypeResolver(filename string) (typeResolver, error) {
 		Dir: dir,
 	}
 
-	allPackages, err := packages.Load(cfg, "./...") // todo: start at module root
+	allPackages, err := packages.Load(cfg, "./...")
 	if err != nil {
 		return typeResolver{}, fmt.Errorf("packages.Load(): %w", err)
 	}
@@ -113,6 +122,24 @@ func newTypeResolver(filename string) (typeResolver, error) {
 		boolType:       newDirectCallType("irpcgen.EncBool", "irpcgen.DecBool", "bool", nil),
 		srcFilePath:    srcFilePath,
 	}, nil
+}
+
+// findModuleRoot walks upwards from the given directory looking for a go.mod
+// file.  If found it returns the directory containing the file, otherwise an
+// error.
+func findModuleRoot(start string) (string, error) {
+	cur := start
+	for {
+		if _, err := os.Stat(filepath.Join(cur, "go.mod")); err == nil {
+			return cur, nil
+		}
+		parent := filepath.Dir(cur)
+		if parent == cur {
+			break
+		}
+		cur = parent
+	}
+	return "", fmt.Errorf("couldn't locate module root from %s", start)
 }
 
 func (tr typeResolver) findTypeAndValueForAst(expr ast.Expr) (types.TypeAndValue, error) {

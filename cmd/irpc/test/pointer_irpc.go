@@ -9,12 +9,7 @@ import (
 	"image"
 )
 
-var _pointerTestIrpcId = []byte{
-	0x8c, 0x08, 0xe1, 0x46, 0x0c, 0xc3, 0x2a, 0x72,
-	0xb2, 0x65, 0x81, 0x9b, 0x29, 0x74, 0x71, 0xe5,
-	0x78, 0x21, 0xab, 0x8c, 0xad, 0xd3, 0x0c, 0xa2,
-	0x78, 0x7c, 0x51, 0x25, 0xfb, 0xc9, 0x91, 0x83,
-}
+var _pointerTestIrpcId = irpcgen.ServiceId(0x6b4845a85deef7d3)
 
 // pointerTestIrpcService provides [pointerTest] interface over irpc
 type pointerTestIrpcService struct {
@@ -29,7 +24,7 @@ func newPointerTestIrpcService(impl pointerTest) *pointerTestIrpcService {
 }
 
 // Id implements [irpcgen.Service] interface.
-func (s *pointerTestIrpcService) Id() []byte {
+func (s *pointerTestIrpcService) Id() irpcgen.ServiceId {
 	return _pointerTestIrpcId
 }
 

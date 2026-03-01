@@ -7,12 +7,7 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-var _emptyInterfaceIrpcId = []byte{
-	0x0c, 0x2e, 0xa0, 0xfb, 0x3d, 0xd9, 0x36, 0x4e,
-	0x9a, 0xeb, 0xdd, 0x51, 0x27, 0x1a, 0xf3, 0x2e,
-	0xdf, 0x78, 0x42, 0x02, 0x51, 0xe8, 0x93, 0xb8,
-	0xbe, 0x2e, 0x0d, 0x06, 0x65, 0x1a, 0x0c, 0xf4,
-}
+var _emptyInterfaceIrpcId = irpcgen.ServiceId(0xbb053051a09ca313)
 
 // emptyInterfaceIrpcService provides [emptyInterface] interface over irpc
 type emptyInterfaceIrpcService struct {
@@ -27,7 +22,7 @@ func newEmptyInterfaceIrpcService(impl emptyInterface) *emptyInterfaceIrpcServic
 }
 
 // Id implements [irpcgen.Service] interface.
-func (s *emptyInterfaceIrpcService) Id() []byte {
+func (s *emptyInterfaceIrpcService) Id() irpcgen.ServiceId {
 	return _emptyInterfaceIrpcId
 }
 

@@ -8,12 +8,7 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-var _emptyAPIIrpcId = []byte{
-	0x66, 0x05, 0x6d, 0xad, 0x44, 0x44, 0x53, 0x8a,
-	0x89, 0x0f, 0x16, 0x0c, 0x4f, 0x4d, 0x75, 0x03,
-	0x28, 0x73, 0xaa, 0x3a, 0xf8, 0x4b, 0x83, 0xe2,
-	0x27, 0x27, 0x32, 0x0e, 0x1f, 0xa6, 0xb9, 0x69,
-}
+var _emptyAPIIrpcId = irpcgen.ServiceId(0x205a3d8d8ec583ec)
 
 // emptyAPIIrpcService provides [emptyAPI] interface over irpc
 type emptyAPIIrpcService struct {
@@ -28,7 +23,7 @@ func newEmptyAPIIrpcService(impl emptyAPI) *emptyAPIIrpcService {
 }
 
 // Id implements [irpcgen.Service] interface.
-func (s *emptyAPIIrpcService) Id() []byte {
+func (s *emptyAPIIrpcService) Id() irpcgen.ServiceId {
 	return _emptyAPIIrpcId
 }
 
@@ -52,12 +47,7 @@ func newEmptyAPIIrpcClient(endpoint irpcgen.Endpoint) (*emptyAPIIrpcClient, erro
 	return &emptyAPIIrpcClient{endpoint: endpoint}, nil
 }
 
-var _edgeCasesIrpcId = []byte{
-	0xab, 0x1d, 0x54, 0xe3, 0x18, 0x0d, 0x31, 0x4a,
-	0xa4, 0x50, 0x12, 0x38, 0x74, 0x90, 0xbf, 0xda,
-	0xf6, 0x57, 0x31, 0x75, 0x7c, 0x51, 0xd4, 0xc6,
-	0xf8, 0xa3, 0xe1, 0x16, 0x47, 0xda, 0x64, 0xce,
-}
+var _edgeCasesIrpcId = irpcgen.ServiceId(0x1ae3ba02781d13b0)
 
 // edgeCasesIrpcService provides [edgeCases] interface over irpc
 type edgeCasesIrpcService struct {
@@ -72,7 +62,7 @@ func newEdgeCasesIrpcService(impl edgeCases) *edgeCasesIrpcService {
 }
 
 // Id implements [irpcgen.Service] interface.
-func (s *edgeCasesIrpcService) Id() []byte {
+func (s *edgeCasesIrpcService) Id() irpcgen.ServiceId {
 	return _edgeCasesIrpcId
 }
 
@@ -472,12 +462,7 @@ func (s *_irpc_edgeCases_paramNamedAsReceiverReq) Deserialize(d *irpcgen.Decoder
 	return nil
 }
 
-var _anotherInterfaceIrpcId = []byte{
-	0xac, 0xb1, 0x97, 0x4e, 0x44, 0xc8, 0x0a, 0xed,
-	0xdc, 0x3d, 0x35, 0x11, 0xee, 0xba, 0xd9, 0xcb,
-	0xe5, 0x6a, 0x8b, 0xea, 0xac, 0xe6, 0x66, 0x9e,
-	0x22, 0x44, 0x55, 0xd0, 0x10, 0x93, 0xa6, 0xcc,
-}
+var _anotherInterfaceIrpcId = irpcgen.ServiceId(0x44c55f9efd07dd45)
 
 // anotherInterfaceIrpcService provides [anotherInterface] interface over irpc
 type anotherInterfaceIrpcService struct {
@@ -492,7 +477,7 @@ func newAnotherInterfaceIrpcService(impl anotherInterface) *anotherInterfaceIrpc
 }
 
 // Id implements [irpcgen.Service] interface.
-func (s *anotherInterfaceIrpcService) Id() []byte {
+func (s *anotherInterfaceIrpcService) Id() irpcgen.ServiceId {
 	return _anotherInterfaceIrpcId
 }
 

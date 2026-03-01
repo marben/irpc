@@ -8,12 +8,7 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-var _namedTestIrpcId = []byte{
-	0xcc, 0xf8, 0xcd, 0xf7, 0xf8, 0xef, 0xa0, 0x54,
-	0x1a, 0x88, 0x97, 0xcb, 0x2e, 0x9c, 0x62, 0x3c,
-	0x46, 0x64, 0x35, 0x1d, 0x05, 0x87, 0xd0, 0x8a,
-	0xbe, 0x6e, 0x4e, 0x11, 0x8a, 0x2d, 0xf4, 0x6c,
-}
+var _namedTestIrpcId = irpcgen.ServiceId(0xea27a520975a6aa8)
 
 // namedTestIrpcService provides [namedTest] interface over irpc
 type namedTestIrpcService struct {
@@ -28,7 +23,7 @@ func newNamedTestIrpcService(impl namedTest) *namedTestIrpcService {
 }
 
 // Id implements [irpcgen.Service] interface.
-func (s *namedTestIrpcService) Id() []byte {
+func (s *namedTestIrpcService) Id() irpcgen.ServiceId {
 	return _namedTestIrpcId
 }
 

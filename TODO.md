@@ -1,12 +1,9 @@
 # TODO
 
 ### Code Generation
-- Make generators report their required imports and populate the qualifier list only from parameter structs (not from generated functions), if possible.
 - Add a helper that batches serialization, deserialization, and error handling, and call it from generated code to eliminate repetitive error checks.
 - Reduce repetitive code in struct serializers (e.g., `vect3x3` in `test_struct_irpc.go`).  
   Consider allowing named serialization functions for sub-structures (e.g., `vect3`).
-- Consider encoding `isNil` for pointer-based `binaryMarshaller` types.  
-  Might be feasible via generics with separate functions for value and pointer types.
 - Remove unnecessary `var zero` declarations when the zero value is obvious (`nil` for interface/slice/map, `""` for string, etc.).
 - Implement optional bit-packing support.  
   Start with slices of `bool`; benchmark before extending to other types.
@@ -29,8 +26,7 @@
 - Investigate why formatting via the Go stdlib produces different (and arguably worse) output than `gofmt`, especially with nested function definitions (e.g., in struct encoders).  
   - Determine whether a known workaround or fix exists.
 - Improve fuzzy testing for `Enc`/`Dec` functions to verify encoding stability.
-- Improve tests that rely on “waits” or manual timing.  
-  Newer Go test utilities offer controllable time flow; apply them where relevant.
+- Improve tests that rely on “waits” or manual timing.   (there is new way to control time in go tests)
 
 ### Documentation
 - Document versioning strategy in the README.

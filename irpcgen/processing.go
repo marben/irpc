@@ -1,13 +1,34 @@
 package irpcgen
 
-import "context"
+import (
+	"context"
+	"fmt"
+)
 
 type FuncId uint64
+
+type ServiceId uint64
+
+func (pt ServiceId) Serialize(e *Encoder) error {
+	return e.uint64le(uint64(pt))
+}
+func (pt *ServiceId) Deserialize(d *Decoder) error {
+	val, err := d.uint64le()
+	if err != nil {
+		return err
+	}
+	*pt = ServiceId(val)
+	return nil
+}
+
+func (pt ServiceId) String() string {
+	return fmt.Sprintf("%#016x", uint64(pt))
+}
 
 // Service defines a collection of RPC-callable functions.
 type Service interface {
 	// Id returns the unique identifier of the service.
-	Id() []byte
+	Id() ServiceId
 
 	// GetFuncCall returns a deserializer for the given function ID.
 	GetFuncCall(funcId FuncId) (ArgDeserializer, error)
