@@ -5,19 +5,19 @@ import "github.com/marben/irpc/irpcgen"
 // todo: serialization/deserialization code should be generated, not hand written
 
 const (
-	rpcRequestPacketType packetType = iota + 1
+	rpcRequestPacketType packetType = iota
 	rpcResponsePacketType
 	closingNowPacketType // informs peer that we will immediately close the connection
 	ctxEndPacketType     // informs service runner that the provided function context expired
 )
 
-type packetType uint64
+type packetType uint8
 
 func (pt packetType) Serialize(e *irpcgen.Encoder) error {
-	return irpcgen.EncUint64(e, uint64(pt))
+	return irpcgen.EncUint8(e, pt)
 }
 func (pt *packetType) Deserialize(d *irpcgen.Decoder) error {
-	return irpcgen.DecUint64(d, (*uint64)(pt))
+	return irpcgen.DecUint8(d, pt)
 }
 
 type packetHeader struct {
