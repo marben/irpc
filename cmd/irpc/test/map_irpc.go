@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-var _mapTestIrpcId = irpcgen.ServiceId(0x75ae19e2bccd1e27)
+var _mapTestIrpcId = irpcgen.ServiceId(0x1b5f2b54a0eb63f9)
 
 // mapTestIrpcService provides [mapTest] interface over irpc
 type mapTestIrpcService struct {

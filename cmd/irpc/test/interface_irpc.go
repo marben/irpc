@@ -10,7 +10,7 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-var _interfaceTestIrpcId = irpcgen.ServiceId(0xfac359b5f053a3bf)
+var _interfaceTestIrpcId = irpcgen.ServiceId(0xe1d4feea546fa811)
 
 // interfaceTestIrpcService provides [interfaceTest] interface over irpc
 type interfaceTestIrpcService struct {
@@ -939,7 +939,7 @@ func (s *_irpc_interfaceTest_passAnonInterfaceWithNamedParamsResp) Deserialize(d
 	return nil
 }
 
-var _customInterfaceIrpcId = irpcgen.ServiceId(0x1d3ffec69fe19082)
+var _customInterfaceIrpcId = irpcgen.ServiceId(0xd3efc7e5eee316f7)
 
 // customInterfaceIrpcService provides [customInterface] interface over irpc
 type customInterfaceIrpcService struct {

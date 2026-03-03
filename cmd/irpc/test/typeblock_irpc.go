@@ -8,7 +8,7 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-var _tbInterfaceAIrpcId = irpcgen.ServiceId(0x4a241868f67b2e45)
+var _tbInterfaceAIrpcId = irpcgen.ServiceId(0x01289bec14e3501d)
 
 // tbInterfaceAIrpcService provides [tbInterfaceA] interface over irpc
 type tbInterfaceAIrpcService struct {
@@ -108,7 +108,7 @@ func (s *_irpc_tbInterfaceA_reverseResp) Deserialize(d *irpcgen.Decoder) error {
 	return nil
 }
 
-var _tvInterfaceBIrpcId = irpcgen.ServiceId(0x87b85d0507dc55ec)
+var _tvInterfaceBIrpcId = irpcgen.ServiceId(0x219e8cf234013787)
 
 // tvInterfaceBIrpcService provides [tvInterfaceB] interface over irpc
 type tvInterfaceBIrpcService struct {

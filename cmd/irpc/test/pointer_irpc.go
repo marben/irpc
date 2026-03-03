@@ -9,7 +9,7 @@ import (
 	"image"
 )
 
-var _pointerTestIrpcId = irpcgen.ServiceId(0x6b4845a85deef7d3)
+var _pointerTestIrpcId = irpcgen.ServiceId(0x8e026b5a67970d8f)
 
 // pointerTestIrpcService provides [pointerTest] interface over irpc
 type pointerTestIrpcService struct {

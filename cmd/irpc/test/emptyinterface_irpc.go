@@ -7,7 +7,7 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-var _emptyInterfaceIrpcId = irpcgen.ServiceId(0xbb053051a09ca313)
+var _emptyInterfaceIrpcId = irpcgen.ServiceId(0x89a0aa875ef6bd1b)
 
 // emptyInterfaceIrpcService provides [emptyInterface] interface over irpc
 type emptyInterfaceIrpcService struct {

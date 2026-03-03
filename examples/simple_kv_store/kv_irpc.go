@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-var _KVStoreIrpcId = irpcgen.ServiceId(0x5e67f5ff0678eac0)
+var _KVStoreIrpcId = irpcgen.ServiceId(0xe52e017562b128ac)
 
 // KVStoreIrpcService provides [KVStore] interface over irpc
 type KVStoreIrpcService struct {

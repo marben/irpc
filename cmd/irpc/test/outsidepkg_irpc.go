@@ -9,7 +9,7 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-var _outsideTestIrpcId = irpcgen.ServiceId(0x51bfcab6c817b34a)
+var _outsideTestIrpcId = irpcgen.ServiceId(0xd7aa718a007cdb31)
 
 // outsideTestIrpcService provides [outsideTest] interface over irpc
 type outsideTestIrpcService struct {

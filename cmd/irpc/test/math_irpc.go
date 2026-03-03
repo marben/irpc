@@ -8,7 +8,7 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-var _MathIrpcId = irpcgen.ServiceId(0xdf980cbd4fd01486)
+var _MathIrpcId = irpcgen.ServiceId(0xdfcd821f503023fa)
 
 // MathIrpcService provides [Math] interface over irpc
 type MathIrpcService struct {

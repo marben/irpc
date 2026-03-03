@@ -11,7 +11,7 @@ import (
 	"image"
 )
 
-var _structAPIIrpcId = irpcgen.ServiceId(0x51be231d9ba010f6)
+var _structAPIIrpcId = irpcgen.ServiceId(0x9189774859284f92)
 
 // structAPIIrpcService provides [structAPI] interface over irpc
 type structAPIIrpcService struct {

@@ -9,7 +9,7 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-var _basicNamedAPIIrpcId = irpcgen.ServiceId(0xcc7d1543465f2dcb)
+var _basicNamedAPIIrpcId = irpcgen.ServiceId(0x1a46ba8c402c8424)
 
 // basicNamedAPIIrpcService provides [basicNamedAPI] interface over irpc
 type basicNamedAPIIrpcService struct {

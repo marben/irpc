@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-var _binMarshalIrpcId = irpcgen.ServiceId(0xd5ca4d0a6338597a)
+var _binMarshalIrpcId = irpcgen.ServiceId(0xb76d72a44428062e)
 
 // binMarshalIrpcService provides [binMarshal] interface over irpc
 type binMarshalIrpcService struct {

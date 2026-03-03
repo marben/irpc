@@ -8,7 +8,7 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-var _tcpTestApiIrpcId = irpcgen.ServiceId(0xbbd92bd72a3c278e)
+var _tcpTestApiIrpcId = irpcgen.ServiceId(0xc9d8c7611e337738)
 
 // tcpTestApiIrpcService provides [tcpTestApi] interface over irpc
 type tcpTestApiIrpcService struct {

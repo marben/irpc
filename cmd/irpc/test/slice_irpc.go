@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-var _sliceTestIrpcId = irpcgen.ServiceId(0x99986de08eb4f665)
+var _sliceTestIrpcId = irpcgen.ServiceId(0x03d0b1055ce76468)
 
 // sliceTestIrpcService provides [sliceTest] interface over irpc
 type sliceTestIrpcService struct {

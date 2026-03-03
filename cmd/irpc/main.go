@@ -54,13 +54,14 @@ func processInputFile(inputFile string) error {
 	}
 	fmt.Printf("  =>  ")
 
-	// calculate hash of generated file
+	// 1. generate the file with version and hash ommited, to calculate hash of all the code
 	hasher := sha256.New()
-	if err := gen.generate(hasher, nil); err != nil {
+	if err := gen.generate(hasher, "", nil); err != nil {
 		return fmt.Errorf("gen.generate(): %w", err)
 	}
 	hash := hasher.Sum(nil)
 
+	// 2. generate again, but with correct version and hash (which servers as serviceId) filled in
 	// OUTPUT FILE
 	genFileName, err := generatedFileName(inputFile)
 	if err != nil {
@@ -73,8 +74,9 @@ func processInputFile(inputFile string) error {
 	}
 	defer outFile.Close()
 
+	generVer := generatorVersion()
 	// write the generated file to output file, but with hash filled in
-	if err := gen.generate(outFile, hash); err != nil {
+	if err := gen.generate(outFile, generVer, hash); err != nil {
 		return fmt.Errorf("write to file %q: %w", genFileName, err)
 	}
 

@@ -8,7 +8,7 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-var _FileServerIrpcId = irpcgen.ServiceId(0xf9c2008fc6311534)
+var _FileServerIrpcId = irpcgen.ServiceId(0x27a8e417553cee1c)
 
 // FileServerIrpcService provides [FileServer] interface over irpc
 type FileServerIrpcService struct {

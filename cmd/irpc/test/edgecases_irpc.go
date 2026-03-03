@@ -8,7 +8,7 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-var _emptyAPIIrpcId = irpcgen.ServiceId(0x205a3d8d8ec583ec)
+var _emptyAPIIrpcId = irpcgen.ServiceId(0x2ef6d05bf89afe15)
 
 // emptyAPIIrpcService provides [emptyAPI] interface over irpc
 type emptyAPIIrpcService struct {
@@ -47,7 +47,7 @@ func newEmptyAPIIrpcClient(endpoint irpcgen.Endpoint) (*emptyAPIIrpcClient, erro
 	return &emptyAPIIrpcClient{endpoint: endpoint}, nil
 }
 
-var _edgeCasesIrpcId = irpcgen.ServiceId(0x1ae3ba02781d13b0)
+var _edgeCasesIrpcId = irpcgen.ServiceId(0x3ae6963c63768097)
 
 // edgeCasesIrpcService provides [edgeCases] interface over irpc
 type edgeCasesIrpcService struct {
@@ -462,7 +462,7 @@ func (s *_irpc_edgeCases_paramNamedAsReceiverReq) Deserialize(d *irpcgen.Decoder
 	return nil
 }
 
-var _anotherInterfaceIrpcId = irpcgen.ServiceId(0x44c55f9efd07dd45)
+var _anotherInterfaceIrpcId = irpcgen.ServiceId(0xd93f207d28173b88)
 
 // anotherInterfaceIrpcService provides [anotherInterface] interface over irpc
 type anotherInterfaceIrpcService struct {

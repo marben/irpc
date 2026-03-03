@@ -9,7 +9,7 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-var _sliceNamedApiIrpcId = irpcgen.ServiceId(0xeabcae2dd9420463)
+var _sliceNamedApiIrpcId = irpcgen.ServiceId(0xb222c0c6ee417023)
 
 // sliceNamedApiIrpcService provides [sliceNamedApi] interface over irpc
 type sliceNamedApiIrpcService struct {

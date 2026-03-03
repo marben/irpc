@@ -8,7 +8,7 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-var _namedTestIrpcId = irpcgen.ServiceId(0xea27a520975a6aa8)
+var _namedTestIrpcId = irpcgen.ServiceId(0xd318fc983ebd408a)
 
 // namedTestIrpcService provides [namedTest] interface over irpc
 type namedTestIrpcService struct {

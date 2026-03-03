@@ -11,7 +11,7 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-var _outsidepkgaliasIrpcId = irpcgen.ServiceId(0xf5722afd8d346b15)
+var _outsidepkgaliasIrpcId = irpcgen.ServiceId(0x2289a9bc0737681c)
 
 // outsidepkgaliasIrpcService provides [outsidepkgalias] interface over irpc
 type outsidepkgaliasIrpcService struct {

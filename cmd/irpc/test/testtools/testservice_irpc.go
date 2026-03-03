@@ -8,7 +8,7 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-var _TestServiceIrpcId = irpcgen.ServiceId(0x82fb9faa16171343)
+var _TestServiceIrpcId = irpcgen.ServiceId(0xf07be4a7675ed89d)
 
 // TestServiceIrpcService provides [TestService] interface over irpc
 type TestServiceIrpcService struct {

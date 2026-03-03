@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-var _BackendIrpcId = irpcgen.ServiceId(0xc1f650de6c375dab)
+var _BackendIrpcId = irpcgen.ServiceId(0xf840c970fd1b9bb9)
 
 // BackendIrpcService provides [Backend] interface over irpc
 type BackendIrpcService struct {
