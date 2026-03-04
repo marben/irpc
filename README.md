@@ -89,6 +89,30 @@ Both sides of a connection can:
 
 This supports patterns such as distributed workers, callbacks, and push-style interfaces.
 
+## Versioning Strategy
+
+Each generated `_irpc.go` contains a hash of the exact generated code, and that hash is used as the service ID.  
+Because of that, any API change produces a new ID (a new version).
+
+To keep backward compatibility, keep the previously generated `_irpc.go` (for example in a `v1/` package), generate a new one for the updated API, and register both services.  
+An endpoint can register multiple service IDs, so old and new API versions can coexist for as long as needed.
+
+Example layout:
+```text
+api/
+  v1/
+    kv.go
+    kv_irpc.go
+  v2/
+    kv.go
+    kv_irpc.go
+```
+
+Typical flow:
+- Keep `api/v1/kv_irpc.go` unchanged for existing clients.
+- Introduce API changes in `api/v2/kv.go` and generate `api/v2/kv_irpc.go`.
+- Register both `v1` and `v2` services on the endpoint during migration.
+
 ## Roadmap
 
 The project is functional but still requires API finalization.
