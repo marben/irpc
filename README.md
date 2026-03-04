@@ -63,10 +63,10 @@ go generate api.go
 ```
 
 
-## Example: KV Store Using `net.Pipe`
+## Example 1: KV Store Using `net.Pipe`
 A complete runnable example is available in [examples/simple_kv_store/](examples/simple_kv_store/).
 
-`kv.go` (api definition):
+`kv.go` (API definition):
 ```go
 type KVStore interface {
 	Put(key string, value []byte, ttl time.Duration) error
@@ -76,68 +76,10 @@ type KVStore interface {
 }
 ```
 
-`main.go`
-```go
-package main
+The full `main.go` walkthrough is in the example README: [examples/simple_kv_store/README.md](examples/simple_kv_store/README.md).
 
-import (
-	"fmt"
-	"log"
-	"net"
-	"time"
-
-	"github.com/marben/irpc"
-)
-
-func main() {
-	clientConn, serverConn := net.Pipe()
-
-	// Each side of the connection needs an Endpoint to handle RPC.
-	serverEp := irpc.NewEndpoint(serverConn)
-	defer serverEp.Close()
-	clientEp := irpc.NewEndpoint(clientConn)
-	defer clientEp.Close()
-
-	// In-memory implementation of the KV store.
-	kvStore := newKVMemory()
-
-	// Wrap our implementation in a generated service adapter.
-	service := NewKVStoreIrpcService(kvStore)
-
-	// Registering service on server endpoint makes it available to the client endpoint
-	// After this, the client endpoint can call KVStore methods remotely.
-	serverEp.RegisterService(service)
-
-	// Create the generated client-side proxy.
-	// Client implements KVStore interface, so it can be passed around as such
-	client, err := NewKVStoreIrpcClient(clientEp)
-	if err != nil {
-		log.Fatalf("NewKVStoreIrpcClient: %v", err)
-	}
-
-	fmt.Println("Putting key 'hello'")
-	if err := client.Put("hello", []byte("world"), 2*time.Minute); err != nil {
-		log.Fatalf("client.Put: %v", err)
-	}
-
-	value, err := client.Get("hello")
-	if err != nil {
-		log.Fatalf("client.Get: %v", err)
-	}
-	fmt.Println("Value: ", string(value))
-
-	oneMinuteAgo := time.Now().Add(-1 * time.Minute)
-
-	// Since we just wrote the key, this will always return ["hello"].
-	keys, err := client.ModifiedSince(oneMinuteAgo)
-	if err != nil {
-		log.Fatalf("client.ModifiedSince: %v", err)
-	}
-	fmt.Println("Modified keys:", keys)
-}
-
-
-```
+## Example 2: Distributed Mandelbrot set rendering done by cli and web clients
+This comprehensive example using `irpc` over `tcp` and `websocket` can be found at [github.com/marben/irpc_dist_mandel](https://github.com/marben/irpc_dist_mandel)
 
 ## Bidirectional RPC
 
