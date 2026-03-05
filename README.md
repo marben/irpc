@@ -1,6 +1,8 @@
 # iRPC
 ## Interface-Driven RPC Code Generator for Go
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/marben/irpc.svg)](https://pkg.go.dev/github.com/marben/irpc)
+
 `irpc` is a light RPC code generator for Go.
 
 From a Go interface, `irpc` generates:
