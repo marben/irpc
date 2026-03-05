@@ -17,6 +17,7 @@ The project focuses on type safety and readable generated code, without reflecti
 - Supports bidirectional RPC on the same connection
 - Works with any `io.ReadWriteCloser` implementation (for example TCP, pipes, or WebSockets)
 - Does not rely on reflection
+- High performance (`gRPC+` grade)
 - Supports common Go types:
   - primitives
   - structs
@@ -25,7 +26,6 @@ The project focuses on type safety and readable generated code, without reflecti
   - `context.Context`
   - `error` and other simple interfaces
   - pointers
-
 
 ## Installation
 
