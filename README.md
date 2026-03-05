@@ -96,6 +96,9 @@ On send, it calls `Error()` on the original value and serializes the returned st
 
 The same pattern is used for other simple interfaces: iRPC serializes the interface method outputs needed by the contract and recreates a generated implementation on the other side.
 
+For transport/network failures during an RPC call, iRPC injects its own error into the call result when the method returns an `error`.  
+If a method does not return an `error`, generated client code cannot surface the failure through return values, so it panics instead.
+
 ## Versioning Strategy
 
 Each generated `_irpc.go` contains a hash of the exact generated code, and that hash is used as the service ID.  
