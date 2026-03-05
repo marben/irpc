@@ -89,6 +89,13 @@ Both sides of a connection can:
 
 This supports patterns such as distributed workers, callbacks, and push-style interfaces.
 
+## Errors and Interfaces
+
+For `error` values, iRPC materializes a generated struct that implements `error` (`interface { Error() string }`).  
+On send, it calls `Error()` on the original value and serializes the returned string. On receive, it reconstructs the generated error implementation so `Error()` returns the same string.
+
+The same pattern is used for other simple interfaces: iRPC serializes the interface method outputs needed by the contract and recreates a generated implementation on the other side.
+
 ## Versioning Strategy
 
 Each generated `_irpc.go` contains a hash of the exact generated code, and that hash is used as the service ID.  
