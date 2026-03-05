@@ -89,6 +89,11 @@ Both sides of a connection can:
 
 This supports patterns such as distributed workers, callbacks, and push-style interfaces.
 
+## Context Cancellation
+
+iRPC supports `context.Context` as the first method parameter. It listens for `Done()` on the caller side and propagates cancellation to the corresponding peer-side context.  
+This does not abort the RPC call itself: the client still waits for the remote handler to finish and then returns the produced results.
+
 ## Errors and Interfaces
 
 For `error` values, iRPC materializes a generated struct that implements `error` (`interface { Error() string }`).  
