@@ -3,9 +3,9 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/marben/irpc.svg)](https://pkg.go.dev/github.com/marben/irpc)
 
-`irpc` is a light RPC code generator for Go.
+`iRPC` is a light RPC code generator for Go.
 
-From a Go interface, `irpc` generates:
+From a Go interface, `iRPC` generates:
 - A client implementation that forwards calls over a connection
 - A server adapter that dispatches requests to your implementation
 - Binary serialization code for parameters and return values
@@ -78,10 +78,14 @@ type KVStore interface {
 }
 ```
 
-The full `main.go` walkthrough is in the example README: [examples/simple_kv_store/README.md](examples/simple_kv_store/README.md).
+The full `main.go` walkthrough is in the example README.
 
 ## Example 2: Distributed Mandelbrot set rendering done by cli and web clients
-This comprehensive example using `irpc` over `tcp` and `websocket` can be found at [github.com/marben/irpc_dist_mandel](https://github.com/marben/irpc_dist_mandel)
+This comprehensive example using `iRPC` over `TCP` and `WebSocket` can be found at [github.com/marben/irpc_dist_mandel](https://github.com/marben/irpc_dist_mandel)
+
+<a href="https://github.com/marben/irpc_dist_mandel">
+  <img src="https://raw.githubusercontent.com/marben/irpc_dist_mandel/main/webclient.png" width="400">
+</a>
 
 ## Bidirectional RPC
 
