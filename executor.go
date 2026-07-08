@@ -68,6 +68,7 @@ func (e *executor) runServiceWorker(reqNum reqNumT, rpcExecutor irpcgen.FuncExec
 
 	e.addWorker(reqNum, wrkr)
 	go func() {
+		defer cancelWorker(nil)
 		// release the worker queue
 		defer func() { <-e.wrkrQueue }()
 
