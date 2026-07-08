@@ -121,8 +121,8 @@ func (s *Server) Serve(lis net.Listener) error {
 	}
 }
 
-// Close immediately closes all listeners and all connections/endpoints
-// Close returns any errors returned by the underlying listeners
+// Close stops accepting new connections, closes all listeners, closes all active connections,
+// waits for shutdown, and returns listener close errors.
 func (s *Server) Close() error {
 	s.inShutdown.Store(true)
 
@@ -139,9 +139,10 @@ func (s *Server) Close() error {
 
 	s.clientsMux.Lock()
 	for c := range s.clients {
-		if err := c.Close(); err != nil {
-			multiError = errors.Join(multiError, err)
-		}
+		// Ignore client Close() errors. During shutdown, connections may already
+		// have been closed by peers, and these errors are not actionable.
+		c.Close()
+		delete(s.clients, c)
 	}
 	s.clientsMux.Unlock()
 
