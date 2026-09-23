@@ -10,7 +10,13 @@ import (
 	"github.com/marben/irpc"
 	irpctestpkg "github.com/marben/irpc/cmd/irpc/test"
 	"github.com/marben/irpc/cmd/irpc/test/testtools"
+	"go.uber.org/goleak"
 )
+
+// run goleak on every test in pkg
+func TestMain(m *testing.M) {
+	goleak.VerifyTestMain(m)
+}
 
 func TestServeOnMultipleListeners(t *testing.T) {
 	// SERVER
@@ -91,7 +97,7 @@ func TestServeOnMultipleListeners(t *testing.T) {
 		t.Fatal("server.serve(l1):", err)
 	}
 
-	t.Logf("trying a clinet1 call on closed listener, but still open connection")
+	t.Logf("trying a client1 call on closed listener, but still open connection")
 	res12, err := client1.DivCtxErr(context.Background(), 6, 1)
 	if err != nil {
 		t.Fatalf("client1.DivCtxErr(): %+v", err)
@@ -124,6 +130,7 @@ func TestServeOnMultipleListeners(t *testing.T) {
 	if err := server.Close(); err != nil {
 		t.Fatal("server.Close()", err)
 	}
+	<-serve2ErrC
 
 	<-c2Ep.Context().Done()
 	t.Log("testing client2 after server.Close()")
@@ -175,6 +182,13 @@ func TestTcpServerDialClose(t *testing.T) {
 	if err := cEp.Close(); err != nil {
 		t.Fatalf("clientEp.Close(): %+v", err)
 	}
+
+	if err := server.Close(); err != nil {
+		t.Fatalf("server.Close: %+v", err)
+	}
+
+	serveErr := <-serveErrC
+	t.Log("serveErr:", serveErr)
 }
 
 func TestClientClosesOnServerClose(t *testing.T) {
@@ -219,6 +233,7 @@ func TestClientClosesOnServerClose(t *testing.T) {
 	if err := server.Close(); err != nil {
 		t.Fatalf("server.Close(): %+v", err)
 	}
+	<-serveErrC
 
 	<-cEp.Context().Done()
 	t.Log("making client call with closed server")

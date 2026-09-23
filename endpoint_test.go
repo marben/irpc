@@ -651,6 +651,8 @@ func TestWaitingClientCallGetsCanceledOnContextTimeout(t *testing.T) {
 			t.Fatalf("wait expired")
 		}
 	}
+
+	serviceEp.Close()
 }
 
 // tests, whether dropped connection correctly closes both endpoints
@@ -662,18 +664,14 @@ func TestOutsideConnectionClose(t *testing.T) {
 	ep1 := irpc.NewEndpoint(c1)
 	ep2 := irpc.NewEndpoint(c2)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
-	defer cancel()
-
 	serviceCallStartedC := make(chan struct{})
-	callBlockC := make(chan struct{})
 
 	t.Log("starting service 1")
 	service1 := testtools.NewTestServiceImpl(1)
 	service1.DivCtxErrFunc = func(ctx context.Context, a, b int) (int, error) {
 		serviceCallStartedC <- struct{}{}
-		<-callBlockC
-		return 0, errors.New("service1 shouldn't have returned")
+		<-t.Context().Done() // block
+		return 0, errors.New("service1 shouldn't have returned during test")
 	}
 	ep1.RegisterService(testtools.NewTestServiceIrpcService(service1))
 
@@ -681,8 +679,8 @@ func TestOutsideConnectionClose(t *testing.T) {
 	service2 := testtools.NewTestServiceImpl(2)
 	service2.DivCtxErrFunc = func(ctx context.Context, a, b int) (int, error) {
 		serviceCallStartedC <- struct{}{}
-		<-callBlockC
-		return 0, errors.New("service2 shouldn't have returned")
+		<-t.Context().Done() // block
+		return 0, errors.New("service2 shouldn't have returned during test")
 	}
 	ep2.RegisterService(testtools.NewTestServiceIrpcService(service2))
 
@@ -695,7 +693,7 @@ func TestOutsideConnectionClose(t *testing.T) {
 		t.Fatalf("new client1: %v", err)
 	}
 	go func() {
-		res, err := client1.DivCtxErr(ctx, 6, 3)
+		res, err := client1.DivCtxErr(t.Context(), 6, 3)
 		t.Logf("client1 res: %v . err: %v", res, err)
 		client1Err <- err
 	}()
@@ -706,7 +704,7 @@ func TestOutsideConnectionClose(t *testing.T) {
 		t.Fatalf("new client2: %v", err)
 	}
 	go func() {
-		res, err := client2.DivCtxErr(ctx, 6, 3)
+		res, err := client2.DivCtxErr(t.Context(), 6, 3)
 		t.Logf("client2 res: %v . err: %v", res, err)
 		client2Err <- err
 	}()
@@ -738,10 +736,10 @@ func TestOutsideConnectionClose(t *testing.T) {
 	}
 
 	t.Log("trying to make a call on client")
-	if _, err := client1.DivCtxErr(ctx, 1, 2); !errors.Is(err, irpc.ErrEndpointClosedByPeer) {
+	if _, err := client1.DivCtxErr(t.Context(), 1, 2); !errors.Is(err, irpc.ErrEndpointClosedByPeer) {
 		t.Fatalf("client1.DivCtxErr(): %v", err)
 	}
-	if _, err := client2.DivCtxErr(ctx, 1, 2); !errors.Is(err, irpc.ErrEndpointClosedByPeer) {
+	if _, err := client2.DivCtxErr(t.Context(), 1, 2); !errors.Is(err, irpc.ErrEndpointClosedByPeer) {
 		t.Fatalf("client2.DivCtxErr(): %v", err)
 	}
 }
