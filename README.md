@@ -80,7 +80,12 @@ type KVStore interface {
 
 The full `main.go` walkthrough is in the example README.
 
-## Example 2: Distributed Mandelbrot set rendering done by cli and web clients
+## Example 2: Bidirectional RPC over WebSocket
+A runnable client/server example is available in [examples/bidirectional/](examples/bidirectional/).
+
+It shows both sides of a single WebSocket connection serving and calling each other's services, multiple services registered on one endpoint, and `context.Context` cancellation propagated across the connection in both directions.
+
+## Example 3: Distributed Mandelbrot set rendering done by cli and web clients
 This comprehensive example using `iRPC` over `TCP` and `WebSocket` can be found at [github.com/marben/irpc_dist_mandel](https://github.com/marben/irpc_dist_mandel)
 
 <a href="https://github.com/marben/irpc_dist_mandel">
@@ -93,7 +98,8 @@ Both sides of a connection can:
 - register services
 - call methods on the other side
 
-This supports patterns such as distributed workers, callbacks, and push-style interfaces.
+This supports patterns such as distributed workers, callbacks, and push-style interfaces.  
+See [examples/bidirectional/](examples/bidirectional/) for a working example.
 
 ## Context Cancellation
 
