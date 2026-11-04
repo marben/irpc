@@ -15,20 +15,22 @@ func TestOneRegisteredVersion(t *testing.T) {
 	if err != nil {
 		log.Fatalf("error opening tcp listener: %v", err)
 	}
-	defer func() {
-		t.Logf("closing server connection")
-		if err := tcpListener.Close(); err != nil {
-			t.Fatalf("failed to close tcp listener: %v", err)
-		}
-	}()
-
 	addr := tcpListener.Addr().String()
 	t.Logf("listening on addr: %v", addr)
 
 	irpcServer := irpc.NewServer(irpc.WithServices(api.NewApiIrpcService(api.ApiImpl{})))
+	serveC := make(chan error, 1)
 	go func() {
-		if err := irpcServer.Serve(tcpListener); err != nil {
-			t.Logf("irpcServer.Serve(): %v", err)
+		serveC <- irpcServer.Serve(tcpListener)
+	}()
+	// close the server and wait for Serve() to return before the test ends,
+	// so the serving goroutine doesn't outlive the test
+	defer func() {
+		if err := irpcServer.Close(); err != nil {
+			t.Errorf("failed to close server: %v", err)
+		}
+		if err := <-serveC; err != irpc.ErrServerClosed {
+			t.Errorf("unexpected Serve() error: %v", err)
 		}
 	}()
 
