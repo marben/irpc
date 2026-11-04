@@ -625,7 +625,8 @@ func TestWaitingClientCallGetsCanceledOnContextTimeout(t *testing.T) {
 	// do the one call, that should not get to service and should time out on our side
 	extraCallErr := make(chan struct{})
 	go func() {
-		timeoutCtx, _ := context.WithTimeout(context.Background(), 50*time.Millisecond)
+		timeoutCtx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+		defer cancel()
 		_, err := client.DivCtxErr(timeoutCtx, 8, 2)
 		if !errors.Is(err, context.DeadlineExceeded) {
 			log.Fatalf("unexpected error from blocked function: %+v", err)

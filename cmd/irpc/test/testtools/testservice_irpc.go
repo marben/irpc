@@ -8,7 +8,7 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-var _TestServiceIrpcId = irpcgen.ServiceId(0xf07be4a7675ed89d)
+var _TestServiceIrpcId = irpcgen.ServiceId(0xc72cb70bee12f1cb)
 
 // TestServiceIrpcService provides [TestService] interface over irpc
 type TestServiceIrpcService struct {
@@ -251,7 +251,7 @@ func (i _error_TestService_impl) Error() string {
 }
 
 type _irpc_TestService_DivCtxErrReq struct {
-	// ctx context.Context
+	//ctx context.Context
 	a int
 	b int
 }
