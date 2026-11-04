@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-var _BarServiceIrpcId = irpcgen.ServiceId(0x3d81f8bbafcb2cd9)
+var _BarServiceIrpcId = irpcgen.ServiceId(0xe2774b4181fb35fe)
 
 // BarServiceIrpcService provides [BarService] interface over irpc
 type BarServiceIrpcService struct {
@@ -278,7 +278,7 @@ func (s *_irpc_BarService_GetExampleDataResp) Deserialize(d *irpcgen.Decoder) er
 	return nil
 }
 
-var _FooServiceIrpcId = irpcgen.ServiceId(0x3084189236941f7f)
+var _FooServiceIrpcId = irpcgen.ServiceId(0xab0b4aced8f5209c)
 
 // FooServiceIrpcService provides [FooService] interface over irpc
 type FooServiceIrpcService struct {
@@ -505,7 +505,7 @@ func (s *_irpc_FooService_CheckDataValidResp) Deserialize(d *irpcgen.Decoder) er
 	return nil
 }
 
-var _FizzServiceIrpcId = irpcgen.ServiceId(0x4897bf654c43292d)
+var _FizzServiceIrpcId = irpcgen.ServiceId(0xcac1479589ac8a00)
 
 // FizzServiceIrpcService provides [FizzService] interface over irpc
 type FizzServiceIrpcService struct {
@@ -605,7 +605,7 @@ func (s *_irpc_FizzService_IsOddResp) Deserialize(d *irpcgen.Decoder) error {
 	return nil
 }
 
-var _BoltServiceIrpcId = irpcgen.ServiceId(0x93a26d9973debde4)
+var _BoltServiceIrpcId = irpcgen.ServiceId(0xce50aa703561c796)
 
 // BoltServiceIrpcService provides [BoltService] interface over irpc
 type BoltServiceIrpcService struct {
@@ -705,7 +705,7 @@ func (s *_irpc_BoltService_IsEvenResp) Deserialize(d *irpcgen.Decoder) error {
 	return nil
 }
 
-var _ContextCancellationServiceIrpcId = irpcgen.ServiceId(0xba6f890a80116d1e)
+var _ContextCancellationServiceIrpcId = irpcgen.ServiceId(0x8b24dd2f52202b4a)
 
 // ContextCancellationServiceIrpcService provides [ContextCancellationService] interface over irpc
 type ContextCancellationServiceIrpcService struct {
@@ -772,8 +772,6 @@ func (_c *ContextCancellationServiceIrpcClient) LongWorkThatWillBeCancelled(ctx 
 }
 
 type _irpc_ContextCancellationService_LongWorkThatWillBeCancelledReq struct {
-	//ctx context.Context
-
 }
 
 func (s _irpc_ContextCancellationService_LongWorkThatWillBeCancelledReq) Serialize(e *irpcgen.Encoder) error {

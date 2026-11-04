@@ -72,8 +72,8 @@ func (sg paramStructGenerator) code(q *qualifier) string {
 	fmt.Fprintf(sb, "type %s struct{\n", sg.structName)
 	for _, p := range sg.params {
 		if p.isContext() {
-			// we comment out context var as it is not filled anyway
-			sb.WriteString("//")
+			// context is not transferred, so it has no field in the struct
+			continue
 		}
 		sb.WriteString(p.structFieldName + " " + p.typ.name(q) + "\n")
 	}
