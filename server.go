@@ -51,12 +51,12 @@ func (s *Server) isShuttingDown() bool {
 
 // returns error if server is shutting down
 func (s *Server) addListener(l net.Listener) error {
+	s.listenersMux.Lock()
+	defer s.listenersMux.Unlock()
+
 	if s.isShuttingDown() {
 		return ErrServerClosed
 	}
-
-	s.listenersMux.Lock()
-	defer s.listenersMux.Unlock()
 
 	s.listeners[l] = struct{}{}
 	s.listenersWg.Add(1)
@@ -74,7 +74,6 @@ func (s *Server) rmListener(l net.Listener) {
 
 // Serve always returns a non-nil error. After [Server.Close], the returned error is [ErrServerClosed]
 func (s *Server) Serve(lis net.Listener) error {
-	// log.Printf("irpc server: serving %s on addr %s", lis.Addr().Network(), lis.Addr())
 	if err := s.addListener(lis); err != nil {
 		return err
 	}
@@ -87,12 +86,6 @@ func (s *Server) Serve(lis net.Listener) error {
 			}
 			return fmt.Errorf("listener.Accept(): %w", err)
 		}
-		// log.Println("Accept: ", conn.LocalAddr())
-
-		if s.isShuttingDown() {
-			conn.Close()
-			return ErrServerClosed
-		}
 
 		ep := NewEndpoint(conn,
 			WithEndpointServices(s.services...),
@@ -101,10 +94,15 @@ func (s *Server) Serve(lis net.Listener) error {
 		)
 
 		s.clientsMux.Lock()
+		if s.isShuttingDown() {
+			s.clientsMux.Unlock()
+			ep.Close()
+			return ErrServerClosed
+		}
 		s.clients[ep] = struct{}{}
+		s.clientsWg.Add(1)
 		s.clientsMux.Unlock()
 
-		s.clientsWg.Add(1)
 		go func() {
 			defer s.clientsWg.Done()
 			if s.onConnect != nil {
