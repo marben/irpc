@@ -10,17 +10,37 @@ type apiGenerator struct {
 	apiName          string
 	goDoc            string
 	serviceIdVarName string
-	methods          []methodGenerator
+	// methods callable over the network: the user's methods without channels,
+	// plus the wire methods of the methods with channels (streams)
+	methods []methodGenerator
+	streams []streamMethodGenerator
 }
 
 func newApiGenerator(tr typeResolver, apiName string, astIface *ast.InterfaceType, godocCg *ast.CommentGroup) (apiGenerator, error) {
 	methods := []methodGenerator{}
+	streams := []streamMethodGenerator{}
+
+	// the user's methods keep their index (funcId) - the additional wire methods of streams are numbered after them
+	nextAuxIndex := len(astIface.Methods.List)
+
 	for i, methodField := range astIface.Methods.List {
 		method, err := newMethodGenerator(tr, apiName, methodField, i)
 		if err != nil {
 			return apiGenerator{}, fmt.Errorf("newMethodGenerator(): %w", err)
 		}
-		methods = append(methods, method)
+
+		if !method.hasChannels() {
+			methods = append(methods, method)
+			continue
+		}
+
+		stream, err := newStreamMethodGenerator(tr, apiName, method, &nextAuxIndex)
+		if err != nil {
+			pos := tr.srcPkg.Fset.Position(methodField.Pos())
+			return apiGenerator{}, fmt.Errorf("%s: %s.%s: %w", pos, apiName, method.name, err)
+		}
+		streams = append(streams, stream)
+		methods = append(methods, stream.wireMethods()...)
 	}
 
 	return apiGenerator{
@@ -28,7 +48,16 @@ func newApiGenerator(tr typeResolver, apiName string, astIface *ast.InterfaceTyp
 		goDoc:            godocFromAstCommentGroup(godocCg),
 		serviceIdVarName: fmt.Sprintf("_%sIrpcId", apiName),
 		methods:          methods,
+		streams:          streams,
 	}, nil
+}
+
+func (ag apiGenerator) hasStreams() bool {
+	return len(ag.streams) > 0
+}
+
+func (ag apiGenerator) streamsTypeName() string {
+	return "_irpc_" + ag.apiName + "Streams"
 }
 
 func (ag apiGenerator) paramStructs() []paramStructGenerator {
@@ -62,17 +91,39 @@ func (ag apiGenerator) clientCode(q *qualifier) string {
 	}
 
 	// type definition
-	fmt.Fprintf(sb, `type %[1]s struct {
-		endpoint irpcgen.Endpoint
-	}
-
-	func %[2]s(endpoint irpcgen.Endpoint) (*%[1]s, error) {
-		if err := endpoint.RegisterClient(%[3]s); err != nil {
-			return nil, fmt.Errorf("register failed: %%w", err)
+	if !ag.hasStreams() {
+		fmt.Fprintf(sb, `type %[1]s struct {
+			endpoint irpcgen.Endpoint
 		}
-		return &%[1]s{endpoint: endpoint}, nil
+
+		func %[2]s(endpoint irpcgen.Endpoint) (*%[1]s, error) {
+			if err := endpoint.RegisterClient(%[3]s); err != nil {
+				return nil, fmt.Errorf("register failed: %%w", err)
+			}
+			return &%[1]s{endpoint: endpoint}, nil
+		}
+		`, ag.clientTypeName(), generateStructConstructorName(ag.clientTypeName()), ag.serviceIdVarName)
+	} else {
+		q.addUsedImport(contextImport)
+		fmt.Fprintf(sb, `type %[1]s struct {
+			endpoint irpcgen.Endpoint
+			// unlimited sends the calls of streams: they must not wait for one of the slots
+			// that the other calls of the same stream are holding
+			unlimited irpcgen.UnlimitedFuncCaller
+		}
+
+		func %[2]s(endpoint irpcgen.Endpoint) (*%[1]s, error) {
+			unlimited, ok := endpoint.(irpcgen.UnlimitedFuncCaller)
+			if !ok {
+				return nil, fmt.Errorf("endpoint %%T doesn't implement irpcgen.UnlimitedFuncCaller, required by the streams of %[4]s", endpoint)
+			}
+			if err := endpoint.RegisterClient(%[3]s); err != nil {
+				return nil, fmt.Errorf("register failed: %%w", err)
+			}
+			return &%[1]s{endpoint: endpoint, unlimited: unlimited}, nil
+		}
+		`, ag.clientTypeName(), generateStructConstructorName(ag.clientTypeName()), ag.serviceIdVarName, ag.apiName)
 	}
-	`, ag.clientTypeName(), generateStructConstructorName(ag.clientTypeName()), ag.serviceIdVarName)
 
 	// func calls
 	for _, m := range ag.methods {
@@ -87,8 +138,12 @@ func (ag apiGenerator) clientCode(q *qualifier) string {
 		fncReceiverName := allVarIds.generateUniqueVarName("_c")
 
 		// func header
-		fmt.Fprintf(sb, "// %s implements [%s]\n//\n", m.name, ag.apiName)
-		sb.WriteString(m.goDoc)
+		if m.isWire {
+			fmt.Fprintf(sb, "// %s is a stream call (see [irpcgen.StreamSession])\n", m.name)
+		} else {
+			fmt.Fprintf(sb, "// %s implements [%s]\n//\n", m.name, ag.apiName)
+			sb.WriteString(m.goDoc)
+		}
 		fmt.Fprintf(sb, "func(%s *%s)%s(%s)(%s){\n", fncReceiverName, ag.clientTypeName(), m.name, m.req.funcCallParams(q), m.resp.funcCallParams(q))
 
 		// request
@@ -119,7 +174,13 @@ func (ag apiGenerator) clientCode(q *qualifier) string {
 		}
 
 		// func call
-		fmt.Fprintf(sb, "if err := %s.endpoint.CallRemoteFunc(%s,%s, %d, %s, &%s); err != nil {\n", fncReceiverName, m.ctxVar, ag.serviceIdVarName, m.index, reqVarName, respVarName)
+		callFunc := "endpoint.CallRemoteFunc"
+		if m.unlimited || m.isWire {
+			// every call of a stream is unlimited on the client: we only limit ourselves, and a stream's
+			// calls must not wait for slots held by the other calls of the same stream
+			callFunc = "unlimited.CallRemoteFuncUnlimited"
+		}
+		fmt.Fprintf(sb, "if err := %s.%s(%s,%s, %d, %s, &%s); err != nil {\n", fncReceiverName, callFunc, m.ctxVar, ag.serviceIdVarName, m.index, reqVarName, respVarName)
 		if m.resp.isLastTypeError(q) {
 			// declare zero var, because i don't know, how to directly instantiate zero values
 			if len(m.resp.params) > 1 {
@@ -151,27 +212,77 @@ func (ag apiGenerator) clientCode(q *qualifier) string {
 		fmt.Fprintf(sb, "}\n") // end of func
 	}
 
+	for _, s := range ag.streams {
+		sb.WriteString(s.clientCode(q, ag.clientTypeName()))
+	}
+
 	return sb.String()
 }
 
 func (ag apiGenerator) serviceCode(q *qualifier) string {
 	w := &strings.Builder{}
 
-	// type definition
-	fmt.Fprintf(w, `// %s provides [%[2]s] interface over irpc 
-	type %[1]s struct{
-		impl %s
-	}
-	`, ag.serviceTypeName(), ag.apiName)
-
-	// constructor
-	fmt.Fprintf(w, `// %s returns new [irpcgen.Service] forwarding [%[2]s] network calls to impl
-	func %[1]s (impl %[2]s) *%[3]s {
-		return &%[3]s{
-			impl:impl,
+	if !ag.hasStreams() {
+		// type definition
+		fmt.Fprintf(w, `// %s provides [%[2]s] interface over irpc 
+		type %[1]s struct{
+			impl %s
 		}
+		`, ag.serviceTypeName(), ag.apiName)
+
+		// constructor
+		fmt.Fprintf(w, `// %s returns new [irpcgen.Service] forwarding [%[2]s] network calls to impl
+		func %[1]s (impl %[2]s) *%[3]s {
+			return &%[3]s{
+				impl:impl,
+			}
+		}
+		`, generateStructConstructorName(ag.serviceTypeName()), ag.apiName, ag.serviceTypeName())
+	} else {
+		q.addUsedImport(contextImport)
+		fmt.Fprintf(w, `// %s provides [%[2]s] interface over irpc 
+		type %[1]s struct{
+			impl %[2]s
+			streams *%[3]s // implements the calls of the methods with channels
+		}
+
+		// %[4]s returns new [irpcgen.Service] forwarding [%[2]s] network calls to impl
+		func %[4]s (impl %[2]s) *%[1]s {
+			return &%[1]s{
+				impl:impl,
+				streams: &%[3]s{impl: impl},
+			}
+		}
+		`, ag.serviceTypeName(), ag.apiName, ag.streamsTypeName(), generateStructConstructorName(ag.serviceTypeName()))
+
+		// IsUnlimitedFunc
+		// "case 1, // name\n 2: // name"
+		unlimitedMethods := []methodGenerator{}
+		for _, m := range ag.methods {
+			if m.unlimited {
+				unlimitedMethods = append(unlimitedMethods, m)
+			}
+		}
+		unlimited := []string{}
+		for i, m := range unlimitedMethods {
+			sep := ","
+			if i == len(unlimitedMethods)-1 {
+				sep = ":"
+			}
+			unlimited = append(unlimited, fmt.Sprintf("%d%s // %s", m.index, sep, m.name))
+		}
+		fmt.Fprintf(w, `// IsUnlimitedFunc implements [irpcgen.UnlimitedFuncService] interface.
+		// The calls of streams that can last for the whole stream don't take a worker slot.
+		func (s *%s) IsUnlimitedFunc(funcId irpcgen.FuncId) bool {
+			switch funcId {
+			case %s
+				return true
+			default:
+				return false
+			}
+		}
+		`, ag.serviceTypeName(), strings.Join(unlimited, "\n"))
 	}
-	`, generateStructConstructorName(ag.serviceTypeName()), ag.apiName, ag.serviceTypeName())
 
 	// Id() func
 	fmt.Fprintf(w, `// Id implements [irpcgen.Service] interface.
@@ -210,6 +321,19 @@ func (ag apiGenerator) serviceCode(q *qualifier) string {
 		}
 	}
 	`)
+
+	if ag.hasStreams() {
+		// the struct implementing the wire methods of the streams
+		fmt.Fprintf(w, "// %s implements the service side of the methods with channels of [%s]\n", ag.streamsTypeName(), ag.apiName)
+		fmt.Fprintf(w, "type %s struct {\nimpl %s\n", ag.streamsTypeName(), ag.apiName)
+		for _, s := range ag.streams {
+			fmt.Fprintf(w, "%s irpcgen.StreamSessions[%s]\n", s.sessionsFieldName(), s.sessionTypeName())
+		}
+		w.WriteString("}\n\n")
+		for _, s := range ag.streams {
+			w.WriteString(s.serverCode(q, ag.streamsTypeName()))
+		}
+	}
 	return w.String()
 }
 

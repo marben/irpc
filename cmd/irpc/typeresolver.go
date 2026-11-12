@@ -159,7 +159,13 @@ func (tr typeResolver) loadRpcParamList(apiName string, list []*ast.Field) ([]rp
 		if err != nil {
 			return nil, fmt.Errorf("couldn't determine ast's %T field's type and value: %w", astExpr, err)
 		}
-		t, err := tr.newType(apiName, tv.Type, astExpr)
+		var t Type
+		if ct, isChan := tv.Type.(*types.Chan); isChan {
+			// channels are allowed only here, directly as parameters/results (streams)
+			t, err = tr.newChanType(apiName, ct, astExpr)
+		} else {
+			t, err = tr.newType(apiName, tv.Type, astExpr)
+		}
 		if err != nil {
 			return nil, fmt.Errorf("newType(): %w", err)
 		}
@@ -232,6 +238,8 @@ func (tr typeResolver) newType(apiName string, t types.Type, astExpr ast.Expr) (
 		return tr.newInterfaceType(apiName, ni, ut, utAst)
 	case *types.Pointer:
 		return tr.newPointerType(apiName, ni, ut, astExpr)
+	case *types.Chan:
+		return nil, fmt.Errorf("unsupported type %s: channels are supported only as unnamed types, directly as parameters or results of an interface method (streams)", t)
 	default:
 		return nil, fmt.Errorf("unsupported type: %T", ut)
 	}

@@ -12,6 +12,29 @@ type methodGenerator struct {
 	req, resp paramStructGenerator
 	ctxVar    string // context used for method call (either there is context param, or we use context.Background() )
 	goDoc     string
+
+	// receiver is the field of the service struct implementing the method: "impl" for the user's methods,
+	// "streams" for the wire methods of streams
+	receiver string
+	// unlimited methods don't take one of the endpoint's worker slots (see irpcgen.UnlimitedFuncService)
+	unlimited bool
+	// isWire is true for the wire methods generated for streams (see streamMethodGenerator)
+	isWire bool
+}
+
+// hasChannels reports whether the method has channel parameters or results (streams)
+func (mg methodGenerator) hasChannels() bool {
+	for _, p := range mg.req.params {
+		if isChanType(p.typ) {
+			return true
+		}
+	}
+	for _, p := range mg.resp.params {
+		if isChanType(p.typ) {
+			return true
+		}
+	}
+	return false
 }
 
 func newMethodGenerator(tr typeResolver, apiName string, methodField *ast.Field, index int) (methodGenerator, error) {
@@ -63,12 +86,13 @@ func newMethodGenerator(tr typeResolver, apiName string, methodField *ast.Field,
 	}
 
 	return methodGenerator{
-		name:   methodName,
-		index:  index,
-		req:    req,
-		resp:   resp,
-		ctxVar: ctxVarName,
-		goDoc:  godocFromAstCommentGroup(methodField.Doc),
+		name:     methodName,
+		index:    index,
+		req:      req,
+		resp:     resp,
+		ctxVar:   ctxVarName,
+		goDoc:    godocFromAstCommentGroup(methodField.Doc),
+		receiver: "impl",
 	}, nil
 }
 
@@ -93,14 +117,14 @@ func (mg methodGenerator) executorFuncCode(q *qualifier) string {
 	q.addUsedImport(contextImport)
 	if mg.resp.isEmpty() {
 		return fmt.Sprintf(`func(ctx context.Context) irpcgen.Serializable {
-				s.impl.%[2]s(%[3]s)
+				s.%[4]s.%[2]s(%[3]s)
 				return irpcgen.EmptySerializable{}
-			}`, mg.resp.structName, mg.name, mg.requestParamsListPrefixed("args.", "ctx"))
+			}`, mg.resp.structName, mg.name, mg.requestParamsListPrefixed("args.", "ctx"), mg.receiver)
 	}
 
 	return fmt.Sprintf(`func(ctx context.Context) irpcgen.Serializable {
 				var resp %[1]s
-				%[2]s = s.impl.%[3]s(%[4]s)
+				%[2]s = s.%[5]s.%[3]s(%[4]s)
 				return resp
-			}`, mg.resp.structName, mg.resp.paramListPrefixed("resp."), mg.name, mg.requestParamsListPrefixed("args.", "ctx"))
+			}`, mg.resp.structName, mg.resp.paramListPrefixed("resp."), mg.name, mg.requestParamsListPrefixed("args.", "ctx"), mg.receiver)
 }

@@ -19,6 +19,11 @@ var DefaultParallelWorkers = 3
 // It can be overridden for each endpoint with [WithParallelClientCalls] option
 var DefaultParallelClientCalls = DefaultParallelWorkers + 1
 
+// DefaultMaxStreamSessions is the default number of stream sessions (calls of methods with channels)
+// our peer can keep open on our services at the same time. Further calls fail with [irpcgen.ErrStreamTooManySessions].
+// It can be overridden for each endpoint with [WithMaxStreamSessions] option. Zero or less means unlimited.
+var DefaultMaxStreamSessions = 64
+
 // Endpoint related errors
 var (
 	ErrEndpointClosed       = errors.New("irpc: endpoint is closed")
@@ -72,6 +77,7 @@ type Endpoint struct {
 	// some options - possibly move to a separate struct?
 	parallelWorkers     int // number of parallel workers servicing peer's requests
 	parallelClientCalls int // number of parallel calls we allow to our peer at the same time
+	maxStreamSessions   int // number of stream sessions our peer can keep open on our services
 }
 
 // NewEndpoint creates and runs a new Endpoint with the given connection and options.
@@ -89,6 +95,7 @@ func NewEndpoint(conn io.ReadWriteCloser, opts ...EndpointOption) *Endpoint {
 		ctxCancel:           endpointContextCancel,
 		parallelWorkers:     DefaultParallelWorkers,
 		parallelClientCalls: DefaultParallelClientCalls,
+		maxStreamSessions:   DefaultMaxStreamSessions,
 	}
 
 	for _, opt := range opts {
@@ -113,7 +120,10 @@ func (e *Endpoint) Context() context.Context {
 }
 
 func (e *Endpoint) serve(ctx context.Context) {
-	exec := newExecutor(ctx, e.parallelWorkers)
+	// the stream sessions opened by our peer belong to this endpoint: they can't be used from other connections,
+	// and they are dropped when the endpoint closes
+	streamOwner := irpcgen.NewStreamOwner(ctx, e.maxStreamSessions)
+	exec := newExecutor(irpcgen.WithStreamOwner(ctx, streamOwner), e.parallelWorkers)
 	readC := make(chan error, 1)
 	go func() {
 		readC <- e.readLoop(exec)
@@ -452,5 +462,13 @@ func WithParallelWorkers(parallelWorkers int) EndpointOption {
 func WithParallelClientCalls(parallelClientCalls int) EndpointOption {
 	return func(ep *Endpoint) {
 		ep.parallelClientCalls = parallelClientCalls
+	}
+}
+
+// WithMaxStreamSessions limits the number of stream sessions our peer can keep open on our services
+// at the same time. Zero or less means unlimited. See [DefaultMaxStreamSessions].
+func WithMaxStreamSessions(maxStreamSessions int) EndpointOption {
+	return func(ep *Endpoint) {
+		ep.maxStreamSessions = maxStreamSessions
 	}
 }
