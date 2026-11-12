@@ -34,6 +34,16 @@ type Service interface {
 	GetFuncCall(funcId FuncId) (ArgDeserializer, error)
 }
 
+// UnlimitedFuncService is optionally implemented by a [Service].
+//
+// Functions for which IsUnlimitedFunc returns true don't wait for one of the endpoint's
+// parallel workers: each call runs in its own goroutine right away. Generated code uses it
+// for functions that can block for a long time and that other calls depend on (streams),
+// which would otherwise deadlock once all the workers are taken.
+type UnlimitedFuncService interface {
+	IsUnlimitedFunc(funcId FuncId) bool
+}
+
 // Serializable serializes its state using an Encoder
 type Serializable interface {
 	Serialize(e *Encoder) error

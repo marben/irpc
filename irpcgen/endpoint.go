@@ -10,3 +10,12 @@ type Endpoint interface {
 	// CallRemoteFunc invokes a function on the peer Endpoint.
 	CallRemoteFunc(ctx context.Context, serviceId ServiceId, funcId FuncId, params Serializable, resp Deserializable) error
 }
+
+// UnlimitedFuncCaller is optionally implemented by an [Endpoint].
+//
+// CallRemoteFuncUnlimited works like CallRemoteFunc, but the call is not counted against
+// the endpoint's limit of parallel calls. Generated code uses it for calls that can last for
+// a long time and that other calls depend on (streams), which would otherwise deadlock.
+type UnlimitedFuncCaller interface {
+	CallRemoteFuncUnlimited(ctx context.Context, serviceId ServiceId, funcId FuncId, params Serializable, resp Deserializable) error
+}

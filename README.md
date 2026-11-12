@@ -17,6 +17,7 @@ The project focuses on type safety and readable generated code, without reflecti
 
 - Generates RPC clients and server adapters from standard Go interfaces
 - Supports bidirectional RPC on the same connection
+- Supports streaming with Go channels (`<-chan T` as parameters and results)
 - Works with any `io.ReadWriteCloser` implementation (for example TCP, pipes, or WebSockets)
 - Does not rely on reflection
 - High performance (comparable to or faster than gRPC in internal benchmarks)
@@ -85,7 +86,14 @@ A runnable client/server example is available in [examples/bidirectional/](examp
 
 It shows both sides of a single WebSocket connection serving and calling each other's services, multiple services registered on one endpoint, and `context.Context` cancellation propagated across the connection in both directions.
 
-## Example 3: Distributed Mandelbrot set rendering done by cli and web clients
+## Example 3: Streaming with channels
+A runnable client/server example is available in [examples/stream_example/](examples/stream_example/).
+
+It streams values from the client to the server on two channels of the same call, and reads a flow of samples
+produced by the server, stopping it early by cancelling the `context.Context`.
+Its README also explains how the generated code works.
+
+## Example 4: Distributed Mandelbrot set rendering done by cli and web clients
 This comprehensive example using `iRPC` over `TCP` and `WebSocket` can be found at [github.com/marben/irpc_dist_mandel](https://github.com/marben/irpc_dist_mandel)
 
 <a href="https://github.com/marben/irpc_dist_mandel">
@@ -105,6 +113,65 @@ See [examples/bidirectional/](examples/bidirectional/) for a working example.
 
 iRPC supports `context.Context` as the first method parameter. It listens for `Done()` on the caller side and propagates cancellation to the corresponding peer-side context.  
 This does not abort the RPC call itself: the client still waits for the remote handler to finish and then returns the produced results.
+
+For methods with channels (see below), cancelling the `context.Context` does end the streams on both sides.
+
+## Streaming with Channels
+
+A method can take channels as parameters (client → server streams) and return channels (server → client streams):
+
+```go
+type StreamingService interface {
+	// the implementation reads inA and inB, and returns when it stops reading
+	ExampleStreamIn(ctx context.Context, inA <-chan int16, inB <-chan int) error
+
+	// the implementation returns immediately and produces in its own goroutine, closing the channel when done
+	Samples(ctx context.Context, count int) (<-chan float64, error)
+}
+```
+
+On the client side the generated method is used like a local one:
+
+```go
+samples, err := client.Samples(ctx, 100)
+if err != nil {
+	return err
+}
+for s := range samples { // closed when the server closes it, or when ctx is cancelled
+	fmt.Println(s)
+}
+```
+
+Rules, checked by the generator:
+- only receive-only channels (`<-chan T`) are supported, directly as parameters or results;
+- a method with channels must take a `context.Context` and return `error` as its last result;
+- the element type can be any supported type, except channels and `context.Context`.
+
+How it works:
+- no protocol change: the generator turns each method with channels into a few ordinary RPC calls
+  that open a session, push and pull batches of values (up to 64), and close it;
+- the context is the lifetime of the streams: the implementation must stop when it is done,
+  and the caller cancels it to stop reading early;
+- sessions belong to the connection that opened them, and are dropped when it closes.
+  Each endpoint accepts at most `irpc.DefaultMaxStreamSessions` (64) open sessions, configurable with `irpc.WithMaxStreamSessions`;
+- the calls that can last as long as the stream don't take the endpoint's worker slots
+  (`WithParallelWorkers`, `WithParallelClientCalls`), so many open streams can't deadlock the endpoint.
+
+Limitations:
+- **A returned channel must be read until it is closed, or the `context.Context` cancelled.**
+  If the caller just stops reading, the generated code stays blocked writing into the channel and the session
+  stays open until the connection closes. Once `WithMaxStreamSessions` sessions are stuck, further stream calls
+  fail with `irpcgen.ErrStreamTooManySessions`. As with any Go API returning a channel, stop with `cancel()`:
+  ```go
+  ctx, cancel := context.WithCancel(ctx)
+  defer cancel() // stops the stream even if we return before the channel is closed
+  samples, err := client.Samples(ctx, 100)
+  ```
+- **Throughput depends on latency.** Each channel waits for the round trip of a batch (up to 64 values)
+  before sending the next one, so a single channel moves at most 64 values per round trip:
+  about 640 values/s on a 100ms link. Values are not lost or reordered, only slowed down.
+
+See [examples/stream_example/](examples/stream_example/) for the details.
 
 ## Errors and Interfaces
 

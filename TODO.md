@@ -28,8 +28,13 @@
 - Improve fuzzy testing for `Enc`/`Dec` functions to verify encoding stability.
 - Improve tests that rely on “waits” or manual timing.   (there is new way to control time in go tests)
 
-### Documentation
-- Document versioning strategy in the README.
+### Streams
+- Generator: `clientCode`/`serviceCode` in `api.go` duplicate the whole struct and constructor templates
+  for services with streams; generate one template with the extra field.
+- Generator: `newStreamMethodGenerator` takes `nextAuxIndex *int` as an out-parameter; return the wire methods
+  and compute the next index from them instead.
+- Throughput: each channel waits for a push/pull round trip per batch (max 64 values).
+  Consider pipelining batches if high-latency links matter.
 
 ### Message Handling
 - Decide, whether call panicking on a server should crash whole server, or just do some logging?

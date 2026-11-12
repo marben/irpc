@@ -46,14 +46,16 @@ func (e *executor) delWorker(reqNum reqNumT) {
 	delete(e.serviceWorkers, reqNum)
 }
 
-// runServiceWorker waits for worker slot and then runs rpcExecutor in a new goroutine
-// returns once work was succesfully started
-func (e *executor) runServiceWorker(reqNum reqNumT, rpcExecutor irpcgen.FuncExecutor, sendResponseF func(reqNum reqNumT, respData irpcgen.Serializable) error) error {
-	// waits until worker slot is available (blocks here on too many long rpcs)
-	select {
-	case e.wrkrQueue <- struct{}{}:
-	case <-e.ctx.Done():
-		return e.ctx.Err()
+// runServiceWorker runs rpcExecutor in a new goroutine and returns once the work was succesfully started.
+// If limited is true, it first waits for a worker slot (blocks here on too many long rpcs).
+// Unlimited work (see [irpcgen.UnlimitedFuncService]) starts immediately and doesn't take a slot.
+func (e *executor) runServiceWorker(reqNum reqNumT, rpcExecutor irpcgen.FuncExecutor, sendResponseF func(reqNum reqNumT, respData irpcgen.Serializable) error, limited bool) error {
+	if limited {
+		select {
+		case e.wrkrQueue <- struct{}{}:
+		case <-e.ctx.Done():
+			return e.ctx.Err()
+		}
 	}
 
 	// workerCtx is passed to the service's actual implementation
@@ -70,7 +72,9 @@ func (e *executor) runServiceWorker(reqNum reqNumT, rpcExecutor irpcgen.FuncExec
 	go func() {
 		defer cancelWorker(nil)
 		// release the worker queue
-		defer func() { <-e.wrkrQueue }()
+		if limited {
+			defer func() { <-e.wrkrQueue }()
+		}
 
 		defer e.delWorker(reqNum)
 
@@ -82,7 +86,12 @@ func (e *executor) runServiceWorker(reqNum reqNumT, rpcExecutor irpcgen.FuncExec
 		}
 
 		if err := sendResponseF(reqNum, resp); err != nil {
-			e.errC <- fmt.Errorf("failed to serialize response %d to connection: %w", reqNum, err)
+			// only the first error matters (it terminates the endpoint).
+			// we must not block: with unlimited workers there can be more failing workers than errC's capacity
+			select {
+			case e.errC <- fmt.Errorf("failed to serialize response %d to connection: %w", reqNum, err):
+			default:
+			}
 		}
 	}()
 

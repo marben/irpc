@@ -19,12 +19,22 @@ var DefaultParallelWorkers = 3
 // It can be overridden for each endpoint with [WithParallelClientCalls] option
 var DefaultParallelClientCalls = DefaultParallelWorkers + 1
 
+// DefaultMaxStreamSessions is the default number of stream sessions (calls of methods with channels)
+// our peer can keep open on our services at the same time. Further calls fail with [irpcgen.ErrStreamTooManySessions].
+// It can be overridden for each endpoint with [WithMaxStreamSessions] option. Zero or less means unlimited.
+var DefaultMaxStreamSessions = 64
+
 // Endpoint related errors
 var (
 	ErrEndpointClosed       = errors.New("irpc: endpoint is closed")
 	ErrEndpointClosedByPeer = errors.New("irpc: endpoint closed by peer")
 	ErrServiceNotFound      = errors.New("irpc: service not found") // todo: not used?
 	errProtocolError        = errors.New("protocol error")
+)
+
+var (
+	_ irpcgen.Endpoint            = (*Endpoint)(nil)
+	_ irpcgen.UnlimitedFuncCaller = (*Endpoint)(nil)
 )
 
 // Endpoint represents one side of an active RPC connection.
@@ -39,7 +49,7 @@ var (
 //
 // The cancellation cause can be inspected using [context.Cause].
 //
-// Endpoint implements [irpcgen.Endpoint].
+// Endpoint implements [irpcgen.Endpoint] and [irpcgen.UnlimitedFuncCaller].
 type Endpoint struct {
 	// maps serviceId to service. uses array, because slices are not comparable in maps
 	services    map[irpcgen.ServiceId]irpcgen.Service
@@ -67,6 +77,7 @@ type Endpoint struct {
 	// some options - possibly move to a separate struct?
 	parallelWorkers     int // number of parallel workers servicing peer's requests
 	parallelClientCalls int // number of parallel calls we allow to our peer at the same time
+	maxStreamSessions   int // number of stream sessions our peer can keep open on our services
 }
 
 // NewEndpoint creates and runs a new Endpoint with the given connection and options.
@@ -84,6 +95,7 @@ func NewEndpoint(conn io.ReadWriteCloser, opts ...EndpointOption) *Endpoint {
 		ctxCancel:           endpointContextCancel,
 		parallelWorkers:     DefaultParallelWorkers,
 		parallelClientCalls: DefaultParallelClientCalls,
+		maxStreamSessions:   DefaultMaxStreamSessions,
 	}
 
 	for _, opt := range opts {
@@ -108,7 +120,10 @@ func (e *Endpoint) Context() context.Context {
 }
 
 func (e *Endpoint) serve(ctx context.Context) {
-	exec := newExecutor(ctx, e.parallelWorkers)
+	// the stream sessions opened by our peer belong to this endpoint: they can't be used from other connections,
+	// and they are dropped when the endpoint closes
+	streamOwner := irpcgen.NewStreamOwner(ctx, e.maxStreamSessions)
+	exec := newExecutor(irpcgen.WithStreamOwner(ctx, streamOwner), e.parallelWorkers)
 	readC := make(chan error, 1)
 	go func() {
 		readC <- e.readLoop(exec)
@@ -187,8 +202,8 @@ func (e *Endpoint) getService(sid irpcgen.ServiceId) (s irpcgen.Service, found b
 	return s, found
 }
 
-func (e *Endpoint) sendRpcRequest(ctx context.Context, serviceId irpcgen.ServiceId, funcId irpcgen.FuncId, reqData irpcgen.Serializable, respData irpcgen.Deserializable) (ourPendingRequest, error) {
-	pr, err := e.ourPendingRequests.addPendingRequest(ctx, respData)
+func (e *Endpoint) sendRpcRequest(ctx context.Context, serviceId irpcgen.ServiceId, funcId irpcgen.FuncId, reqData irpcgen.Serializable, respData irpcgen.Deserializable, limited bool) (ourPendingRequest, error) {
+	pr, err := e.ourPendingRequests.addPendingRequest(ctx, respData, limited)
 	if err != nil {
 		return ourPendingRequest{}, fmt.Errorf("addPendingRequest(): %w", err)
 	}
@@ -262,10 +277,26 @@ func (e *Endpoint) serializePacket(data ...irpcgen.Serializable) error {
 }
 
 // CallRemoteFunc invokes a function on the peer Endpoint.
+// At most parallelClientCalls calls (see [WithParallelClientCalls]) are pending at the same time,
+// further calls wait for a free slot.
 //
-// CallRemoteFunc implements [irpcgen.Service]
+// CallRemoteFunc implements [irpcgen.Endpoint]
 func (e *Endpoint) CallRemoteFunc(ctx context.Context, serviceId irpcgen.ServiceId, funcId irpcgen.FuncId, reqData irpcgen.Serializable, respData irpcgen.Deserializable) error {
-	pendingReq, err := e.sendRpcRequest(ctx, serviceId, funcId, reqData, respData)
+	return e.callRemoteFunc(ctx, serviceId, funcId, reqData, respData, true)
+}
+
+// CallRemoteFuncUnlimited is like [Endpoint.CallRemoteFunc], but the call is not counted
+// against the parallelClientCalls limit. It is meant for calls that can last for a long time
+// and that other calls depend on (for example a stream's calls), which would otherwise deadlock
+// once all the slots are taken.
+//
+// CallRemoteFuncUnlimited implements [irpcgen.UnlimitedFuncCaller]
+func (e *Endpoint) CallRemoteFuncUnlimited(ctx context.Context, serviceId irpcgen.ServiceId, funcId irpcgen.FuncId, reqData irpcgen.Serializable, respData irpcgen.Deserializable) error {
+	return e.callRemoteFunc(ctx, serviceId, funcId, reqData, respData, false)
+}
+
+func (e *Endpoint) callRemoteFunc(ctx context.Context, serviceId irpcgen.ServiceId, funcId irpcgen.FuncId, reqData irpcgen.Serializable, respData irpcgen.Deserializable, limited bool) error {
+	pendingReq, err := e.sendRpcRequest(ctx, serviceId, funcId, reqData, respData, limited)
 	if err != nil {
 		// check if endpoint was closed
 		if cause := context.Cause(e.ctx); cause != nil {
@@ -340,7 +371,13 @@ func (e *Endpoint) processRequest(dec *irpcgen.Decoder, exec *executor) error {
 		return fmt.Errorf("argDeserialize: %w", err)
 	}
 
-	err = exec.runServiceWorker(req.ReqNum, funcExec, e.sendResponse)
+	// functions declared unlimited by the service don't wait for a worker slot
+	limited := true
+	if u, ok := service.(irpcgen.UnlimitedFuncService); ok && u.IsUnlimitedFunc(irpcgen.FuncId(req.FuncId)) {
+		limited = false
+	}
+
+	err = exec.runServiceWorker(req.ReqNum, funcExec, e.sendResponse, limited)
 	if err != nil {
 		return fmt.Errorf("new worker: %w", err)
 	}
@@ -425,5 +462,13 @@ func WithParallelWorkers(parallelWorkers int) EndpointOption {
 func WithParallelClientCalls(parallelClientCalls int) EndpointOption {
 	return func(ep *Endpoint) {
 		ep.parallelClientCalls = parallelClientCalls
+	}
+}
+
+// WithMaxStreamSessions limits the number of stream sessions our peer can keep open on our services
+// at the same time. Zero or less means unlimited. See [DefaultMaxStreamSessions].
+func WithMaxStreamSessions(maxStreamSessions int) EndpointOption {
+	return func(ep *Endpoint) {
+		ep.maxStreamSessions = maxStreamSessions
 	}
 }

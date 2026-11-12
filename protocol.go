@@ -39,7 +39,7 @@ func (ph *packetHeader) Deserialize(d *irpcgen.Decoder) error {
 }
 
 // reqNumT is used to identify requests and responses.
-// request numbers are re-used. generally, we only need as big enough number as is the number of parallel workers (DefaultParallelClientCalls)
+// request numbers are re-used once the response arrived. a request number is unique among the pending requests of one endpoint
 type reqNumT uint16
 
 func (rn reqNumT) Serialize(e *irpcgen.Encoder) error    { return irpcgen.EncUint16(e, uint16(rn)) }
